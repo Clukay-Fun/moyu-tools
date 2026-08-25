@@ -38,6 +38,7 @@ contextBridge.exposeInMainWorld(
       return () => ipcRenderer.off('shortcut:status', listener)
     },
     reportShortcutReady: () => ipcRenderer.send('shortcut:ready'),
+    reportStartupReady: () => ipcRenderer.send('startup:report-ready'),
     saveImageFile: (payload) => ipcRenderer.invoke('image:save-file', payload),
     // 全局截图快捷键设置（F-16）
     // 窗口恢复后重新激活画布（F-15）

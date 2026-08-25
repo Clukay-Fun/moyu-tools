@@ -5723,3 +5723,11 @@ generateBarcode()
 setFormatAction('视频转换')
 activateModule('pdf', defaultSelections.pdf)
 verifyPreloadBridge()
+
+// 启动埋点：首帧绘制且交互就绪后回报主进程（F-018 验收用）。
+if (!window.__moyuStartupReported) {
+  window.__moyuStartupReported = true
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => window.api.reportStartupReady())
+  )
+}

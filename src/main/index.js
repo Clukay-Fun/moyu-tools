@@ -45,6 +45,27 @@ async function loadTesseract() {
   return tesseractModulePromise
 }
 
+// 启动埋点（F-018 验收）：记录进程启动时刻，供 renderer 回报首帧可交互耗时。
+// 用进程启动后的最早可用时刻近似"双击 EXE"起点，比 app.ready 更靠前。
+const startupBootEpoch = Date.now()
+let startupReported = false
+function recordStartupReady() {
+  if (startupReported) return
+  startupReported = true
+  const elapsed = Date.now() - startupBootEpoch
+  console.log(`startup-ready: ${elapsed}ms`)
+  try {
+    const logPath = join(app.getPath('userData'), 'startup-log.txt')
+    writeFileSync(logPath, `${new Date().toISOString()} startup-ready: ${elapsed}ms\n`, { flag: 'a' })
+  } catch (error) {
+    console.warn('启动日志写入失败：', error?.message || error)
+  }
+}
+
+ipcMain.on('startup:report-ready', () => {
+  recordStartupReady()
+})
+
 const BARCODE_FILE_TYPES = {
   svg: {
     extension: 'svg',
@@ -1605,7 +1626,7 @@ ipcMain.handle('format:get-status', async (event) => {
     ffmpegMessage,
     ffmpegVersion,
     missingEncoders,
-    sharp: sharp.versions,
+    sharp: (await loadSharp()).versions,
     platform: process.platform
   }
 })
