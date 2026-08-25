@@ -1,8 +1,8 @@
-# moyu-dsh — Electron 开发约定
+# 摸鱼工具箱 — Electron 开发约定
 
 ## 项目定位
 
-`moyu-dsh` 是一个基于 DeepSeek Harness 的本地桌面应用。DSH 是应用内核与唯一主界面；Electron 是桌面宿主、安全边界和系统能力桥。
+`摸鱼工具箱` 是一个基于 DeepSeek Harness 的本地桌面应用；Electron 是桌面宿主、安全边界和系统能力桥。
 
 技术与范围以本机 `scope/` 当前计划为准。`scope/` 是本地开发依据，不纳入 Git。
 
@@ -30,11 +30,11 @@
 
 ## 发布与交付
 
-发布命名统一使用 `moyu-dsh`。当前发布流程以 `docs/` 中的现行文档和 `scope/` 当前计划为准。
+发布命名统一使用 `moyu-tools`（安装包文件名前缀 `moyu-tools-v<version>-windows-x64-*`）。当前发布流程以 `docs/` 中的现行文档和 `scope/` 当前计划为准。
 
 ## Git
 
 - 开发主线：`dev`；`main` 保留为稳定基线。
 - 提交前运行 `git diff --check`、`git diff --stat` 与 `git status --short --branch`。
-- 使用约定式提交，例如 `feat(dsh): ...`、`fix(screenshot): ...`、`docs(project): ...`。
+- 使用约定式提交，例如 `feat(tools): ...`、`fix(screenshot): ...`、`docs(project): ...`。
 - 不推送远程，除非用户明确要求。

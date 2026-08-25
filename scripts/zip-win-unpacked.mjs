@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 
 const { version } = JSON.parse(readFileSync('package.json', 'utf8'))
-const name = `moyu-dsh-v${version}-windows-x64-unpacked.zip`
+const name = `moyu-tools-v${version}-windows-x64-unpacked.zip`
 
 execFileSync(
   'powershell',
