@@ -1099,6 +1099,23 @@ function droppedFilePaths(files) {
   return Array.from(files || [], (file) => window.api.getPathForFile(file)).filter(Boolean)
 }
 
+// 主进程已按区域规则扫描并校验，这里只按安全路径取回字节、重建 File 对象。
+function mimeFromFileName(name) {
+  const dot = name.lastIndexOf('.')
+  const ext = dot >= 0 ? name.slice(dot).toLowerCase() : ''
+  if (ext === '.pdf') return 'application/pdf'
+  if (ext === '.png') return 'image/png'
+  if (ext === '.jpg' || ext === '.jpeg') return 'image/jpeg'
+  if (ext === '.webp') return 'image/webp'
+  return ''
+}
+
+// 单个扫描条目（持有不透明 fileId）按 sender 取回字节、重建 File，逐条读取避免一次性持有全部字节。
+async function readScanFile(item) {
+  const data = await window.api.readDroppedFile(item.id)
+  return new File([data.bytes], data.name, { type: mimeFromFileName(data.name) })
+}
+
 // 文件若落在目标区边缘之外，Chromium 默认会直接导航到该文件，导致当前工作丢失。
 // 目标区自己的 drop 处理先执行；这里仅兜底阻止页面导航。
 for (const type of ['dragover', 'drop']) {
@@ -2335,12 +2352,47 @@ pdfDropZone.addEventListener('dragleave', () => pdfDropZone.classList.remove('dr
 pdfDropZone.addEventListener('drop', (event) => {
   event.preventDefault()
   pdfDropZone.classList.remove('drag-over')
-  if (currentPdfConfig().kind === 'office') {
-    setPdfResult('Office 文件请使用“上传”按钮选择', 'error')
-    return
-  }
-  addPdfToolFiles(event.dataTransfer.files)
+  void addPdfFilesFromDrop(event.dataTransfer.files)
 })
+
+async function addPdfFilesFromDrop(files) {
+  const paths = droppedFilePaths(files)
+  if (!paths.length) return
+  const config = currentPdfConfig()
+  const kind = config.kind
+  const action = kind === 'office' ? config.officeKind : kind
+  try {
+    const result = await window.api.scanDroppedPaths({ paths, region: 'pdf', action })
+    if (!result.files.length) {
+      if (result.skipped || result.errors.length) {
+        setPdfResult(`未找到匹配的 ${config.inputLabel} 文件`, 'error')
+      }
+      return
+    }
+    if (kind === 'office') {
+      // Office 转 PDF 沿用单输入模型：取首个匹配文件注册为受 sender 约束的 Office 会话。
+      const first = result.files[0]
+      state.pdfNativeInput = first
+      state.pdfFileStatuses = [{ status: '待处理', error: '' }]
+      state.pdfComResult = null
+      state.pdfLastOutput = null
+      resetPdfDestination()
+      pdfOpenOutputButton.disabled = true
+      renderPdfFiles()
+      setPdfResult(`${first.name} 已添加`)
+    } else {
+      for (const item of result.files) {
+        const file = await readScanFile(item)
+        addPdfToolFiles([file])
+      }
+      if (result.skipped || result.errors.length) {
+        showToast(`扫描完成：跳过 ${result.skipped || 0}、失败 ${result.errors.length || 0}`)
+      }
+    }
+  } catch (error) {
+    setPdfResult(`拖入失败：${cleanIpcError(error?.message ?? error)}`, 'error')
+  }
+}
 pdfRunButton.addEventListener('click', runPdfAction)
 pdfOpenOutputButton.addEventListener('click', async () => {
   if (!state.pdfLastOutput && !state.pdfComResult) return
@@ -3498,9 +3550,18 @@ illustratorAddFolderButton.addEventListener('click', () => addIllustratorInputs(
 bindFileDropZone(illustratorDropZone, async (files) => {
   if (illustratorState.busy) return
   try {
-    const result = await window.api.addDroppedIllustratorFiles(droppedFilePaths(files))
+    const result = await window.api.scanDroppedPaths({
+      paths: droppedFilePaths(files),
+      region: 'illustrator'
+    })
     await addIllustratorInputs(async () => result.files)
-    if (result.errors.length) showToast(`${result.errors.length} 个文件未能加入`)
+    if (result.skipped || result.errors.length || result.truncated) {
+      const notes = []
+      if (result.skipped) notes.push(`${result.skipped} 个跳过`)
+      if (result.errors.length) notes.push(`${result.errors.length} 个失败`)
+      if (result.truncated) notes.push('已达数量上限')
+      if (notes.length) showToast(`扫描完成：${notes.join('，')}`)
+    }
   } catch (error) {
     showToast(`拖入失败：${cleanIpcError(error?.message ?? error)}`)
   }
@@ -3946,8 +4007,21 @@ let barcodeRequestSeq = 0
 // 当前预览所依据的 GS1-128 校验结果，是参数报告与全部导出路径的唯一数据源。
 let gs1128Prepared = null
 
+// 零售 / 物流码的有效数据长度（不含校验位）。用户输入视为数据前缀，右侧补零到此长度。
+const RETAIL_DATA_LENGTH = {
+  'EAN-13': 12,
+  'UPC-A': 11,
+  'EAN-8': 7,
+  'ITF-14': 13
+}
+
+// 当前预览是否达到可导出状态：补零预览阶段为 false，导出控件保持禁用。
+let barcodeExportReady = false
+
 async function generateBarcode(notifyError = true) {
-  const value = barcodeInput.value.trim()
+  // 保留原始输入用于字符校验：trim 前的首尾空格也应算非法字符，不能被静默接受。
+  const rawInput = barcodeInput.value
+  const raw = rawInput.trim()
   const typeName = state.selections.bc
   // 任何一次生成（含切换类型、非 GS1-128 类型）都推进序号，
   // 以作废仍在飞行中的旧 GS1-128 校验请求。
@@ -3956,11 +4030,47 @@ async function generateBarcode(notifyError = true) {
   barcodeSvg.replaceChildren()
   barcodeRenderedValue = ''
   barcodeRenderedType = ''
+  barcodeExportReady = false
   gs1128Prepared = null
   setBarcodeExportEnabled(false)
 
+  let value = raw
+  let isRetailPreview = false
   let prepared = null
-  if (isGs1128Type(typeName)) {
+
+  // 零售 / 物流码：前缀补零实时预览。空输入或不足时右补零到数据长度，
+  // 仅用于预览；达到数据长度或提供合法完整码（含校验位）才允许导出。
+  if (isRetailType(typeName) || isItf14Type(typeName)) {
+    // 零售 / 物流码仅支持数字：任何非数字字符直接报错，绝不静默删除，
+    // 否则会出现“显示成功且启用导出”但 hasCurrentBarcode 又拒绝导出的状态矛盾。
+    if (rawInput.length > 0 && /[^0-9]/.test(rawInput)) {
+      if (token !== barcodeRequestSeq) return false
+      barcodeSpecReport.hidden = true
+      setBarcodeMessage(`${typeName} 仅支持数字，请移除字母、空格或符号。`, 'error')
+      if (notifyError) showToast('条码含非法字符')
+      return false
+    }
+    const dataLen = RETAIL_DATA_LENGTH[typeName]
+    const cleaned = raw.replace(/\D/g, '')
+    if (cleaned.length === 0) {
+      value = '0'.repeat(dataLen)
+      isRetailPreview = true
+    } else if (cleaned.length < dataLen) {
+      value = cleaned + '0'.repeat(dataLen - cleaned.length)
+      isRetailPreview = true
+    } else if (cleaned.length === dataLen || cleaned.length === dataLen + 1) {
+      value = cleaned
+    } else {
+      if (token !== barcodeRequestSeq) return false
+      barcodeSpecReport.hidden = true
+      setBarcodeMessage(
+        `${typeName} 位数超出：需 ${dataLen} 位数据，或 ${dataLen + 1} 位完整码（含校验位）。`,
+        'error'
+      )
+      if (notifyError) showToast('条码位数超出限制')
+      return false
+    }
+  } else if (isGs1128Type(typeName)) {
     setBarcodeMessage('正在校验 GS1 应用标识符…', '')
     try {
       prepared = await prepareGs1128(value)
@@ -3981,18 +4091,33 @@ async function generateBarcode(notifyError = true) {
     gs1128Prepared = prepared
     barcodeRenderedValue = value
     barcodeRenderedType = typeName
-    setBarcodeExportEnabled(true)
     renderBarcodeSpecReport(typeName)
-    setBarcodeMessage(`${typeName} 已生成，可保存为 SVG 或 PNG。`, 'success')
+    if (isRetailPreview) {
+      // 补零结果只用于预览：保存 / 复制 / EPS / Adobe 联动等导出控件保持禁用。
+      setBarcodeExportEnabled(false)
+      setBarcodeMessage(
+        `预览已用 0 补足，请完整输入 ${RETAIL_DATA_LENGTH[typeName]} 位数据后导出。`,
+        'preview'
+      )
+    } else {
+      barcodeExportReady = true
+      setBarcodeExportEnabled(true)
+      setBarcodeMessage(`${typeName} 已生成，可保存为 SVG 或 PNG。`, 'success')
+    }
     return true
   } catch (error) {
     if (token !== barcodeRequestSeq) return false
     // GS1-128 的几何层错误（如超过 165.10mm）自带可执行信息，不应被通用提示盖掉
-    // GS1-128 的上限错误、Code 39 的字符集/窄宽比错误都自带可执行信息，
+    // GS1-128 的上限错误、Code 39 的字符集/窄宽比错误、零售码校验位错误都自带可执行信息，
     // 不能被通用提示盖掉。
-    const message = (isGs1128Type(typeName) || isGenericType(typeName)) && error instanceof Error
-      ? error.message
-      : friendlyBarcodeError(typeName)
+    const message =
+      (isGs1128Type(typeName) ||
+        isGenericType(typeName) ||
+        isRetailType(typeName) ||
+        isItf14Type(typeName)) &&
+      error instanceof Error
+        ? error.message
+        : friendlyBarcodeError(typeName)
     barcodeSpecReport.hidden = true
     setBarcodeMessage(message, 'error')
     if (notifyError) showToast(message)
@@ -4207,11 +4332,7 @@ function svgToPngBytes(svgText, target = null) {
 }
 
 async function saveBarcode(type) {
-  if (
-    !barcodeRenderedValue ||
-    barcodeInput.value.trim() !== barcodeRenderedValue ||
-    barcodeRenderedType !== state.selections.bc
-  ) {
+  if (!hasCurrentBarcode()) {
     setBarcodeMessage('内容已改变，请先重新生成条码。', 'error')
     return
   }
@@ -4274,6 +4395,7 @@ async function copyBarcodeVector() {
 
 function hasCurrentBarcode() {
   return Boolean(
+    barcodeExportReady &&
     barcodeRenderedValue &&
     barcodeInput.value.trim() === barcodeRenderedValue &&
     barcodeRenderedType === state.selections.bc
@@ -4440,7 +4562,9 @@ function selectBarcodeType(typeName, replaceValue = false) {
   updateBarcodeFontPickerVisibility(typeName)
 
   if (replaceValue) {
-    barcodeInput.value = type.example
+    // 零售 / 物流码默认空白，由补零预览实时驱动；其余维持示例值。
+    barcodeInput.value =
+      isRetailType(typeName) || isItf14Type(typeName) ? '' : type.example
   }
 
   barcodeRenderedValue = ''
@@ -5029,10 +5153,19 @@ const formatDropZone = document.querySelector('#format-drop-zone')
 bindFileDropZone(formatDropZone, async (files) => {
   if (formatState.busy) return
   try {
-    const result = await window.api.addDroppedFormatFiles(droppedFilePaths(files), formatConfig().kind)
-    if (result.status !== 'selected') return
+    const result = await window.api.scanDroppedPaths({
+      paths: droppedFilePaths(files),
+      region: 'format',
+      action: formatConfig().kind
+    })
     addFormatInputs(result.files)
-    if (result.errors.length) showToast(`${result.errors.length} 个文件未能加入`)
+    if (result.skipped || result.errors.length || result.truncated) {
+      const notes = []
+      if (result.skipped) notes.push(`${result.skipped} 个跳过`)
+      if (result.errors.length) notes.push(`${result.errors.length} 个失败`)
+      if (result.truncated) notes.push('已达数量上限')
+      if (notes.length) showToast(`扫描完成：${notes.join('，')}`)
+    }
   } catch (error) {
     showToast(`拖入失败：${cleanIpcError(error?.message ?? error)}`)
   }

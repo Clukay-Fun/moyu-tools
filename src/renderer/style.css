@@ -1918,6 +1918,10 @@ label {
   color: #4a9a6a;
 }
 
+.barcode-message.preview {
+  color: #b58900;
+}
+
 .batch-input-row {
   display: grid;
   flex: none;

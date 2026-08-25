@@ -1,7 +1,7 @@
 {
-  "name": "moyu-tools",
-  "version": "2.1.0",
-  "description": "面向设计工作流的 Windows Electron 工具箱",
+  "name": "moyu-dsh",
+  "version": "0.1.0",
+  "description": "基于 DeepSeek Harness 的 Moyu 桌面发行版",
   "author": "Clukay",
   "private": true,
   "type": "module",
@@ -18,8 +18,8 @@
     "preview": "electron-vite preview"
   },
   "build": {
-    "appId": "com.clukay.moyutools",
-    "productName": "摸鱼工具箱",
+    "appId": "com.clukay.moyudsh",
+    "productName": "Moyu DSH",
     "asar": true,
     "asarUnpack": [
       "node_modules/sharp/**/*",

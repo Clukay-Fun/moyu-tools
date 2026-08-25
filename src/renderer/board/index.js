@@ -2,6 +2,15 @@
 //
 // 把 scene.js（真值）与 canvas.js（绘制/交互）接到具体的 DOM 控件上。
 
+function mimeFromCanvasName(name) {
+  const dot = name.lastIndexOf('.')
+  const ext = dot >= 0 ? name.slice(dot).toLowerCase() : ''
+  if (ext === '.png') return 'image/png'
+  if (ext === '.jpg' || ext === '.jpeg') return 'image/jpeg'
+  if (ext === '.webp') return 'image/webp'
+  return 'application/octet-stream'
+}
+
 import {
   createScene,
   AssetStore,
@@ -157,7 +166,7 @@ export class BoardController {
     dom.stage.addEventListener('drop', (event) => {
       event.preventDefault()
       dom.stage.classList.remove('drag-over')
-      void this.importFiles(event.dataTransfer?.files)
+      void this.importDroppedFiles(event.dataTransfer?.files)
     })
     dom.deleteButton.addEventListener('click', () => this.deleteSelected())
     dom.front.addEventListener('click', () => this.#applyLayer(bringToFront))
@@ -1392,6 +1401,37 @@ export class BoardController {
     // 导入结束信号：成功数为 0 时同样要通知，调用方据此清理 pending
     this.onStatus({ imported: added })
     return added
+  }
+
+  // 文件夹 / 混合拖入：renderer 只提交路径，主进程递归扫描并校验图片，
+  // 这里按安全路径取回字节重建 File，再走 importFiles。
+  async importDroppedFiles(fileList) {
+    const paths = Array.from(fileList || [])
+      .map((file) => window.api?.getPathForFile?.(file))
+      .filter(Boolean)
+    if (!paths.length) return
+    if (this.busy) return
+    try {
+      const result = await window.api.scanDroppedPaths({ paths, region: 'canvas' })
+      if (!result.files.length) {
+        this.onStatus({ error: '文件夹中未找到匹配的图片' })
+        return
+      }
+      const built = []
+      for (const item of result.files) {
+        const data = await window.api.readDroppedFile(item.id)
+        await this.importFiles([
+          new File([data.bytes], data.name, { type: mimeFromCanvasName(data.name) })
+        ])
+      }
+      if (result.skipped || (result.errors && result.errors.length)) {
+        this.onStatus({
+          error: `已导入图片，跳过 ${result.skipped || 0} 个非图片文件`
+        })
+      }
+    } catch (error) {
+      this.onStatus({ error: `拖入失败：${error instanceof Error ? error.message : String(error)}` })
+    }
   }
 
   // ── 项目文件 ────────────────────────────────────────────

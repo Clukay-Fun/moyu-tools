@@ -1,32 +1,21 @@
-# 摸鱼工具箱
+# moyu-dsh
 
-面向设计工作流的 Windows x64 Electron 工具箱。
+`moyu-dsh` 是一个基于 DeepSeek Harness 的本地桌面应用。DSH 负责主界面、会话和工具调用，Electron 负责桌面窗口、安全边界、文件访问与系统能力桥接。
 
-## 当前状态
+## 当前能力
 
-2.1.0 是个人内部学习版本。唯一正式 UI 是 Electron 渲染层；根目录 [index.html](index.html) 仅保留为视觉蓝本，不作为独立网页产品交付。
-
-目前已经接通：
-
-- 一维条码：9 类码制、单个/批量生成、SVG/PNG/EPS、打印尺寸及一键转入 Illustrator/Photoshop。
-- 图片与画布：截图/导入/粘贴图片、对象编排、文本框、裁切、旋转翻转、涂鸦、调色、像素化，以及 PNG/JPG/WebP/TIFF 导出。
-- PDF：转换、合并拆分、旋转提页、水印页码、页面重排、提图、OCR、AES 加解密。
-- Office：在已安装 Microsoft Office 的 Windows 上将 Word、Excel、PowerPoint 导出为 PDF。
-- Illustrator：批量导出 PDF、250 PPI 最小化 PDF 与文字转曲。
-- 截图：区域截图、标注、离线中英 OCR、钉图。
-- 格式工厂：视频格式转换/压缩/抽取音频、音频转换，以及图片转换/压缩。
-- AI 图像：本版本不提供模型下载、推理或 sidecar。
-- 设置：浅色/深色/跟随系统与自定义强调色。
-
-COM 已采用独立 Electron utility process 隔离，winax 的 Electron ABI、发布包资源与启动已通过 Windows 自动验收；Office/Adobe 的真实文件处理仍需在安装了对应软件的 Windows 机器上做发布前回归。开发范围与验收以本地 `scope/` 子计划为准。
+- 图片转换：通过本地 Host Service 处理图片格式转换、压缩和结果保存。
+- PDF：通过本地 Host Service 处理 PDF 合并、拆分、旋转、加解密、水印、页码、图片转 PDF、整页转图、文本与内嵌图片提取。
+- 截图：通过 Electron 系统能力完成屏幕采集、用户确认、区域选择和结果回传。
 
 ## 技术基线
 
-- Electron + Vite + Vanilla JavaScript
-- electron-vite + electron-builder + npm
-- renderer：JsBarcode、Fabric.js、pdf-lib、pdf.js、QPDF WebAssembly
-- 主进程：受限 IPC、文件系统、Tesseract.js、ag-psd、sharp、FFmpeg 子进程适配层
-- Windows COM：winax + Electron utility process；Office/Illustrator/Photoshop 不在 renderer 或主进程内直接执行
+- Electron
+- DeepSeek Harness
+- npm workspaces
+- 本地 DSH profile
+- 主进程与 DSH Host 的窄桥通信
+- 本地文件令牌与结果令牌，不向模型暴露绝对路径
 
 ## 开发
 
@@ -34,27 +23,17 @@ COM 已采用独立 Electron utility process 隔离，winax 的 Electron ABI、�
 npm install
 npm run dev
 npm run build
-npm run build:win
 ```
 
-`npm run build` 生成 Electron bundle；`npm run build:win` 会先下载并校验固定版本的 FFmpeg/ffprobe，再生成 Windows x64 portable EXE。本版本不构建或打包 AI sidecar。
-
-频繁测试时可在 Windows 源码目录先双击 `首次安装.cmd`，以后通过 `启动测试版.cmd` 直接启动 Electron，不必每次生成 portable EXE。完整说明见 [Windows 源码测试版](docs/windows-source-test.md)。
-
-完整的 Windows 本机构建、临时 Windows runner、启动冒烟、SHA-256 校验、桌面交付和远程清理流程见 [Windows x64 构建与交付规范](docs/windows-release.md)。非 Windows 主机需要提供 EXE 时按该规范使用临时 Windows runner，不使用 Docker，也不长期保留 Artifact。
-
-AI 模型不会随源码或 EXE 分发。
+构建、打包和验收以当前 `scope/` 计划为准。`scope/`、`tests/`、`release/` 是本地开发资料和产物目录，不纳入 Git。
 
 ## 目录
 
-- `index.html`：视觉蓝本。
-- `assets/`：logo 等本地资源。
-- `src/main/`：Electron 主进程与受限 IPC。
-- `src/preload/`：renderer 白名单桥接。
-- `src/renderer/`：正式界面与浏览器侧工具能力。
-- `scripts/`：发布构建脚本。
-- `licenses/`：第三方组件、运行库与模型 notices。
-- `scope/`：本地路线图和子计划，不纳入 Git。
-- `tests/`：本地测试与样本，不纳入 Git。
-
-旧 Python 桌面版本保留在本地 Git 分支 `archive/desktop-v1.2`。
+- `apps/`：桌面应用入口与 Electron 宿主代码。
+- `packages/`：DSH profile、内置插件和本地能力实现。
+- `resources/`：运行期 worker 与桌面桥资源。
+- `scripts/`：构建、资源和发布辅助脚本。
+- `docs/`：随源码交付的当前开发与发布说明。
+- `licenses/`：第三方组件和运行库声明。
+- `scope/`：本地路线图、计划和验收材料。
+- `tests/`：本地测试与样本。

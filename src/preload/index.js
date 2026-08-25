@@ -52,6 +52,9 @@ contextBridge.exposeInMainWorld(
     pickIllustratorFiles: () => ipcRenderer.invoke('illustrator:pick-files'),
     getPathForFile: (file) => webUtils.getPathForFile(file),
     addDroppedIllustratorFiles: (paths) => ipcRenderer.invoke('illustrator:add-paths', paths),
+    // 统一拖入扫描：renderer 只提交路径 + 区域/动作，主进程递归扫描并校验。
+    scanDroppedPaths: (payload) => ipcRenderer.invoke('drop:scan-paths', payload),
+    readDroppedFile: (filePath) => ipcRenderer.invoke('drop:read-file', filePath),
     pickIllustratorFolder: () => ipcRenderer.invoke('illustrator:pick-folder'),
     removeIllustratorInputs: (inputIds) => ipcRenderer.invoke('illustrator:remove-inputs', inputIds),
     runIllustratorTask: (payload) => ipcRenderer.invoke('illustrator:run', payload),
