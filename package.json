@@ -14,7 +14,10 @@
     "build": "electron-vite build",
     "build:icon": "node scripts/generate-icon.mjs",
     "build:tools:win": "powershell -ExecutionPolicy Bypass -File scripts/download-ffmpeg-win.ps1",
-    "build:win": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win portable --x64",
+    "build:win": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win nsis --x64",
+    "build:win:nsis": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win nsis --x64",
+    "build:win:portable": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win portable --x64",
+    "build:win:dir": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win dir --x64 && node scripts/zip-win-unpacked.mjs",
     "preview": "electron-vite preview"
   },
   "build": {
@@ -69,14 +72,34 @@
       ],
       "target": [
         {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
           "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "dir",
           "arch": [
             "x64"
           ]
         }
       ],
-      "artifactName": "${productName}-v${version}-${arch}.${ext}",
       "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createStartMenuShortcut": true,
+      "artifactName": "moyu-dsh-v${version}-windows-x64-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "moyu-dsh-v${version}-windows-x64-portable.${ext}"
     }
   },
   "devDependencies": {
