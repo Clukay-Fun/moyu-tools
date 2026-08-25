@@ -1,5 +1,6 @@
 import {
   app,
+  Menu,
   BrowserWindow,
   clipboard,
   desktopCapturer,
@@ -2887,6 +2888,8 @@ ipcMain.on('shortcut:ready', (event) => {
 })
 
 app.whenReady().then(() => {
+  // 隐藏 Electron 默认原生菜单栏（File/Edit/...），应用使用自身渲染层界面。
+  Menu.setApplicationMenu(null)
   // macOS 首次截图若在点击后才编译 ScreenCaptureKit 侧车，会额外等待约一秒。
   // 启动后后台预热；失败时 promise 会自行复位，真正截图仍会重试并给出明确错误。
   if (process.platform === 'darwin') {
