@@ -1,11 +1,7 @@
 name: release-dryrun
 on:
-  workflow_dispatch:
-    inputs:
-      fail_step:
-        description: Force the validation step to fail (to exercise failure cleanup)
-        type: boolean
-        default: false
+  push:
+    branches: [ci/dryrun]
 permissions:
   contents: write
 jobs:
@@ -57,7 +53,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release view "${{ steps.bump.outputs.tag }}" --json assets -q '.assets[].name' | grep -E 'setup\.exe$|latest\.yml$|blockmap$'
-          if [ "${{ inputs.fail_step }}" = "true" ]; then echo "::error::Forced failure for cleanup test"; exit 1; fi
 
       - name: Publish release
         shell: bash
