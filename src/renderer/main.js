@@ -5669,6 +5669,94 @@ document.querySelector('#open-github')?.addEventListener('click', async () => {
   }
 })
 
+// ── 设置页：更新（GitHub Releases 自动更新）──
+function initUpdatePanel() {
+  const el = {
+    current: document.querySelector('#update-current'),
+    last: document.querySelector('#update-last'),
+    autocheck: document.querySelector('#update-autocheck'),
+    statusText: document.querySelector('#update-status-text'),
+    notes: document.querySelector('#update-notes'),
+    progress: document.querySelector('#update-progress'),
+    bar: document.querySelector('#update-progress-bar'),
+    progressText: document.querySelector('#update-progress-text'),
+    primary: document.querySelector('#update-primary'),
+    secondary: document.querySelector('#update-secondary')
+  }
+  if (!el.current) return
+
+  const fmtTime = (ts) => {
+    if (!ts) return '—'
+    try { return new Date(ts).toLocaleString() } catch { return '—' }
+  }
+
+  function statusLabel(s) {
+    switch (s.status) {
+      case 'checking': return '正在检查更新…'
+      case 'available': return `发现新版本 v${s.availableVersion}`
+      case 'downloading': return '正在下载更新…'
+      case 'downloaded': return `v${s.availableVersion} 已下载，可重启安装`
+      case 'up-to-date': return '已是最新版本'
+      case 'error': return `更新出错：${s.message || '未知错误'}`
+      case 'portable': return '便携版不支持自动更新，请前往 GitHub 手动下载'
+      default: return '尚未检查更新'
+    }
+  }
+
+  function render(s) {
+    el.current.textContent = s.currentVersion || '—'
+    el.last.textContent = fmtTime(s.lastCheckedAt)
+    el.autocheck.checked = !!s.autoCheck
+    el.statusText.textContent = statusLabel(s)
+    if (s.releaseNotes) {
+      el.notes.textContent = s.releaseNotes
+      el.notes.hidden = false
+    } else {
+      el.notes.hidden = true
+      el.notes.textContent = ''
+    }
+    if (s.status === 'downloading' && s.progress) {
+      const pct = Math.floor(s.progress.percent || 0)
+      el.bar.value = pct
+      el.progressText.textContent = `${pct}%`
+      el.progress.hidden = false
+    } else {
+      el.progress.hidden = true
+    }
+    el.secondary.hidden = s.status !== 'downloaded'
+    const p = el.primary
+    p.disabled = false
+    switch (s.status) {
+      case 'available': p.textContent = '下载更新'; break
+      case 'checking': p.textContent = '检查中…'; p.disabled = true; break
+      case 'downloading': p.textContent = '下载中…'; p.disabled = true; break
+      case 'downloaded': p.textContent = '立即重启更新'; break
+      case 'portable': p.textContent = '前往 GitHub 下载'; break
+      default: p.textContent = '检查更新'
+    }
+  }
+
+  el.primary.addEventListener('click', async () => {
+    const s = await window.api.update.getState()
+    if (s.status === 'portable') { await window.api.update.openReleases(); return }
+    if (s.status === 'downloaded') { await window.api.update.install(); return }
+    if (s.status === 'available') { await window.api.update.download(); return }
+    await window.api.update.check()
+  })
+  el.secondary.addEventListener('click', () => {
+    el.secondary.hidden = true
+    el.progress.hidden = true
+    el.statusText.textContent = '已下载更新，稍后可在设置中重启安装'
+  })
+  el.autocheck.addEventListener('change', async () => {
+    await window.api.update.setAutoCheck(el.autocheck.checked)
+  })
+
+  window.api.update.onState(render)
+  window.api.update.getState().then(render).catch(() => {})
+}
+initUpdatePanel()
+
 let colorDragging = false
 
 function pickWheelColor(event) {

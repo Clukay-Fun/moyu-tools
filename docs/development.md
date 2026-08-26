@@ -1,6 +1,6 @@
 # 本地开发
 
-`moyu-dsh` 使用 Electron 与本地 DSH 运行环境开发。
+摸鱼工具箱 使用 Electron 与项目构建链开发。
 
 ## 常用命令
 

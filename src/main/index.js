@@ -13,6 +13,7 @@ import {
   utilityProcess
 } from 'electron'
 import { spawn } from 'node:child_process'
+import { initUpdater, updateApi } from './updater.js'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import {
@@ -1144,6 +1145,36 @@ ipcMain.handle('ping', () => 'pong')
 ipcMain.handle('app:info', (event) => {
   assertMainWindowSender(event)
   return { version: app.getVersion() }
+})
+
+// ── 自动更新（GitHub Releases，仅 Windows 安装版）──
+ipcMain.handle('update:get-state', (event) => {
+  assertMainWindowSender(event)
+  return updateApi.getState()
+})
+ipcMain.handle('update:get-settings', (event) => {
+  assertMainWindowSender(event)
+  return updateApi.getSettings()
+})
+ipcMain.handle('update:set-auto-check', (event, enabled) => {
+  assertMainWindowSender(event)
+  return updateApi.setAutoCheck(enabled)
+})
+ipcMain.handle('update:check', (event) => {
+  assertMainWindowSender(event)
+  return updateApi.check()
+})
+ipcMain.handle('update:download', (event) => {
+  assertMainWindowSender(event)
+  return updateApi.download()
+})
+ipcMain.handle('update:install', (event) => {
+  assertMainWindowSender(event)
+  return updateApi.install()
+})
+ipcMain.handle('update:open-releases', (event) => {
+  assertMainWindowSender(event)
+  return updateApi.openReleases()
 })
 
 const ALLOWED_EXTERNAL_URLS = new Set([
@@ -2904,6 +2935,7 @@ app.whenReady().then(() => {
     if (dockIcon && !dockIcon.isEmpty()) app.dock.setIcon(dockIcon)
   }
   createWindow()
+  initUpdater(mainWindow)
   // 预先加载隐藏的截图壳。后续点击只更新屏幕数据，不再创建窗口或重跑页面初始化。
   void ensureScreenshotOverlay(screen.getPrimaryDisplay()).catch((error) => {
     console.warn('截图覆盖层预加载失败：', error?.message || error)

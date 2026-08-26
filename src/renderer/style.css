@@ -3047,6 +3047,18 @@ label {
   font-size: 10px;
 }
 
+/* 设置：更新卡片 */
+.update-meta { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 2px 0 14px; }
+.update-meta > div { display: flex; flex-direction: column; gap: 2px; }
+.update-meta span { font-size: 12px; color: var(--faint); }
+.update-meta b { font-size: 14px; font-weight: 600; }
+.update-autocheck { margin: 6px 0 14px; }
+.update-status { margin: 4px 0 12px; }
+.update-notes { margin-top: 8px; padding: 10px 12px; background: rgba(127, 127, 127, 0.12); border-radius: 10px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; max-height: 160px; overflow: auto; }
+.update-progress { display: flex; align-items: center; gap: 10px; margin: 6px 0 12px; }
+.update-progress progress { flex: 1; height: 8px; }
+.update-actions { display: flex; gap: 10px; }
+
 .settings-content {
   display: grid;
   gap: 14px;

@@ -88,5 +88,6 @@ export const ICON_MAP = {
   //   "删除"全应用都是 trash-2，"关闭"都是 x，不允许某个窗口自成一套。
   'opacity-down': 'sun-dim',
   'opacity-up': 'sun',
-  download: 'download'
+  download: 'download',
+  update: 'refresh-cw'
 }

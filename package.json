@@ -18,6 +18,7 @@
     "build:win:nsis": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win nsis --x64 --publish=never",
     "build:win:portable": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win portable --x64 --publish=never",
     "build:win:dir": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win dir --x64 --publish=never && node scripts/zip-win-unpacked.mjs",
+    "build:win:release": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win nsis --x64 --publish always",
     "preview": "electron-vite preview"
   },
   "build": {
@@ -100,7 +101,16 @@
     },
     "portable": {
       "artifactName": "moyu-tools-v${version}-windows-x64-portable.${ext}"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Clukay-Fun",
+        "repo": "moyu-tools",
+        "channel": "latest",
+        "draft": true
+      }
+    ]
   },
   "devDependencies": {
     "electron": "43.2.0",
@@ -120,7 +130,8 @@
     "pdfjs-dist": "5.4.624",
     "qpdf-run": "0.2.1",
     "sharp": "0.35.3",
-    "tesseract.js": "7.0.0"
+    "tesseract.js": "7.0.0",
+    "electron-updater": "^6.3.0"
   },
   "optionalDependencies": {
     "winax": "3.6.9"

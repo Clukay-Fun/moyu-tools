@@ -130,6 +130,21 @@ contextBridge.exposeInMainWorld(
       const listener = (_event, progress) => callback(progress)
       ipcRenderer.on('screenshot:ocr-progress', listener)
       return () => ipcRenderer.removeListener('screenshot:ocr-progress', listener)
+    },
+    // 自动更新（GitHub Releases）
+    update: {
+      getState: () => ipcRenderer.invoke('update:get-state'),
+      getSettings: () => ipcRenderer.invoke('update:get-settings'),
+      setAutoCheck: (enabled) => ipcRenderer.invoke('update:set-auto-check', enabled),
+      check: () => ipcRenderer.invoke('update:check'),
+      download: () => ipcRenderer.invoke('update:download'),
+      install: () => ipcRenderer.invoke('update:install'),
+      openReleases: () => ipcRenderer.invoke('update:open-releases'),
+      onState: (handler) => {
+        const listener = (_event, payload) => handler(payload)
+        ipcRenderer.on('update:state', listener)
+        return () => ipcRenderer.removeListener('update:state', listener)
+      }
     }
   })
 )

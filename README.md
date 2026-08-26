@@ -1,6 +1,6 @@
-# moyu-dsh
+# 摸鱼工具箱
 
-`moyu-dsh` 是一个基于 DeepSeek Harness 的本地桌面应用。DSH 负责主界面、会话和工具调用，Electron 负责桌面窗口、安全边界、文件访问与系统能力桥接。
+摸鱼工具箱 是一个基于 DeepSeek Harness 的本地桌面应用；Electron 负责桌面窗口、安全边界、文件访问与系统能力桥接。
 
 ## 当前能力
 

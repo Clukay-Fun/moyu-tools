@@ -555,7 +555,7 @@
                   <div>
                     <span>偏好设置</span>
                     <h1>设置</h1>
-                    <p>调整截图快捷键、界面外观与应用信息。</p>
+                    <p>调整截图快捷键、界面外观、应用更新与项目信息。</p>
                   </div>
                 </header>
                 <div class="settings-layout">
@@ -567,6 +567,10 @@
                     <a class="settings-nav-item" href="#settings-appearance" data-settings-target="settings-appearance">
                       <svg class="ic" aria-hidden="true"><use href="#ic-appearance"></use></svg>
                       <span><b>外观</b><small>主题与强调色</small></span>
+                    </a>
+                    <a class="settings-nav-item" href="#settings-update" data-settings-target="settings-update">
+                      <svg class="ic" aria-hidden="true"><use href="#ic-update"></use></svg>
+                      <span><b>更新</b><small>版本与自动更新</small></span>
                     </a>
                     <a class="settings-nav-item" href="#settings-about" data-settings-target="settings-about">
                       <svg class="ic" aria-hidden="true"><use href="#ic-info"></use></svg>
@@ -623,6 +627,34 @@
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </section>
+
+                                    <section class="glass-card setting-card" id="settings-update" data-settings-section>
+                    <div class="setting-card-heading">
+                      <span class="setting-card-icon"><svg class="ic" aria-hidden="true"><use href="#ic-update"></use></svg></span>
+                      <div><h2>更新</h2><p>版本与自动更新；发现新版本先提示，确认后再下载。</p></div>
+                    </div>
+                    <div class="update-meta">
+                      <div><span>当前版本</span><b id="update-current">—</b></div>
+                      <div><span>更新频道</span><b>稳定版</b></div>
+                      <div><span>最近检查</span><b id="update-last">—</b></div>
+                    </div>
+                    <label class="toggle-wrap update-autocheck">
+                      <input type="checkbox" id="update-autocheck" checked />
+                      <span>启动后自动检查更新</span>
+                    </label>
+                    <div class="update-status" id="update-status" aria-live="polite">
+                      <p id="update-status-text">正在读取更新状态…</p>
+                      <p class="update-notes" id="update-notes" hidden></p>
+                    </div>
+                    <div class="update-progress" id="update-progress" hidden>
+                      <progress id="update-progress-bar" max="100" value="0"></progress>
+                      <span id="update-progress-text">0%</span>
+                    </div>
+                    <div class="update-actions">
+                      <button class="gbtn primary" id="update-primary" type="button" disabled>检查更新</button>
+                      <button class="gbtn ghost" id="update-secondary" type="button" hidden>稍后安装</button>
                     </div>
                   </section>
 
