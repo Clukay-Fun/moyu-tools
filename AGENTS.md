@@ -2,7 +2,7 @@
 
 ## 项目定位
 
-`摸鱼工具箱` 是一个基于 DeepSeek Harness 的本地桌面应用；Electron 是桌面宿主、安全边界和系统能力桥。
+`摸鱼工具箱` 是一个 Windows 优先的本地 Electron 桌面工具箱（图片、PDF、条码、截图、格式转换等）。
 
 技术与范围以本机 `scope/` 当前计划为准。`scope/` 是本地开发依据，不纳入 Git。
 
@@ -10,7 +10,7 @@
 
 1. 修改前运行 `git status --short --branch`，保留已有改动。
 2. 按 `scope/plans/README.md` 的里程碑顺序开发。每片先完成计划中的 Spike 或验收，再扩展下一片。
-3. 使用 Electron、DeepSeek Harness、npm 和项目现有构建链；不引入第二套包管理器。
+3. 使用 Electron、npm 和项目现有构建链；不引入第二套包管理器。
 4. renderer 必须 `contextIsolation: true`、`nodeIntegration: false`、`sandbox: true`；所有桌面能力仅经白名单桥接暴露。
 5. 文件读写、系统能力、原生模块和外部进程都放在主进程或受控任务进程；renderer 不直接访问 Node、文件系统或系统 API。
 6. 新增原生模块、WASM、worker、独立可执行文件或打包后需解析路径的资源时，先做目标平台打包 Spike。
