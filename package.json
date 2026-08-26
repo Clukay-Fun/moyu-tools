@@ -108,7 +108,7 @@
         "owner": "Clukay-Fun",
         "repo": "moyu-tools",
         "channel": "latest",
-        "draft": true
+        "releaseType": "draft"
       }
     ]
   },

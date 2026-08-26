@@ -22,8 +22,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG=$(gh api repos/Clukay-Fun/moyu-tools/releases/latest --jq '.tag_name' 2>/dev/null || true)
-          if [ -z "$TAG" ]; then TAG="v$(node -p "require('./package.json').version")"; fi
+          if TAG=$(gh api repos/Clukay-Fun/moyu-tools/releases/latest --jq '.tag_name' 2>/dev/null); then
+            echo "latest release tag: $TAG"
+          else
+            TAG="v$(node -p "require('./package.json').version")"
+            echo "no latest release, using package.json: $TAG"
+          fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Bump patch version
