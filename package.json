@@ -1,7 +1,7 @@
 {
   "name": "moyu-tools",
   "version": "2.1.0",
-  "description": "摸鱼工具箱桌面应用（基于 DeepSeek Harness）",
+  "description": "摸鱼工具箱桌面应用",
   "author": "Clukay",
   "private": true,
   "type": "module",
