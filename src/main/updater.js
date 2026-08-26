@@ -1,5 +1,6 @@
 import { app, shell } from 'electron'
-import { autoUpdater } from 'electron-updater'
+import updater from 'electron-updater'
+const { autoUpdater } = updater
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
