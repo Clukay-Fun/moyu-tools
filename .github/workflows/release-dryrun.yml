@@ -1,0 +1,84 @@
+name: release-dryrun
+on:
+  workflow_dispatch:
+    inputs:
+      fail_step:
+        description: Force the validation step to fail (to exercise failure cleanup)
+        type: boolean
+        default: false
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Resolve base version
+        id: base
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=$(gh api repos/Clukay-Fun/moyu-tools/releases/latest --jq '.tag_name' 2>/dev/null || true)
+          if [ -z "$TAG" ]; then TAG="v$(node -p "require('./package.json').version")"; fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Bump patch version
+        id: bump
+        shell: bash
+        run: |
+          BASE="${{ steps.base.outputs.tag }}"
+          BASE="${BASE#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
+          PATCH=$((10#$PATCH + 1))
+          VERSION="$MAJOR.$MINOR.$PATCH"
+          node -e "const fs=require('fs');const f='package.json';const p=require('./'+f);p.version='$VERSION';fs.writeFileSync(f, JSON.stringify(p,null,2)+'\n');const lf='package-lock.json';const L=JSON.parse(fs.readFileSync(lf,'utf8'));if(L.version)L.version='$VERSION';if(L.packages&&L.packages[''])L.packages[''].version='$VERSION';fs.writeFileSync(lf, JSON.stringify(L,null,2)+'\n');"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies (clean)
+        run: npm ci
+
+      - name: Build and publish (draft)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build:win:release
+
+      - name: Validate release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "${{ steps.bump.outputs.tag }}" --json assets -q '.assets[].name' | grep -E 'setup\.exe$|latest\.yml$|blockmap$'
+          if [ "${{ inputs.fail_step }}" = "true" ]; then echo "::error::Forced failure for cleanup test"; exit 1; fi
+
+      - name: Publish release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "${{ steps.bump.outputs.tag }}" --draft=false
+
+      - name: Cleanup test release (success)
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete "${{ steps.bump.outputs.tag }}" --yes || true
+          git push --delete origin "${{ steps.bump.outputs.tag }}" || true
+
+      - name: Cleanup on failure
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete "${{ steps.bump.outputs.tag }}" --yes || true
+          git push --delete origin "${{ steps.bump.outputs.tag }}" || true
