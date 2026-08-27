@@ -20,7 +20,7 @@ export function renderFileRows(listBody, emptyEl, items, { renderRow } = {}) {
 
 // 统一任务状态机（M2B）
 // 各文件任务页（PDF / Illustrator / 格式工厂）共用同一套任务状态语义，
-// 不再各自用零散的 Map 记录进度与错误。渲染层从 scheduler 读状态，
+// 不再各自用零散的 Map 记录进度与错误。渲染层从 store 读状态，
 // 执行层（含主进程任务）按生命周期回调写入状态。
 export const TaskStatus = Object.freeze({
   PENDING: 'pending',
@@ -34,21 +34,19 @@ export function createTask(id, label = '') {
   return { id, label, status: TaskStatus.PENDING, progress: 0, error: null, result: null }
 }
 
-export class TaskScheduler {
-  constructor({ concurrency = 1, onUpdate = () => {} } = {}) {
-    this.concurrency = concurrency
-    this.onUpdate = onUpdate
+// 统一任务状态机（M2B）：仅负责逐任务状态的存储与流转，
+// 不含队列执行 / 并发调度——实际执行在各文件任务页 / 主进程。
+export class TaskStore {
+  constructor() {
     /** id → task */
     this.tasks = new Map()
     /** 注册顺序，保证渲染顺序稳定 */
     this.order = []
-    this.cancelled = new Set()
   }
 
   reset() {
     this.tasks.clear()
     this.order = []
-    this.cancelled.clear()
   }
 
   register(id, label = '') {
@@ -72,14 +70,12 @@ export class TaskScheduler {
     task.status = TaskStatus.RUNNING
     task.progress = 0
     task.error = null
-    this.onUpdate(task)
   }
 
   markProgress(id, progress) {
     const task = this.tasks.get(id)
     if (!task) return
     task.progress = Math.max(0, Math.min(1, progress))
-    this.onUpdate(task)
   }
 
   markDone(id, result = null) {
@@ -88,7 +84,6 @@ export class TaskScheduler {
     task.status = TaskStatus.DONE
     task.progress = 1
     task.result = result
-    this.onUpdate(task)
   }
 
   markFailed(id, error = '') {
@@ -96,21 +91,11 @@ export class TaskScheduler {
     if (!task) return
     task.status = TaskStatus.FAILED
     task.error = error instanceof Error ? error.message : String(error || '')
-    this.onUpdate(task)
   }
 
   markCancelled(id) {
     const task = this.tasks.get(id)
     if (!task) return
     task.status = TaskStatus.CANCELLED
-    this.onUpdate(task)
-  }
-
-  cancel(id) {
-    this.cancelled.add(id)
-  }
-
-  isCancelled(id) {
-    return this.cancelled.has(id)
   }
 }

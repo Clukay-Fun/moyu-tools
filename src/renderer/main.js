@@ -10,7 +10,7 @@ import { ImageEditorModal } from './board/editor/modal.js'
 import { RecoveryScheduler } from './board/recovery.js'
 import { cleanIpcError, illustratorFailureHint, isComCancelled } from './comErrors.js'
 import { installTooltips } from './tooltip.js'
-import { renderFileRows, TaskScheduler, TaskStatus } from './fileTask.js'
+import { renderFileRows, TaskStore, TaskStatus } from './fileTask.js'
 import {
   isGenericType, renderGenericBarcode, computeGenericGeometry, genericRasterSize, resolveGenericTypeName,
   GENERIC_DEFAULTS, CODE39_DEFAULTS, CODABAR_DEFAULTS, MSI_DEFAULTS
@@ -5013,7 +5013,7 @@ const formatState = {
   inputs: [],
   results: [],
   // M2B：统一任务状态机取代分散的进度 / 错误 Map
-  scheduler: new TaskScheduler(),
+  scheduler: new TaskStore(),
   busy: false,
   saving: false,
   taskId: '',
@@ -5032,7 +5032,6 @@ function formatSize(bytes) {
 }
 
 function renderFormatFiles() {
-  const resultInputIds = new Set(formatState.results.map((result) => result.inputId))
   renderFileRows(formatFileList, formatEmpty, formatState.inputs, {
     renderRow: (input, index) => {
       const row = document.createElement('article')
@@ -5045,7 +5044,7 @@ function renderFormatFiles() {
       const remove = document.createElement('button')
       const task = formatState.scheduler.get(input.id)
       const error = task?.error || null
-      const progress = task?.progress
+      const progress = task ? task.progress : undefined
       row.className = 'format-file-item'
       indexNode.className = 'format-index'
       nameNode.className = 'format-name'
@@ -5065,16 +5064,19 @@ function renderFormatFiles() {
       detail.textContent = error || inputDetail
       detail.title = error || ''
       size.textContent = formatSize(input.size)
-      if (error) {
+      // 状态以 task.status 为准，避免 pending 因 progress=0 误显“转换中”
+      if (task?.status === TaskStatus.FAILED) {
         status.textContent = '导出失败'
         status.classList.add('error')
-        status.title = error
-      } else if (resultInputIds.has(input.id)) {
+        status.title = error || ''
+      } else if (task?.status === TaskStatus.DONE) {
         status.textContent = '已导出'
         status.classList.add('success')
-      } else if (Number.isFinite(progress)) {
-        status.textContent = `转换中 ${Math.round(progress * 100)}%`
+      } else if (task?.status === TaskStatus.RUNNING) {
+        status.textContent = `转换中 ${Math.round((progress || 0) * 100)}%`
         status.classList.add('busy')
+      } else if (task?.status === TaskStatus.CANCELLED) {
+        status.textContent = '已取消'
       } else {
         status.textContent = '等待处理'
       }
@@ -5276,6 +5278,19 @@ async function runFormatTask() {
   formatRunButton.textContent = '处理中…'
   formatCancelButton.hidden = false
   formatStatusText.textContent = '正在准备任务…'
+  // 按计划结算已完成 / 失败项；未终结的输入交回调用方决定（取消或异常）。
+  const settleResults = (response) => {
+    const succeeded = new Set((response.results || []).map((result) => result.inputId))
+    formatState.inputs.forEach((input) => {
+      if (succeeded.has(input.id)) {
+        formatState.scheduler.markDone(input.id)
+      } else {
+        const failed = (response.errors || []).find((error) => error.inputId === input.id)
+        if (failed) formatState.scheduler.markFailed(input.id, failed.message)
+        else formatState.scheduler.markCancelled(input.id)
+      }
+    })
+  }
   updateFormatControls()
   try {
     const response = await window.api.runFormatTask({
@@ -5285,20 +5300,19 @@ async function runFormatTask() {
       options: currentFormatOptions()
     })
     if (response.status === 'cancelled') {
-      formatState.scheduler.all().forEach((task) => formatState.scheduler.markCancelled(task.id))
+      // 先结算主进程带回的已完成 / 失败项，仅把尚未终结的任务标为取消，
+      // 避免中途取消时已经成功的文件丢失“已完成”状态。
+      settleResults(response)
+      formatState.scheduler.all().forEach((task) => {
+        if (task.status === TaskStatus.PENDING || task.status === TaskStatus.RUNNING) {
+          formatState.scheduler.markCancelled(task.id)
+        }
+      })
       formatStatusText.textContent = '任务已取消'
       showToast('格式转换任务已取消')
     } else {
       formatState.results = response.results
-      const succeeded = new Set(response.results.map((result) => result.inputId))
-      formatState.inputs.forEach((input) => {
-        if (succeeded.has(input.id)) formatState.scheduler.markDone(input.id)
-        else {
-          const failed = response.errors.find((error) => error.inputId === input.id)
-          if (failed) formatState.scheduler.markFailed(input.id, failed.message)
-          else formatState.scheduler.markCancelled(input.id)
-        }
-      })
+      settleResults(response)
       formatProgressFill.style.width = '100%'
       formatStatusText.textContent = response.errors.length
         ? `完成 ${response.results.length} 个，失败 ${response.errors.length} 个`
@@ -5306,8 +5320,16 @@ async function runFormatTask() {
       showToast('格式转换任务完成')
     }
   } catch (error) {
-    formatStatusText.textContent = `处理失败：${error.message}`
+    // 批次异常：保留已完成项，把仍在等待 / 进行中的任务落为失败并重渲染。
+    const reason = error instanceof Error ? error.message : String(error)
+    formatState.scheduler.all().forEach((task) => {
+      if (task.status === TaskStatus.PENDING || task.status === TaskStatus.RUNNING) {
+        formatState.scheduler.markFailed(task.id, reason)
+      }
+    })
+    formatStatusText.textContent = `处理失败：${reason}`
     showToast('格式转换失败')
+    renderFormatFiles()
   } finally {
     formatState.busy = false
     formatState.taskId = ''
@@ -5746,8 +5768,19 @@ settingsNavItems.forEach((item) => {
 
 settingsLayout?.addEventListener('scroll', syncSettingsNavigation, { passive: true })
 
+// 按平台显示快捷键提示：Windows 优先应用显示 Ctrl+K，其余显示 ⌘K。
+const APP_PLATFORM = { value: 'darwin' }
+function applyPlatformHints() {
+  const key = APP_PLATFORM.value === 'win32' ? 'Ctrl+K' : '⌘K'
+  document.querySelectorAll('.shortcut-kbd').forEach((el) => { el.textContent = key })
+}
+applyPlatformHints()
 window.api.getAppInfo().then((info) => {
   document.querySelector('#app-version').textContent = info.version
+  if (info.platform) {
+    APP_PLATFORM.value = info.platform
+    applyPlatformHints()
+  }
 }).catch(() => {
   document.querySelector('#app-version').textContent = '版本信息不可用'
 })

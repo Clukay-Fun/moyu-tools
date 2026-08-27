@@ -1144,7 +1144,7 @@ function createWindow() {
 ipcMain.handle('ping', () => 'pong')
 ipcMain.handle('app:info', (event) => {
   assertMainWindowSender(event)
-  return { version: app.getVersion() }
+  return { version: app.getVersion(), platform: process.platform }
 })
 
 // ── 自动更新（GitHub Releases，仅 Windows 安装版）──
