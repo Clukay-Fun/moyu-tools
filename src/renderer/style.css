@@ -4282,19 +4282,6 @@ body[data-module="home"] .submenu {
 }
 .cmd-menu.align-right { left: auto; right: 0; transform-origin: top right; }
 .cmd-menu[hidden] { display: none; }
-
-#overlay-layer {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 60;
-}
-
-#overlay-layer > .cmd-menu {
-  position: fixed;
-  pointer-events: auto;
-  z-index: 60;
-}
 .cmd-menu button {
   display: block;
   width: 100%;
