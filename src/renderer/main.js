@@ -10,6 +10,7 @@ import { ImageEditorModal } from './board/editor/modal.js'
 import { RecoveryScheduler } from './board/recovery.js'
 import { cleanIpcError, illustratorFailureHint, isComCancelled } from './comErrors.js'
 import { installTooltips } from './tooltip.js'
+import { renderFileRows } from './fileTask.js'
 import {
   isGenericType, renderGenericBarcode, computeGenericGeometry, genericRasterSize, resolveGenericTypeName,
   GENERIC_DEFAULTS, CODE39_DEFAULTS, CODABAR_DEFAULTS, MSI_DEFAULTS
@@ -730,45 +731,44 @@ function renderPdfOptions() {
 }
 
 function renderPdfFiles() {
-  pdfFileBody.replaceChildren()
   const config = currentPdfConfig()
   const displayedFiles = config.kind === 'office'
     ? (state.pdfNativeInput ? [state.pdfNativeInput] : [])
     : currentPdfFiles()
-  pdfEmpty.classList.toggle('hidden', displayedFiles.length > 0)
+  renderFileRows(pdfFileBody, pdfEmpty, displayedFiles, {
+    renderRow: (file, index) => {
+      const row = document.createElement('div')
+      const order = document.createElement('span')
+      const name = document.createElement('span')
+      const size = document.createElement('span')
+      const progress = document.createElement('span')
+      const remove = document.createElement('button')
 
-  displayedFiles.forEach((file, index) => {
-    const row = document.createElement('div')
-    const order = document.createElement('span')
-    const name = document.createElement('span')
-    const size = document.createElement('span')
-    const progress = document.createElement('span')
-    const remove = document.createElement('button')
-
-    row.className = 'pdf-file-row'
-    order.className = 'cell-index'
-    name.className = 'cell-name'
-    size.className = 'cell-size'
-    progress.className = 'cell-progress'
-    order.textContent = String(index + 1)
-    name.textContent = file.name
-    name.title = file.name
-    size.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`
-    const fileStatus = isPdfWatermarkAction()
-      ? state.pdfWatermarkStatuses[index]
-      : state.pdfFileStatuses[index]
-    progress.textContent = fileStatus?.error || fileStatus?.status || '待处理'
-    progress.title = fileStatus?.error || ''
-    progress.classList.toggle('success', ['已导出', '完成'].includes(fileStatus?.status))
-    progress.classList.toggle('busy', ['处理中', '等待保存'].includes(fileStatus?.status))
-    progress.classList.toggle('error', Boolean(fileStatus?.error) || fileStatus?.status === '导出失败')
-    remove.type = 'button'
-    remove.className = 'pdf-remove-file'
-    remove.dataset.index = String(index)
-    remove.setAttribute('aria-label', `移除 ${file.name}`)
-    remove.textContent = '×'
-    row.append(order, name, size, progress, remove)
-    pdfFileBody.append(row)
+      row.className = 'pdf-file-row'
+      order.className = 'cell-index'
+      name.className = 'cell-name'
+      size.className = 'cell-size'
+      progress.className = 'cell-progress'
+      order.textContent = String(index + 1)
+      name.textContent = file.name
+      name.title = file.name
+      size.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`
+      const fileStatus = isPdfWatermarkAction()
+        ? state.pdfWatermarkStatuses[index]
+        : state.pdfFileStatuses[index]
+      progress.textContent = fileStatus?.error || fileStatus?.status || '待处理'
+      progress.title = fileStatus?.error || ''
+      progress.classList.toggle('success', ['已导出', '完成'].includes(fileStatus?.status))
+      progress.classList.toggle('busy', ['处理中', '等待保存'].includes(fileStatus?.status))
+      progress.classList.toggle('error', Boolean(fileStatus?.error) || fileStatus?.status === '导出失败')
+      remove.type = 'button'
+      remove.className = 'pdf-remove-file'
+      remove.dataset.index = String(index)
+      remove.setAttribute('aria-label', `移除 ${file.name}`)
+      remove.textContent = '×'
+      row.append(order, name, size, progress, remove)
+      return row
+    }
   })
 
   updatePdfRunState()
@@ -3459,36 +3459,35 @@ function appendIllustratorLog(message) {
 }
 
 function renderIllustratorFiles() {
-  illustratorFileBody.replaceChildren()
-  illustratorEmpty.classList.toggle('hidden', illustratorState.inputs.length > 0)
+  renderFileRows(illustratorFileBody, illustratorEmpty, illustratorState.inputs, {
+    renderRow: (file, index) => {
+      const row = document.createElement('div')
+      const order = document.createElement('span')
+      const name = document.createElement('span')
+      const size = document.createElement('span')
+      const status = document.createElement('span')
+      const remove = document.createElement('button')
+      const currentStatus = illustratorState.statuses.get(file.id) || '等待'
 
-  illustratorState.inputs.forEach((file, index) => {
-    const row = document.createElement('div')
-    const order = document.createElement('span')
-    const name = document.createElement('span')
-    const size = document.createElement('span')
-    const status = document.createElement('span')
-    const remove = document.createElement('button')
-    const currentStatus = illustratorState.statuses.get(file.id) || '等待'
-
-    row.className = 'pdf-file-row illustrator-file-row'
-    order.className = 'cell-index'
-    name.className = 'cell-name'
-    size.className = 'cell-meta'
-    status.className = `cell-status illustrator-status ${currentStatus === '完成' ? 'success' : currentStatus === '处理中' ? 'busy' : currentStatus === '失败' ? 'error' : ''}`
-    order.textContent = String(index + 1)
-    name.textContent = file.name
-    name.title = file.name
-    size.textContent = illustratorFileSize(file.size)
-    status.textContent = currentStatus
-    remove.type = 'button'
-    remove.className = 'pdf-remove-file illustrator-remove-file'
-    remove.dataset.id = file.id
-    remove.disabled = illustratorState.busy
-    remove.setAttribute('aria-label', `移除 ${file.name}`)
-    remove.textContent = '×'
-    row.append(order, name, size, status, remove)
-    illustratorFileBody.append(row)
+      row.className = 'pdf-file-row illustrator-file-row'
+      order.className = 'cell-index'
+      name.className = 'cell-name'
+      size.className = 'cell-meta'
+      status.className = `cell-status illustrator-status ${currentStatus === '完成' ? 'success' : currentStatus === '处理中' ? 'busy' : currentStatus === '失败' ? 'error' : ''}`
+      order.textContent = String(index + 1)
+      name.textContent = file.name
+      name.title = file.name
+      size.textContent = illustratorFileSize(file.size)
+      status.textContent = currentStatus
+      remove.type = 'button'
+      remove.className = 'pdf-remove-file illustrator-remove-file'
+      remove.dataset.id = file.id
+      remove.disabled = illustratorState.busy
+      remove.setAttribute('aria-label', `移除 ${file.name}`)
+      remove.textContent = '×'
+      row.append(order, name, size, status, remove)
+      return row
+    }
   })
 
   const hasFiles = illustratorState.inputs.length > 0
@@ -4991,58 +4990,56 @@ function formatSize(bytes) {
 }
 
 function renderFormatFiles() {
-  formatFileList.replaceChildren()
-  formatEmpty.hidden = formatState.inputs.length > 0
   const resultInputIds = new Set(formatState.results.map((result) => result.inputId))
-  const fragment = document.createDocumentFragment()
-  formatState.inputs.forEach((input, index) => {
-    const row = document.createElement('article')
-    const indexNode = document.createElement('span')
-    const nameNode = document.createElement('span')
-    const name = document.createElement('b')
-    const detail = document.createElement('small')
-    const size = document.createElement('span')
-    const status = document.createElement('span')
-    const remove = document.createElement('button')
-    const error = formatState.errorsByInput.get(input.id)
-    const progress = formatState.progressByInput.get(input.id)
-    row.className = 'format-file-item'
-    indexNode.className = 'format-index'
-    nameNode.className = 'format-name'
-    size.className = 'format-size'
-    status.className = 'format-file-status'
-    remove.className = 'format-remove'
-    remove.type = 'button'
-    remove.dataset.inputId = input.id
-    remove.setAttribute('aria-label', `移除 ${input.name}`)
-    remove.textContent = '×'
-    remove.disabled = formatState.busy
-    indexNode.textContent = String(index + 1)
-    name.textContent = input.name
-    const inputDetail = input.dimensions?.width
-      ? `${input.dimensions.width} × ${input.dimensions.height}`
-      : (input.name.split('.').at(-1) || input.kind).toUpperCase()
-    detail.textContent = error || inputDetail
-    detail.title = error || ''
-    size.textContent = formatSize(input.size)
-    if (error) {
-      status.textContent = '导出失败'
-      status.classList.add('error')
-      status.title = error
-    } else if (resultInputIds.has(input.id)) {
-      status.textContent = '已导出'
-      status.classList.add('success')
-    } else if (Number.isFinite(progress)) {
-      status.textContent = `转换中 ${Math.round(progress * 100)}%`
-      status.classList.add('busy')
-    } else {
-      status.textContent = '等待处理'
+  renderFileRows(formatFileList, formatEmpty, formatState.inputs, {
+    renderRow: (input, index) => {
+      const row = document.createElement('article')
+      const indexNode = document.createElement('span')
+      const nameNode = document.createElement('span')
+      const name = document.createElement('b')
+      const detail = document.createElement('small')
+      const size = document.createElement('span')
+      const status = document.createElement('span')
+      const remove = document.createElement('button')
+      const error = formatState.errorsByInput.get(input.id)
+      const progress = formatState.progressByInput.get(input.id)
+      row.className = 'format-file-item'
+      indexNode.className = 'format-index'
+      nameNode.className = 'format-name'
+      size.className = 'format-size'
+      status.className = 'format-file-status'
+      remove.className = 'format-remove'
+      remove.type = 'button'
+      remove.dataset.inputId = input.id
+      remove.setAttribute('aria-label', `移除 ${input.name}`)
+      remove.textContent = '×'
+      remove.disabled = formatState.busy
+      indexNode.textContent = String(index + 1)
+      name.textContent = input.name
+      const inputDetail = input.dimensions?.width
+        ? `${input.dimensions.width} × ${input.dimensions.height}`
+        : (input.name.split('.').at(-1) || input.kind).toUpperCase()
+      detail.textContent = error || inputDetail
+      detail.title = error || ''
+      size.textContent = formatSize(input.size)
+      if (error) {
+        status.textContent = '导出失败'
+        status.classList.add('error')
+        status.title = error
+      } else if (resultInputIds.has(input.id)) {
+        status.textContent = '已导出'
+        status.classList.add('success')
+      } else if (Number.isFinite(progress)) {
+        status.textContent = `转换中 ${Math.round(progress * 100)}%`
+        status.classList.add('busy')
+      } else {
+        status.textContent = '等待处理'
+      }
+      nameNode.append(name, detail)
+      row.append(indexNode, nameNode, size, status, remove)
+      return row
     }
-    nameNode.append(name, detail)
-    row.append(indexNode, nameNode, size, status, remove)
-    fragment.append(row)
   })
-  formatFileList.append(fragment)
   updateFormatControls()
 }
 
