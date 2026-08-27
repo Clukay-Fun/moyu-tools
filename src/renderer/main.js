@@ -467,6 +467,7 @@ function animateEntry(element, { duration = 160, distance = 6, horizontal = fals
 function activateModule(module, action = '', animate = false) {
   const changed = state.module !== module
   state.module = module
+  document.body.dataset.module = module
 
   document.querySelectorAll('.nav-ic').forEach((button) => {
     const isActive = button.dataset.module === module
@@ -5809,7 +5810,12 @@ applyAccent()
 setBarcodeMode('single')
 generateBarcode()
 setFormatAction('视频转换')
-activateModule('pdf', defaultSelections.pdf)
+  document.querySelector('.pages').addEventListener('click', (event) => {
+    const go = event.target.closest('[data-go]')
+    if (go) activateModule(go.dataset.go)
+  })
+
+  activateModule('home')
 verifyPreloadBridge()
 
 // 启动埋点：首帧绘制且交互就绪后回报主进程（F-018 验收用）。

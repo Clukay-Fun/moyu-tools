@@ -48,7 +48,8 @@
 
         <div class="app-body">
           <nav class="rail" aria-label="工具模块">
-            <button class="nav-ic active" type="button" data-module="pdf" data-tip="PDF" aria-label="PDF"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-pdf"></use></svg></button>
+            <button class="nav-ic active" type="button" data-module="home" data-tip="主页" aria-label="主页"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-home"></use></svg></button>
+            <button class="nav-ic" type="button" data-module="pdf" data-tip="PDF" aria-label="PDF"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-pdf"></use></svg></button>
             <button class="nav-ic" type="button" data-module="ai" data-tip="Illustrator" aria-label="Illustrator"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-adobe"></use></svg></button>
             <button class="nav-ic" type="button" data-module="bc" data-tip="条码" aria-label="条码"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-barcode"></use></svg></button>
             <button class="nav-ic" type="button" data-module="image" data-tip="图片" aria-label="图片"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-image"></use></svg></button>
@@ -61,7 +62,23 @@
 
           <main class="content">
             <div class="pages">
-              <section class="page active" id="page-pdf">
+              <section class="page active" id="page-home">
+                <div class="home-hero">
+                  <h1 class="home-slogan">干活久一点，摸鱼久一点</h1>
+                  <p class="home-sub">把 PDF、条码、图片编排、格式转换与 Adobe / Office 联动收进同一个本地工具箱，常用操作尽量本地完成。</p>
+                  <div class="home-actions">
+                    <button class="primary" data-go="pdf" type="button">PDF 工具</button>
+                    <button class="gbtn" data-go="ai" type="button">Illustrator 批处理</button>
+                    <button class="gbtn" data-go="bc" type="button">条码生成</button>
+                    <button class="gbtn" data-go="image" type="button">图片画布</button>
+                    <button class="gbtn" data-go="video" type="button">格式工厂</button>
+                    <button class="gbtn" data-go="more" type="button">设置</button>
+                  </div>
+                  <p class="home-hint">按 <kbd>⌘K</kbd> 搜索任意功能，或点上方任意入口进入</p>
+                </div>
+              </section>
+
+              <section class="page" id="page-pdf">
                 <div class="crumb">PDF › <b id="pdf-crumb">转 PNG</b></div>
                 <div class="toolbar toolbar-wrap">
                   <button class="gbtn" id="pdf-add-files" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 上传 PDF</button>

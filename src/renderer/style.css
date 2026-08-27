@@ -904,6 +904,68 @@ label {
   display: flex;
 }
 
+.page-home {
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+}
+
+.home-hero {
+  text-align: center;
+  max-width: 760px;
+  padding: 32px;
+}
+
+.home-slogan {
+  margin: 0 0 16px;
+  font-size: clamp(30px, 4.4vw, 46px);
+  font-weight: 800;
+  letter-spacing: 1px;
+  line-height: 1.18;
+  background: linear-gradient(120deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #fff));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.home-sub {
+  margin: 0 auto 28px;
+  max-width: 580px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.home-actions .gbtn {
+  min-width: 132px;
+}
+
+.home-hint {
+  margin-top: 24px;
+  color: var(--faint);
+  font-size: 13px;
+}
+
+.home-hint kbd {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--control-bg);
+  font: 600 12px/1.6 var(--font-ui, system-ui);
+}
+
+body[data-module="home"] .submenu {
+  display: none;
+}
+
 .crumb {
   flex: none;
   color: var(--faint);
