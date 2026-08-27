@@ -156,7 +156,7 @@ export const updateApi = {
   },
   install: () => {
     if (state.status !== 'downloaded') return { ok: false, message: '尚未下载完成' }
-    autoUpdater.quitAndInstall()
+    autoUpdater.quitAndInstall(true)
     return { ok: true }
   },
   openReleases: () => {
