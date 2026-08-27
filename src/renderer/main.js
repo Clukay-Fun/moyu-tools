@@ -5350,6 +5350,26 @@ let updatingImageResize = false
 
 let imageResizeTimer
 
+const submenuIconMap = {}
+for (const [module, groups] of Object.entries(submenuData)) {
+  for (const group of groups) {
+    for (const [name, icon, color] of group.items) {
+      submenuIconMap[`${module}:${name}`] = { icon, color }
+    }
+  }
+}
+
+function searchFeatureIcon(feature) {
+  return (
+    submenuIconMap[`${feature.module}:${feature.action}`] ||
+    submenuIconMap[`${feature.module}:${feature.name}`] ||
+    (submenuData[feature.module]?.[0]?.items?.[0] && {
+      icon: submenuData[feature.module][0].items[0][1],
+      color: submenuData[feature.module][0].items[0][2]
+    }) || { icon: moduleLabels[feature.module].slice(0, 3), color: 'var(--accent)' }
+  )
+}
+
 function renderSearchResults(query) {
   const normalized = query.trim().toLowerCase()
   if (normalized) {
@@ -5378,17 +5398,7 @@ function renderSearchResults(query) {
     searchResults.replaceChildren(empty)
   } else {
     const fragment = document.createDocumentFragment()
-    let previousGroup = ''
-
     state.searchMatches.forEach((feature, index) => {
-      if (feature.group !== previousGroup) {
-        const heading = document.createElement('div')
-        heading.className = 'search-group'
-        heading.textContent = feature.group
-        fragment.append(heading)
-        previousGroup = feature.group
-      }
-
       const button = document.createElement('button')
       const icon = document.createElement('i')
       const name = document.createElement('span')
@@ -5398,7 +5408,9 @@ function renderSearchResults(query) {
       button.className = `search-result${index === state.activeSearchIndex ? ' active' : ''}`
       button.dataset.index = String(index)
       button.setAttribute('role', 'option')
-      icon.textContent = moduleLabels[feature.module].slice(0, 3)
+      const info = searchFeatureIcon(feature)
+      icon.textContent = info.icon
+      icon.style.background = info.color
       name.textContent = feature.name
       group.textContent = feature.group
       button.append(icon, name, group)
