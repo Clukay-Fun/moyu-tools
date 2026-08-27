@@ -3655,8 +3655,6 @@ const barcodeInput = document.querySelector('#barcode-value')
 const barcodeSvg = document.querySelector('#barcode-svg')
 const barcodeMessage = document.querySelector('#barcode-message')
 const barcodeSpecReport = document.querySelector('#barcode-spec-report')
-const barcodeTypesNav = document.querySelector('#barcode-types')
-const barcodeSpecToggle = document.querySelector('#barcode-spec-toggle')
 const saveBarcodeSvgButton = document.querySelector('#save-barcode-svg')
 const saveBarcodePngButton = document.querySelector('#save-barcode-png')
 const saveBarcodeEpsButton = document.querySelector('#save-barcode-eps')
@@ -3750,45 +3748,6 @@ function setBarcodeMessage(message, type = '') {
 function getBarcodeType() {
   return barcodeTypes[state.selections.bc] || barcodeTypes['EAN-13']
 }
-
-// M3：左侧类型列表面板，固定条码类型选择职责
-function renderBarcodeTypes() {
-  barcodeTypesNav.replaceChildren()
-  const fragment = document.createDocumentFragment()
-  for (const [name, type] of Object.entries(barcodeTypes)) {
-    const button = document.createElement('button')
-    button.type = 'button'
-    button.className = 'barcode-type-item'
-    button.dataset.type = name
-    button.setAttribute('aria-pressed', String(state.selections.bc === name))
-    const icon = document.createElement('span')
-    icon.className = 'barcode-type-icon'
-    icon.style.setProperty('--type-color', type.color)
-    icon.textContent = type.icon
-    const text = document.createElement('span')
-    text.className = 'barcode-type-text'
-    const title = document.createElement('b')
-    title.textContent = name
-    const hint = document.createElement('small')
-    hint.textContent = type.hint
-    text.append(title, hint)
-    button.append(icon, text)
-    button.addEventListener('click', () => selectBarcodeType(name, true))
-    fragment.append(button)
-  }
-  barcodeTypesNav.append(fragment)
-  updateBarcodeTypeList()
-}
-
-function updateBarcodeTypeList() {
-  for (const button of barcodeTypesNav.querySelectorAll('.barcode-type-item')) {
-    const active = button.dataset.type === state.selections.bc
-    button.classList.toggle('on', active)
-    button.setAttribute('aria-pressed', String(active))
-  }
-}
-
-renderBarcodeTypes()
 
 // Code 39 的三项设置必须能被批量条目冻结：生成后用户改设置，
 // 已有条目的 SVG 与导出尺寸必须仍属同一状态。
@@ -4648,7 +4607,6 @@ function selectBarcodeType(typeName, replaceValue = false) {
   barcodeBatchSummary.textContent = '条码类型已改变，请重新批量生成。'
   setBarcodeBatchExportEnabled(false)
   generateBarcode()
-  updateBarcodeTypeList()
 }
 
 function setBarcodeMode(mode, animate = false) {
@@ -4883,12 +4841,6 @@ barcodeBatchInput.addEventListener('input', () => {
   barcodeBatchList.replaceChildren()
   barcodeBatchSummary.textContent = '内容已修改，请重新批量生成。'
   setBarcodeBatchExportEnabled(false)
-})
-
-barcodeSpecToggle.addEventListener('click', () => {
-  const willShow = barcodeSpecReport.hidden
-  barcodeSpecReport.hidden = !willShow
-  barcodeSpecToggle.setAttribute('aria-expanded', String(willShow))
 })
 
 function refreshBarcodeFont() {

@@ -254,8 +254,6 @@
               <section class="page" id="page-bc">
                 <div class="crumb">条码 › <b id="bc-crumb">EAN-13</b></div>
                 <div class="barcode-grid">
-                  <nav class="glass-card barcode-types" id="barcode-types" aria-label="条码类型"></nav>
-
                   <div class="glass-card barcode-work">
                     <div class="barcode-mode-switch" role="tablist" aria-label="条码生成模式">
                       <button class="on" id="barcode-single-tab" type="button" role="tab" aria-selected="true">单个生成</button>
@@ -270,7 +268,6 @@
                         <svg id="barcode-svg" role="img" aria-label="条码预览"></svg>
                       </div>
                       <p class="barcode-message" id="barcode-message" role="status" aria-live="polite"></p>
-                      <button class="gbtn barcode-spec-toggle" id="barcode-spec-toggle" type="button" aria-expanded="false" aria-controls="barcode-spec-report">规格信息</button>
                       <dl class="barcode-spec-report" id="barcode-spec-report" hidden></dl>
                     </div>
 
@@ -287,22 +284,9 @@
                       <div class="batch-list" id="barcode-batch-list"></div>
                     </div>
                   </div>
-
-                  <aside class="barcode-params">
+                  <div class="control-column">
                     <div class="glass-card control-card">
-                      <span class="label">基础设置</span>
-                      <label class="barcode-font-picker">数字字体
-                        <select id="barcode-font">
-                          <option value="ocrb">OCRB</option>
-                          <option value="ocrb-i">OCRB I</option>
-                          <option value="ocrb-iii">OCRB III</option>
-                          <option value="ocrb-iv">OCRB IV</option>
-                        </select>
-                      </label>
-                    </div>
-
-                    <div class="glass-card control-card">
-                      <span class="label">高级设置</span>
+                      <span class="label">条码样式</span>
                       <label class="barcode-preset-picker" id="itf14-preset-picker" hidden>ITF-14 印刷预设
                         <select id="itf14-preset">
                           <option value="label">标签 / 数字打印</option>
@@ -324,27 +308,34 @@
                       <label class="barcode-preset-picker" id="msi-options" hidden>MSI 校验模式
                         <select id="msi-checksum"></select>
                       </label>
-                    </div>
-
-                    <div class="glass-card control-card barcode-export-card">
-                      <span class="label">导出</span>
+                      <label class="barcode-font-picker">数字字体
+                        <select id="barcode-font">
+                          <option value="ocrb">OCRB</option>
+                          <option value="ocrb-i">OCRB I</option>
+                          <option value="ocrb-iii">OCRB III</option>
+                          <option value="ocrb-iv">OCRB IV</option>
+                        </select>
+                      </label>
+                      <span class="label">导出文件</span>
                       <div class="format-grid">
                         <button id="save-barcode-svg" type="button">保存 SVG</button>
                         <button id="save-barcode-png" type="button">保存 PNG</button>
                         <button id="save-barcode-eps" type="button">保存 EPS</button>
                         <button id="copy-barcode-vector" type="button">复制矢量图</button>
                       </div>
-                      <span class="label">发送到</span>
+                    </div>
+                    <div class="glass-card control-card">
+                      <span class="label">一键转入</span>
                       <div class="app-grid">
-                        <button class="app-button" id="open-barcode-illustrator" type="button"><b class="ai-icon">Ai</b><span>发送到 Illustrator</span></button>
-                        <button class="app-button" id="open-barcode-photoshop" type="button"><b class="ps-icon">Ps</b><span>发送到 Photoshop</span></button>
+                        <button class="app-button" id="open-barcode-illustrator" type="button"><b class="ai-icon">Ai</b><span>Illustrator</span></button>
+                        <button class="app-button" id="open-barcode-photoshop" type="button"><b class="ps-icon">Ps</b><span>Photoshop</span></button>
                       </div>
                       <button class="gbtn board-wide-button" id="copy-barcode-ungrouped" type="button" disabled>
-                        发送到 Illustrator（未编组）
+                        复制到 Illustrator（未编组）
                       </button>
                       <p class="app-note" id="ungrouped-note">粘贴后直接是可编辑路径，无需再解组。仅 Windows + 已安装 Illustrator。</p>
                     </div>
-                  </aside>
+                  </div>
                 </div>
               </section>
 
