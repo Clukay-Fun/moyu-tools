@@ -3031,6 +3031,17 @@ const boardBgColor = document.querySelector('#board-bg-color')
  *
  * 登记表按**打开顺序**维护，最后打开的就是最上层。
  */
+let overlayLayerEl = null
+function overlayLayer() {
+  if (!overlayLayerEl) {
+    overlayLayerEl = document.createElement('div')
+    overlayLayerEl.id = 'overlay-layer'
+    overlayLayerEl.setAttribute('aria-hidden', 'false')
+    document.body.appendChild(overlayLayerEl)
+  }
+  return overlayLayerEl
+}
+
 const popovers = []
 /** @type {Array<{menu: HTMLElement, trigger: HTMLElement|null}>} */
 const openPopovers = []
@@ -3051,7 +3062,13 @@ function openPopover(menu) {
   const entry = popovers.find((p) => p.menu === menu)
   if (!entry) return
   closePopovers(menu) // 同层互斥
+  const layer = overlayLayer()
+  if (!menu.parentElement || menu.parentElement.id !== 'overlay-layer') layer.appendChild(menu)
+  menu.style.position = 'fixed'
   menu.hidden = false
+  if (entry.trigger) {
+    placePopover(menu, entry.trigger, { align: menu.classList.contains('align-right') ? 'right' : 'left' })
+  }
   entry.trigger?.setAttribute('aria-expanded', 'true')
   if (!isPopoverOpen(menu)) openPopovers.push(entry)
 }
@@ -3106,6 +3123,22 @@ function toggleCmdMenu(trigger, menu) {
 // 登记两个命令栏菜单
 registerPopover(projectMenu, cmdProject)
 registerPopover(backgroundMenu, cmdBackground)
+
+// 缩放或滚动时重新定位已打开的浮层，避免触发器移走后浮层悬空（M1 浮层体系）
+window.addEventListener('resize', () => {
+  for (const entry of openPopovers) {
+    if (entry.trigger && !entry.menu.hidden) {
+      placePopover(entry.menu, entry.trigger, { align: entry.menu.classList.contains('align-right') ? 'right' : 'left' })
+    }
+  }
+})
+window.addEventListener('scroll', () => {
+  for (const entry of openPopovers) {
+    if (entry.trigger && !entry.menu.hidden) {
+      placePopover(entry.menu, entry.trigger, { align: entry.menu.classList.contains('align-right') ? 'right' : 'left' })
+    }
+  }
+}, true)
 
 // ── 文本工具栏的字体 / 对齐菜单（S1：替换原生 select）──
 const textFontTrigger = document.querySelector('#text-font-trigger')
