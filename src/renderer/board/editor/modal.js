@@ -79,6 +79,9 @@ export class ImageEditorModal {
     this.actionBtns = [...this.rail.querySelectorAll('[data-action]')]
     this.cancelBtn = document.getElementById('img-editor-cancel')
     this.commitBtn = document.getElementById('img-editor-commit')
+    this.cropBar = document.getElementById('img-editor-crop-bar')
+    this.cropApplyBtn = document.getElementById('img-editor-crop-apply')
+    this.cropCancelBtn = document.getElementById('img-editor-crop-cancel')
 
     this.session = null
     this.canvas = null
@@ -122,6 +125,8 @@ export class ImageEditorModal {
     })
     this.cancelBtn.addEventListener('click', () => this.requestClose())
     this.commitBtn.addEventListener('click', () => this.commit())
+    this.cropApplyBtn?.addEventListener('click', () => this.#commitCrop())
+    this.cropCancelBtn?.addEventListener('click', () => this.canvas?.cancelDraft())
 
     // 编辑器打开时，快捷键先归模态；不能让底层画布同时响应
     /**
@@ -416,6 +421,7 @@ export class ImageEditorModal {
 
   #renderPanel() {
     const tool = this.activeTool
+    if (this.cropBar) this.cropBar.hidden = tool !== 'crop'
     this.panel.replaceChildren()
     if (!tool) return
 
@@ -475,18 +481,24 @@ export class ImageEditorModal {
     this.panel.append(frag)
   }
 
+  /** 确认裁切草稿：框选后点「应用裁切」（右侧面板或画布就地条均可触发）。 */
+  #commitCrop() {
+    const rect = this.canvas.commitDraft()
+    if (rect) this.#applyOperation('crop', rect)
+    else this.onStatus('请先在图片上框选要保留的区域')
+  }
+
   #renderCropPanel() {
     const apply = document.createElement('button')
     apply.type = 'button'
     apply.className = 'primary-btn'
     apply.textContent = '应用裁切'
     apply.disabled = !this.canvas.hasDraft()
-    apply.addEventListener('click', () => {
-      const rect = this.canvas.commitDraft()
-      if (rect) this.#applyOperation('crop', rect)
-      else this.onStatus('请先在图片上框选要保留的区域')
-    })
+    apply.addEventListener('click', () => this.#commitCrop())
     this.panel.append(apply)
+
+    // 画布上的就地确认条与右侧面板共用同一份禁用态
+    if (this.cropBar) this.cropApplyBtn.disabled = !this.canvas.hasDraft()
   }
 
   #renderMosaicPanel() {

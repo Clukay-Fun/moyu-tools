@@ -5052,6 +5052,30 @@ body[data-module="home"] .submenu {
   box-shadow: var(--shadow-panel);
 }
 
+/* 裁切就地确认条：画布底部居中，框选后直接确认，不必回右侧面板 */
+.img-editor-crop-bar {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  gap: 8px;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-panel);
+}
+.img-editor-crop-bar[hidden] { display: none; }
+.img-editor-crop-bar .primary-btn,
+.img-editor-crop-bar .gbtn {
+  height: 32px;
+  padding: 0 16px;
+  font-size: var(--fs-md);
+}
+
 /* ── 参数面板 ── */
 .img-editor-panel {
   border-left: 1px solid var(--hairline);
