@@ -3015,7 +3015,6 @@ const cmdImport = document.querySelector('#cmd-import')
 const cmdText = document.querySelector('#cmd-text')
 const cmdProject = document.querySelector('#cmd-project')
 const projectMenu = document.querySelector('#project-menu')
-const cmdBackground = document.querySelector('#cmd-background')
 const backgroundMenu = document.querySelector('#background-menu')
 const boardBgColor = document.querySelector('#board-bg-color')
 
@@ -3122,7 +3121,6 @@ function toggleCmdMenu(trigger, menu) {
 
 // 登记两个命令栏菜单
 registerPopover(projectMenu, cmdProject)
-registerPopover(backgroundMenu, cmdBackground)
 
 // 缩放或滚动时重新定位已打开的浮层，避免触发器移走后浮层悬空（M1 浮层体系）
 window.addEventListener('resize', () => {
@@ -3330,10 +3328,6 @@ projectMenu.addEventListener('click', (event) => {
   }
 })
 
-cmdBackground.addEventListener('click', (event) => {
-  event.stopPropagation()
-  toggleCmdMenu(cmdBackground, backgroundMenu)
-})
 backgroundMenu.addEventListener('click', (event) => {
   const button = event.target.closest('[data-bg]')
   if (!button) return

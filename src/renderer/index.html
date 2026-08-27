@@ -372,21 +372,9 @@
                     </div>
                   </div>
 
+                  <div class="canvas-body">
                   <div class="canvas-shell checkerboard" id="board-stage">
                     <canvas id="board-canvas-element"></canvas>
-                    <div class="canvas-actions">
-                      <button class="cbtn ghost" id="cmd-background" type="button"
-                              aria-haspopup="true" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#ic-background"></use></svg>背景</button>
-                      <div class="cmd-menu align-right" id="background-menu" role="menu" hidden>
-                        <button type="button" role="menuitem" data-bg="transparent" aria-checked="true">透明</button>
-                        <button type="button" role="menuitem" data-bg="custom">自定义颜色…</button>
-                        <!-- 自定义色走原生取色器；隐藏 input 由菜单项触发 -->
-                        <input type="color" id="board-bg-color" value="#ffffff" hidden />
-                        <hr />
-                        <button type="button" role="menuitem" data-bg="grid">显示网格</button>
-                        <button type="button" role="menuitem" data-bg="snap">吸附网格</button>
-                      </div>
-                    </div>
                     <!-- 辅助层：标尺 / 网格 / 参考线 / 对齐线。
                    全部画在视口层，不进场景、不进包围盒、不参与导出。 -->
               <canvas id="board-overlay" class="board-overlay"></canvas>
@@ -463,10 +451,27 @@
                     </div>
                   </div>
                 </div>
+                <aside class="glass-card canvas-settings" id="background-menu" role="group" aria-label="画布设置">
+                  <span class="label">画布设置</span>
+                  <div class="setting-block">
+                    <span class="setting-title">背景</span>
+                    <div class="setting-btns">
+                      <button type="button" data-bg="transparent" aria-checked="true">透明</button>
+                      <button type="button" data-bg="custom">自定义颜色…</button>
+                    </div>
+                    <input type="color" id="board-bg-color" value="#ffffff" aria-label="自定义背景颜色" />
+                  </div>
+                  <hr class="setting-rule" />
+                  <div class="setting-checks">
+                    <button type="button" class="setting-toggle" data-bg="grid" aria-checked="false">显示网格</button>
+                    <button type="button" class="setting-toggle" data-bg="snap" aria-checked="false">吸附网格</button>
+                  </div>
+                </aside>
+              </div>
 
                 <!-- 画布控件：命令栏与对象工具栏委托到这里，不直接对用户可见。
-                     保留为隐藏 DOM 而非内联到命令栏，是因为控制器按 id 绑定，
-                     两者合并属于独立重构，不在本轮范围。 -->
+                      保留为隐藏 DOM 而非内联到命令栏，是因为控制器按 id 绑定，
+                      两者合并属于独立重构，不在本轮范围。 -->
                 <div id="board-controls" hidden aria-hidden="true">
                   <div class="board-toolbar">
                     <button class="gbtn" id="board-open" type="button">打开</button>

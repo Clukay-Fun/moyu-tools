@@ -4432,6 +4432,85 @@ body[data-module="home"] .submenu {
 }
 .canvas-shell canvas { display: block; }
 
+.canvas-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+}
+
+.canvas-settings {
+  flex: 0 0 248px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  margin: var(--sp-4);
+  overflow: auto;
+  align-self: flex-start;
+}
+
+.canvas-settings .label {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.canvas-settings .setting-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.canvas-settings .setting-title {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.canvas-settings .setting-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.canvas-settings button,
+.canvas-settings .setting-toggle {
+  padding: 6px 10px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-md);
+  background: var(--control-bg);
+  color: var(--foreground);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.canvas-settings button[aria-checked="true"],
+.canvas-settings .setting-toggle[aria-checked="true"] {
+  border-color: var(--selection-border);
+  background: var(--selection-bg);
+  color: var(--accent);
+}
+
+.canvas-settings input[type="color"] {
+  width: 44px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-sm);
+  background: var(--control-bg);
+  cursor: pointer;
+}
+
+.canvas-settings .setting-rule {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  margin: 2px 0;
+}
+
+.canvas-settings .setting-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* 画布右上角独立操作区。
    ⚠ top 必须让开顶部标尺（RULER.sizeY = 18px），否则「背景」按钮会压住刻度。
    数值与 guides.js 的 RULER.sizeY 对应，改标尺高度时要一起改。 */
@@ -4667,7 +4746,7 @@ body[data-module="home"] .submenu {
 
 .object-toolbar .obj-group {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: var(--sp-1);
   padding: 4px;
   border: 1px solid var(--border);
