@@ -10,7 +10,7 @@ import { ImageEditorModal } from './board/editor/modal.js'
 import { RecoveryScheduler } from './board/recovery.js'
 import { cleanIpcError, illustratorFailureHint, isComCancelled } from './comErrors.js'
 import { installTooltips } from './tooltip.js'
-import { renderFileRows, TaskScheduler, TaskStatus } from './fileTask.js'
+import { renderFileRows } from './fileTask.js'
 import {
   isGenericType, renderGenericBarcode, computeGenericGeometry, genericRasterSize, resolveGenericTypeName,
   GENERIC_DEFAULTS, CODE39_DEFAULTS, CODABAR_DEFAULTS, MSI_DEFAULTS
@@ -5012,8 +5012,8 @@ const formatRuntimeState = document.querySelector('#format-runtime-state')
 const formatState = {
   inputs: [],
   results: [],
-  // M2B：统一任务状态机取代分散的进度 / 错误 Map
-  scheduler: new TaskScheduler(),
+  progressByInput: new Map(),
+  errorsByInput: new Map(),
   busy: false,
   saving: false,
   taskId: '',
@@ -5043,9 +5043,8 @@ function renderFormatFiles() {
       const size = document.createElement('span')
       const status = document.createElement('span')
       const remove = document.createElement('button')
-      const task = formatState.scheduler.get(input.id)
-      const error = task?.error || null
-      const progress = task?.progress
+      const error = formatState.errorsByInput.get(input.id)
+      const progress = formatState.progressByInput.get(input.id)
       row.className = 'format-file-item'
       indexNode.className = 'format-index'
       nameNode.className = 'format-name'
@@ -5168,7 +5167,8 @@ function setFormatAction(action, indicatorFromTop = null) {
   formatRunButton.textContent = config.runLabel
   if (previousKind !== config.kind && formatState.inputs.length) clearFormatInputs()
   formatState.results = []
-  formatState.scheduler.reset()
+  formatState.progressByInput.clear()
+  formatState.errorsByInput.clear()
   formatProgressFill.style.width = '0'
   formatStatusText.textContent = formatState.inputs.length ? '准备就绪' : '添加文件后可开始'
   renderFormatOptions()
@@ -5192,7 +5192,8 @@ function addFormatInputs(files, replace = false) {
   }
   formatState.inputs.push(...accepted)
   formatState.results = []
-  formatState.scheduler.reset()
+  formatState.progressByInput.clear()
+  formatState.errorsByInput.clear()
   formatStatusText.textContent = `已添加 ${formatState.inputs.length} 个文件`
   formatProgressFill.style.width = '0'
   renderFormatFiles()
@@ -5247,7 +5248,8 @@ async function clearFormatInputs() {
   const ids = formatState.inputs.map((input) => input.id)
   formatState.inputs = []
   formatState.results = []
-  formatState.scheduler.reset()
+  formatState.progressByInput.clear()
+  formatState.errorsByInput.clear()
   formatState.taskId = ''
   formatProgressFill.style.width = '0'
   formatStatusText.textContent = '添加文件后可开始'
@@ -5269,9 +5271,8 @@ async function runFormatTask() {
   if (formatState.busy || !formatState.inputs.length) return
   formatState.busy = true
   formatState.results = []
-  // M2B：用统一任务状态机登记每个输入，渲染层直接读状态
-  formatState.scheduler.reset()
-  formatState.inputs.forEach((input) => formatState.scheduler.register(input.id, input.name))
+  formatState.progressByInput.clear()
+  formatState.errorsByInput.clear()
   formatState.taskId = crypto.randomUUID()
   formatRunButton.textContent = '处理中…'
   formatCancelButton.hidden = false
@@ -5285,19 +5286,12 @@ async function runFormatTask() {
       options: currentFormatOptions()
     })
     if (response.status === 'cancelled') {
-      formatState.scheduler.all().forEach((task) => formatState.scheduler.markCancelled(task.id))
       formatStatusText.textContent = '任务已取消'
       showToast('格式转换任务已取消')
     } else {
       formatState.results = response.results
-      const succeeded = new Set(response.results.map((result) => result.inputId))
-      formatState.inputs.forEach((input) => {
-        if (succeeded.has(input.id)) formatState.scheduler.markDone(input.id)
-        else {
-          const failed = response.errors.find((error) => error.inputId === input.id)
-          if (failed) formatState.scheduler.markFailed(input.id, failed.message)
-          else formatState.scheduler.markCancelled(input.id)
-        }
+      response.errors.forEach((error) => {
+        formatState.errorsByInput.set(error.inputId, error.message)
       })
       formatProgressFill.style.width = '100%'
       formatStatusText.textContent = response.errors.length
@@ -5381,6 +5375,8 @@ formatFileList.addEventListener('click', async (event) => {
   const inputId = button.dataset.inputId
   formatState.inputs = formatState.inputs.filter((input) => input.id !== inputId)
   formatState.results = formatState.results.filter((result) => result.inputId !== inputId)
+  formatState.progressByInput.delete(inputId)
+  formatState.errorsByInput.delete(inputId)
   renderFormatFiles()
   await window.api.removeFormatInputs([inputId]).catch(() => {})
 })
@@ -5391,9 +5387,7 @@ window.api.onFormatProgress((progress) => {
   if (progress.status === 'running' && progress.taskId === formatState.taskId) {
     const overall = (progress.completed + (progress.fileProgress || 0)) / Math.max(1, progress.total)
     if (progress.inputId) {
-      const task = formatState.scheduler.get(progress.inputId)
-      if (task && task.status === TaskStatus.PENDING) formatState.scheduler.markRunning(progress.inputId)
-      formatState.scheduler.markProgress(progress.inputId, progress.fileProgress || 0)
+      formatState.progressByInput.set(progress.inputId, Math.min(1, progress.fileProgress || 0))
       renderFormatFiles()
     }
     formatProgressFill.style.width = `${Math.min(100, overall * 100)}%`
