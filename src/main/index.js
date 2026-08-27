@@ -2094,6 +2094,7 @@ async function ensureScreenCaptureKitBinary() {
   if (screenCaptureKitBinaryPromise) return screenCaptureKitBinaryPromise
   screenCaptureKitBinaryPromise = (async () => {
     const sourceCandidates = [
+      join(process.resourcesPath, 'native', 'macos', 'screen-capture.swift'),
       join(app.getAppPath(), 'native', 'macos', 'screen-capture.swift'),
       join(__dirname, '..', '..', 'native', 'macos', 'screen-capture.swift')
     ]

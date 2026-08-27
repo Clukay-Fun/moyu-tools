@@ -93,6 +93,15 @@
       ],
       "icon": "build/icon.ico"
     },
+    "mac": {
+      "extraResources": [
+        {
+          "from": "native",
+          "to": "native"
+        }
+      ],
+      "category": "public.app-category.utilities"
+    },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
