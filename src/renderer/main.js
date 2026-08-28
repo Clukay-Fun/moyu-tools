@@ -331,7 +331,7 @@ const state = {
   module: 'home',
   selections: { ...defaultSelections
   },
-  activeSearchIndex: 0,
+  activeSearchIndex: -1,
   searchMatches: [],
   barcodeMode: 'single',
   barcodeFont: barcodeFonts[savedBarcodeStyle.font] ? savedBarcodeStyle.font : 'ocrb',
@@ -5389,7 +5389,7 @@ function renderSearchResults(query) {
   state.searchMatches = searchModuleOrder.flatMap((module) => matches
     .filter((feature) => feature.module === module)
     .sort((left, right) => score(left) - score(right)))
-  state.activeSearchIndex = 0
+  state.activeSearchIndex = -1
 
   if (!state.searchMatches.length) {
     const empty = document.createElement('div')
@@ -5414,7 +5414,7 @@ function renderSearchResults(query) {
       const name = document.createElement('span')
 
       button.type = 'button'
-      button.className = `search-result${index === state.activeSearchIndex ? ' active' : ''}`
+      button.className = `search-result${index === state.activeSearchIndex ? ' keyboard-active' : ''}`
       button.dataset.index = String(index)
       button.setAttribute('role', 'option')
       const iconInfo = searchFeatureIcon(feature)
@@ -5448,7 +5448,7 @@ function runSearchResult(index) {
 
 function refreshActiveSearchResult() {
   searchResults.querySelectorAll('.search-result').forEach((button, index) => {
-    button.classList.toggle('active', index === state.activeSearchIndex)
+    button.classList.toggle('keyboard-active', index === state.activeSearchIndex)
   })
 }
 
@@ -5461,11 +5461,13 @@ searchInput.addEventListener('keydown', (event) => {
     refreshActiveSearchResult()
   } else if (event.key === 'ArrowUp') {
     event.preventDefault()
-    state.activeSearchIndex = Math.max(state.activeSearchIndex - 1, 0)
+    state.activeSearchIndex = state.activeSearchIndex < 0
+      ? state.searchMatches.length - 1
+      : Math.max(state.activeSearchIndex - 1, 0)
     refreshActiveSearchResult()
   } else if (event.key === 'Enter') {
     event.preventDefault()
-    runSearchResult(state.activeSearchIndex)
+    runSearchResult(state.activeSearchIndex < 0 ? 0 : state.activeSearchIndex)
   } else if (event.key === 'Escape') {
     closeSearch()
     searchInput.blur()
@@ -5475,6 +5477,12 @@ searchInput.addEventListener('keydown', (event) => {
 searchResults.addEventListener('click', (event) => {
   const button = event.target.closest('.search-result')
   if (button) runSearchResult(Number(button.dataset.index))
+})
+
+searchResults.addEventListener('pointermove', () => {
+  if (state.activeSearchIndex < 0) return
+  state.activeSearchIndex = -1
+  refreshActiveSearchResult()
 })
 
 document.addEventListener('pointerdown', (event) => {
