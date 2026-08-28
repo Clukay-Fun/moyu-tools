@@ -230,9 +230,9 @@ input[type="number"]:focus,
 input[type="search"]:focus,
 textarea:focus,
 select:focus {
-  border-color: var(--accent);
+  border-color: var(--control-border-hover);
   background-color: var(--control-bg-hover);
-  box-shadow: 0 0 0 3px var(--accent-10);
+  box-shadow: none;
 }
 
 select {
@@ -1956,7 +1956,7 @@ label {
 }
 
 .batch-input-row textarea:focus {
-  border-color: var(--accent-28);
+  border-color: var(--control-border-hover);
 }
 
 .batch-actions {
@@ -2897,8 +2897,8 @@ label {
 }
 
 #ocr-result:focus {
-  border-color: var(--accent-28);
-  box-shadow: 0 0 0 3px var(--accent-10);
+  border-color: var(--control-border-hover);
+  box-shadow: none;
 }
 
 @media (max-width: 820px) {
@@ -3731,7 +3731,7 @@ label {
    本不该获得焦点的元素上（它们可能因为 contenteditable 或第三方库
    意外可聚焦），出现"焦点框飘在奇怪位置"。这里只覆盖**真实可交互**元素。
    用 :where() 保持零特异性，任何组件都能覆盖它而不必写 !important。 */
-:where(
+body.keyboard-focus :where(
   button,
   a,
   input,
@@ -4900,15 +4900,16 @@ label {
    结果就是这些输入控件按 Tab 时完全看不到焦点。
    这里按同样的选择器补一条 :focus-visible，只在**键盘**聚焦时出现。
    ⚠ 新增控件如果也要去掉鼠标焦点框，记得同步加进这份名单。 */
-#ocr-result:focus-visible,
-.barcode-input input:focus-visible,
-.barcode-preset-picker select:focus-visible,
-.batch-input-row textarea:focus-visible,
-.color-preview input:focus-visible,
-.format-options input[type="number"]:focus-visible,
-.image-panel select:focus-visible,
-.pdf-options input:focus-visible,
-.pdf-watermark-controls select:focus-visible {
+body.keyboard-focus #ocr-result:focus-visible,
+body.keyboard-focus .barcode-input input:focus-visible,
+body.keyboard-focus .barcode-preset-picker select:focus-visible,
+body.keyboard-focus .batch-input-row textarea:focus-visible,
+body.keyboard-focus .color-preview input:focus-visible,
+body.keyboard-focus .format-options input[type="number"]:focus-visible,
+body.keyboard-focus .image-panel select:focus-visible,
+body.keyboard-focus .pdf-options input:focus-visible,
+body.keyboard-focus .pdf-watermark-controls select:focus-visible,
+body.keyboard-focus .search input:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring-color);
   outline-offset: var(--focus-ring-offset);
 }

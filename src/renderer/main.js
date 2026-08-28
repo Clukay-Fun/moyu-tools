@@ -377,6 +377,14 @@ let qpdfRunnerPromise = null
 let pdfWatermarkPreviewToken = 0
 const parsedBarcodeFonts = new Map()
 
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Tab') document.body.classList.add('keyboard-focus')
+}, true)
+
+document.addEventListener('pointerdown', () => {
+  document.body.classList.remove('keyboard-focus')
+}, true)
+
 function renderSubmenu(module, indicatorFromTop = null) {
   const groups = submenuData[module]
 
