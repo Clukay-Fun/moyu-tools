@@ -551,7 +551,7 @@ label {
   top: 43px;
   left: 0;
   display: none;
-  width: min(440px, calc(100vw - 110px));
+  width: min(380px, calc(100vw - 110px));
   max-height: min(520px, calc(100vh - 86px));
   padding: 8px;
   overflow: auto;
@@ -573,22 +573,13 @@ label {
   display: block;
 }
 
-.search-group {
-  padding: 8px 10px 5px;
-  color: var(--faint);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 .search-result {
   display: grid;
-  grid-template-columns: 34px 1fr auto;
+  grid-template-columns: 25px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
   width: 100%;
-  padding: 9px 10px;
+  padding: 7px 10px;
   border: 0;
   border-radius: 10px;
   color: var(--foreground);
@@ -605,13 +596,13 @@ label {
 
 .search-result i {
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 25px;
+  height: 25px;
+  flex: none;
   place-items: center;
-  border-radius: 9px;
-  color: var(--accent);
-  background: var(--accent-10);
-  font-size: 11px;
+  border-radius: 7px;
+  color: #fff;
+  font-size: 9px;
   font-style: normal;
   font-weight: 800;
 }

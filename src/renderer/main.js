@@ -5349,6 +5349,28 @@ let updatingImageResize = false
 
 let imageResizeTimer
 
+const submenuIconMap = new Map()
+for (const [module, groups] of Object.entries(submenuData)) {
+  for (const group of groups) {
+    for (const [name, icon, color] of group.items) {
+      submenuIconMap.set(`${module}:${name}`, { icon, color })
+    }
+  }
+}
+
+const moduleSearchIcons = {
+  ai: { icon: 'Ai', color: '#31a766' },
+  image: { icon: 'IMG', color: '#6978e6' },
+  more: { icon: 'SET', color: '#737789' }
+}
+
+function searchFeatureIcon(feature) {
+  return submenuIconMap.get(`${feature.module}:${feature.action}`)
+    || submenuIconMap.get(`${feature.module}:${feature.name}`)
+    || moduleSearchIcons[feature.module]
+    || { icon: moduleLabels[feature.module].slice(0, 3), color: '#6978e6' }
+}
+
 function renderSearchResults(query) {
   const normalized = query.trim().toLowerCase()
   if (normalized) {
@@ -5377,17 +5399,8 @@ function renderSearchResults(query) {
     searchResults.replaceChildren(empty)
   } else {
     const fragment = document.createDocumentFragment()
-    let previousGroup = ''
 
     state.searchMatches.forEach((feature, index) => {
-      if (feature.group !== previousGroup) {
-        const heading = document.createElement('div')
-        heading.className = 'search-group'
-        heading.textContent = feature.group
-        fragment.append(heading)
-        previousGroup = feature.group
-      }
-
       const button = document.createElement('button')
       const icon = document.createElement('i')
       const name = document.createElement('span')
@@ -5397,7 +5410,9 @@ function renderSearchResults(query) {
       button.className = `search-result${index === state.activeSearchIndex ? ' active' : ''}`
       button.dataset.index = String(index)
       button.setAttribute('role', 'option')
-      icon.textContent = moduleLabels[feature.module].slice(0, 3)
+      const iconInfo = searchFeatureIcon(feature)
+      icon.textContent = iconInfo.icon
+      icon.style.background = iconInfo.color
       name.textContent = feature.name
       group.textContent = feature.group
       button.append(icon, name, group)
@@ -5801,6 +5816,8 @@ if (/^#[0-9a-f]{6}$/i.test(savedAccent || '')) {
   colorState.g = Number.parseInt(savedAccent.slice(3, 5), 16)
   colorState.b = Number.parseInt(savedAccent.slice(5, 7), 16)
 }
+
+document.querySelector('.search kbd').textContent = /Mac/i.test(navigator.platform) ? '⌘K' : 'Ctrl K'
 
 drawColorWheel()
 rgbToHsl(colorState.r, colorState.g, colorState.b)
