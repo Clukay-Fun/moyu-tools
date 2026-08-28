@@ -770,6 +770,14 @@
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
     </div>
 
+    <div id="overlay-layer">
+      <div class="app-menu pdf-quality-menu" id="pdf-jpeg-quality-menu" role="listbox" aria-label="JPEG 质量" hidden>
+        <button type="button" role="option" data-value="0.85" aria-selected="true">85%</button>
+        <button type="button" role="option" data-value="0.7" aria-selected="false">70%</button>
+        <button type="button" role="option" data-value="0.95" aria-selected="false">95%</button>
+      </div>
+    </div>
+
     <script type="module" src="./main.js"></script>
 
     <!-- 应用自己的下拉菜单（S1）。挂在 body 下是为了绕开 .canvas-shell 的

@@ -1062,6 +1062,25 @@ label {
   background-color: var(--control-bg);
 }
 
+.pdf-select-trigger {
+  min-width: 72px;
+  height: var(--control-height);
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  color: var(--foreground);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--faint) 50%) calc(100% - 15px) calc(50% - 2px) / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--faint) 50%, transparent 50%) calc(100% - 10px) calc(50% - 2px) / 5px 5px no-repeat,
+    var(--control-bg);
+  cursor: pointer;
+}
+
+.pdf-select-trigger:hover {
+  border-color: var(--control-border-hover);
+  background-color: var(--control-bg-hover);
+}
+
 .pdf-options input {
   width: 116px;
   user-select: text;
@@ -4389,6 +4408,23 @@ body.keyboard-focus :where(
   transform-origin: top left;
   transition: opacity var(--dur-popover) var(--ease-out),
               transform var(--dur-popover) var(--ease-out);
+}
+
+#overlay-layer {
+  position: fixed;
+  z-index: var(--z-popover);
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+#overlay-layer > .app-menu {
+  pointer-events: auto;
+}
+
+.pdf-quality-menu button[aria-selected="true"] {
+  color: #fff;
+  background: var(--accent);
 }
 .app-menu[hidden] { display: none; }
 .app-menu button {

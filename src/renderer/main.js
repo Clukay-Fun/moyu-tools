@@ -333,6 +333,7 @@ const state = {
   },
   activeSearchIndex: -1,
   searchMatches: [],
+  pdfJpegQuality: '0.85',
   barcodeMode: 'single',
   barcodeFont: barcodeFonts[savedBarcodeStyle.font] ? savedBarcodeStyle.font : 'ocrb',
   itf14Preset: ITF14_DEFAULT_PRESET,
@@ -577,6 +578,7 @@ const pdfWatermarkPreviewLabel = document.querySelector('#pdf-watermark-preview-
 const pdfFileBody = document.querySelector('#pdf-file-body')
 const pdfEmpty = document.querySelector('#pdf-empty')
 const pdfOptions = document.querySelector('#pdf-options')
+const pdfJpegQualityMenu = document.querySelector('#pdf-jpeg-quality-menu')
 const pdfRunButton = document.querySelector('#run-pdf-action')
 const pdfChooseOutputButton = document.querySelector('#choose-pdf-output')
 const pdfOutputPath = document.querySelector('#pdf-output-path')
@@ -667,6 +669,7 @@ function isAcceptedPdfToolFile(file, config = currentPdfConfig()) {
 
 function renderPdfOptions() {
   const action = state.selections.pdf
+  if (isPopoverOpen(pdfJpegQualityMenu)) closePopover(pdfJpegQualityMenu)
   pdfOptions.replaceChildren()
 
   if (action === '旋转 PDF') {
@@ -691,13 +694,13 @@ function renderPdfOptions() {
   } else if (action === '转 JPEG') {
     pdfOptions.innerHTML = `
       <label>质量
-        <select id="pdf-jpeg-quality">
-          <option value="0.85">85%</option>
-          <option value="0.7">70%</option>
-          <option value="0.95">95%</option>
-        </select>
+        <button class="pdf-select-trigger" id="pdf-jpeg-quality" type="button"
+          data-value="${state.pdfJpegQuality}" aria-haspopup="listbox" aria-expanded="false">
+          ${Math.round(Number(state.pdfJpegQuality) * 100)}%
+        </button>
       </label>
     `
+    bindPdfJpegQualityMenu()
   } else if (action === '添加页码') {
     pdfOptions.innerHTML = `
       <label>位置
@@ -735,6 +738,64 @@ function renderPdfOptions() {
     `
   }
 }
+
+function bindPdfJpegQualityMenu() {
+  const trigger = pdfOptions.querySelector('#pdf-jpeg-quality')
+  if (!trigger) return
+  registerPopover(pdfJpegQualityMenu, trigger)
+
+  const openMenu = ({ focusOption = false } = {}) => {
+    openPopover(pdfJpegQualityMenu)
+    placePopover(pdfJpegQualityMenu, trigger, { matchWidth: true })
+    if (focusOption) {
+      const selected = pdfJpegQualityMenu.querySelector('[aria-selected="true"]')
+      ;(selected || pdfJpegQualityMenu.querySelector('button'))?.focus()
+    }
+  }
+
+  trigger.addEventListener('click', (event) => {
+    event.stopPropagation()
+    if (isPopoverOpen(pdfJpegQualityMenu)) closePopover(pdfJpegQualityMenu)
+    else openMenu()
+  })
+  trigger.addEventListener('keydown', (event) => {
+    if (!['ArrowDown', 'Enter', ' '].includes(event.key)) return
+    event.preventDefault()
+    event.stopPropagation()
+    openMenu({ focusOption: true })
+  })
+}
+
+pdfJpegQualityMenu.addEventListener('click', (event) => {
+  const option = event.target.closest('[data-value]')
+  if (!option) return
+  state.pdfJpegQuality = option.dataset.value
+  pdfJpegQualityMenu.querySelectorAll('[role="option"]').forEach((item) => {
+    item.setAttribute('aria-selected', String(item === option))
+  })
+  const trigger = pdfOptions.querySelector('#pdf-jpeg-quality')
+  if (trigger) {
+    trigger.dataset.value = state.pdfJpegQuality
+    trigger.textContent = `${Math.round(Number(state.pdfJpegQuality) * 100)}%`
+  }
+  closePopover(pdfJpegQualityMenu)
+  trigger?.focus({ preventScroll: true })
+})
+
+pdfJpegQualityMenu.addEventListener('keydown', (event) => {
+  if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
+  event.preventDefault()
+  const options = [...pdfJpegQualityMenu.querySelectorAll('[role="option"]')]
+  const current = options.indexOf(document.activeElement)
+  const next = event.key === 'Home'
+    ? 0
+    : event.key === 'End'
+      ? options.length - 1
+      : event.key === 'ArrowDown'
+        ? Math.min(options.length - 1, current + 1)
+        : Math.max(0, current - 1)
+  options[next]?.focus()
+})
 
 function renderPdfFiles() {
   pdfFileBody.replaceChildren()
@@ -1902,7 +1963,7 @@ async function renderPdfPages(type) {
         outputCanvas,
         type === 'jpeg' ? 'image/jpeg' : 'image/png',
         type === 'jpeg'
-          ? Number(window.document.querySelector('#pdf-jpeg-quality')?.value || 0.85)
+          ? Number(window.document.querySelector('#pdf-jpeg-quality')?.dataset.value || 0.85)
           : undefined
       )
       const data = new Uint8Array(await blob.arrayBuffer())
@@ -3044,6 +3105,11 @@ const openPopovers = []
 
 function registerPopover(menu, trigger = null) {
   if (!menu) return
+  const existing = popovers.find((entry) => entry.menu === menu)
+  if (existing) {
+    existing.trigger = trigger
+    return
+  }
   popovers.push({ menu, trigger })
   // 点内部不穿透；mousedown 也要拦，否则会把焦点从画布抢走
   menu.addEventListener('mousedown', (event) => {
@@ -3084,13 +3150,15 @@ function closeTopPopover() {
   const top = openPopovers[openPopovers.length - 1]
   if (!top) return false
   closePopover(top.menu)
+  top.trigger?.focus({ preventScroll: true })
   return true
 }
 
 /** 把浮层定位到触发钮下方；越界时钳制回窗口内。position: fixed，用视口坐标。 */
-function placePopover(menu, trigger, { align = 'left', gap = 6 } = {}) {
+function placePopover(menu, trigger, { align = 'left', gap = 6, matchWidth = false } = {}) {
   menu.hidden = false // 先显形才量得到尺寸
   const t = trigger.getBoundingClientRect()
+  if (matchWidth) menu.style.width = `${Math.round(t.width)}px`
   const m = menu.getBoundingClientRect()
   let left = align === 'right' ? t.right - m.width : t.left
   left = Math.max(8, Math.min(left, window.innerWidth - m.width - 8))
@@ -3121,6 +3189,19 @@ const textAlignTrigger = document.querySelector('#text-align-trigger')
 const textAlignMenu = document.querySelector('#text-align-menu')
 registerPopover(textFontMenu, textFontTrigger)
 registerPopover(textAlignMenu, textAlignTrigger)
+
+function placePdfQualityMenu() {
+  if (!isPopoverOpen(pdfJpegQualityMenu)) return
+  const trigger = pdfOptions.querySelector('#pdf-jpeg-quality')
+  if (!trigger) {
+    closePopover(pdfJpegQualityMenu)
+    return
+  }
+  placePopover(pdfJpegQualityMenu, trigger, { matchWidth: true })
+}
+
+window.addEventListener('resize', placePdfQualityMenu)
+window.addEventListener('scroll', placePdfQualityMenu, true)
 
 const ALIGN_LABEL = { left: '左对齐', center: '居中', right: '右对齐' }
 
