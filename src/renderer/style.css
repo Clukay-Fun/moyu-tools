@@ -4419,7 +4419,12 @@ body.keyboard-focus :where(
 }
 
 #overlay-layer > .app-menu {
+  box-sizing: border-box;
   pointer-events: auto;
+}
+
+.pdf-quality-menu {
+  min-width: 0;
 }
 
 .pdf-quality-menu button[aria-selected="true"] {
@@ -4429,6 +4434,7 @@ body.keyboard-focus :where(
 .app-menu[hidden] { display: none; }
 .app-menu button {
   display: block;
+  box-sizing: border-box;
   width: 100%;
   padding: 6px 10px;
   border: 0;

@@ -3158,7 +3158,12 @@ function closeTopPopover() {
 function placePopover(menu, trigger, { align = 'left', gap = 6, matchWidth = false } = {}) {
   menu.hidden = false // 先显形才量得到尺寸
   const t = trigger.getBoundingClientRect()
-  if (matchWidth) menu.style.width = `${Math.round(t.width)}px`
+  if (matchWidth) {
+    const triggerWidth = `${Math.round(t.width)}px`
+    menu.style.width = triggerWidth
+    menu.style.minWidth = triggerWidth
+    menu.style.maxWidth = triggerWidth
+  }
   const m = menu.getBoundingClientRect()
   let left = align === 'right' ? t.right - m.width : t.left
   left = Math.max(8, Math.min(left, window.innerWidth - m.width - 8))
