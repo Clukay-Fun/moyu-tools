@@ -11,6 +11,7 @@
 //   下面的键有些在 V1 结束时还没有任何 <use> 引用，这是预期的。
 export const ICON_MAP = {
   // ── 主导航（V3a）──
+  'nav-home': 'home',
   'nav-pdf': 'file-text',
   'nav-adobe': 'pen-tool',
   'nav-barcode': 'barcode',

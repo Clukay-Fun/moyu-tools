@@ -328,7 +328,7 @@ const savedBarcodeStyle = (() => {
 })()
 
 const state = {
-  module: 'pdf',
+  module: 'home',
   selections: { ...defaultSelections
   },
   activeSearchIndex: 0,
@@ -5809,7 +5809,7 @@ applyAccent()
 setBarcodeMode('single')
 generateBarcode()
 setFormatAction('视频转换')
-activateModule('pdf', defaultSelections.pdf)
+activateModule('home')
 verifyPreloadBridge()
 
 // 启动埋点：首帧绘制且交互就绪后回报主进程（F-018 验收用）。
