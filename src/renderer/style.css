@@ -551,7 +551,7 @@ label {
   top: 43px;
   left: 0;
   display: none;
-  width: min(380px, calc(100vw - 110px));
+  width: min(320px, calc(100vw - 110px));
   max-height: min(520px, calc(100vh - 86px));
   padding: 8px;
   overflow: auto;
