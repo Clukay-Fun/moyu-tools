@@ -5364,6 +5364,8 @@ const moduleSearchIcons = {
   more: { icon: 'SET', color: '#737789' }
 }
 
+const searchModuleOrder = Object.keys(moduleLabels)
+
 function searchFeatureIcon(feature) {
   return submenuIconMap.get(`${feature.module}:${feature.action}`)
     || submenuIconMap.get(`${feature.module}:${feature.name}`)
@@ -5373,23 +5375,20 @@ function searchFeatureIcon(feature) {
 
 function renderSearchResults(query) {
   const normalized = query.trim().toLowerCase()
-  if (normalized) {
-    state.searchMatches = searchFeatures
-      .filter((feature) => feature.searchable.includes(normalized))
-      .sort((left, right) => {
-        const score = (feature) => {
-          const name = feature.name.toLowerCase()
-          const group = feature.group.toLowerCase()
-          if (name.startsWith(normalized)) return 0
-          if (name.includes(normalized)) return 1
-          if (group.includes(normalized)) return 2
-          return 3
-        }
-        return score(left) - score(right)
-      })
-  } else {
-    state.searchMatches = [...searchFeatures]
+  const score = (feature) => {
+    const name = feature.name.toLowerCase()
+    const group = feature.group.toLowerCase()
+    if (!normalized || name.startsWith(normalized)) return 0
+    if (name.includes(normalized)) return 1
+    if (group.includes(normalized)) return 2
+    return 3
   }
+  const matches = normalized
+    ? searchFeatures.filter((feature) => feature.searchable.includes(normalized))
+    : [...searchFeatures]
+  state.searchMatches = searchModuleOrder.flatMap((module) => matches
+    .filter((feature) => feature.module === module)
+    .sort((left, right) => score(left) - score(right)))
   state.activeSearchIndex = 0
 
   if (!state.searchMatches.length) {
@@ -5399,12 +5398,20 @@ function renderSearchResults(query) {
     searchResults.replaceChildren(empty)
   } else {
     const fragment = document.createDocumentFragment()
+    let previousModule = ''
 
     state.searchMatches.forEach((feature, index) => {
+      if (feature.module !== previousModule) {
+        const heading = document.createElement('div')
+        heading.className = 'search-group'
+        heading.textContent = feature.group
+        fragment.append(heading)
+        previousModule = feature.module
+      }
+
       const button = document.createElement('button')
       const icon = document.createElement('i')
       const name = document.createElement('span')
-      const group = document.createElement('small')
 
       button.type = 'button'
       button.className = `search-result${index === state.activeSearchIndex ? ' active' : ''}`
@@ -5414,8 +5421,7 @@ function renderSearchResults(query) {
       icon.textContent = iconInfo.icon
       icon.style.background = iconInfo.color
       name.textContent = feature.name
-      group.textContent = feature.group
-      button.append(icon, name, group)
+      button.append(icon, name)
       fragment.append(button)
     })
 
