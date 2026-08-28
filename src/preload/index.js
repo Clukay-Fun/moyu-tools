@@ -73,6 +73,14 @@ contextBridge.exposeInMainWorld(
     cancelFormatTask: (taskId) => ipcRenderer.invoke('format:cancel', taskId),
     saveFormatResults: (resultIds) => ipcRenderer.invoke('format:save-results', resultIds),
     choosePdfOutput: (payload) => ipcRenderer.invoke('pdf:choose-output', payload),
+    createDefaultPdfOutput: (file, outputKind) => {
+      const sourcePath = webUtils.getPathForFile(file)
+      if (!sourcePath) return Promise.resolve(null)
+      return ipcRenderer.invoke('pdf:default-output', { sourcePath, outputKind })
+    },
+    createDefaultPdfDropOutput: (fileId, outputKind) =>
+      ipcRenderer.invoke('pdf:default-drop-output', { fileId, outputKind }),
+    releasePdfOutput: (sessionId) => ipcRenderer.invoke('pdf:release-output', sessionId),
     savePdfFile: (payload) => ipcRenderer.invoke('pdf:save-file', payload),
     savePdfFiles: (payload) => ipcRenderer.invoke('pdf:save-files', payload),
     showPdfOutput: (path) => ipcRenderer.invoke('pdf:show-item', path),

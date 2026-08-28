@@ -72,19 +72,20 @@
                   <button class="gbtn" id="pdf-add-files" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 上传 PDF</button>
                   <button class="gbtn ghost" id="pdf-clear-files" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
                   <div class="pdf-options" id="pdf-options"></div>
-                  <span class="toolbar-hint" id="pdf-hint">上传 PDF 文件后执行“转 PNG”</span>
                 </div>
                 <div class="glass-card file-list pdf-drop-zone" id="pdf-drop-zone">
+                  <div class="pdf-list-title">文件列表</div>
                   <div class="file-head">
-                    <span class="cell-index">序号</span><span class="cell-name">文件名</span>
-                    <span class="cell-size">大小</span><span class="cell-progress">进度</span>
+                    <span class="cell-name">文件名</span><span class="cell-pages">页数</span>
+                    <span class="cell-size">大小</span><span class="cell-progress">状态</span>
                     <span class="cell-action" aria-label="操作"></span>
                   </div>
                   <div class="pdf-file-body" id="pdf-file-body"></div>
                   <div class="empty" id="pdf-empty">
                     <div class="empty-icon">PDF</div>
-                    <div id="pdf-empty-text">上传 PDF 文件</div>
-                    <small>点击上传，或将文件拖到这里</small>
+                    <div id="pdf-empty-text">拖入 PDF 文件到这里</div>
+                    <small>支持拖入文件或文件夹，也可以手动选择</small>
+                    <button class="gbtn" id="pdf-empty-add" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-add"></use></svg><span id="pdf-empty-add-label">上传 PDF</span></button>
                   </div>
                 </div>
                 <div class="pdf-watermark-workbench" id="pdf-watermark-workbench" hidden>
@@ -194,13 +195,22 @@
                     </section>
                   </aside>
                 </div>
-                <div class="glass-card result">
-                  <span class="result-dot" id="pdf-result-dot"></span>
-                  <span id="pdf-result-text">添加文件后即可处理</span>
-                  <button class="gbtn pdf-output-picker" id="choose-pdf-output" type="button">选择输出位置</button>
-                  <span class="pdf-output-path" id="pdf-output-path">尚未选择</span>
-                  <button class="primary" id="run-pdf-action" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>开始转 PNG</button>
-                  <button class="gbtn open" id="open-pdf-output" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-open"></use></svg>打开所在位置</button>
+                <div class="glass-card result pdf-result-card">
+                  <div class="pdf-output-row">
+                    <div class="pdf-output-copy">
+                      <b>输出位置</b>
+                      <span class="pdf-output-path" id="pdf-output-path">添加文件后自动设置</span>
+                    </div>
+                    <button class="gbtn pdf-output-picker" id="choose-pdf-output" type="button">更改</button>
+                  </div>
+                  <div class="pdf-run-row">
+                    <div class="pdf-result-summary">
+                      <span class="result-dot" id="pdf-result-dot"></span>
+                      <span id="pdf-result-text">0 个文件 · 等待添加</span>
+                    </div>
+                    <button class="primary" id="run-pdf-action" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>开始转 PNG</button>
+                    <button class="gbtn open" id="open-pdf-output" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-open"></use></svg>打开所在位置</button>
+                  </div>
                 </div>
                 <input id="pdf-file-input" type="file" accept="application/pdf,.pdf" hidden />
                 <input id="pdf-insert-pages-input" type="file" accept="application/pdf,.pdf" multiple hidden />

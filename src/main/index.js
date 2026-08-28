@@ -456,12 +456,22 @@ const DROP_CANVAS_MAX_TOTAL = 300 * 1024 * 1024
 // 读取后即销毁；未消费的会话设超时回收，并在 sender 销毁时统一清理。
 const dropFileSessions = new Map()
 const DROP_FILE_SESSION_TTL = 5 * 60 * 1000
+const PDF_DEFAULT_OUTPUT_DIRECTORIES = Object.freeze({
+  jpeg: 'JPEG',
+  png: 'PNG',
+  split: 'PDF-Pages',
+  watermark: 'Watermarked',
+  images: 'Images'
+})
 // 每个 sender 仅绑定一次 destroyed 清理，避免连续拖入累积监听器。
 const boundDropDestroyListeners = new Set()
 
 function purgeOwnerSessions(ownerId) {
   for (const [id, entry] of dropFileSessions) {
     if (entry.ownerId === ownerId) dropFileSessions.delete(id)
+  }
+  for (const [id, entry] of pdfOutputSessions) {
+    if (entry.ownerId === ownerId) pdfOutputSessions.delete(id)
   }
   for (const [id, entry] of officeInputSessions) {
     if (entry.ownerId === ownerId) officeInputSessions.delete(id)
@@ -673,6 +683,46 @@ ipcMain.handle('drop:read-file', async (event, fileId) => {
   dropFileSessions.delete(fileId)
   const data = await readFile(entry.path)
   return { name: entry.name, size: data.length, bytes: data }
+})
+
+function registerDefaultPdfOutput(ownerId, sourcePath, outputKind) {
+  const childDirectory = PDF_DEFAULT_OUTPUT_DIRECTORIES[outputKind]
+  if (!childDirectory) throw new Error('不支持的 PDF 默认输出目录')
+  const id = randomUUID()
+  const outputPath = join(dirname(sourcePath), childDirectory)
+  pdfOutputSessions.set(id, {
+    id,
+    ownerId,
+    mode: 'directory',
+    path: outputPath
+  })
+  return { status: 'selected', id, mode: 'directory', path: outputPath, automatic: true }
+}
+
+ipcMain.handle('pdf:default-output', async (event, payload) => {
+  assertMainWindowSender(event)
+  const sourcePath = payload?.sourcePath
+  if (typeof sourcePath !== 'string' || !sourcePath) throw new Error('PDF 来源文件无效')
+  const info = await stat(sourcePath).catch(() => null)
+  if (!info?.isFile()) throw new Error('PDF 来源文件不存在')
+  return registerDefaultPdfOutput(event.sender.id, sourcePath, payload?.outputKind)
+})
+
+ipcMain.handle('pdf:default-drop-output', async (event, payload) => {
+  assertMainWindowSender(event)
+  const entry = dropFileSessions.get(payload?.fileId)
+  if (!entry || entry.ownerId !== event.sender.id) {
+    throw new Error('拖入文件会话不存在或无权访问')
+  }
+  return registerDefaultPdfOutput(event.sender.id, entry.path, payload?.outputKind)
+})
+
+ipcMain.handle('pdf:release-output', (event, sessionId) => {
+  assertMainWindowSender(event)
+  const session = pdfOutputSessions.get(sessionId)
+  if (!session || session.ownerId !== event.sender.id) return { status: 'missing' }
+  pdfOutputSessions.delete(sessionId)
+  return { status: 'released' }
 })
 
 function officeKindConfig(kind) {
@@ -2023,6 +2073,7 @@ ipcMain.handle('pdf:save-files', async (event, payload) => {
 
   const destination = getPdfOutputSession(event, payload?.destinationId, 'directory')
   const directory = destination.path
+  await mkdir(directory, { recursive: true })
   const usedNames = new Map()
 
   for (const [index, file] of normalizedFiles.entries()) {

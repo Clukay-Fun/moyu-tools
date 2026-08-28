@@ -577,6 +577,8 @@ const pdfWatermarkPreviewEmpty = document.querySelector('#pdf-watermark-preview-
 const pdfWatermarkPreviewLabel = document.querySelector('#pdf-watermark-preview-label')
 const pdfFileBody = document.querySelector('#pdf-file-body')
 const pdfEmpty = document.querySelector('#pdf-empty')
+const pdfEmptyAddButton = document.querySelector('#pdf-empty-add')
+const pdfEmptyAddLabel = document.querySelector('#pdf-empty-add-label')
 const pdfOptions = document.querySelector('#pdf-options')
 const pdfJpegQualityMenu = document.querySelector('#pdf-jpeg-quality-menu')
 const pdfRunButton = document.querySelector('#run-pdf-action')
@@ -590,6 +592,8 @@ const pdfPageGrid = document.querySelector('#pdf-page-grid')
 const pdfPageSummary = document.querySelector('#pdf-page-summary')
 const pdfInsertPagesInput = document.querySelector('#pdf-insert-pages-input')
 let draggedPdfPageId = ''
+const pdfPageCounts = new WeakMap()
+let pdfDestinationRequest = 0
 
 function currentPdfConfig() {
   return pdfActionConfig[state.selections.pdf]
@@ -603,6 +607,17 @@ const pdfDirectoryActions = new Set([
   '图片水印',
   '提取图片'
 ])
+
+function currentPdfDefaultOutputKind() {
+  return {
+    '转 JPEG': 'jpeg',
+    '转 PNG': 'png',
+    逐页拆分: 'split',
+    文字水印: 'watermark',
+    图片水印: 'watermark',
+    提取图片: 'images'
+  }[state.selections.pdf] || null
+}
 
 function isPdfWatermarkAction(action = state.selections.pdf) {
   return action === '文字水印' || action === '图片水印'
@@ -650,9 +665,44 @@ function currentPdfOutputSpec() {
 }
 
 function resetPdfDestination() {
+  pdfDestinationRequest += 1
+  const previous = state.pdfDestination
   state.pdfDestination = null
-  pdfOutputPath.textContent = '尚未选择'
+  if (previous?.id) void window.api.releasePdfOutput(previous.id)
+  pdfOutputPath.textContent = currentPdfDefaultOutputKind()
+    ? '添加文件后自动设置'
+    : '尚未选择'
   pdfOutputPath.title = ''
+  pdfChooseOutputButton.textContent = '更改'
+}
+
+function setPdfDestination(destination) {
+  const previous = state.pdfDestination
+  state.pdfDestination = destination
+  if (previous?.id && previous.id !== destination.id) void window.api.releasePdfOutput(previous.id)
+  pdfOutputPath.textContent = destination.path
+  pdfOutputPath.title = destination.path
+  pdfChooseOutputButton.textContent = '更改'
+  updatePdfRunState()
+}
+
+async function setDefaultPdfDestination(file, preparedDestination = null) {
+  const outputKind = currentPdfDefaultOutputKind()
+  if (!file || !outputKind) return
+  const request = ++pdfDestinationRequest
+  try {
+    const destination = preparedDestination || await window.api.createDefaultPdfOutput(file, outputKind)
+    if (request !== pdfDestinationRequest || !destination) {
+      if (destination?.id) void window.api.releasePdfOutput(destination.id)
+      return
+    }
+    setPdfDestination(destination)
+  } catch (error) {
+    if (request !== pdfDestinationRequest) return
+    pdfOutputPath.textContent = '自动设置失败，请手动选择'
+    pdfOutputPath.title = cleanIpcError(error?.message ?? error)
+    updatePdfRunState()
+  }
 }
 
 function isAcceptedPdfToolFile(file, config = currentPdfConfig()) {
@@ -797,6 +847,32 @@ pdfJpegQualityMenu.addEventListener('keydown', (event) => {
   options[next]?.focus()
 })
 
+function pdfIdleSummary(files) {
+  if (!files.length) return '0 个文件 · 等待添加'
+  const totalSize = files.reduce((total, file) => total + (Number(file.size) || 0), 0)
+  const pageCounts = files.map((file) => pdfPageCounts.get(file)).filter(Number.isInteger)
+  const pages = pageCounts.length === files.length
+    ? ` · ${pageCounts.reduce((total, count) => total + count, 0)} 页`
+    : ''
+  return `${files.length} 个文件${pages} · ${(totalSize / 1024 / 1024).toFixed(2)} MB`
+}
+
+function shouldShowPdfPageCount() {
+  return currentPdfConfig().kind === 'pdf'
+}
+
+function loadPdfPageCount(file) {
+  if (!shouldShowPdfPageCount() || pdfPageCounts.has(file)) return
+  pdfPageCounts.set(file, 'loading')
+  void readPdfDocument(file).then((document) => {
+    pdfPageCounts.set(file, document.getPageCount())
+  }).catch(() => {
+    pdfPageCounts.set(file, 'unknown')
+  }).finally(() => {
+    if (currentPdfFiles().includes(file)) renderPdfFiles()
+  })
+}
+
 function renderPdfFiles() {
   pdfFileBody.replaceChildren()
   const config = currentPdfConfig()
@@ -804,28 +880,46 @@ function renderPdfFiles() {
     ? (state.pdfNativeInput ? [state.pdfNativeInput] : [])
     : currentPdfFiles()
   pdfEmpty.classList.toggle('hidden', displayedFiles.length > 0)
+  pdfDropZone.style.height = displayedFiles.length
+    ? `${Math.min(520, Math.max(180, 40 + displayedFiles.length * 52))}px`
+    : '220px'
 
   displayedFiles.forEach((file, index) => {
     const row = document.createElement('div')
-    const order = document.createElement('span')
     const name = document.createElement('span')
+    const nameText = document.createElement('span')
+    const detail = document.createElement('small')
+    const pages = document.createElement('span')
     const size = document.createElement('span')
     const progress = document.createElement('span')
     const remove = document.createElement('button')
 
     row.className = 'pdf-file-row'
-    order.className = 'cell-index'
-    name.className = 'cell-name'
+    name.className = 'cell-name pdf-file-name'
+    pages.className = 'cell-pages'
     size.className = 'cell-size'
     progress.className = 'cell-progress'
-    order.textContent = String(index + 1)
-    name.textContent = file.name
+    nameText.textContent = file.name
     name.title = file.name
+    name.append(nameText, detail)
     size.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`
+    if (config.kind === 'pdf') {
+      loadPdfPageCount(file)
+      const count = pdfPageCounts.get(file)
+      pages.textContent = Number.isInteger(count) ? `${count} 页` : count === 'unknown' ? '无法读取' : '读取中…'
+      detail.textContent = state.selections.pdf === '转 JPEG' && Number.isInteger(count)
+        ? `预计生成 ${count} 张 JPEG`
+        : ''
+    } else {
+      pages.textContent = '—'
+      detail.textContent = config.inputLabel
+    }
     const fileStatus = isPdfWatermarkAction()
       ? state.pdfWatermarkStatuses[index]
       : state.pdfFileStatuses[index]
-    progress.textContent = fileStatus?.error || fileStatus?.status || '待处理'
+    const fallbackStatus = state.selections.pdf === '转 JPEG' ? '待转换' : '待处理'
+    progress.textContent = fileStatus?.error || fileStatus?.status || fallbackStatus
+    if (state.selections.pdf === '转 JPEG' && progress.textContent === '待处理') progress.textContent = '待转换'
     progress.title = fileStatus?.error || ''
     progress.classList.toggle('success', ['已导出', '完成'].includes(fileStatus?.status))
     progress.classList.toggle('busy', ['处理中', '等待保存'].includes(fileStatus?.status))
@@ -835,10 +929,15 @@ function renderPdfFiles() {
     remove.dataset.index = String(index)
     remove.setAttribute('aria-label', `移除 ${file.name}`)
     remove.textContent = '×'
-    row.append(order, name, size, progress, remove)
+    row.append(name, pages, size, progress, remove)
     pdfFileBody.append(row)
   })
 
+  const hasError = (isPdfWatermarkAction() ? state.pdfWatermarkStatuses : state.pdfFileStatuses)
+    .some((status) => status?.error)
+  if (!state.pdfBusy && !state.pdfLastOutput && !state.pdfComResult && !hasError) {
+    setPdfResult(pdfIdleSummary(displayedFiles))
+  }
   updatePdfRunState()
   void updatePdfSplitEstimate()
 }
@@ -1085,11 +1184,8 @@ function updatePdfState(action) {
   pdfDropZone.hidden = isPdfWatermarkAction(action)
   pdfWatermarkWorkbench.hidden = !isPdfWatermarkAction(action)
   document.querySelector('#pdf-crumb').textContent = action
-  document.querySelector('#pdf-hint').textContent =
-    config.minFiles > 1
-      ? `至少上传 ${config.minFiles} 个 ${config.inputLabel} 文件`
-      : `上传 ${config.inputLabel} 文件后执行“${action}”`
-  document.querySelector('#pdf-empty-text').textContent = `上传 ${config.inputLabel} 文件`
+  document.querySelector('#pdf-empty-text').textContent = `拖入 ${config.inputLabel} 文件到这里`
+  pdfEmptyAddLabel.textContent = `上传 ${config.inputLabel}`
   pdfAddFilesButton.textContent = `＋ 上传 ${config.inputLabel}`
   state.pdfLastOutput = null
   state.pdfComResult = null
@@ -1100,11 +1196,13 @@ function updatePdfState(action) {
   resetPdfDestination()
   resetPdfPageOrganizer()
   pdfOpenOutputButton.disabled = true
-  pdfResultText.textContent = '添加文件后即可处理'
+  pdfResultText.textContent = '0 个文件 · 等待添加'
   pdfResultDot.classList.remove('success', 'error', 'busy')
   renderPdfOptions()
   renderPdfFiles()
   renderPdfWatermarkState()
+  const retainedFile = config.kind === 'office' ? null : currentPdfFiles()[0]
+  if (retainedFile) void setDefaultPdfDestination(retainedFile)
 }
 
 function chooseSubmenu(module, action, animate = false) {
@@ -1211,7 +1309,7 @@ function pdfOutputBaseName(file) {
   return file.name.replace(/\.[^.]+$/, '').replace(/[^\p{L}\p{N}_.-]+/gu, '-') || 'pdf-output'
 }
 
-function addPdfToolFiles(fileList) {
+function addPdfToolFiles(fileList, { preparedDestination = null, preserveDestination = false } = {}) {
   const config = currentPdfConfig()
   const accepted = Array.from(fileList || []).filter((file) => isAcceptedPdfToolFile(file, config))
 
@@ -1249,12 +1347,12 @@ function addPdfToolFiles(fileList) {
     )
   }
   state.pdfLastOutput = null
-  resetPdfDestination()
+  if (!preserveDestination) resetPdfDestination()
   resetPdfPageOrganizer()
   pdfOpenOutputButton.disabled = true
   renderPdfFiles()
   renderPdfWatermarkState()
-  setPdfResult(`已添加 ${nextFiles.length} 个文件`)
+  if (!preserveDestination) void setDefaultPdfDestination(nextFiles[0], preparedDestination)
 }
 
 async function readPdfDocument(file) {
@@ -2297,6 +2395,7 @@ pdfAddFilesButton.addEventListener('click', async () => {
     setPdfResult(`无法选择文件：${error instanceof Error ? error.message : String(error)}`, 'error')
   }
 })
+pdfEmptyAddButton.addEventListener('click', () => pdfAddFilesButton.click())
 pdfWatermarkAddFilesButton.addEventListener('click', () => {
   pdfFileInput.value = ''
   pdfFileInput.click()
@@ -2306,10 +2405,8 @@ pdfChooseOutputButton.addEventListener('click', async () => {
   try {
     const result = await window.api.choosePdfOutput(currentPdfOutputSpec())
     if (result.status !== 'selected') return
-    state.pdfDestination = result
-    pdfOutputPath.textContent = result.path
-    pdfOutputPath.title = result.path
-    updatePdfRunState()
+    pdfDestinationRequest += 1
+    setPdfDestination(result)
     setPdfResult('输出位置已选择')
   } catch (error) {
     setPdfResult(`无法选择输出位置：${error instanceof Error ? error.message : String(error)}`, 'error')
@@ -2333,7 +2430,7 @@ pdfClearFilesButton.addEventListener('click', () => {
   pdfOpenOutputButton.disabled = true
   renderPdfFiles()
   renderPdfWatermarkState()
-  setPdfResult('添加文件后即可处理')
+  setPdfResult('0 个文件 · 等待添加')
 })
 pdfFileBody.addEventListener('click', (event) => {
   const button = event.target.closest('.pdf-remove-file')
@@ -2350,6 +2447,7 @@ pdfFileBody.addEventListener('click', (event) => {
   resetPdfPageOrganizer()
   renderPdfFiles()
   renderPdfWatermarkState()
+  void setDefaultPdfDestination(currentPdfFiles()[0])
 })
 pdfWatermarkFileList.addEventListener('click', (event) => {
   const button = event.target.closest('[data-watermark-index]')
@@ -2361,6 +2459,7 @@ pdfWatermarkFileList.addEventListener('click', (event) => {
     state.pdfWatermarkPreviewPage = 1
     renderPdfFiles()
     renderPdfWatermarkState()
+    void setDefaultPdfDestination(currentPdfFiles()[0])
     return
   }
   const row = event.target.closest('[data-preview-index]')
@@ -2450,9 +2549,17 @@ async function addPdfFilesFromDrop(files) {
       renderPdfFiles()
       setPdfResult(`${first.name} 已添加`)
     } else {
-      for (const item of result.files) {
+      const outputKind = currentPdfDefaultOutputKind()
+      let preparedDestination = null
+      if (outputKind && result.files[0]) {
+        preparedDestination = await window.api.createDefaultPdfDropOutput(result.files[0].id, outputKind)
+      }
+      for (const [index, item] of result.files.entries()) {
         const file = await readScanFile(item)
-        addPdfToolFiles([file])
+        addPdfToolFiles([file], {
+          preparedDestination: index === 0 ? preparedDestination : null,
+          preserveDestination: index > 0
+        })
       }
       if (result.skipped || result.errors.length) {
         showToast(`扫描完成：跳过 ${result.skipped || 0}、失败 ${result.errors.length || 0}`)
