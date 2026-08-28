@@ -776,23 +776,21 @@
         <button type="button" role="option" data-value="0.7" aria-selected="false">70%</button>
         <button type="button" role="option" data-value="0.95" aria-selected="false">95%</button>
       </div>
+      <!-- 应用自己的下拉菜单（S1）。统一挂到顶层，绕开滚动容器裁切。 -->
+      <div class="app-menu" id="text-font-menu" role="menu" hidden>
+        <button type="button" role="menuitemradio" data-font='system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif'>系统默认</button>
+        <button type="button" role="menuitemradio" data-font='"Microsoft YaHei", "PingFang SC", sans-serif'>黑体</button>
+        <button type="button" role="menuitemradio" data-font='"SimSun", "Songti SC", serif'>宋体</button>
+        <button type="button" role="menuitemradio" data-font='"Segoe UI", Helvetica, Arial, sans-serif'>Segoe UI</button>
+        <button type="button" role="menuitemradio" data-font='ui-monospace, "SFMono-Regular", Consolas, monospace'>等宽</button>
+      </div>
+      <div class="app-menu" id="text-align-menu" role="menu" hidden>
+        <button type="button" role="menuitemradio" data-align="left">左对齐</button>
+        <button type="button" role="menuitemradio" data-align="center">居中</button>
+        <button type="button" role="menuitemradio" data-align="right">右对齐</button>
+      </div>
     </div>
 
     <script type="module" src="./main.js"></script>
-
-    <!-- 应用自己的下拉菜单（S1）。挂在 body 下是为了绕开 .canvas-shell 的
-         overflow: hidden 与祖先层叠上下文；位置由 JS 按触发钮实时算。 -->
-    <div class="app-menu" id="text-font-menu" role="menu" hidden>
-      <button type="button" role="menuitemradio" data-font='system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif'>系统默认</button>
-      <button type="button" role="menuitemradio" data-font='"Microsoft YaHei", "PingFang SC", sans-serif'>黑体</button>
-      <button type="button" role="menuitemradio" data-font='"SimSun", "Songti SC", serif'>宋体</button>
-      <button type="button" role="menuitemradio" data-font='"Segoe UI", Helvetica, Arial, sans-serif'>Segoe UI</button>
-      <button type="button" role="menuitemradio" data-font='ui-monospace, "SFMono-Regular", Consolas, monospace'>等宽</button>
-    </div>
-    <div class="app-menu" id="text-align-menu" role="menu" hidden>
-      <button type="button" role="menuitemradio" data-align="left">左对齐</button>
-      <button type="button" role="menuitemradio" data-align="center">居中</button>
-      <button type="button" role="menuitemradio" data-align="right">右对齐</button>
-    </div>
   </body>
 </html>

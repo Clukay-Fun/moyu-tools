@@ -4423,6 +4423,16 @@ body.keyboard-focus :where(
   pointer-events: auto;
 }
 
+#overlay-layer > .cmd-menu {
+  position: fixed;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
 .pdf-quality-menu {
   min-width: 0;
 }
@@ -4446,6 +4456,84 @@ body.keyboard-focus :where(
   text-align: left;
   white-space: nowrap;
   cursor: pointer;
+}
+
+/* 原生 select 仅保留为业务数据源；可视触发器和菜单统一由应用绘制。 */
+.app-select-native {
+  position: absolute !important;
+  width: 1px !important;
+  min-width: 0 !important;
+  height: 1px !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.app-select-trigger {
+  display: inline-flex;
+  min-width: 72px;
+  min-height: var(--control-height);
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 30px 0 10px;
+  overflow: hidden;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-sm);
+  color: var(--foreground);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--faint) 50%) calc(100% - 16px) calc(50% - 2px) / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--faint) 50%, transparent 50%) calc(100% - 11px) calc(50% - 2px) / 5px 5px no-repeat,
+    var(--control-bg);
+  font: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-select-trigger:hover:not(:disabled) {
+    border-color: var(--control-border-hover);
+    background-color: var(--control-bg-hover);
+  }
+}
+
+.app-select-trigger[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.app-select-menu button[aria-selected="true"] {
+  color: #fff;
+  background: var(--accent);
+}
+
+.app-select-menu button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.pdf-options .app-select-trigger {
+  height: var(--control-height);
+  border-radius: 8px;
+}
+
+.pdf-watermark-controls .app-select-trigger,
+.format-options .app-select-trigger,
+.image-panel .app-select-trigger,
+.img-editor-field .app-select-trigger {
+  width: 100%;
+}
+
+.format-options .app-select-trigger {
+  grid-column: 1 / -1;
+}
+
+.barcode-font-picker .app-select-trigger,
+.barcode-preset-picker .app-select-trigger {
+  width: 124px;
 }
 @media (hover: hover) and (pointer: fine) {
   .app-menu button:hover { color: var(--accent); background: var(--accent-10); }

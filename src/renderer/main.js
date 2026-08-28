@@ -3102,15 +3102,18 @@ const boardBgColor = document.querySelector('#board-bg-color')
 const popovers = []
 /** @type {Array<{menu: HTMLElement, trigger: HTMLElement|null}>} */
 const openPopovers = []
+const overlayLayer = document.querySelector('#overlay-layer')
 
-function registerPopover(menu, trigger = null) {
+function registerPopover(menu, trigger = null, placement = {}) {
   if (!menu) return
   const existing = popovers.find((entry) => entry.menu === menu)
   if (existing) {
     existing.trigger = trigger
+    existing.placement = placement
     return
   }
-  popovers.push({ menu, trigger })
+  overlayLayer?.append(menu)
+  popovers.push({ menu, trigger, placement })
   // 点内部不穿透；mousedown 也要拦，否则会把焦点从画布抢走
   menu.addEventListener('mousedown', (event) => {
     if (!event.target.closest('input, select, textarea')) event.preventDefault()
@@ -3127,6 +3130,7 @@ function openPopover(menu) {
   menu.hidden = false
   entry.trigger?.setAttribute('aria-expanded', 'true')
   if (!isPopoverOpen(menu)) openPopovers.push(entry)
+  if (entry.trigger) placePopover(menu, entry.trigger, entry.placement)
 }
 
 function closePopover(menu) {
@@ -3174,6 +3178,16 @@ function placePopover(menu, trigger, { align = 'left', gap = 6, matchWidth = fal
   menu.style.top = `${Math.round(top)}px`
 }
 
+function repositionOpenPopovers() {
+  for (const entry of openPopovers) {
+    if (!entry.trigger?.isConnected || entry.trigger.hidden) {
+      closePopover(entry.menu)
+      continue
+    }
+    placePopover(entry.menu, entry.trigger, entry.placement)
+  }
+}
+
 function closeAllCmdMenus(except = null) {
   closePopovers(except)
 }
@@ -3185,7 +3199,7 @@ function toggleCmdMenu(trigger, menu) {
 
 // 登记两个命令栏菜单
 registerPopover(projectMenu, cmdProject)
-registerPopover(backgroundMenu, cmdBackground)
+registerPopover(backgroundMenu, cmdBackground, { align: 'right' })
 
 // ── 文本工具栏的字体 / 对齐菜单（S1：替换原生 select）──
 const textFontTrigger = document.querySelector('#text-font-trigger')
@@ -3205,8 +3219,8 @@ function placePdfQualityMenu() {
   placePopover(pdfJpegQualityMenu, trigger, { matchWidth: true })
 }
 
-window.addEventListener('resize', placePdfQualityMenu)
-window.addEventListener('scroll', placePdfQualityMenu, true)
+window.addEventListener('resize', repositionOpenPopovers)
+window.addEventListener('scroll', repositionOpenPopovers, true)
 
 const ALIGN_LABEL = { left: '左对齐', center: '居中', right: '右对齐' }
 
@@ -3231,6 +3245,186 @@ bindTextPopover(textFontTrigger, textFontMenu, (item) => {
 bindTextPopover(textAlignTrigger, textAlignMenu, (item) => {
   boardController?.applyTextStyleFromToolbar({ textAlign: item.dataset.align })
 })
+
+// ── 全应用 Select 适配层 ──────────────────────────────────
+// 原生 select 的弹层由系统窗口绘制，无法解决圆角容器裁切、主题和宽度不一致。
+// 保留原 select 作为唯一数据源，只替换它的可视触发器与菜单：业务代码继续读写
+// select.value 并监听 change，不需要维护第二份状态。
+const enhancedSelects = new Map()
+let appSelectSequence = 0
+
+function selectAccessibleName(select) {
+  const explicit = select.getAttribute('aria-label')
+  if (explicit) return explicit
+  const label = select.closest('label')
+  if (!label) return '选择选项'
+  return [...label.childNodes]
+    .filter((node) => node.nodeType === Node.TEXT_NODE)
+    .map((node) => node.textContent.trim())
+    .filter(Boolean)
+    .join(' ') || '选择选项'
+}
+
+function syncEnhancedSelect(select) {
+  const entry = enhancedSelects.get(select)
+  if (!entry) return
+  const option = select.selectedOptions[0]
+  const label = option?.textContent?.trim() || '请选择'
+  const invalid = select.getAttribute('aria-invalid') || 'false'
+  if (entry.trigger.textContent !== label) entry.trigger.textContent = label
+  if (entry.trigger.title !== label) entry.trigger.title = label
+  if (entry.trigger.disabled !== select.disabled) entry.trigger.disabled = select.disabled
+  if (entry.trigger.hidden !== select.hidden) entry.trigger.hidden = select.hidden
+  if (entry.trigger.getAttribute('aria-invalid') !== invalid) entry.trigger.setAttribute('aria-invalid', invalid)
+  if ((select.disabled || select.hidden) && isPopoverOpen(entry.menu)) closePopover(entry.menu)
+}
+
+function renderEnhancedSelectMenu(select) {
+  const entry = enhancedSelects.get(select)
+  if (!entry) return
+  entry.menu.replaceChildren(...[...select.options].map((option) => {
+    const item = document.createElement('button')
+    item.type = 'button'
+    item.role = 'option'
+    item.dataset.value = option.value
+    item.textContent = option.textContent
+    item.title = option.textContent
+    item.disabled = option.disabled
+    item.setAttribute('aria-selected', String(option.selected))
+    return item
+  }))
+}
+
+function focusEnhancedSelectOption(menu, direction = 0) {
+  const items = [...menu.querySelectorAll('button:not(:disabled)')]
+  if (!items.length) return
+  const selected = menu.querySelector('button[aria-selected="true"]:not(:disabled)')
+  let index = items.indexOf(document.activeElement)
+  if (index === -1) index = Math.max(0, items.indexOf(selected))
+  const target = direction === 0
+    ? (selected || items[0])
+    : items[(index + direction + items.length) % items.length]
+  target.focus({ preventScroll: true })
+}
+
+function enhanceSelect(select) {
+  if (!(select instanceof HTMLSelectElement) || select.multiple || enhancedSelects.has(select)) return
+
+  const menuId = `app-select-menu-${++appSelectSequence}`
+  const trigger = document.createElement('button')
+  trigger.type = 'button'
+  trigger.className = 'app-select-trigger'
+  trigger.setAttribute('aria-haspopup', 'listbox')
+  trigger.setAttribute('aria-expanded', 'false')
+  trigger.setAttribute('aria-controls', menuId)
+  trigger.setAttribute('aria-label', selectAccessibleName(select))
+
+  const menu = document.createElement('div')
+  menu.id = menuId
+  menu.className = 'app-menu app-select-menu'
+  menu.role = 'listbox'
+  menu.setAttribute('aria-label', selectAccessibleName(select))
+  menu.hidden = true
+
+  select.classList.add('app-select-native')
+  select.tabIndex = -1
+  select.setAttribute('aria-hidden', 'true')
+  select.insertAdjacentElement('afterend', trigger)
+  enhancedSelects.set(select, { trigger, menu })
+  registerPopover(menu, trigger, { matchWidth: true })
+  syncEnhancedSelect(select)
+
+  const label = select.closest('label')
+  label?.addEventListener('click', (event) => {
+    if (event.target !== label) return
+    event.preventDefault()
+    trigger.click()
+  })
+
+  trigger.addEventListener('click', (event) => {
+    event.stopPropagation()
+    syncEnhancedSelect(select)
+    renderEnhancedSelectMenu(select)
+    if (isPopoverOpen(menu)) closePopover(menu)
+    else openPopover(menu)
+  })
+  trigger.addEventListener('keydown', (event) => {
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
+    event.preventDefault()
+    if (!isPopoverOpen(menu)) {
+      renderEnhancedSelectMenu(select)
+      openPopover(menu)
+    }
+    requestAnimationFrame(() => {
+      if (event.key === 'Home') menu.querySelector('button:not(:disabled)')?.focus()
+      else if (event.key === 'End') [...menu.querySelectorAll('button:not(:disabled)')].at(-1)?.focus()
+      else focusEnhancedSelectOption(menu, event.key === 'ArrowDown' ? 1 : -1)
+    })
+  })
+  menu.addEventListener('keydown', (event) => {
+    if (event.key === 'Tab') {
+      closePopover(menu)
+      return
+    }
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
+    event.preventDefault()
+    if (event.key === 'Home') menu.querySelector('button:not(:disabled)')?.focus()
+    else if (event.key === 'End') [...menu.querySelectorAll('button:not(:disabled)')].at(-1)?.focus()
+    else focusEnhancedSelectOption(menu, event.key === 'ArrowDown' ? 1 : -1)
+  })
+  menu.addEventListener('click', (event) => {
+    const item = event.target.closest('button[data-value]')
+    if (!item || item.disabled) return
+    select.value = item.dataset.value
+    select.dispatchEvent(new Event('change', { bubbles: true }))
+    syncEnhancedSelect(select)
+    closePopover(menu)
+    trigger.focus({ preventScroll: true })
+  })
+  select.addEventListener('change', () => syncEnhancedSelect(select))
+  select.addEventListener('input', () => syncEnhancedSelect(select))
+}
+
+function syncAllEnhancedSelects() {
+  for (const [select, entry] of enhancedSelects) {
+    if (!select.isConnected) {
+      closePopover(entry.menu)
+      entry.menu.remove()
+      entry.trigger.remove()
+      enhancedSelects.delete(select)
+      continue
+    }
+    syncEnhancedSelect(select)
+  }
+}
+
+function installAppSelects(root = document) {
+  if (root instanceof HTMLSelectElement) enhanceSelect(root)
+  root.querySelectorAll?.('select').forEach(enhanceSelect)
+}
+
+const appSelectObserver = new MutationObserver((records) => {
+  let childListChanged = false
+  for (const record of records) {
+    if (record.type === 'childList') {
+      childListChanged = true
+      record.addedNodes.forEach((node) => {
+        if (node instanceof Element) installAppSelects(node)
+      })
+    } else if (record.target instanceof HTMLSelectElement) {
+      syncEnhancedSelect(record.target)
+    }
+  }
+  if (childListChanged) syncAllEnhancedSelects()
+})
+
+appSelectObserver.observe(document.body, {
+  childList: true,
+  subtree: true,
+  attributes: true,
+  attributeFilter: ['disabled', 'hidden', 'aria-invalid']
+})
+document.addEventListener('click', () => queueMicrotask(syncAllEnhancedSelects))
 
 // ══ F-16 · 全局截图快捷键设置 ══════════════════════════════
 //
@@ -5927,6 +6121,7 @@ if (/^#[0-9a-f]{6}$/i.test(savedAccent || '')) {
 
 document.querySelector('.search kbd').textContent = /Mac/i.test(navigator.platform) ? '⌘K' : 'Ctrl K'
 
+installAppSelects()
 drawColorWheel()
 rgbToHsl(colorState.r, colorState.g, colorState.b)
 updateColorControls()
