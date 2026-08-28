@@ -175,8 +175,7 @@ const submenuData = {
         ['逐页拆分', '拆', '#e0554e'],
         ['旋转 PDF', '旋', '#e0554e'],
         ['提取指定页', '页', '#e0554e'],
-        ['文字水印', 'WM', '#6978e6'],
-        ['图片水印', 'IMG', '#6978e6'],
+        ['添加水印', 'WM', '#6978e6'],
         ['添加页码', '#', '#6978e6'],
         ['页重排', '⇅', '#6978e6'],
         ['提取图片', 'PIC', '#3c9a5e'],
@@ -263,8 +262,7 @@ const searchFeatures = [
   ['逐页拆分', 'PDF', 'pdf', '逐页拆分', '拆分 PDF 每页 独立文件'],
   ['旋转 PDF', 'PDF', 'pdf', '旋转 PDF', '旋转 页面'],
   ['提取指定页', 'PDF', 'pdf', '提取指定页', 'PDF 页面 提取 页码范围'],
-  ['文字水印', 'PDF', 'pdf', '文字水印', 'PDF 水印 文字'],
-  ['图片水印', 'PDF', 'pdf', '图片水印', 'PDF 水印 图片'],
+  ['添加水印', 'PDF', 'pdf', '添加水印', 'PDF 水印 文字 图片'],
   ['添加页码', 'PDF', 'pdf', '添加页码', 'PDF 页眉 页脚'],
   ['页重排', 'PDF', 'pdf', '页重排', 'PDF 拖拽 调序 删除 插入'],
   ['提取图片', 'PDF', 'pdf', '提取图片', 'PDF 内嵌 图片 导出'],
@@ -358,6 +356,7 @@ const state = {
   pdfNativeInput: null,
   pdfWatermarkFiles: [],
   pdfWatermarkStatuses: [],
+  pdfWatermarkMode: 'text',
   pdfWatermarkImage: null,
   pdfWatermarkPreviewFileIndex: 0,
   pdfWatermarkPreviewPage: 1,
@@ -525,8 +524,7 @@ const pdfActionConfig = {
   逐页拆分: { inputLabel: 'PDF', kind: 'pdf', accept: 'application/pdf,.pdf', multiple: false, minFiles: 1 },
   '旋转 PDF': { inputLabel: 'PDF', kind: 'pdf', accept: 'application/pdf,.pdf', multiple: false, minFiles: 1 },
   提取指定页: { inputLabel: 'PDF', kind: 'pdf', accept: 'application/pdf,.pdf', multiple: false, minFiles: 1 },
-  文字水印: { inputLabel: 'PDF', kind: 'pdf', accept: 'application/pdf,.pdf', multiple: true, minFiles: 1 },
-  图片水印: { inputLabel: 'PDF', kind: 'pdf', accept: 'application/pdf,.pdf', multiple: true, minFiles: 1 },
+  添加水印: { inputLabel: 'PDF', kind: 'pdf', accept: 'application/pdf,.pdf', multiple: true, minFiles: 1 },
   添加页码: { inputLabel: 'PDF', kind: 'pdf', accept: 'application/pdf,.pdf', multiple: false, minFiles: 1 },
   页重排: { inputLabel: 'PDF', kind: 'pdf', accept: 'application/pdf,.pdf', multiple: false, minFiles: 1 },
   提取图片: { inputLabel: 'PDF', kind: 'pdf', accept: 'application/pdf,.pdf', multiple: false, minFiles: 1 },
@@ -570,7 +568,6 @@ const pdfAddFilesButton = document.querySelector('#pdf-add-files')
 const pdfClearFilesButton = document.querySelector('#pdf-clear-files')
 const pdfDropZone = document.querySelector('#pdf-drop-zone')
 const pdfWatermarkWorkbench = document.querySelector('#pdf-watermark-workbench')
-const pdfWatermarkAddFilesButton = document.querySelector('#pdf-watermark-add-files')
 const pdfWatermarkFileList = document.querySelector('#pdf-watermark-file-list')
 const pdfWatermarkPreview = document.querySelector('#pdf-watermark-preview')
 const pdfWatermarkPreviewEmpty = document.querySelector('#pdf-watermark-preview-empty')
@@ -582,6 +579,7 @@ const pdfEmptyAddLabel = document.querySelector('#pdf-empty-add-label')
 const pdfOptions = document.querySelector('#pdf-options')
 const pdfJpegQualityMenu = document.querySelector('#pdf-jpeg-quality-menu')
 const pdfRunButton = document.querySelector('#run-pdf-action')
+const pdfWatermarkRunButton = document.querySelector('#run-pdf-watermark-action')
 const pdfChooseOutputButton = document.querySelector('#choose-pdf-output')
 const pdfOutputPath = document.querySelector('#pdf-output-path')
 const pdfResultText = document.querySelector('#pdf-result-text')
@@ -603,8 +601,7 @@ const pdfDirectoryActions = new Set([
   '转 PNG',
   '转 JPEG',
   '逐页拆分',
-  '文字水印',
-  '图片水印',
+  '添加水印',
   '提取图片'
 ])
 
@@ -613,14 +610,13 @@ function currentPdfDefaultOutputKind() {
     '转 JPEG': 'jpeg',
     '转 PNG': 'png',
     逐页拆分: 'split',
-    文字水印: 'watermark',
-    图片水印: 'watermark',
+    添加水印: 'watermark',
     提取图片: 'images'
   }[state.selections.pdf] || null
 }
 
 function isPdfWatermarkAction(action = state.selections.pdf) {
-  return action === '文字水印' || action === '图片水印'
+  return action === '添加水印'
 }
 
 function currentPdfFiles() {
@@ -644,8 +640,7 @@ function currentPdfOutputSpec() {
     '合并 PDF': 'merged',
     '旋转 PDF': `${base}-rotated`,
     提取指定页: `${base}-pages`,
-    文字水印: `${base}-watermarked`,
-    图片水印: `${base}-watermarked`,
+    添加水印: `${base}-watermarked`,
     添加页码: `${base}-numbered`,
     页重排: `${base}-reordered`,
     '图片转 PDF': 'images',
@@ -1047,7 +1042,7 @@ async function drawPdfWatermarkPreview() {
     previousPage.disabled = source.pageNumber <= 1
     nextPage.disabled = source.pageNumber >= source.pageCount
     const settings = getPdfWatermarkSettings()
-    const kind = state.selections.pdf === '文字水印' ? 'text' : 'image'
+    const kind = state.pdfWatermarkMode
     let converted
     if (kind === 'text') {
       if (!settings.text) throw new Error('请输入水印文字')
@@ -1119,7 +1114,10 @@ function renderPdfWatermarkState() {
     0,
     Math.min(state.pdfWatermarkPreviewFileIndex, state.pdfWatermarkFiles.length - 1)
   )
-  const imageMode = state.selections.pdf === '图片水印'
+  const imageMode = state.pdfWatermarkMode === 'image'
+  document.querySelectorAll('[data-watermark-mode]').forEach((button) => {
+    button.classList.toggle('active', button.dataset.watermarkMode === state.pdfWatermarkMode)
+  })
   document.querySelector('#pdf-watermark-text').closest('label').hidden = imageMode
   document.querySelector('#pdf-watermark-font').closest('label').hidden = imageMode
   document.querySelector('#pdf-watermark-font-size').closest('label').hidden = imageMode
@@ -1139,10 +1137,13 @@ function updatePdfRunState() {
     ? Number(Boolean(state.pdfNativeInput))
     : currentPdfFiles().length
   const enoughFiles = fileCount >= config.minFiles
-  const hasWatermarkImage = state.selections.pdf !== '图片水印' || Boolean(state.pdfWatermarkImage)
+  const hasWatermarkImage = state.pdfWatermarkMode !== 'image' || Boolean(state.pdfWatermarkImage)
   const hasDestination = Boolean(state.pdfDestination)
   pdfRunButton.disabled = state.pdfBusy || !enoughFiles || !hasWatermarkImage || !hasDestination
   pdfRunButton.textContent = state.pdfBusy ? '处理中…' : `开始${state.selections.pdf}`
+  pdfWatermarkRunButton.disabled = pdfRunButton.disabled
+  const watermarkModeLabel = state.pdfWatermarkMode === 'image' ? '图片水印' : '文字水印'
+  pdfWatermarkRunButton.textContent = state.pdfBusy ? '处理中…' : `开始${watermarkModeLabel}`
   pdfClearFilesButton.disabled = state.pdfBusy || fileCount === 0
   pdfAddFilesButton.disabled = state.pdfBusy
   pdfChooseOutputButton.disabled = state.pdfBusy || !enoughFiles
@@ -1180,6 +1181,7 @@ function updatePdfState(action) {
   pdfDropZone.classList.toggle('native-picker', config.kind === 'office')
   pdfDropZone.hidden = isPdfWatermarkAction(action)
   pdfWatermarkWorkbench.hidden = !isPdfWatermarkAction(action)
+  document.querySelector('#page-pdf').classList.toggle('watermark-mode', isPdfWatermarkAction(action))
   document.querySelector('#pdf-crumb').textContent = action
   document.querySelector('#pdf-empty-text').textContent = `拖入 ${config.inputLabel} 文件到这里`
   pdfEmptyAddLabel.textContent = `上传 ${config.inputLabel}`
@@ -2332,8 +2334,7 @@ async function runPdfAction() {
     else if (action === '逐页拆分') message = await splitPdfFile()
     else if (action === '旋转 PDF') message = await rotatePdfFile()
     else if (action === '提取指定页') message = await extractPdfPages()
-    else if (action === '文字水印') message = await addPdfWatermarks('text')
-    else if (action === '图片水印') message = await addPdfWatermarks('image')
+    else if (action === '添加水印') message = await addPdfWatermarks(state.pdfWatermarkMode)
     else if (action === '添加页码') message = await addPdfPageNumbers()
     else if (action === '页重排') message = await saveReorderedPdf()
     else if (action === '提取图片') message = await extractEmbeddedPdfImages()
@@ -2393,9 +2394,12 @@ pdfAddFilesButton.addEventListener('click', async () => {
   }
 })
 pdfEmptyAddButton.addEventListener('click', () => pdfAddFilesButton.click())
-pdfWatermarkAddFilesButton.addEventListener('click', () => {
-  pdfFileInput.value = ''
-  pdfFileInput.click()
+document.querySelector('.pdf-watermark-mode').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-watermark-mode]')
+  if (!button || state.pdfBusy || button.dataset.watermarkMode === state.pdfWatermarkMode) return
+  state.pdfWatermarkMode = button.dataset.watermarkMode
+  renderPdfWatermarkState()
+  updatePdfRunState()
 })
 pdfChooseOutputButton.addEventListener('click', async () => {
   if (state.pdfBusy || pdfChooseOutputButton.disabled) return
@@ -2567,6 +2571,7 @@ async function addPdfFilesFromDrop(files) {
   }
 }
 pdfRunButton.addEventListener('click', runPdfAction)
+pdfWatermarkRunButton.addEventListener('click', () => pdfRunButton.click())
 pdfOpenOutputButton.addEventListener('click', async () => {
   if (!state.pdfLastOutput && !state.pdfComResult) return
   try {

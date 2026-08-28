@@ -82,7 +82,6 @@
                   </div>
                   <div class="pdf-file-body" id="pdf-file-body"></div>
                   <div class="empty" id="pdf-empty">
-                    <div class="empty-icon">PDF</div>
                     <div id="pdf-empty-text">拖入 PDF 文件到这里</div>
                     <small>支持拖入文件或文件夹，也可以手动选择</small>
                     <button class="gbtn" id="pdf-empty-add" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-add"></use></svg><span id="pdf-empty-add-label">上传 PDF</span></button>
@@ -90,21 +89,17 @@
                 </div>
                 <div class="pdf-watermark-workbench" id="pdf-watermark-workbench" hidden>
                   <div class="pdf-watermark-left">
-                    <section class="glass-card pdf-watermark-upload">
-                      <header>
-                        <div>
-                          <b>上传文件</b>
-                          <span>选择文件后可在下方预览</span>
-                        </div>
-                        <button class="gbtn" id="pdf-watermark-add-files" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 上传 PDF</button>
-                      </header>
-                      <div class="pdf-watermark-file-list" id="pdf-watermark-file-list"></div>
-                    </section>
                     <section class="glass-card pdf-watermark-preview-card">
                       <header>
-                        <b>水印预览</b>
-                        <span id="pdf-watermark-preview-label">添加 PDF 后显示第一页</span>
+                        <div>
+                          <b>水印预览</b>
+                          <span id="pdf-watermark-preview-label">添加 PDF 后显示第一页</span>
+                        </div>
                       </header>
+                      <div class="pdf-watermark-file-strip">
+                        <span>文件</span>
+                        <div class="pdf-watermark-file-list" id="pdf-watermark-file-list"></div>
+                      </div>
                       <div class="pdf-watermark-preview-stage">
                         <canvas id="pdf-watermark-preview"></canvas>
                         <div class="empty" id="pdf-watermark-preview-empty">添加 PDF 后显示预览</div>
@@ -117,8 +112,16 @@
                     </section>
                   </div>
                   <aside class="glass-card pdf-watermark-controls">
+                    <div class="pdf-watermark-controls-title">水印设置</div>
+                    <section class="pdf-watermark-mode-section">
+                      <h3>水印类型</h3>
+                      <div class="pdf-watermark-mode" role="group" aria-label="水印类型">
+                        <button id="pdf-watermark-mode-text" type="button" data-watermark-mode="text">文字水印</button>
+                        <button id="pdf-watermark-mode-image" type="button" data-watermark-mode="image">图片水印</button>
+                      </div>
+                    </section>
                     <section id="pdf-watermark-source-controls">
-                      <h3>水印内容</h3>
+                      <h3>内容</h3>
                       <label>水印文本
                         <input id="pdf-watermark-text" type="text" value="摸鱼工具箱" maxlength="80" />
                       </label>
@@ -193,6 +196,7 @@
                         </select>
                       </label>
                     </section>
+                    <button class="primary pdf-watermark-run" id="run-pdf-watermark-action" type="button" disabled>开始文字水印</button>
                   </aside>
                 </div>
                 <div class="glass-card result pdf-result-card">
