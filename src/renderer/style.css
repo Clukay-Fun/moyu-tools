@@ -1562,7 +1562,7 @@ label {
 }
 
 #pdf-drop-zone {
-  height: 220px;
+  height: 280px;
   min-height: 180px;
   max-height: 520px;
   flex: none;
@@ -1745,6 +1745,15 @@ label {
 .pdf-remove-file:hover {
   color: #d54f50;
   background: rgba(213, 79, 80, 0.1);
+}
+
+#pdf-drop-zone .pdf-remove-file {
+  color: #d54f50;
+  background: rgba(213, 79, 80, 0.08);
+}
+
+#pdf-drop-zone .pdf-remove-file:hover {
+  background: rgba(213, 79, 80, 0.16);
 }
 
 .result,
