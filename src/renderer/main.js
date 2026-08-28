@@ -880,9 +880,6 @@ function renderPdfFiles() {
     ? (state.pdfNativeInput ? [state.pdfNativeInput] : [])
     : currentPdfFiles()
   pdfEmpty.classList.toggle('hidden', displayedFiles.length > 0)
-  pdfDropZone.style.height = displayedFiles.length
-    ? `${Math.min(520, Math.max(180, 40 + displayedFiles.length * 52))}px`
-    : '280px'
 
   displayedFiles.forEach((file, index) => {
     const row = document.createElement('div')

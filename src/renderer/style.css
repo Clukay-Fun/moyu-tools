@@ -1562,10 +1562,8 @@ label {
 }
 
 #pdf-drop-zone {
-  height: 280px;
-  min-height: 180px;
-  max-height: 520px;
-  flex: none;
+  min-height: 220px;
+  flex: 1 1 0;
 }
 
 .pdf-list-title {
@@ -1769,7 +1767,11 @@ label {
 
 .pdf-result-card {
   display: grid;
+  height: 116px;
+  min-height: 116px;
+  flex: none;
   gap: 0;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   padding: 0;
 }
 
