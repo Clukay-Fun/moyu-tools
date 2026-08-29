@@ -224,33 +224,53 @@
                 <div class="crumb">Illustrator › <b>批量处理</b></div>
                 <div class="toolbar toolbar-wrap">
                   <button class="gbtn" id="illustrator-add-files" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 添加文件</button>
-                  <button class="gbtn" id="illustrator-add-folder" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-folder-add"></use></svg> 文件夹</button>
+                  <button class="gbtn" id="illustrator-add-folder" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-folder-add"></use></svg> 添加文件夹</button>
                   <button class="gbtn ghost" id="illustrator-clear" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
-                  <label class="toggle-wrap"><input id="illustrator-same-directory" type="checkbox" checked /><span class="toggle"></span>与原文件同目录</label>
+                </div>
+                <div class="glass-card illustrator-config">
+                  <div class="illustrator-config-group">
+                    <span class="section-label">处理类型</span>
+                    <div class="illustrator-mode-switch" role="radiogroup" aria-label="Illustrator 处理类型">
+                      <button class="active" type="button" role="radio" aria-checked="true" data-illustrator-action="standard-pdf">导出 PDF</button>
+                      <button type="button" role="radio" aria-checked="false" data-illustrator-action="minimal-pdf">最小化 PDF</button>
+                      <button type="button" role="radio" aria-checked="false" data-illustrator-action="outline">文字转曲</button>
+                    </div>
+                  </div>
+                  <label class="toggle-wrap"><input id="illustrator-same-directory" type="checkbox" checked /><span class="toggle"></span>输出到原文件目录</label>
                   <span class="toolbar-space"></span>
-                  <button class="primary illustrator-run" type="button" data-illustrator-action="standard-pdf" disabled><svg class="ic" aria-hidden="true"><use href="#ic-export"></use></svg>导出 PDF</button>
-                  <button class="gbtn illustrator-run" type="button" data-illustrator-action="minimal-pdf" disabled>最小化 PDF</button>
-                  <button class="gbtn illustrator-run" type="button" data-illustrator-action="outline" disabled>文字转曲</button>
-                  <button class="gbtn danger" id="illustrator-stop" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-stop"></use></svg>停止任务</button>
+                  <button class="primary" id="illustrator-run" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>开始处理</button>
+                  <button class="gbtn danger" id="illustrator-stop" type="button" hidden><svg class="ic" aria-hidden="true"><use href="#ic-stop"></use></svg>停止任务</button>
                 </div>
                 <div class="glass-card file-list file-drop-target" id="illustrator-drop-zone">
+                  <div class="pdf-list-title">文件列表</div>
                   <div class="file-head">
-                    <span class="cell-index">#</span><span class="cell-name">文件名</span>
-                    <span class="cell-meta">大小</span><span class="cell-status">状态</span>
+                    <span class="cell-name">文件名</span>
+                    <span class="cell-meta">大小</span><span class="cell-status">状态</span><span class="cell-action" aria-label="操作"></span>
                   </div>
                   <div class="pdf-file-body" id="illustrator-file-body"></div>
                   <div class="empty" id="illustrator-empty">
-                    <div class="empty-icon">Ai</div>
-                    <div>添加 Illustrator 文件后开始批量处理</div>
-                    <small>点击添加或拖入 .ai 文件 · 需要 Windows 与已安装的 Adobe Illustrator</small>
+                    <div>拖入 Illustrator 文件或文件夹</div>
+                    <small>支持 .ai 文件 · 需要 Windows 与已安装的 Adobe Illustrator</small>
+                    <div class="illustrator-empty-actions">
+                      <button class="gbtn" id="illustrator-empty-add-files" type="button">添加文件</button>
+                      <button class="gbtn" id="illustrator-empty-add-folder" type="button">添加文件夹</button>
+                    </div>
                   </div>
                 </div>
-                <div class="glass-card run-card">
-                  <div class="progress-track"><div class="progress-fill" id="illustrator-progress-fill"></div></div>
-                  <span class="progress-text" id="illustrator-progress-text">等待任务</span>
-                  <button class="gbtn open" id="illustrator-open-output" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-open"></use></svg>打开输出</button>
+                <div class="glass-card illustrator-progress-card">
+                  <div class="illustrator-section-head">
+                    <div><b>批处理进度</b><span id="illustrator-progress-summary">0 个文件 · 等待任务</span></div>
+                    <button class="gbtn open" id="illustrator-open-output" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-open"></use></svg>打开输出目录</button>
+                  </div>
+                  <div class="illustrator-progress-row">
+                    <div class="progress-track"><div class="progress-fill" id="illustrator-progress-fill"></div></div>
+                    <span class="progress-text" id="illustrator-progress-text">等待任务</span>
+                  </div>
                 </div>
-                <div class="glass-card log-card"><div class="log-inner" id="illustrator-log">等待添加 Illustrator 文件。</div></div>
+                <div class="glass-card log-card illustrator-log-card">
+                  <div class="illustrator-log-title">运行日志</div>
+                  <div class="log-inner" id="illustrator-log">等待添加 Illustrator 文件。</div>
+                </div>
               </section>
 
               <section class="page" id="page-bc">
@@ -445,7 +465,6 @@
               </div>
 
               <div class="canvas-empty" id="board-empty">
-                      <div class="empty-icon">▦</div>
                       <div>截图、导入或粘贴图片，都会落到这块画布上</div>
                       <small>单击编排 · 双击编辑图片</small>
                     </div>
@@ -537,7 +556,6 @@
                     </header>
                     <div class="format-file-list" id="format-file-list"></div>
                     <div class="empty" id="format-empty">
-                      <div class="empty-icon">▶</div>
                       <div id="format-empty-title">添加视频文件</div>
                       <small>支持拖入、批量选择或读取文件夹</small>
                     </div>

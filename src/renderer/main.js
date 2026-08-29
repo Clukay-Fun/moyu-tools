@@ -3805,9 +3805,17 @@ const illustratorStopButton = document.querySelector('#illustrator-stop')
 const illustratorSameDirectory = document.querySelector('#illustrator-same-directory')
 const illustratorProgressFill = document.querySelector('#illustrator-progress-fill')
 const illustratorProgressText = document.querySelector('#illustrator-progress-text')
+const illustratorProgressSummary = document.querySelector('#illustrator-progress-summary')
 const illustratorLog = document.querySelector('#illustrator-log')
 const illustratorOpenOutputButton = document.querySelector('#illustrator-open-output')
-const illustratorRunButtons = Array.from(document.querySelectorAll('.illustrator-run'))
+const illustratorRunButton = document.querySelector('#illustrator-run')
+const illustratorModeButtons = Array.from(document.querySelectorAll('.illustrator-mode-switch button'))
+const illustratorModeLabels = {
+  'standard-pdf': '导出 PDF',
+  'minimal-pdf': '最小化 PDF',
+  outline: '文字转曲'
+}
+let illustratorSelectedAction = 'standard-pdf'
 
 function illustratorFileSize(bytes) {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
@@ -3825,21 +3833,18 @@ function renderIllustratorFiles() {
   illustratorFileBody.replaceChildren()
   illustratorEmpty.classList.toggle('hidden', illustratorState.inputs.length > 0)
 
-  illustratorState.inputs.forEach((file, index) => {
+  illustratorState.inputs.forEach((file) => {
     const row = document.createElement('div')
-    const order = document.createElement('span')
     const name = document.createElement('span')
     const size = document.createElement('span')
     const status = document.createElement('span')
     const remove = document.createElement('button')
-    const currentStatus = illustratorState.statuses.get(file.id) || '等待'
+    const currentStatus = illustratorState.statuses.get(file.id) || '待处理'
 
     row.className = 'pdf-file-row illustrator-file-row'
-    order.className = 'cell-index'
     name.className = 'cell-name'
     size.className = 'cell-meta'
     status.className = `cell-status illustrator-status ${currentStatus === '完成' ? 'success' : currentStatus === '处理中' ? 'busy' : currentStatus === '失败' ? 'error' : ''}`
-    order.textContent = String(index + 1)
     name.textContent = file.name
     name.title = file.name
     size.textContent = illustratorFileSize(file.size)
@@ -3850,18 +3855,29 @@ function renderIllustratorFiles() {
     remove.disabled = illustratorState.busy
     remove.setAttribute('aria-label', `移除 ${file.name}`)
     remove.textContent = '×'
-    row.append(order, name, size, status, remove)
+    row.append(name, size, status, remove)
     illustratorFileBody.append(row)
   })
 
   const hasFiles = illustratorState.inputs.length > 0
+  const completed = illustratorState.inputs.filter((file) => illustratorState.statuses.get(file.id) === '完成').length
+  const failed = illustratorState.inputs.filter((file) => illustratorState.statuses.get(file.id) === '失败').length
+  illustratorProgressSummary.textContent = hasFiles
+    ? `${illustratorState.inputs.length} 个文件 · 已完成 ${completed} 个 · 失败 ${failed} 个`
+    : '0 个文件 · 等待任务'
   illustratorAddFilesButton.disabled = illustratorState.busy
   illustratorAddFolderButton.disabled = illustratorState.busy
   illustratorClearButton.disabled = illustratorState.busy || !hasFiles
   illustratorSameDirectory.disabled = illustratorState.busy
-  illustratorRunButtons.forEach((button) => {
-    button.disabled = illustratorState.busy || !hasFiles
+  illustratorModeButtons.forEach((button) => {
+    const selected = button.dataset.illustratorAction === illustratorSelectedAction
+    button.classList.toggle('active', selected)
+    button.setAttribute('aria-checked', String(selected))
+    button.disabled = illustratorState.busy
   })
+  illustratorRunButton.disabled = illustratorState.busy || !hasFiles
+  illustratorRunButton.hidden = illustratorState.busy
+  illustratorStopButton.hidden = !illustratorState.busy
   illustratorStopButton.disabled = !illustratorState.busy
 }
 
@@ -3883,7 +3899,7 @@ async function addIllustratorInputs(picker) {
     })
     if (skippedIds.length) await window.api.removeIllustratorInputs(skippedIds)
     illustratorState.inputs.push(...added)
-    added.forEach((file) => illustratorState.statuses.set(file.id, '等待'))
+    added.forEach((file) => illustratorState.statuses.set(file.id, '待处理'))
     illustratorState.outputs = []
     illustratorOpenOutputButton.disabled = true
     renderIllustratorFiles()
@@ -3894,18 +3910,17 @@ async function addIllustratorInputs(picker) {
   }
 }
 
-async function runIllustratorAction(action, triggerButton) {
+async function runIllustratorAction(action) {
   if (illustratorState.busy || !illustratorState.inputs.length) return
   illustratorState.busy = true
   illustratorState.outputs = []
   illustratorOpenOutputButton.disabled = true
-  illustratorState.inputs.forEach((file) => illustratorState.statuses.set(file.id, '等待'))
+  illustratorState.inputs.forEach((file) => illustratorState.statuses.set(file.id, '待处理'))
   illustratorProgressFill.style.width = '0%'
   illustratorProgressText.textContent = '正在启动 Illustrator…'
   renderIllustratorFiles()
-  const originalLabel = triggerButton.textContent
-  triggerButton.textContent = '处理中…'
-  appendIllustratorLog(`开始${originalLabel}，共 ${illustratorState.inputs.length} 个文件。`)
+  const actionLabel = illustratorModeLabels[action]
+  appendIllustratorLog(`开始${actionLabel}，共 ${illustratorState.inputs.length} 个文件。`)
 
   try {
     const result = await window.api.runIllustratorTask({
@@ -3919,8 +3934,8 @@ async function runIllustratorAction(action, triggerButton) {
       illustratorProgressFill.style.width = '100%'
       illustratorProgressText.textContent = `已完成 ${result.outputs.length} / ${illustratorState.inputs.length}`
       illustratorOpenOutputButton.disabled = result.outputs.length === 0
-      appendIllustratorLog(`${originalLabel}完成，已生成 ${result.outputs.length} 个文件。`)
-      showToast(`${originalLabel}完成`)
+      appendIllustratorLog(`${actionLabel}完成，已生成 ${result.outputs.length} 个文件。`)
+      showToast(`${actionLabel}完成`)
     } else {
       illustratorProgressText.textContent = '任务已取消'
       appendIllustratorLog('任务已取消；当前 COM 操作完成后停止。')
@@ -3937,13 +3952,14 @@ async function runIllustratorAction(action, triggerButton) {
     showToast('Illustrator 任务失败')
   } finally {
     illustratorState.busy = false
-    triggerButton.textContent = originalLabel
     renderIllustratorFiles()
   }
 }
 
 illustratorAddFilesButton.addEventListener('click', () => addIllustratorInputs(window.api.pickIllustratorFiles))
 illustratorAddFolderButton.addEventListener('click', () => addIllustratorInputs(window.api.pickIllustratorFolder))
+document.querySelector('#illustrator-empty-add-files').addEventListener('click', () => illustratorAddFilesButton.click())
+document.querySelector('#illustrator-empty-add-folder').addEventListener('click', () => illustratorAddFolderButton.click())
 bindFileDropZone(illustratorDropZone, async (files) => {
   if (illustratorState.busy) return
   try {
@@ -3984,9 +4000,14 @@ illustratorFileBody.addEventListener('click', async (event) => {
   illustratorState.statuses.delete(button.dataset.id)
   renderIllustratorFiles()
 })
-illustratorRunButtons.forEach((button) => {
-  button.addEventListener('click', () => runIllustratorAction(button.dataset.illustratorAction, button))
+illustratorModeButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    if (illustratorState.busy) return
+    illustratorSelectedAction = button.dataset.illustratorAction
+    renderIllustratorFiles()
+  })
 })
+illustratorRunButton.addEventListener('click', () => runIllustratorAction(illustratorSelectedAction))
 illustratorStopButton.addEventListener('click', async () => {
   const result = await window.api.cancelIllustratorTask()
   if (result.status === 'cancelling') {

@@ -1699,7 +1699,6 @@ label {
   text-align: center;
 }
 
-.empty-icon,
 .hint-mark {
   display: grid;
   width: 48px;
@@ -1783,6 +1782,130 @@ label {
 
 .illustrator-status.error {
   color: #d54f50;
+}
+
+.illustrator-config {
+  display: flex;
+  min-height: 76px;
+  flex: none;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: 12px 16px;
+}
+
+.illustrator-config-group {
+  display: grid;
+  gap: 6px;
+}
+
+.illustrator-config > .toggle-wrap,
+.illustrator-config > #illustrator-run,
+.illustrator-config > #illustrator-stop {
+  align-self: flex-end;
+}
+
+.illustrator-config > .toggle-wrap {
+  margin-bottom: 10px;
+}
+
+.section-label {
+  color: var(--faint);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.illustrator-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(94px, 1fr));
+  padding: 3px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-md);
+  background: var(--control-bg);
+}
+
+.illustrator-mode-switch button {
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.illustrator-mode-switch button.active {
+  color: var(--accent);
+  background: var(--accent-10);
+  font-weight: 650;
+}
+
+#illustrator-run[hidden],
+#illustrator-stop[hidden] {
+  display: none;
+}
+
+#illustrator-drop-zone {
+  min-height: 280px;
+  flex: 1 1 0;
+}
+
+#illustrator-drop-zone .pdf-remove-file {
+  color: #d54f50;
+  background: rgba(213, 79, 80, 0.08);
+}
+
+#illustrator-drop-zone .pdf-remove-file:hover {
+  background: rgba(213, 79, 80, 0.16);
+}
+
+.illustrator-empty-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.illustrator-progress-card {
+  display: grid;
+  min-height: 88px;
+  flex: none;
+  gap: 9px;
+  padding: 11px 14px;
+}
+
+.illustrator-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.illustrator-section-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+.illustrator-section-head b,
+.illustrator-log-title {
+  color: var(--foreground);
+  font-size: var(--fs-md);
+}
+
+.illustrator-section-head span {
+  color: var(--faint);
+  font-size: var(--fs-sm);
+}
+
+.illustrator-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.illustrator-log-card {
+  display: grid;
+  flex-basis: 112px;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 5px;
 }
 
 .pdf-remove-file {
@@ -4467,7 +4590,6 @@ body.keyboard-focus :where(
 .canvas-empty[hidden] {
   display: none;
 }
-.canvas-empty .empty-icon { font-size: 26px; opacity: 0.5; }
 .canvas-empty small { color: var(--faint); font-size: var(--fs-md); }
 
 /* 状态条：叠在画布底边，不占布局高度，不拦截鼠标 */
