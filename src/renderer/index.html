@@ -583,18 +583,19 @@
                 <div class="crumb">格式工厂 › <b id="format-crumb">视频转换</b></div>
                 <div class="toolbar toolbar-wrap">
                   <button class="gbtn" id="format-pick-files" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 添加视频</button>
-                  <button class="gbtn" id="format-pick-folder" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-folder-add"></use></svg> 文件夹</button>
+                  <button class="gbtn" id="format-pick-folder" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-folder-add"></use></svg> 添加文件夹</button>
                   <button class="gbtn ghost" id="format-clear-inputs" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
-                  <span class="toolbar-space"></span>
-                  <span class="format-runtime-state" id="format-runtime-state"><i></i>检查转换引擎…</span>
                 </div>
+                <p class="format-support-hint" id="format-support-hint">支持 MP4 / MOV / MKV / AVI / WebM 等格式</p>
                 <div class="format-workspace">
                   <section class="glass-card format-file-panel file-drop-target" id="format-drop-zone">
+                    <h2 class="format-section-title">文件列表</h2>
                     <header class="format-file-head">
-                      <span class="cell-index">#</span>
                       <span class="cell-name">文件名</span>
+                      <span class="cell-detail">规格</span>
                       <span class="cell-meta">大小</span>
-                      <span class="cell-status">进度</span>
+                      <span class="cell-target">输出</span>
+                      <span class="cell-status">状态</span>
                       <span aria-hidden="true"></span>
                     </header>
                     <div class="format-file-list" id="format-file-list"></div>
@@ -604,29 +605,28 @@
                     </div>
                   </section>
                   <aside class="glass-card format-control-panel">
-                    <div class="format-action-copy">
-                      <span id="format-action-mark">VID</span>
-                      <div>
-                        <b id="format-action-title">视频转换</b>
-                        <p id="format-action-copy">转换为 MP4、MKV 或 WebM。</p>
-                      </div>
+                    <div class="format-control-heading">
+                      <b id="format-action-title">转换设置</b>
+                      <p id="format-action-copy">转换为 MP4、MKV 或 WebM。</p>
                     </div>
                     <div class="format-options" id="format-options"></div>
                     <div class="format-engine-card">
-                      <span>本地处理引擎</span>
-                      <b id="format-engine-name">FFmpeg 6.1.1</b>
-                      <small id="format-engine-status">等待检查</small>
+                      <span class="format-runtime-state" id="format-runtime-state"><i></i><b id="format-engine-status">正在检查本地引擎…</b></span>
+                      <button class="format-engine-detail" id="format-engine-detail" type="button" hidden>查看详情</button>
                     </div>
                     <div class="format-control-actions">
-                      <button class="primary format-run" id="format-run-task" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>开始视频转换</button>
+                      <button class="primary format-run" id="format-run-task" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>视频转换</button>
                       <button class="gbtn format-cancel" id="format-cancel-task" type="button" hidden>取消任务</button>
                     </div>
                   </aside>
                 </div>
                 <div class="glass-card format-result-bar">
+                  <div class="format-progress-copy">
+                    <b>批处理进度</b>
+                    <span id="format-status-text">0 个文件 · 等待添加</span>
+                  </div>
                   <div class="format-progress-track"><span id="format-progress-fill"></span></div>
-                  <span id="format-status-text">添加文件后可开始</span>
-                  <button class="gbtn" id="format-save-results" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-save"></use></svg>保存结果</button>
+                  <button class="gbtn" id="format-save-results" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-save"></use></svg>保存到文件夹</button>
                 </div>
               </section>
 

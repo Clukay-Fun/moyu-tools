@@ -3945,6 +3945,12 @@ label {
   font-size: var(--fs-md);
 }
 
+.format-support-hint {
+  margin: -4px 0 var(--sp-3);
+  color: var(--faint);
+  font-size: var(--fs-sm);
+}
+
 .format-runtime-state i {
   width: 7px;
   height: 7px;
@@ -3962,9 +3968,9 @@ label {
 
 .format-workspace {
   display: grid;
-  min-height: 0;
+  min-height: 560px;
   flex: 1;
-  grid-template-columns: minmax(360px, 1fr) 250px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
   gap: var(--sp-4);
 }
 
@@ -3974,10 +3980,18 @@ label {
   overflow: hidden;
 }
 
+.format-section-title {
+  height: 48px;
+  margin: 0;
+  padding: 15px 18px 0;
+  color: var(--foreground);
+  font-size: var(--fs-lg);
+}
+
 .format-file-head,
 .format-file-item {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) 72px minmax(90px, auto) 28px;
+  grid-template-columns: minmax(140px, 1fr) minmax(72px, 0.45fr) 72px minmax(68px, 0.4fr) minmax(82px, 0.5fr) 28px;
   gap: var(--sp-3);
   align-items: center;
 }
@@ -3992,7 +4006,7 @@ label {
 }
 
 .format-file-list {
-  max-height: calc(100% - 42px);
+  max-height: calc(100% - 90px);
   padding: 6px 9px;
   overflow: auto;
 }
@@ -4009,17 +4023,12 @@ label {
   border-bottom: 0;
 }
 
-.format-file-item .format-index {
-  color: var(--faint);
-  text-align: center;
-}
-
 .format-file-item .format-name {
   min-width: 0;
 }
 
 .format-file-item .format-name b,
-.format-file-item .format-name small {
+.format-file-item .format-detail {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4031,10 +4040,14 @@ label {
   font-size: var(--fs-md);
 }
 
-.format-file-item .format-name small {
-  margin-top: 3px;
+.format-file-item .format-detail,
+.format-file-item .format-target {
+  min-width: 0;
+  overflow: hidden;
   color: var(--faint);
   font-size: var(--fs-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .format-file-item .format-size {
@@ -4084,7 +4097,7 @@ label {
 
 .format-file-panel > .empty {
   position: absolute;
-  inset: 42px 0 0;
+  inset: 90px 0 0;
 }
 
 .format-file-panel > .empty[hidden] {
@@ -4097,29 +4110,15 @@ label {
   grid-template-rows: auto minmax(0, 1fr) auto auto;
   gap: var(--sp-4);
   padding: var(--sp-5);
-  overflow: hidden;
+  overflow: visible;
 }
 
-.format-action-copy {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--sp-3);
+.format-control-heading b {
+  color: var(--foreground);
+  font-size: var(--fs-lg);
 }
 
-.format-action-copy > span {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  flex: none;
-  place-items: center;
-  border-radius: var(--r-md);
-  color: var(--accent);
-  background: var(--accent-10);
-  font-size: 10px;
-  font-weight: 800;
-}
-
-.format-action-copy p {
+.format-control-heading p {
   margin: 4px 0 0;
   color: var(--faint);
   font-size: var(--fs-sm);
@@ -4128,10 +4127,17 @@ label {
 
 .format-options {
   display: grid;
-  min-height: 0;
+  min-height: max-content;
   gap: var(--sp-4);
   padding-right: 3px;
-  overflow: auto;
+  overflow: visible;
+}
+
+.format-options::before {
+  content: "基础设置";
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  font-weight: 700;
 }
 
 .format-options label {
@@ -4162,22 +4168,43 @@ label {
 }
 
 .format-engine-card {
-  display: grid;
-  gap: var(--sp-1);
-  padding: var(--sp-4);
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: 10px 12px;
   border: 1px solid var(--hairline);
   border-radius: var(--r-md);
   background: var(--card-thin);
 }
 
-.format-engine-card span,
-.format-engine-card small {
+.format-engine-card span {
+  min-width: 0;
   color: var(--faint);
   font-size: var(--fs-xs);
 }
 
+.format-engine-card b {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.format-engine-detail {
+  flex: none;
+  padding: 0;
+  border: 0;
+  color: var(--accent);
+  background: transparent;
+  font: inherit;
+  font-size: var(--fs-xs);
+  cursor: pointer;
+}
+
 .format-control-actions {
-  display: grid;
+  display: flex;
   gap: var(--sp-3);
   margin: auto -16px -16px;
   padding: 12px 16px 16px;
@@ -4187,21 +4214,33 @@ label {
 }
 
 .format-run {
-  width: 100%;
+  min-width: 0;
+  flex: 1;
 }
 
 .format-cancel {
-  width: 100%;
+  min-width: 0;
+  flex: 1;
   color: #d7525b;
 }
 
 .format-result-bar {
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) minmax(180px, auto) auto;
+  grid-template-columns: minmax(160px, auto) minmax(120px, 1fr) auto;
   gap: var(--sp-4);
   align-items: center;
-  min-height: 54px;
-  padding: 9px 12px;
+  min-height: 68px;
+  padding: 10px 14px;
+}
+
+.format-progress-copy {
+  display: grid;
+  gap: 3px;
+}
+
+.format-progress-copy b {
+  color: var(--foreground);
+  font-size: var(--fs-sm);
 }
 
 .format-progress-track {
@@ -4223,7 +4262,6 @@ label {
 #format-status-text {
   color: var(--faint);
   font-size: var(--fs-sm);
-  text-align: right;
 }
 
 /* ══ V1 · 图标基类 ══
@@ -4306,6 +4344,24 @@ body.keyboard-focus :where(
   height: 0;
 }
 
+@media (max-width: 1100px) {
+  .format-workspace {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+
+  .format-file-head,
+  .format-file-item {
+    grid-template-columns: minmax(120px, 1fr) minmax(64px, 0.45fr) minmax(74px, 0.55fr) 28px;
+  }
+
+  .format-file-head .cell-detail,
+  .format-file-head .cell-meta,
+  .format-file-item .format-detail,
+  .format-file-item .format-size {
+    display: none;
+  }
+}
+
 @media (max-width: 940px) {
   .brand b,
   .slogan {
@@ -4329,9 +4385,6 @@ body.keyboard-focus :where(
     width: 190px;
   }
 
-  .format-workspace {
-    grid-template-columns: 1fr 220px;
-  }
 }
 
 @media (max-height: 760px) {
@@ -4383,7 +4436,7 @@ body.keyboard-focus :where(
   }
 
   .format-workspace {
-    grid-template-columns: minmax(220px, 1fr) 190px;
+    grid-template-columns: 1fr;
   }
 
   .pdf-watermark-workbench {
@@ -4404,22 +4457,25 @@ body.keyboard-focus :where(
 
   .format-file-head,
   .format-file-item {
-    grid-template-columns: 34px minmax(0, 1fr) minmax(84px, auto) 28px;
+    grid-template-columns: minmax(0, 1fr) minmax(84px, auto) 28px;
   }
 
+  .format-file-head .cell-detail,
   .format-file-head .cell-meta,
-  .format-file-item .format-size {
+  .format-file-head .cell-target,
+  .format-file-item .format-detail,
+  .format-file-item .format-size,
+  .format-file-item .format-target {
     display: none;
   }
 
   .format-result-bar {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  #format-status-text {
+  .format-progress-track {
     grid-column: 1 / -1;
-    grid-row: 1;
-    text-align: left;
+    grid-row: 2;
   }
 }
 
@@ -5243,6 +5299,17 @@ body.keyboard-focus :where(
 
 .format-options .app-select-trigger {
   grid-column: 1 / -1;
+}
+
+.format-options label:has(select),
+.format-options label:has(.app-select-trigger) {
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--sp-3);
+}
+
+.format-options label > .app-select-trigger {
+  grid-column: 2;
 }
 
 .barcode-font-picker .app-select-trigger,

@@ -5402,41 +5402,41 @@ const formatActionConfigs = {
     kind: 'video',
     mark: 'VID',
     copy: '转换为 MP4、MKV 或 WebM。',
-    runLabel: '开始视频转换',
+    runLabel: '视频转换',
     targets: [['mp4', 'MP4 · H.264'], ['mkv', 'MKV · H.264'], ['webm', 'WebM · VP9']]
   },
   视频压缩: {
     kind: 'video',
     mark: 'ZIP',
     copy: '使用 H.264 CRF 档位缩小视频体积。',
-    runLabel: '开始压缩视频'
+    runLabel: '视频压缩'
   },
   抽取音频: {
     kind: 'video',
     mark: 'MP3',
     copy: '从视频中导出 MP3、AAC、WAV 或 FLAC。',
-    runLabel: '开始抽取音频',
+    runLabel: '抽取音频',
     targets: [['mp3', 'MP3'], ['m4a', 'AAC / M4A'], ['wav', 'WAV'], ['flac', 'FLAC']]
   },
   音频转换: {
     kind: 'audio',
     mark: 'AUD',
     copy: '在常用音频格式之间批量转换。',
-    runLabel: '开始音频转换',
+    runLabel: '音频转换',
     targets: [['mp3', 'MP3'], ['m4a', 'AAC / M4A'], ['wav', 'WAV'], ['flac', 'FLAC']]
   },
   图片转换: {
     kind: 'image',
     mark: 'IMG',
     copy: '由 sharp 批量输出常用图片格式。',
-    runLabel: '开始图片转换',
+    runLabel: '图片转换',
     targets: [['webp', 'WebP'], ['jpeg', 'JPEG'], ['png', 'PNG'], ['avif', 'AVIF'], ['tiff', 'TIFF'], ['gif', 'GIF']]
   },
   图片压缩: {
     kind: 'image',
     mark: 'MIN',
     copy: '保持原格式，按质量与最大宽度批量压缩。',
-    runLabel: '开始图片压缩'
+    runLabel: '图片压缩'
   }
 }
 
@@ -5449,6 +5449,7 @@ const formatSaveButton = document.querySelector('#format-save-results')
 const formatProgressFill = document.querySelector('#format-progress-fill')
 const formatStatusText = document.querySelector('#format-status-text')
 const formatRuntimeState = document.querySelector('#format-runtime-state')
+const formatEngineDetailButton = document.querySelector('#format-engine-detail')
 const formatState = {
   inputs: [],
   results: [],
@@ -5458,7 +5459,8 @@ const formatState = {
   saving: false,
   taskId: '',
   ffmpegReady: false,
-  sharpReady: false
+  sharpReady: false,
+  engineDetail: ''
 }
 
 function formatConfig() {
@@ -5476,21 +5478,22 @@ function renderFormatFiles() {
   formatEmpty.hidden = formatState.inputs.length > 0
   const resultInputIds = new Set(formatState.results.map((result) => result.inputId))
   const fragment = document.createDocumentFragment()
-  formatState.inputs.forEach((input, index) => {
+  formatState.inputs.forEach((input) => {
     const row = document.createElement('article')
-    const indexNode = document.createElement('span')
     const nameNode = document.createElement('span')
     const name = document.createElement('b')
     const detail = document.createElement('small')
     const size = document.createElement('span')
+    const target = document.createElement('span')
     const status = document.createElement('span')
     const remove = document.createElement('button')
     const error = formatState.errorsByInput.get(input.id)
     const progress = formatState.progressByInput.get(input.id)
     row.className = 'format-file-item'
-    indexNode.className = 'format-index'
     nameNode.className = 'format-name'
+    detail.className = 'format-detail'
     size.className = 'format-size'
+    target.className = 'format-target'
     status.className = 'format-file-status'
     remove.className = 'format-remove'
     remove.type = 'button'
@@ -5498,7 +5501,6 @@ function renderFormatFiles() {
     remove.setAttribute('aria-label', `移除 ${input.name}`)
     remove.textContent = '×'
     remove.disabled = formatState.busy
-    indexNode.textContent = String(index + 1)
     name.textContent = input.name
     const inputDetail = input.dimensions?.width
       ? `${input.dimensions.width} × ${input.dimensions.height}`
@@ -5506,6 +5508,8 @@ function renderFormatFiles() {
     detail.textContent = error || inputDetail
     detail.title = error || ''
     size.textContent = formatSize(input.size)
+    target.textContent = formatOptions.querySelector('#format-target')?.selectedOptions?.[0]?.textContent
+      || (state.selections.video.includes('压缩') ? '原格式' : '—')
     if (error) {
       status.textContent = '导出失败'
       status.classList.add('error')
@@ -5519,8 +5523,8 @@ function renderFormatFiles() {
     } else {
       status.textContent = '等待处理'
     }
-    nameNode.append(name, detail)
-    row.append(indexNode, nameNode, size, status, remove)
+    nameNode.append(name)
+    row.append(nameNode, detail, size, target, status, remove)
     fragment.append(row)
   })
   formatFileList.append(fragment)
@@ -5591,6 +5595,7 @@ function renderFormatOptions() {
   bitrate?.addEventListener('input', () => {
     formatOptions.querySelector('#format-bitrate-value').textContent = `${bitrate.value} kbps`
   })
+  formatOptions.querySelector('#format-target')?.addEventListener('change', renderFormatFiles)
 }
 
 function setFormatAction(action, indicatorFromTop = null) {
@@ -5599,20 +5604,24 @@ function setFormatAction(action, indicatorFromTop = null) {
   state.selections.video = action
   const config = formatConfig()
   document.querySelector('#format-crumb').textContent = action
-  document.querySelector('#format-action-title').textContent = action
-  document.querySelector('#format-action-mark').textContent = config.mark
+  document.querySelector('#format-action-title').textContent = `${action}设置`
   document.querySelector('#format-action-copy').textContent = config.copy
   document.querySelector('#format-empty-title').textContent =
     `添加${config.kind === 'video' ? '视频' : config.kind === 'audio' ? '音频' : '图片'}文件`
   document.querySelector('#format-pick-files').textContent =
     `＋ 添加${config.kind === 'video' ? '视频' : config.kind === 'audio' ? '音频' : '图片'}`
+  document.querySelector('#format-support-hint').textContent = config.kind === 'video'
+    ? '支持 MP4 / MOV / MKV / AVI / WebM 等格式'
+    : config.kind === 'audio'
+      ? '支持 MP3 / AAC / WAV / FLAC / OGG 等格式'
+      : '支持 JPG / PNG / WebP / AVIF / TIFF / GIF 等格式'
   formatRunButton.textContent = config.runLabel
   if (previousKind !== config.kind && formatState.inputs.length) clearFormatInputs()
   formatState.results = []
   formatState.progressByInput.clear()
   formatState.errorsByInput.clear()
   formatProgressFill.style.width = '0'
-  formatStatusText.textContent = formatState.inputs.length ? '准备就绪' : '添加文件后可开始'
+  formatStatusText.textContent = formatState.inputs.length ? `${formatState.inputs.length} 个文件 · 准备就绪` : '0 个文件 · 等待添加'
   renderFormatOptions()
   renderSubmenu('video', indicatorFromTop)
   renderFormatFiles()
@@ -5694,7 +5703,7 @@ async function clearFormatInputs() {
   formatState.errorsByInput.clear()
   formatState.taskId = ''
   formatProgressFill.style.width = '0'
-  formatStatusText.textContent = '添加文件后可开始'
+  formatStatusText.textContent = '0 个文件 · 等待添加'
   renderFormatFiles()
   if (ids.length) await window.api.removeFormatInputs(ids).catch(() => {})
 }
@@ -5790,21 +5799,22 @@ async function loadFormatRuntimeStatus() {
     const ready = formatConfig().kind === 'image' ? formatState.sharpReady : formatState.ffmpegReady
     formatRuntimeState.classList.toggle('ready', ready)
     formatRuntimeState.classList.toggle('error', !ready)
-    formatRuntimeState.lastChild.textContent = ready
-      ? formatConfig().kind === 'image'
-        ? `sharp ${status.sharp.sharp}`
-        : `${status.ffmpegVersion || 'FFmpeg'} · 编码器就绪`
-      : formatConfig().kind === 'image' ? 'sharp 未能加载' : status.ffmpegMessage
-    document.querySelector('#format-engine-name').textContent =
-      formatConfig().kind === 'image'
-        ? `sharp ${status.sharp?.sharp || ''}`
-        : (status.ffmpegVersion || 'FFmpeg')
-    document.querySelector('#format-engine-status').textContent =
-      ready ? '本地引擎可用' : '当前环境不可用'
+    const engineName = formatConfig().kind === 'image'
+      ? `sharp ${status.sharp?.sharp || ''}`.trim()
+      : (status.ffmpegVersion || 'FFmpeg')
+    document.querySelector('#format-engine-status').textContent = ready
+      ? `本地引擎正常 · ${engineName}`
+      : '转换引擎暂不可用，请检查本地处理组件'
+    formatState.engineDetail = ready
+      ? `${engineName} 已就绪`
+      : (formatConfig().kind === 'image' ? 'sharp 未能加载' : status.ffmpegMessage)
+    formatEngineDetailButton.hidden = ready
     updateFormatControls()
   } catch (error) {
     formatRuntimeState.classList.add('error')
-    formatRuntimeState.lastChild.textContent = `引擎检查失败：${error.message}`
+    document.querySelector('#format-engine-status').textContent = '转换引擎暂不可用，请检查本地处理组件'
+    formatState.engineDetail = cleanIpcError(error?.message ?? error)
+    formatEngineDetailButton.hidden = false
   }
 }
 
@@ -5825,6 +5835,9 @@ formatFileList.addEventListener('click', async (event) => {
 formatRunButton.addEventListener('click', runFormatTask)
 formatCancelButton.addEventListener('click', cancelFormatTask)
 formatSaveButton.addEventListener('click', saveFormatResults)
+formatEngineDetailButton.addEventListener('click', () => {
+  showToast(formatState.engineDetail || '暂无更多引擎信息')
+})
 window.api.onFormatProgress((progress) => {
   if (progress.status === 'running' && progress.taskId === formatState.taskId) {
     const overall = (progress.completed + (progress.fileProgress || 0)) / Math.max(1, progress.total)
