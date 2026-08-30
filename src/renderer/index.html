@@ -389,15 +389,16 @@
               <section class="page" id="page-image">
                 <!-- ══ 统一画布（A 方案 · 顶部命令栏）══ -->
                 <div class="canvas-surface" id="canvas-surface">
-                  <div class="canvas-command-bar">
+                  <div class="canvas-command-bar" role="toolbar" aria-label="画布工具">
                     <!-- 删除滚动截图后只剩一种截图方式，分裂按钮的下拉不再有内容，
                          整体收敛为单按钮。 -->
-                    <button class="cbtn primary" id="cmd-capture" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-capture"></use></svg>区域截图</button>
-                    <button class="cbtn" id="cmd-import" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-import"></use></svg>导入图片</button>
-                    <button class="cbtn" id="cmd-text" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-textbox"></use></svg>文本框</button>
+                    <button class="cbtn canvas-icon-btn" id="cmd-capture" type="button" aria-label="区域截图" data-tip="区域截图"><svg class="ic" aria-hidden="true"><use href="#ic-capture"></use></svg></button>
+                    <button class="cbtn canvas-icon-btn" id="cmd-import" type="button" aria-label="导入图片" data-tip="导入图片"><svg class="ic" aria-hidden="true"><use href="#ic-import"></use></svg></button>
+                    <button class="cbtn canvas-icon-btn" id="cmd-text" type="button" aria-label="添加文本" data-tip="添加文本"><svg class="ic" aria-hidden="true"><use href="#ic-textbox"></use></svg></button>
+                    <span class="canvas-toolbar-separator" aria-hidden="true"></span>
                     <div class="menu-wrap">
-                      <button class="cbtn" id="cmd-project" type="button"
-                              aria-haspopup="true" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#ic-project"></use></svg>项目<svg class="ic ic-sm" aria-hidden="true"><use href="#ic-chevron-down"></use></svg></button>
+                      <button class="cbtn canvas-icon-btn" id="cmd-project" type="button"
+                              aria-label="项目" data-tip="项目" aria-haspopup="true" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#ic-project"></use></svg></button>
                       <div class="cmd-menu" id="project-menu" role="menu" hidden>
                         <button type="button" role="menuitem" data-project="new">新建</button>
                         <button type="button" role="menuitem" data-project="open">打开项目</button>
@@ -413,16 +414,32 @@
                   <div class="canvas-shell checkerboard" id="board-stage">
                     <canvas id="board-canvas-element"></canvas>
                     <div class="canvas-actions">
-                      <button class="cbtn ghost" id="cmd-background" type="button"
-                              aria-haspopup="true" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#ic-background"></use></svg>背景</button>
-                      <div class="cmd-menu align-right" id="background-menu" role="menu" hidden>
-                        <button type="button" role="menuitem" data-bg="transparent" aria-checked="true">透明</button>
-                        <button type="button" role="menuitem" data-bg="custom">自定义颜色…</button>
+                      <button class="cbtn ghost canvas-icon-btn" id="cmd-background" type="button"
+                              aria-label="背景" data-tip="背景" aria-haspopup="true" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#ic-background"></use></svg></button>
+                      <button class="cbtn ghost canvas-icon-btn canvas-view-trigger" id="cmd-view" type="button"
+                              aria-label="视图" data-tip="视图" aria-haspopup="true" aria-expanded="false">···</button>
+                      <div class="cmd-menu canvas-popover align-right" id="background-menu" role="menu" hidden>
+                        <div class="canvas-popover-title">背景</div>
+                        <div class="canvas-color-grid" aria-label="背景颜色">
+                          <button class="canvas-color transparent" type="button" role="menuitem" data-bg="transparent" aria-checked="true" aria-label="透明"></button>
+                          <button class="canvas-color" style="--swatch:#ffffff" type="button" role="menuitem" data-bg-color="#ffffff" aria-label="白色"></button>
+                          <button class="canvas-color" style="--swatch:#f2f3f7" type="button" role="menuitem" data-bg-color="#f2f3f7" aria-label="浅灰"></button>
+                          <button class="canvas-color" style="--swatch:#eaf2ff" type="button" role="menuitem" data-bg-color="#eaf2ff" aria-label="浅蓝"></button>
+                          <button class="canvas-color" style="--swatch:#f0eaff" type="button" role="menuitem" data-bg-color="#f0eaff" aria-label="浅紫"></button>
+                          <button class="canvas-color custom" type="button" role="menuitem" data-bg="custom" aria-label="更多颜色">+</button>
+                        </div>
                         <!-- 自定义色走原生取色器；隐藏 input 由菜单项触发 -->
                         <input type="color" id="board-bg-color" value="#ffffff" hidden />
                         <hr />
-                        <button type="button" role="menuitem" data-bg="grid">显示网格</button>
-                        <button type="button" role="menuitem" data-bg="snap">吸附网格</button>
+                        <button class="canvas-toggle-row" type="button" role="menuitemcheckbox" data-bg="grid" aria-checked="false"><span>显示网格</span><span class="canvas-toggle-indicator"></span></button>
+                        <button class="canvas-toggle-row" type="button" role="menuitemcheckbox" data-bg="snap" aria-checked="false"><span>吸附网格</span><span class="canvas-toggle-indicator"></span></button>
+                      </div>
+                      <div class="cmd-menu canvas-popover canvas-view-menu align-right" id="view-menu" role="menu" hidden>
+                        <div class="canvas-popover-title">视图</div>
+                        <button class="canvas-toggle-row" type="button" role="menuitemcheckbox" data-view="rulers" aria-checked="false"><span>显示标尺</span><span class="canvas-toggle-indicator"></span></button>
+                        <hr />
+                        <button type="button" role="menuitem" data-view="fit">适应画布</button>
+                        <button type="button" role="menuitem" data-view="new">清空画布</button>
                       </div>
                     </div>
                     <!-- 辅助层：标尺 / 网格 / 参考线 / 对齐线。
@@ -432,28 +449,26 @@
               <div class="ruler ruler-y" id="ruler-y"></div>
               <div class="ruler-corner"></div>
 
-              <!-- 跟随选中对象的竖向工具栏：屏幕固定尺寸，不随画布缩放 -->
+              <!-- 跟随选中对象的横向工具栏：屏幕固定尺寸，不随画布缩放 -->
               <div class="object-toolbar" id="object-toolbar" hidden>
-                <button class="obj-btn obj-collapse" data-obj="collapse" type="button"
-                        data-tip="收起工具栏" aria-label="收起工具栏"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-collapse-left"></use></svg></button>
                 <div class="obj-group" id="obj-actions">
                   <!-- 主操作：图标 + 短标签。整个矩形可点，不依赖单个字符。 -->
-                  <button class="obj-btn" data-obj="edit" type="button">
+                  <button class="obj-btn" data-obj="edit" type="button" aria-label="编辑" data-tip="编辑">
                     <svg class="ic obj-ic" aria-hidden="true" focusable="false"><use href="#ic-edit"></use></svg><span class="obj-label">编辑</span>
                   </button>
-                  <button class="obj-btn" data-obj="copy" type="button">
+                  <button class="obj-btn" data-obj="copy" type="button" aria-label="复制" data-tip="复制">
                     <svg class="ic obj-ic" aria-hidden="true" focusable="false"><use href="#ic-copy"></use></svg><span class="obj-label">复制</span>
                   </button>
-                  <button class="obj-btn obj-lock" data-obj="lock" type="button" aria-pressed="false">
+                  <button class="obj-btn obj-lock" data-obj="lock" type="button" aria-label="锁定" data-tip="锁定" aria-pressed="false">
                     <svg class="ic obj-ic" aria-hidden="true" focusable="false"><use href="#ic-unlock"></use></svg><span class="obj-label">锁定</span>
                   </button>
-                  <button class="obj-btn" data-obj="front" type="button">
+                  <button class="obj-btn" data-obj="front" type="button" aria-label="置于顶层" data-tip="置于顶层">
                     <svg class="ic obj-ic" aria-hidden="true" focusable="false"><use href="#ic-bring-front"></use></svg><span class="obj-label">置顶</span>
                   </button>
-                  <button class="obj-btn" data-obj="back" type="button">
+                  <button class="obj-btn" data-obj="back" type="button" aria-label="置于底层" data-tip="置于底层">
                     <svg class="ic obj-ic" aria-hidden="true" focusable="false"><use href="#ic-send-back"></use></svg><span class="obj-label">置底</span>
                   </button>
-                  <button class="obj-btn obj-danger" data-obj="delete" type="button">
+                  <button class="obj-btn obj-danger" data-obj="delete" type="button" aria-label="删除" data-tip="删除">
                     <svg class="ic obj-ic" aria-hidden="true" focusable="false"><use href="#ic-delete"></use></svg><span class="obj-label">删除</span>
                   </button>
                 </div>
@@ -490,12 +505,20 @@
               </div>
 
               <div class="canvas-empty" id="board-empty">
-                      <div>截图、导入或粘贴图片，都会落到这块画布上</div>
-                      <small>单击编排 · 双击编辑图片</small>
+                      <div>拖入、粘贴或导入图片开始创作</div>
+                      <button class="cbtn canvas-empty-import" id="board-empty-import" type="button">导入图片</button>
+                      <small>支持 Ctrl / ⌘ + V 直接粘贴</small>
                     </div>
-                    <!-- 状态条不占布局高度，叠在画布底边且不拦截鼠标 -->
+                    <div class="canvas-zoom-controls" role="toolbar" aria-label="画布缩放">
+                      <button type="button" id="board-zoom-out" aria-label="缩小" data-tip="缩小"><svg class="ic" aria-hidden="true"><use href="#ic-zoom-out"></use></svg></button>
+                      <span id="board-zoom-label">100%</span>
+                      <button type="button" id="board-zoom-in" aria-label="放大" data-tip="放大"><svg class="ic" aria-hidden="true"><use href="#ic-zoom-in"></use></svg></button>
+                      <button type="button" id="board-zoom-fit" aria-label="适应画布" data-tip="适应画布"><svg class="ic" aria-hidden="true"><use href="#ic-zoom-fit"></use></svg></button>
+                      <button type="button" id="board-zoom-reset" aria-label="缩放重置为 100%" data-tip="重置为 100%"><svg class="ic" aria-hidden="true"><use href="#ic-zoom-reset"></use></svg></button>
+                    </div>
+                    <!-- 状态文字不占布局高度，叠在画布底边且不拦截鼠标 -->
                     <div class="canvas-status">
-                      <span class="result-dot" id="board-status-dot"></span>
+                      <span class="result-dot" id="board-status-dot" hidden></span>
                       <span id="board-status-text">画布为空</span>
                     </div>
                   </div>
@@ -549,11 +572,6 @@
                     <div class="board-view-group">
                       <button class="gbtn" id="board-undo" type="button" disabled>撤销</button>
                       <button class="gbtn" id="board-redo" type="button" disabled>重做</button>
-                      <button class="gbtn" id="board-zoom-out" aria-label="缩小" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-zoom-out"></use></svg></button>
-                      <span id="board-zoom-label">100%</span>
-                      <button class="gbtn" id="board-zoom-in" aria-label="放大" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-zoom-in"></use></svg></button>
-                      <button class="gbtn" id="board-zoom-fit" type="button">适应</button>
-                      <button class="gbtn" id="board-zoom-reset" aria-label="缩放重置为 100%" type="button">100%</button>
                     </div>
                   </div>
                   <input type="file" id="board-file-input" accept="image/png,image/jpeg,image/webp" multiple hidden />

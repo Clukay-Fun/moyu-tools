@@ -1,6 +1,7 @@
 import './tooltip.css'
 
 const INITIAL_DELAY = 450
+const CANVAS_DELAY = 0
 const SWITCH_GRACE = 120
 const EDGE_GAP = 8
 
@@ -32,13 +33,17 @@ export function installTooltips(root = document) {
       Math.max(EDGE_GAP, rect.left + (rect.width - tip.width) / 2),
       window.innerWidth - tip.width - EDGE_GAP
     )
-    const roomAbove = rect.top - tip.height - EDGE_GAP
-    const top = roomAbove >= EDGE_GAP
-      ? roomAbove
-      : Math.min(window.innerHeight - tip.height - EDGE_GAP, rect.bottom + EDGE_GAP)
+    const targetInTopHalf = rect.top + rect.height / 2 < window.innerHeight / 2
+    const preferredTop = targetInTopHalf
+      ? rect.bottom + EDGE_GAP
+      : rect.top - tip.height - EDGE_GAP
+    const top = Math.max(
+      EDGE_GAP,
+      Math.min(preferredTop, window.innerHeight - tip.height - EDGE_GAP)
+    )
     tooltip.style.left = `${Math.round(left)}px`
     tooltip.style.top = `${Math.round(top)}px`
-    tooltip.dataset.side = roomAbove >= EDGE_GAP ? 'top' : 'bottom'
+    tooltip.dataset.side = targetInTopHalf ? 'bottom' : 'top'
   }
 
   function show(target, instant, keyboard) {
@@ -57,7 +62,8 @@ export function installTooltips(root = document) {
     clearTimers()
     if (!target || target.getAttribute('aria-disabled') === 'true') return
     const instant = !tooltip.hidden
-    openTimer = window.setTimeout(() => show(target, instant, keyboard), instant || keyboard ? 0 : INITIAL_DELAY)
+    const delay = target.closest('#canvas-surface') ? CANVAS_DELAY : INITIAL_DELAY
+    openTimer = window.setTimeout(() => show(target, instant, keyboard), instant || keyboard ? 0 : delay)
   }
 
   function hideSoon(target) {

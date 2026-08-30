@@ -3201,6 +3201,10 @@ const projectMenu = document.querySelector('#project-menu')
 const cmdBackground = document.querySelector('#cmd-background')
 const backgroundMenu = document.querySelector('#background-menu')
 const boardBgColor = document.querySelector('#board-bg-color')
+const cmdView = document.querySelector('#cmd-view')
+const viewMenu = document.querySelector('#view-menu')
+const boardStage = document.querySelector('#board-stage')
+const boardEmptyImport = document.querySelector('#board-empty-import')
 
 /** 同一时刻只允许一个下拉打开。 */
 /**
@@ -3312,9 +3316,10 @@ function toggleCmdMenu(trigger, menu) {
   else openPopover(menu)
 }
 
-// 登记两个命令栏菜单
+// 登记画布命令栏菜单
 registerPopover(projectMenu, cmdProject)
 registerPopover(backgroundMenu, cmdBackground, { align: 'right' })
+registerPopover(viewMenu, cmdView, { align: 'right' })
 
 // ── 文本工具栏的字体 / 对齐菜单（S1：替换原生 select）──
 const textFontTrigger = document.querySelector('#text-font-trigger')
@@ -3670,6 +3675,7 @@ cmdImport.addEventListener('click', () => {
   activateUnifiedCanvas()
   boardFileInput.click()
 })
+boardEmptyImport?.addEventListener('click', () => cmdImport.click())
 cmdText.addEventListener('click', () => {
   activateUnifiedCanvas()
   ensureBoardController().addText('textbox')
@@ -3701,10 +3707,11 @@ projectMenu.addEventListener('click', (event) => {
 
 cmdBackground.addEventListener('click', (event) => {
   event.stopPropagation()
+  syncBackgroundMenu()
   toggleCmdMenu(cmdBackground, backgroundMenu)
 })
 backgroundMenu.addEventListener('click', (event) => {
-  const button = event.target.closest('[data-bg]')
+  const button = event.target.closest('[data-bg], [data-bg-color]')
   if (!button) return
   const controller = ensureBoardController()
   const key = button.dataset.bg
@@ -3717,6 +3724,12 @@ backgroundMenu.addEventListener('click', (event) => {
     button.setAttribute('aria-checked', String(next))
     if (key === 'grid') controller.setShowGrid(next)
     else controller.setSnapGrid(next)
+    return
+  }
+  if (button.dataset.bgColor) {
+    controller.setBackground({ type: 'color', color: button.dataset.bgColor })
+    syncBackgroundMenu()
+    showToast(`背景已设为 ${button.getAttribute('aria-label') || button.dataset.bgColor}`)
     return
   }
   closeAllCmdMenus()
@@ -3733,6 +3746,33 @@ backgroundMenu.addEventListener('click', (event) => {
     return
   }
   showToast(`暂不支持的背景选项：${button.textContent.trim()}`)
+})
+
+cmdView.addEventListener('click', (event) => {
+  event.stopPropagation()
+  syncViewMenu()
+  toggleCmdMenu(cmdView, viewMenu)
+})
+
+viewMenu.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-view]')
+  if (!button) return
+  const controller = ensureBoardController()
+  const action = button.dataset.view
+  if (action === 'rulers') {
+    event.stopPropagation()
+    boardStage.classList.toggle('show-rulers')
+    syncViewMenu()
+    return
+  }
+  closeAllCmdMenus()
+  if (action === 'fit') {
+    controller.fitToContent()
+    return
+  }
+  if (action === 'new') {
+    void controller.newBoard()
+  }
 })
 
 boardBgColor.addEventListener('change', () => {
@@ -3753,6 +3793,16 @@ function syncBackgroundMenu() {
     ?.setAttribute('aria-checked', String(controller.showGrid))
   backgroundMenu.querySelector('[data-bg="snap"]')
     ?.setAttribute('aria-checked', String(controller.snapGrid))
+  for (const swatch of backgroundMenu.querySelectorAll('[data-bg-color]')) {
+    swatch.setAttribute('aria-checked', String(
+      bg.type === 'color' && bg.color?.toLowerCase() === swatch.dataset.bgColor.toLowerCase()
+    ))
+  }
+}
+
+function syncViewMenu() {
+  viewMenu.querySelector('[data-view="rulers"]')
+    ?.setAttribute('aria-checked', String(boardStage.classList.contains('show-rulers')))
 }
 
 // 取消文件选择时 change 不会触发，必须靠 cancel 清掉 pending，

@@ -4653,8 +4653,8 @@ body.keyboard-focus :where(
 }
 
 /* ═══════════════════════════════════════════════════════════
-   统一画布 · A 方案（顶部命令栏）
-   规格：v2.1.0-image-canvas-unification.md 第 2 节
+   统一画布 · 浮动编辑器布局
+   画布就是工作区；工具、属性和状态按需浮在画布上。
    ═══════════════════════════════════════════════════════════ */
 
 /* 画布页取消内容区内边距，让画布铺满 */
@@ -4662,20 +4662,58 @@ body.keyboard-focus :where(
 #page-image { height: 100%; }
 
 .canvas-surface {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
 }
 
-/* ── 顶部命令栏：独立于画布，不是画布的一部分 ── */
+/* ── 创建工具：浮在画布上，不占画布布局高度 ── */
 .canvas-command-bar {
+  position: absolute;
+  z-index: var(--z-float-toolbar);
+  top: 16px;
+  left: 20px;
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
-  flex: 0 0 auto;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--hairline);
+  gap: var(--sp-1);
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--menu-surface);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(24px) saturate(155%);
+}
+
+.canvas-toolbar-separator {
+  width: 1px;
+  height: 22px;
+  margin: 0 3px;
+  background: var(--hairline);
+}
+
+.canvas-command-bar .cbtn {
+  min-height: 36px;
+  border-color: transparent;
+  background: transparent;
+}
+
+.canvas-icon-btn {
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
+}
+
+.canvas-icon-btn .ic {
+  width: 18px;
+  height: 18px;
+}
+
+.canvas-command-bar .cbtn[aria-pressed="true"],
+.canvas-command-bar .cbtn.is-active {
+  color: var(--accent);
+  background: var(--accent-10);
 }
 
 .cbtn {
@@ -4768,6 +4806,12 @@ body.keyboard-focus :where(
 .cmd-menu button[aria-checked="true"]::after { content: " ✓"; color: var(--accent); }
 .cmd-menu hr { margin: 5px 6px; border: 0; border-top: 1px solid var(--hairline); }
 
+/* 项目菜单只有短操作名，宽度跟最长一项走，不保留通用菜单的 168px 底宽。 */
+#overlay-layer > #project-menu {
+  width: max-content;
+  min-width: max-content;
+}
+
 /* ── 画布外壳：无边框、无圆角、无卡片背景，铺满剩余空间 ── */
 /* 透明区域的棋盘格提示。
    ⚠ 只能画在**容器**上，绝不进 fabric 场景：一旦成为场景的一部分，
@@ -4800,12 +4844,118 @@ body.keyboard-focus :where(
    数值与 guides.js 的 RULER.sizeY 对应，改标尺高度时要一起改。 */
 .canvas-actions {
   position: absolute;
-  /* ⚠ 这里**不能**设 z-index：一设就自成层叠上下文，
-     里面的背景菜单（--z-popover）会被封死在这一层，
-     表现为"菜单被工具栏截断"。让它跟随文档流参与外层排序。 */
-  top: 26px; /* 18px 标尺 + 8px 间距 */
-  right: 12px;
+  z-index: var(--z-float-toolbar);
+  top: 16px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
 }
+
+.canvas-actions .cbtn {
+  min-height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  box-shadow: var(--shadow-small);
+}
+
+.canvas-view-trigger {
+  min-width: 36px;
+  font-size: 17px;
+  letter-spacing: 1px;
+}
+
+/* 背景 / 视图是属性 Popover，不沿用普通文本菜单的窄列表。 */
+#overlay-layer > .canvas-popover {
+  width: 244px;
+  min-width: 244px;
+  padding: 12px;
+  border-radius: 14px;
+}
+
+/* 视图菜单只有三项短文字；背景色盘仍保留上面的固定宽度。 */
+#overlay-layer > .canvas-view-menu {
+  width: max-content;
+  min-width: max-content;
+}
+
+.canvas-popover-title {
+  padding: 2px 2px 10px;
+  color: var(--foreground);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+}
+
+.canvas-color-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 30px);
+  gap: 7px;
+  padding: 1px 2px 8px;
+}
+
+#overlay-layer > .canvas-popover .canvas-color {
+  position: relative;
+  display: block;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--swatch, transparent);
+}
+
+#overlay-layer > .canvas-popover .canvas-color.transparent {
+  background-color: #fff;
+  background-image: conic-gradient(#e4e6ed 25%, #fff 25% 50%, #e4e6ed 50% 75%, #fff 75%);
+  background-size: 10px 10px;
+}
+
+#overlay-layer > .canvas-popover .canvas-color.custom {
+  color: var(--muted);
+  background: var(--control-bg);
+  font-size: 18px;
+  text-align: center;
+}
+
+#overlay-layer > .canvas-popover .canvas-color[aria-checked="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-18);
+}
+
+#overlay-layer > .canvas-popover .canvas-color[aria-checked="true"]::after { content: none; }
+
+#overlay-layer > .canvas-popover .canvas-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.canvas-toggle-indicator {
+  position: relative;
+  width: 30px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--hairline-strong, var(--border));
+  transition: background-color 140ms ease;
+}
+
+.canvas-toggle-indicator::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(25, 30, 46, 0.22);
+  content: "";
+  transition: transform 140ms ease;
+}
+
+.canvas-toggle-row[aria-checked="true"] .canvas-toggle-indicator { background: var(--accent); }
+.canvas-toggle-row[aria-checked="true"] .canvas-toggle-indicator::after { transform: translateX(12px); }
+#overlay-layer > .canvas-popover .canvas-toggle-row[aria-checked="true"]::after { content: none; }
 
 .canvas-empty {
   position: absolute;
@@ -4819,6 +4969,11 @@ body.keyboard-focus :where(
   pointer-events: none;
 }
 
+.canvas-empty-import {
+  margin-top: var(--sp-2);
+  pointer-events: auto;
+}
+
 /* ⚠ 没有这条规则，hidden 属性会被上面的 display:grid 盖掉——
    空状态提示会一直画在内容之上。同文件里其他可隐藏组件都有对应规则。 */
 .canvas-empty[hidden] {
@@ -4826,20 +4981,57 @@ body.keyboard-focus :where(
 }
 .canvas-empty small { color: var(--faint); font-size: var(--fs-md); }
 
-/* 状态条：叠在画布底边，不占布局高度，不拦截鼠标 */
+/* 缩放固定左下；状态固定右下，二者都不再占一整条底栏。 */
+.canvas-zoom-controls {
+  position: absolute;
+  z-index: var(--z-float-toolbar);
+  bottom: 18px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--menu-surface);
+  box-shadow: var(--shadow-small);
+  backdrop-filter: blur(20px) saturate(150%);
+}
+
+.canvas-zoom-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+
+.canvas-zoom-controls button:hover { color: var(--accent); background: var(--accent-10); }
+.canvas-zoom-controls #board-zoom-label {
+  min-width: 48px;
+  color: var(--foreground);
+  font-size: var(--fs-md);
+}
+
 .canvas-status {
   position: absolute;
   z-index: 12;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  right: 20px;
+  bottom: 22px;
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
-  padding: 7px 14px;
+  padding: 0;
   color: var(--muted);
   font-size: var(--fs-md);
-  background: linear-gradient(to top, var(--panel), transparent);
+  background: transparent;
   pointer-events: none;
 }
 
@@ -5126,6 +5318,19 @@ body.keyboard-focus :where(
 }
 .txt-color:disabled { opacity: 0.35; cursor: not-allowed; }
 
+/* 比例输入只容纳“100%”一类短值，不跟普通文本框一起拉宽。 */
+.txt-scale {
+  box-sizing: border-box;
+  width: 6ch;
+  min-width: 0;
+  height: var(--control-height);
+  padding: 0 6px;
+  border-radius: var(--r-sm);
+  text-align: center;
+  font-size: var(--fs-md);
+  font-variant-numeric: tabular-nums;
+}
+
 .txt-sep {
   width: 1px;
   height: 18px;
@@ -5140,9 +5345,10 @@ body.keyboard-focus :where(
 
 .object-toolbar .obj-group {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: var(--sp-1);
-  padding: 4px;
+  align-items: center;
+  padding: 5px;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
   /* 与所有浮层统一：--card 的 0.2 会把下面的图片和控制点透出来 */
@@ -5162,14 +5368,16 @@ body.keyboard-focus :where(
 .obj-btn {
   /* 图标 + 短标签横排；整个矩形都是点击区，不依赖单个字符 */
   display: grid;
-  grid-template-columns: 18px auto;
+  grid-template-columns: 18px;
   align-items: center;
-  justify-items: start;
+  justify-content: center;
+  justify-items: center;
   gap: var(--sp-2);
-  width: 100%;
-  min-width: 84px;
+  width: auto;
+  min-width: 0;
   min-height: var(--h-md);
-  padding: 0 8px 0 6px;
+  width: 36px;
+  padding: 0;
   border: 0;
   border-radius: var(--r-sm);
   color: var(--muted);
@@ -5194,7 +5402,9 @@ body.keyboard-focus :where(
      font-size 已无意义——里面是 svg 不是字符了（V2）。 */
   width: 18px;
 }
-.obj-label { white-space: nowrap; }
+.obj-label {
+  display: none;
+}
 
 /* 收起按钮只有箭头，不占标签宽度 */
 .obj-collapse {
@@ -5228,9 +5438,7 @@ body.keyboard-focus :where(
   font-size: var(--fs-sm);
 }
 /* 翻到左侧时收起箭头方向反转 */
-.object-toolbar.flipped { flex-direction: row-reverse; }
-.object-toolbar.flipped > .obj-btn[data-obj="collapse"] { transform: scaleX(-1); }
-.object-toolbar.flipped > .obj-btn[data-obj="collapse"]:active { transform: scaleX(-1) scale(0.94); }
+.object-toolbar.flipped { flex-direction: row; }
 
 .object-toolbar #object-more-menu { top: auto; bottom: 0; right: calc(100% + 6px); }
 .object-toolbar.flipped #object-more-menu { right: auto; left: calc(100% + 6px); }
@@ -5283,6 +5491,12 @@ body.keyboard-focus :where(
 }
 /* 标尺内的刻度与文字用 canvas 绘制，保持屏幕尺寸不随画布缩放 */
 .ruler canvas { display: block; width: 100%; height: 100%; }
+
+/* 默认是干净的大画布；需要精确排版时再从「视图」打开标尺。 */
+.canvas-shell:not(.show-rulers) .ruler,
+.canvas-shell:not(.show-rulers) .ruler-corner {
+  display: none;
+}
 
 /* ══ U4 · 全屏图片编辑器 ══════════════════════════════════
    覆盖内容区，不覆盖顶栏与左侧导航。

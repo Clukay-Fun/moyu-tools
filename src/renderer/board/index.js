@@ -1001,23 +1001,23 @@ export class BoardController {
       ?? this.canvas.toScreenRect(unionBounds(nodes))
     const stage = this.dom.stage.getBoundingClientRect()
     const size = toolbar.getBoundingClientRect()
-    const width = size.width || 40
-    const height = size.height || 120
+    const width = size.width || 252
+    const height = size.height || 46
     const gap = 8
 
-    // 右侧放不下就翻到左侧；两侧都不足时钳制在可视区内
-    const flip = view.x + view.width + gap + width > stage.width
-    const left = flip
-      ? Math.max(gap, view.x - width - gap)
-      : Math.min(stage.width - width - gap, view.x + view.width + gap)
-    // 顶部与对象外接框顶部对齐（S2），不再纵向居中——
-    // 居中会让高对象的工具栏飘到画面中央，与对象的关联看不出来。
-    const top = Math.min(
-      Math.max(gap, view.y),
-      Math.max(gap, stage.height - height - gap)
+    // 横向工具条跟随对象：默认居中放在对象上方；上方空间不足时放到下方。
+    // 两边都不足时再钳制进视口，避免工具条把画布内容遮住一整列。
+    const left = Math.min(
+      Math.max(gap, view.x + (view.width - width) / 2),
+      Math.max(gap, stage.width - width - gap)
     )
+    const above = view.y - height - gap
+    const below = view.y + view.height + gap
+    const top = above >= gap
+      ? above
+      : Math.min(below, Math.max(gap, stage.height - height - gap))
 
-    toolbar.classList.toggle('flipped', flip)
+    toolbar.classList.remove('flipped')
     // ⚠ 只改 transform，不改 left/top：后者每帧都会触发布局，拖动时肉眼可见地抖。
     toolbar.style.transform = `translate3d(${Math.round(left)}px, ${Math.round(top)}px, 0)`
 
@@ -1057,12 +1057,18 @@ export class BoardController {
 
     // 编辑按钮的文案随类型变化，避免"编辑"对文本框含义不清
     const editButton = this.dom.objectToolbar.querySelector('[data-obj="edit"] .obj-label')
-    if (editButton) editButton.textContent = isText ? '编辑文字' : '编辑'
+    if (editButton) {
+      const editLabel = isText ? '编辑文字' : '编辑'
+      editButton.textContent = editLabel
+      editButton.closest('button')?.setAttribute('aria-label', editLabel)
+      editButton.closest('button')?.setAttribute('data-tip', editLabel)
+    }
 
     // 锁定按钮：图标 + 文案 + 高亮三者同时表达状态
     const lockButton = this.dom.objectToolbar.querySelector('[data-obj="lock"]')
     if (lockButton) {
       lockButton.setAttribute('aria-pressed', String(locked))
+      lockButton.setAttribute('aria-label', locked ? '解锁' : '锁定')
       lockButton.dataset.tip = locked ? '点击解锁' : '锁定后不可移动、缩放、旋转与编辑'
       const icon = lockButton.querySelector('.obj-ic')
       const label = lockButton.querySelector('.obj-label')
@@ -1347,13 +1353,22 @@ export class BoardController {
     }
   }
 
-  /** 在内容右侧插入文本节点。 */
+  /** 在当前可见画布中央插入文本节点。 */
   addText(kind) {
-    const bounds = sceneBounds(this.scene)
-    const x = bounds.empty ? 40 : bounds.x + bounds.width + 24
-    const y = bounds.empty ? 40 : bounds.y
     // U2：只保留一种文本对象，kind 参数保留仅为兼容旧调用
-    const node = addTextBoxNode(this.scene, { x, y })
+    const viewport = this.canvas.viewportRect()
+    const node = addTextBoxNode(this.scene, {})
+    // Fabric.Textbox 本身不会按内容自动收窄；先用同字体的 IText 测量默认文案，
+    // 再把测量值作为初始尺寸。后续用户主动拉宽或输入长文本时仍沿用文本框行为。
+    const measure = new this.fabric.IText(node.text, {
+      fontSize: node.style.fontSize,
+      fontFamily: node.style.fontFamily,
+      fontWeight: node.style.fontWeight
+    })
+    node.width = Math.ceil(measure.width || node.width)
+    node.height = Math.ceil(measure.height || node.height)
+    node.x = viewport.x + (viewport.width - node.width) / 2
+    node.y = viewport.y + (viewport.height - node.height) / 2
     this.#afterChange().then(() => {
       this.selection = [node.id]
       this.canvas.selectNodes([node.id])
