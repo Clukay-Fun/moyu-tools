@@ -3477,21 +3477,14 @@ label {
   width: min(100%, 1080px);
   flex: none;
   align-items: flex-end;
-  min-height: 74px;
+  min-height: 58px;
   margin-inline: auto;
-  padding: 4px 2px 12px;
-}
-
-.settings-heading span {
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  padding: 2px 2px 10px;
 }
 
 .settings-heading h1 {
-  margin: 4px 0 2px;
-  font-size: 26px;
+  margin: 0 0 2px;
+  font-size: 24px;
   letter-spacing: -0.035em;
 }
 
@@ -3506,8 +3499,8 @@ label {
   width: min(100%, 1080px);
   min-height: 0;
   flex: 1;
-  grid-template-columns: 156px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: 142px minmax(0, 1fr);
+  gap: 16px;
   align-items: start;
   margin-inline: auto;
   overflow: auto;
@@ -3532,8 +3525,8 @@ label {
   grid-template-columns: 28px minmax(0, 1fr);
   gap: 8px;
   align-items: center;
-  min-height: 48px;
-  padding: 6px 8px;
+  min-height: 44px;
+  padding: 5px 8px;
   border: 1px solid transparent;
   border-radius: var(--r-md);
   color: var(--muted);
@@ -3547,7 +3540,7 @@ label {
 }
 
 .settings-nav-item.active {
-  border-color: var(--selection-border);
+  border-color: transparent;
   color: var(--accent);
   background: var(--selection-bg);
 }
@@ -3575,55 +3568,58 @@ label {
 }
 
 /* 设置：更新卡片 */
-.update-meta { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 2px 0 14px; }
-.update-meta > div { display: flex; flex-direction: column; gap: 2px; }
+.update-meta { display: grid; grid-template-columns: 1fr; gap: 0; margin: 0 0 22px; overflow: hidden; border: 1px solid var(--hairline); border-radius: var(--r-md); background: var(--control-bg); }
+.update-meta > div { display: grid; min-height: 58px; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 9px 14px; border-bottom: 1px solid var(--hairline); }
+.update-meta > div:last-child { border-bottom: 0; }
 .update-meta span { font-size: 12px; color: var(--faint); }
 .update-meta b { font-size: 14px; font-weight: 600; }
 .update-autocheck { margin: 6px 0 14px; }
 .update-status { margin: 4px 0 12px; }
 .update-notes { margin-top: 8px; padding: 10px 12px; background: rgba(127, 127, 127, 0.12); border-radius: 10px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; max-height: 160px; overflow: auto; }
-.update-progress { display: flex; align-items: center; gap: 10px; margin: 6px 0 12px; }
-.update-progress progress { flex: 1; height: 8px; }
 .update-actions { display: flex; gap: 10px; }
+
+.update-state-card {
+  margin-bottom: 22px;
+  padding: 14px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--control-bg);
+}
+
+.update-state-card .update-actions {
+  justify-content: flex-end;
+}
 
 .settings-content {
   display: grid;
   gap: 14px;
+  min-width: 0;
+  align-self: start;
   padding-bottom: 24px;
 }
 
 .setting-card {
-  padding: 22px;
+  min-height: 0;
+  height: fit-content;
+  padding: 14px 18px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--card-solid) 86%, transparent);
+  box-shadow: var(--shadow-panel);
   scroll-margin-top: 4px;
 }
 
+.setting-card[hidden] {
+  display: none;
+}
+
 .setting-card-heading {
-  display: grid;
-  grid-template-columns: 38px minmax(0, 1fr);
-  gap: 12px;
-  align-items: start;
-  margin-bottom: var(--sp-5);
-}
-
-.setting-card-icon {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border: 1px solid var(--selection-border);
-  border-radius: 11px;
-  color: var(--accent);
-  background: var(--selection-bg);
-}
-
-.setting-card-icon .ic {
-  width: 18px;
-  height: 18px;
+  margin-bottom: 10px;
 }
 
 .setting-card h2 {
   margin: 0 0 3px;
-  font-size: var(--fs-lg);
+  font-size: 20px;
 }
 
 .setting-card-heading p {
@@ -3634,16 +3630,18 @@ label {
 }
 
 .theme-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-3);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .theme-option {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
-  padding: var(--sp-3) var(--sp-4);
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
   cursor: pointer;
@@ -3659,8 +3657,8 @@ label {
 }
 
 .color-picker-section {
-  margin-top: var(--sp-5);
-  padding-top: var(--sp-5);
+  margin-top: 22px;
+  padding-top: 18px;
   border-top: 1px solid var(--hairline);
 }
 
@@ -3668,10 +3666,149 @@ label {
   font-size: var(--fs-lg);
 }
 
+.settings-group-title {
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.setting-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  min-height: 72px;
+  padding: 10px 2px;
+}
+
+.setting-row-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.setting-row-copy b {
+  color: var(--foreground);
+  font-size: var(--fs-md);
+}
+
+.setting-row-copy > span {
+  color: var(--faint);
+  font-size: var(--fs-sm);
+}
+
+.setting-row-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-only-toggle {
+  width: 38px;
+  flex: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .color-picker-section > p {
   margin: 0;
   color: var(--faint);
   font-size: var(--fs-md);
+}
+
+.accent-color-row,
+.accent-current-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.accent-color-row {
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
+.accent-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.accent-presets button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 3px solid var(--card-solid);
+  border-radius: 50%;
+  outline: 1px solid transparent;
+  background: var(--preset);
+  box-shadow: 0 0 0 1px var(--hairline);
+  cursor: pointer;
+}
+
+.accent-presets button[data-accent="#6978E6"] { background-color: #6978e6; }
+.accent-presets button[data-accent="#8B6FD9"] { background-color: #8b6fd9; }
+.accent-presets button[data-accent="#3C8ED9"] { background-color: #3c8ed9; }
+.accent-presets button[data-accent="#36A477"] { background-color: #36a477; }
+.accent-presets button[data-accent="#E58A34"] { background-color: #e58a34; }
+.accent-presets button[data-accent="#D65B72"] { background-color: #d65b72; }
+
+.accent-presets button:hover,
+.accent-presets button.active {
+  outline-color: var(--accent);
+}
+
+.accent-current-row {
+  min-height: 52px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+}
+
+.accent-current-row > span:first-child {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.accent-current-row #color-swatch {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--accent);
+}
+
+.accent-current-row #color-hex {
+  width: 82px;
+  height: 32px;
+  padding: 0 7px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-sm);
+  outline: 0;
+  color: var(--foreground);
+  background: var(--control-bg);
+  font-family: monospace;
+}
+
+.accent-current-row #reset-accent {
+  padding: 0;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  font-size: var(--fs-xs);
+  cursor: pointer;
 }
 
 .color-picker-row {
@@ -3681,15 +3818,19 @@ label {
   margin-top: var(--sp-4);
 }
 
+#custom-accent-panel[hidden] {
+  display: none;
+}
+
 .wheel-wrap {
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 156px;
+  height: 156px;
 }
 
 .color-wheel {
-  width: 200px;
-  height: 200px;
+  width: 156px;
+  height: 156px;
   border-radius: 50%;
   cursor: crosshair;
 }
@@ -3782,61 +3923,33 @@ label {
   cursor: pointer;
 }
 
-.about-hero {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.about-logo {
-  display: grid;
-  width: 58px;
-  height: 58px;
-  flex: none;
-  place-items: center;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--control-bg);
-}
-
-.about-logo img {
-  width: 46px;
-  height: 46px;
-  object-fit: contain;
-}
-
-.about-hero h2 {
-  margin: 0 0 4px;
-  font-size: 20px;
-}
-
-.about-hero p,
-.about-intro {
-  margin: 0;
-  color: var(--faint);
-  font-size: var(--fs-md);
-  line-height: 1.65;
-}
-
-.about-intro {
-  max-width: 620px;
-  margin-top: 18px;
+.about-group-title {
+  margin-top: 0;
 }
 
 .about-meta {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: 1fr;
+  gap: 0;
   margin: 18px 0;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--control-bg);
 }
 
 .about-meta div {
   display: grid;
-  gap: 4px;
-  padding: 12px;
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
-  background: var(--control-bg);
+  min-height: 52px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.about-meta div:last-child {
+  border-bottom: 0;
 }
 
 .about-meta span {
@@ -3855,7 +3968,8 @@ label {
   grid-template-columns: 36px minmax(0, 1fr) 20px;
   gap: 10px;
   align-items: center;
-  padding: 11px 12px;
+  min-height: 56px;
+  padding: 9px 12px;
   border: 1px solid var(--control-border);
   border-radius: var(--r-md);
   color: var(--foreground);
@@ -5131,13 +5245,25 @@ body.keyboard-focus :where(
 
 /* ══ F-16 · 快捷键设置 ══ */
 .shortcut-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 18px;
+  margin-top: 0;
 }
+
+/* 快捷键目前只有一项，卡片按实际内容收紧，避免形成大块空白。 */
+#settings-shortcut .setting-card-heading {
+  margin-bottom: 6px;
+}
+
+#settings-shortcut .shortcut-row {
+  min-height: 52px;
+  padding-block: 4px;
+}
+
 .shortcut-input {
-  min-width: 190px;
+  min-width: 164px;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.3px;
 }
@@ -5148,12 +5274,16 @@ body.keyboard-focus :where(
   background: var(--accent-10);
 }
 .shortcut-status {
-  margin-top: 8px;
+  margin: 2px 0 0;
   font-size: 12px;
   color: var(--muted);
 }
 .shortcut-status.error { color: #d54f50; }
 .shortcut-status.ok { color: var(--accent); }
+
+.update-preferences-title {
+  margin-top: 20px;
+}
 
 /* ══ S1 · 应用自己的下拉菜单 ══
    原生 <select> 的弹窗由系统绘制，透明度、圆角、模糊都控制不了，

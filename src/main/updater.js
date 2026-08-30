@@ -1,4 +1,5 @@
 import { app, shell } from 'electron'
+import { getApplicationVersion } from './appVersion.js'
 import updater from 'electron-updater'
 const { autoUpdater } = updater
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
@@ -17,7 +18,7 @@ let downloading = false
 
 const state = {
   status: 'idle',
-  currentVersion: app.getVersion(),
+  currentVersion: getApplicationVersion(),
   availableVersion: null,
   releaseNotes: null,
   progress: null,
@@ -87,7 +88,7 @@ export function initUpdater(window) {
   prefs = loadPrefs()
   state.autoCheck = prefs.autoCheck
   state.portable = !!process.env.PORTABLE_EXECUTABLE_DIR
-  state.currentVersion = app.getVersion()
+  state.currentVersion = getApplicationVersion()
 
   if (!isUpdateable()) {
     patch({

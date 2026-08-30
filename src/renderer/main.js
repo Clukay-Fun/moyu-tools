@@ -493,6 +493,12 @@ function activateModule(module, action = '', animate = false) {
     if (page.id === `page-${module}`) activePage = page
     page.classList.toggle('active', page.id === `page-${module}`)
   })
+  if (module === 'more' && changed && activePage) {
+    // 设置内容有自己的滚动容器。重新进入设置页时必须复位外层 page，
+    // 否则之前由锚点导航带出的 scrollTop 会把“设置”标题卷出视口。
+    activePage.scrollTop = 0
+    activePage.querySelector('.settings-layout')?.scrollTo({ top: 0, behavior: 'instant' })
+  }
   if (animate && changed) animateEntry(activePage, { duration: 180, distance: 7 })
 
   const deferredMilestone = module === 'pdf' ? deferredPdfActions.get(action) : null
@@ -3563,6 +3569,7 @@ function setShortcutStatus(text, kind = '') {
   if (!shortcutStatus) return
   shortcutStatus.textContent = text
   shortcutStatus.className = `shortcut-status${kind ? ' ' + kind : ''}`
+  shortcutStatus.hidden = kind !== 'error'
 }
 
 function paintShortcut(accelerator, disabled) {
@@ -6146,11 +6153,25 @@ function updateColorControls() {
   })
   document.querySelector('#color-hex').value = colorHex()
   document.querySelector('#color-swatch').style.background = colorHex()
+  document.querySelectorAll('[data-accent]').forEach((button) => {
+    button.classList.toggle('active', button.dataset.accent.toUpperCase() === colorHex())
+  })
 
   const angle = colorState.h * Math.PI / 180
   const distance = 48 + (colorState.s / 100) * 44
   colorMarker.style.left = `${100 + Math.cos(angle) * distance}px`
   colorMarker.style.top = `${100 + Math.sin(angle) * distance}px`
+}
+
+function setAccentFromHex(value) {
+  if (!/^#[0-9a-f]{6}$/i.test(value)) return false
+  colorState.r = Number.parseInt(value.slice(1, 3), 16)
+  colorState.g = Number.parseInt(value.slice(3, 5), 16)
+  colorState.b = Number.parseInt(value.slice(5, 7), 16)
+  rgbToHsl(colorState.r, colorState.g, colorState.b)
+  updateColorControls()
+  applyAccent()
+  return true
 }
 
 function setAccentFromRgbInputs() {
@@ -6168,17 +6189,20 @@ document.querySelectorAll('.slider-row input').forEach((input) => {
 
 document.querySelector('#color-hex').addEventListener('change', (event) => {
   const value = event.target.value.trim()
-  if (!/^#[0-9a-f]{6}$/i.test(value)) {
+  if (!setAccentFromHex(value)) {
     updateColorControls()
-    return
   }
+})
 
-  colorState.r = Number.parseInt(value.slice(1, 3), 16)
-  colorState.g = Number.parseInt(value.slice(3, 5), 16)
-  colorState.b = Number.parseInt(value.slice(5, 7), 16)
-  rgbToHsl(colorState.r, colorState.g, colorState.b)
-  updateColorControls()
-  applyAccent()
+document.querySelectorAll('[data-accent]').forEach((button) => {
+  button.addEventListener('click', () => setAccentFromHex(button.dataset.accent))
+})
+
+document.querySelector('#toggle-custom-accent').addEventListener('click', (event) => {
+  const panel = document.querySelector('#custom-accent-panel')
+  panel.hidden = !panel.hidden
+  event.currentTarget.setAttribute('aria-expanded', String(!panel.hidden))
+  event.currentTarget.textContent = panel.hidden ? '自定义…' : '收起'
 })
 
 document.querySelector('#reset-accent').addEventListener('click', () => {
@@ -6199,18 +6223,28 @@ function syncSettingsNavigation() {
     const distance = Math.abs(section.getBoundingClientRect().top - top)
     return distance < closest.distance ? { id: section.id, distance } : closest
   }, { id: settingsSections[0].id, distance: Infinity })
-  settingsNavItems.forEach((item) => item.classList.toggle('active', item.dataset.settingsTarget === current.id))
+  settingsNavItems.forEach((item) => {
+    const active = item.dataset.settingsTarget === current.id
+    item.classList.toggle('active', active)
+    item.setAttribute('aria-current', active ? 'page' : 'false')
+  })
 }
 
 settingsNavItems.forEach((item) => {
   item.addEventListener('click', (event) => {
     event.preventDefault()
     const section = document.getElementById(item.dataset.settingsTarget)
-    section?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (!settingsLayout || !section) return
+    const offset = section.getBoundingClientRect().top - settingsLayout.getBoundingClientRect().top
+    settingsLayout.scrollTo({
+      top: settingsLayout.scrollTop + offset,
+      behavior: 'smooth'
+    })
   })
 })
 
 settingsLayout?.addEventListener('scroll', syncSettingsNavigation, { passive: true })
+syncSettingsNavigation()
 
 window.api.getAppInfo().then((info) => {
   document.querySelector('#app-version').textContent = info.version
@@ -6234,9 +6268,6 @@ function initUpdatePanel() {
     autocheck: document.querySelector('#update-autocheck'),
     statusText: document.querySelector('#update-status-text'),
     notes: document.querySelector('#update-notes'),
-    progress: document.querySelector('#update-progress'),
-    bar: document.querySelector('#update-progress-bar'),
-    progressText: document.querySelector('#update-progress-text'),
     primary: document.querySelector('#update-primary'),
     secondary: document.querySelector('#update-secondary')
   }
@@ -6272,14 +6303,6 @@ function initUpdatePanel() {
       el.notes.hidden = true
       el.notes.textContent = ''
     }
-    if (s.status === 'downloading' && s.progress) {
-      const pct = Math.floor(s.progress.percent || 0)
-      el.bar.value = pct
-      el.progressText.textContent = `${pct}%`
-      el.progress.hidden = false
-    } else {
-      el.progress.hidden = true
-    }
     el.secondary.hidden = s.status !== 'downloaded'
     const p = el.primary
     p.disabled = false
@@ -6302,7 +6325,6 @@ function initUpdatePanel() {
   })
   el.secondary.addEventListener('click', () => {
     el.secondary.hidden = true
-    el.progress.hidden = true
     el.statusText.textContent = '已下载更新，稍后可在设置中重启安装'
   })
   el.autocheck.addEventListener('change', async () => {

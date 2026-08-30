@@ -14,6 +14,7 @@ import {
 } from 'electron'
 import { spawn } from 'node:child_process'
 import { initUpdater, updateApi } from './updater.js'
+import { getApplicationVersion } from './appVersion.js'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import {
@@ -1194,7 +1195,7 @@ function createWindow() {
 ipcMain.handle('ping', () => 'pong')
 ipcMain.handle('app:info', (event) => {
   assertMainWindowSender(event)
-  return { version: app.getVersion() }
+  return { version: getApplicationVersion() }
 })
 
 // ── 自动更新（GitHub Releases，仅 Windows 安装版）──
