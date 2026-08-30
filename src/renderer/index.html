@@ -276,59 +276,61 @@
               <section class="page" id="page-bc">
                 <div class="crumb">条码 › <b id="bc-crumb">EAN-13</b></div>
                 <div class="barcode-grid">
-                  <div class="glass-card barcode-work">
+                  <div class="barcode-work">
                     <div class="barcode-mode-switch" role="tablist" aria-label="条码生成模式">
                       <button class="on" id="barcode-single-tab" type="button" role="tab" aria-selected="true">单个生成</button>
                       <button id="barcode-batch-tab" type="button" role="tab" aria-selected="false">批量 / CSV</button>
                     </div>
 
-                    <div class="barcode-pane active" id="barcode-single-pane">
-                      <div class="barcode-input">
+                    <div class="glass-card barcode-pane barcode-single-section active" id="barcode-single-pane">
+                      <label class="barcode-input-field">
+                        <span>条码内容</span>
+                        <div class="barcode-input">
                         <input id="barcode-value" value="" inputmode="numeric" maxlength="13" aria-label="条码内容" placeholder="输入数据前缀，右侧自动补零预览" />
-                      </div>
+                        </div>
+                      </label>
                       <div class="artboard">
                         <svg id="barcode-svg" role="img" aria-label="条码预览"></svg>
                       </div>
                       <p class="barcode-message" id="barcode-message" role="status" aria-live="polite"></p>
-                      <dl class="barcode-spec-report" id="barcode-spec-report" hidden></dl>
+                      <div class="barcode-spec-footer">
+                        <div class="barcode-compact-summary" id="barcode-compact-summary">EAN-13 · 等待输入</div>
+                        <details class="barcode-spec-details">
+                          <summary>查看详细规格</summary>
+                          <dl class="barcode-spec-report" id="barcode-spec-report" hidden></dl>
+                        </details>
+                      </div>
                     </div>
 
                     <div class="barcode-pane" id="barcode-batch-pane">
-                      <div class="batch-input-row">
-                        <textarea id="barcode-batch-value" rows="4" placeholder="每行一个编码；粘贴 CSV 时读取第一列"></textarea>
-                        <div class="batch-actions">
+                      <div class="glass-card barcode-batch-section barcode-batch-input-section">
+                        <label class="batch-input-field">
+                          <span>批量数据</span>
+                          <textarea id="barcode-batch-value" rows="4" placeholder="每行一个编码；粘贴 CSV 时读取第一列"></textarea>
+                          <small>支持每行一个编码；粘贴 CSV 时读取第一列；最多 500 条。</small>
+                        </label>
+                        <div class="batch-generate-row">
                           <button class="primary" id="generate-barcode-batch" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>批量生成</button>
-                          <button class="gbtn" id="save-barcode-batch-svg" type="button" disabled>保存全部 SVG</button>
-                          <button class="gbtn" id="save-barcode-batch-png" type="button" disabled>保存全部 PNG</button>
                         </div>
                       </div>
-                      <div class="batch-summary" id="barcode-batch-summary">等待输入，最多 500 条。</div>
-                      <div class="batch-list" id="barcode-batch-list"></div>
+                      <div class="glass-card barcode-batch-section barcode-batch-result-section">
+                        <div class="batch-result-head"><b>批量结果</b><span class="batch-summary" id="barcode-batch-summary">等待输入，最多 500 条。</span></div>
+                        <div class="batch-list" id="barcode-batch-list"></div>
+                        <div class="batch-export-actions">
+                          <button class="gbtn" id="save-barcode-batch-svg" type="button" disabled>导出全部 SVG</button>
+                          <button class="gbtn" id="save-barcode-batch-png" type="button" disabled>导出全部 PNG</button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="control-column">
-                    <div class="glass-card control-card">
-                      <span class="label">条码样式</span>
+                    <div class="glass-card control-card barcode-settings-card" id="barcode-settings-card">
+                      <span class="label barcode-settings-title" id="barcode-settings-title">基础设置</span>
                       <label class="barcode-preset-picker" id="itf14-preset-picker" hidden>ITF-14 印刷预设
                         <select id="itf14-preset">
                           <option value="label">标签 / 数字打印</option>
                           <option value="plate">印版直印</option>
                         </select>
-                      </label>
-                      <div class="barcode-preset-picker" id="code39-options" hidden>
-                        <label>Code 39 窄宽比
-                          <select id="code39-ratio"></select>
-                        </label>
-                        <label class="barcode-check"><input type="checkbox" id="code39-mod43" /> Mod 43 校验字符</label>
-                        <label class="barcode-check"><input type="checkbox" id="code39-fullascii" /> Full ASCII 扩展</label>
-                      </div>
-                      <div class="barcode-preset-picker" id="codabar-options" hidden>
-                        <label>Codabar 起始符<select id="codabar-start"></select></label>
-                        <label>Codabar 终止符<select id="codabar-stop"></select></label>
-                        <label class="barcode-check"><input type="checkbox" id="codabar-showss" /> HRI 显示起止符</label>
-                      </div>
-                      <label class="barcode-preset-picker" id="msi-options" hidden>MSI 校验模式
-                        <select id="msi-checksum"></select>
                       </label>
                       <label class="barcode-font-picker">数字字体
                         <select id="barcode-font">
@@ -338,16 +340,40 @@
                           <option value="ocrb-iv">OCRB IV</option>
                         </select>
                       </label>
-                      <span class="label">导出文件</span>
-                      <div class="format-grid">
-                        <button id="save-barcode-svg" type="button">保存 SVG</button>
-                        <button id="save-barcode-png" type="button">保存 PNG</button>
-                        <button id="save-barcode-eps" type="button">保存 EPS</button>
-                        <button id="copy-barcode-vector" type="button">复制矢量图</button>
+                      <details class="barcode-advanced-settings" id="barcode-advanced-settings" hidden>
+                        <summary>高级设置</summary>
+                        <div class="barcode-advanced-content">
+                          <div class="barcode-preset-picker" id="code39-options" hidden>
+                            <label>Code 39 窄宽比
+                              <select id="code39-ratio"></select>
+                            </label>
+                            <label class="barcode-check"><input type="checkbox" id="code39-mod43" /> Mod 43 校验字符</label>
+                            <label class="barcode-check"><input type="checkbox" id="code39-fullascii" /> Full ASCII 扩展</label>
+                          </div>
+                          <div class="barcode-preset-picker" id="codabar-options" hidden>
+                            <label>Codabar 起始符<select id="codabar-start"></select></label>
+                            <label>Codabar 终止符<select id="codabar-stop"></select></label>
+                            <label class="barcode-check"><input type="checkbox" id="codabar-showss" /> HRI 显示起止符</label>
+                          </div>
+                          <label class="barcode-preset-picker" id="msi-options" hidden>MSI 校验模式
+                            <select id="msi-checksum"></select>
+                          </label>
+                        </div>
+                      </details>
+                    </div>
+                    <div class="glass-card control-card barcode-export-card">
+                      <div class="barcode-export-section">
+                        <span class="label">导出</span>
+                        <div class="format-grid">
+                          <button id="save-barcode-svg" type="button">保存 SVG</button>
+                          <button id="save-barcode-png" type="button">保存 PNG</button>
+                          <button id="save-barcode-eps" type="button">保存 EPS</button>
+                          <button id="copy-barcode-vector" type="button">复制矢量图</button>
+                        </div>
                       </div>
                     </div>
                     <div class="glass-card control-card">
-                      <span class="label">一键转入</span>
+                      <span class="label">发送到</span>
                       <div class="app-grid">
                         <button class="app-button" id="open-barcode-illustrator" type="button"><b class="ai-icon">Ai</b><span>Illustrator</span></button>
                         <button class="app-button" id="open-barcode-photoshop" type="button"><b class="ps-icon">Ps</b><span>Photoshop</span></button>
@@ -355,7 +381,6 @@
                       <button class="gbtn board-wide-button" id="copy-barcode-ungrouped" type="button" disabled>
                         复制到 Illustrator（未编组）
                       </button>
-                      <p class="app-note" id="ungrouped-note">粘贴后直接是可编辑路径，无需再解组。仅 Windows + 已安装 Illustrator。</p>
                     </div>
                   </div>
                 </div>

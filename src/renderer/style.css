@@ -2103,17 +2103,30 @@ label {
 
 .barcode-grid {
   display: grid;
+  width: 100%;
+  max-width: 1680px;
   min-height: 0;
   flex: 1;
-  grid-template-columns: minmax(0, 1fr) 240px;
+  grid-template-columns: minmax(0, 1fr) clamp(240px, 24vw, 320px);
   gap: var(--sp-4);
+  margin: 0 auto;
+  padding-bottom: var(--sp-2);
 }
 
 .barcode-work {
   display: flex;
+  width: 100%;
+  height: 100%;
   min-height: 0;
+  align-self: start;
   flex-direction: column;
+  overflow: visible;
+}
+
+.barcode-single-section {
+  overflow: hidden;
   padding: var(--sp-5);
+  padding-bottom: calc(var(--sp-5) + var(--sp-2));
 }
 
 .barcode-mode-switch {
@@ -2184,6 +2197,15 @@ label {
   gap: var(--sp-3);
 }
 
+.barcode-input-field {
+  display: grid;
+  flex: none;
+  gap: 7px;
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 650;
+}
+
 .barcode-input input {
   min-width: 0;
   height: var(--control-height);
@@ -2196,6 +2218,10 @@ label {
   background: var(--control-bg);
 }
 
+.barcode-input input:focus::placeholder {
+  color: transparent;
+}
+
 .barcode-input input.invalid {
   border-color: rgba(224, 85, 78, 0.65);
   box-shadow: 0 0 0 3px rgba(224, 85, 78, 0.1);
@@ -2203,8 +2229,9 @@ label {
 
 .artboard {
   display: flex;
-  min-height: 0;
-  flex: 1;
+  height: clamp(220px, 34vh, 420px);
+  min-height: 220px;
+  flex: 1 1 auto;
   align-items: center;
   justify-content: center;
   padding: 6%;
@@ -2243,15 +2270,35 @@ label {
   color: #b58900;
 }
 
-.batch-input-row {
+.batch-input-field {
   display: grid;
   flex: none;
-  grid-template-columns: minmax(0, 1fr) 140px;
-  gap: var(--sp-3);
+  gap: 7px;
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 650;
 }
 
-.batch-input-row textarea {
+.barcode-batch-section {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+}
+
+.barcode-batch-input-section {
+  flex: none;
+}
+
+.barcode-batch-result-section {
+  min-height: 240px;
+  flex: 1;
+}
+
+.batch-input-field textarea {
   min-width: 0;
+  min-height: 112px;
   padding: 10px 12px;
   resize: vertical;
   border: 1px solid var(--control-border);
@@ -2263,25 +2310,42 @@ label {
   user-select: text;
 }
 
-.batch-input-row textarea:focus {
+.batch-input-field textarea:focus {
   border-color: var(--control-border-hover);
 }
 
-.batch-actions {
+.batch-input-field small,
+.batch-summary {
+  color: var(--faint);
+  font-size: var(--fs-sm);
+  font-weight: 400;
+}
+
+.batch-generate-row,
+.batch-export-actions {
   display: flex;
-  flex-direction: column;
+  justify-content: flex-end;
   gap: var(--sp-2);
 }
 
-.batch-actions button {
-  width: 100%;
+.batch-generate-row button {
+  width: auto;
+  min-width: 0;
+  font-size: var(--fs-md);
 }
 
-.batch-summary {
+.batch-result-head {
+  display: flex;
   flex: none;
-  min-height: 18px;
-  color: var(--faint);
-  font-size: 11px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.batch-result-head b {
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 650;
 }
 
 .batch-list {
@@ -2292,6 +2356,95 @@ label {
   align-content: start;
   gap: var(--sp-3);
   overflow: auto;
+}
+
+.batch-export-actions {
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--hairline);
+}
+
+.barcode-compact-summary {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.barcode-spec-footer {
+  display: grid;
+  flex: none;
+  gap: var(--sp-2);
+  padding: var(--sp-3) 2px var(--sp-2);
+  border-top: 1px solid var(--hairline);
+}
+
+.barcode-spec-details,
+.barcode-advanced-settings {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.barcode-spec-details:has(.barcode-spec-report[hidden]) {
+  display: none;
+}
+
+.barcode-spec-details summary,
+.barcode-advanced-settings summary {
+  width: fit-content;
+  color: var(--accent);
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.barcode-settings-card {
+  flex: none;
+}
+
+.barcode-settings-title[hidden] {
+  display: none !important;
+}
+
+.barcode-settings-card[hidden] {
+  display: none !important;
+}
+
+.barcode-advanced-settings {
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--hairline);
+}
+
+.barcode-advanced-content {
+  display: grid;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+}
+
+.barcode-export-section {
+  display: grid;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--hairline);
+}
+
+.barcode-export-card .barcode-export-section {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.barcode-grid .control-card > .label,
+.barcode-export-section > .label {
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 750;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.barcode-advanced-settings summary {
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 750;
 }
 
 .batch-item {
@@ -2366,6 +2519,11 @@ label {
   gap: var(--sp-4);
 }
 
+.control-column {
+  align-self: start;
+  margin-top: calc(var(--h-sm) + var(--sp-1) + var(--sp-1) + var(--sp-4) - 4px);
+}
+
 .control-card {
   padding: var(--sp-4);
 }
@@ -2376,8 +2534,15 @@ label {
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: var(--sp-2);
-  color: var(--faint);
+  color: var(--muted);
   font-size: 10px;
+}
+
+.barcode-font-picker[hidden],
+.barcode-preset-picker[hidden],
+.barcode-advanced-settings[hidden],
+.barcode-advanced-content > [hidden] {
+  display: none !important;
 }
 
 .barcode-font-picker select,
@@ -2390,6 +2555,47 @@ label {
   outline: 0;
   color: var(--foreground);
   background-color: var(--control-bg);
+}
+
+.barcode-advanced-content label {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+#code39-options,
+#codabar-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: var(--sp-3);
+}
+
+#code39-options > label:first-child,
+#codabar-options > label:not(.barcode-check) {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+#code39-options > label:first-child {
+  grid-column: 1 / -1;
+}
+
+#code39-options select,
+#codabar-options select {
+  width: 100%;
+}
+
+#codabar-options .barcode-check {
+  grid-column: 1 / -1;
+}
+
+#msi-options {
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+#msi-options select {
+  width: 100%;
 }
 
 .label {
@@ -4128,6 +4334,31 @@ body.keyboard-focus :where(
   }
 }
 
+@media (max-height: 760px) {
+  .barcode-single-section {
+    padding: var(--sp-4);
+    padding-bottom: calc(var(--sp-4) + var(--sp-2));
+  }
+
+  .barcode-pane {
+    gap: var(--sp-3);
+  }
+
+  .barcode-mode-switch {
+    margin-bottom: var(--sp-2);
+  }
+
+  .artboard {
+    height: clamp(180px, 30vh, 260px);
+    min-height: 180px;
+    padding: 4%;
+  }
+
+  .barcode-spec-footer {
+    padding-top: var(--sp-2);
+  }
+}
+
 @media (max-width: 780px) {
   .submenu {
     width: 158px;
@@ -4140,6 +4371,7 @@ body.keyboard-focus :where(
   .control-column {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    margin-top: 0;
   }
 
   .image-zoom {
@@ -4229,6 +4461,7 @@ body.keyboard-focus :where(
 /* 零售条码生产合规参数报告（SVG/EPS 与 PNG 双口径） */
 .barcode-spec-report {
   display: grid;
+  max-height: 220px;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 4px 12px;
   margin: 10px 0 0;
@@ -4238,6 +4471,7 @@ body.keyboard-focus :where(
   background: var(--card-thin);
   font-size: 11px;
   line-height: 1.5;
+  overflow: auto;
 }
 .barcode-spec-report dt { color: var(--faint); white-space: nowrap; }
 .barcode-spec-report dd { margin: 0; color: var(--foreground); word-break: break-word; }
@@ -5321,7 +5555,7 @@ body.keyboard-focus :where(
 body.keyboard-focus #ocr-result:focus-visible,
 body.keyboard-focus .barcode-input input:focus-visible,
 body.keyboard-focus .barcode-preset-picker select:focus-visible,
-body.keyboard-focus .batch-input-row textarea:focus-visible,
+body.keyboard-focus .batch-input-field textarea:focus-visible,
 body.keyboard-focus .color-preview input:focus-visible,
 body.keyboard-focus .format-options input[type="number"]:focus-visible,
 body.keyboard-focus .image-panel select:focus-visible,

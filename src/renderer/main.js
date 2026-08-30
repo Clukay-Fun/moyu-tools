@@ -139,7 +139,7 @@ const barcodeTypes = {
   },
   Auto: {
     format: 'auto',
-    icon: 'AUTO',
+    icon: 'A',
     color: '#737789',
     example: 'AUTO-123456',
     inputMode: 'text',
@@ -202,7 +202,13 @@ const submenuData = {
   bc: [
     {
       heading: '条码类型',
-      items: Object.entries(barcodeTypes).map(([name, type]) => [name, type.icon, type.color])
+      items: Object.entries(barcodeTypes)
+        .filter(([name]) => name !== 'Auto')
+        .map(([name, type]) => [name, type.icon, type.color])
+    },
+    {
+      heading: '自动识别',
+      items: [['Auto', barcodeTypes.Auto.icon, barcodeTypes.Auto.color]]
     }
   ],
   video: [
@@ -4037,6 +4043,10 @@ window.api.onIllustratorProgress((progress) => {
 renderIllustratorFiles()
 
 const barcodeInput = document.querySelector('#barcode-value')
+const barcodeCompactSummary = document.querySelector('#barcode-compact-summary')
+const barcodeAdvancedSettings = document.querySelector('#barcode-advanced-settings')
+const barcodeSettingsTitle = document.querySelector('#barcode-settings-title')
+const barcodeSettingsCard = document.querySelector('#barcode-settings-card')
 const barcodeSvg = document.querySelector('#barcode-svg')
 const barcodeMessage = document.querySelector('#barcode-message')
 const barcodeSpecReport = document.querySelector('#barcode-spec-report')
@@ -4204,6 +4214,36 @@ function renderBarcodeSvg(svgElement, value, typeName = state.selections.bc, itf
 function friendlyBarcodeError(typeName) {
   const type = barcodeTypes[typeName]
   return `${typeName} 输入无效：${type?.hint || '请检查长度与字符'}。`
+}
+
+function renderBarcodeCompactSummary(typeName) {
+  const parts = [typeName]
+  if (barcodeRenderedValue) parts.push(`${barcodeRenderedValue.length} 位`)
+
+  try {
+    if (isGs1128Type(typeName) && gs1128Prepared) {
+      const geometry = computeGs1128Geometry(gs1128Prepared)
+      const raster = gs1128RasterSize(gs1128Prepared)
+      parts.push(`${geometry.widthMm.toFixed(2)} × ${geometry.heightMm.toFixed(2)} mm`, `${raster.dpi} DPI`)
+    } else if (isItf14Type(typeName)) {
+      const geometry = computeItf14Geometry(state.itf14Preset || ITF14_DEFAULT_PRESET, barcodeRenderedValue || null)
+      const raster = itf14RasterSize(state.itf14Preset || ITF14_DEFAULT_PRESET, barcodeRenderedValue || null)
+      parts.push(`${geometry.widthMm.toFixed(2)} × ${geometry.heightMm.toFixed(2)} mm`, `${raster.dpi} DPI`)
+    } else if (isRetailType(typeName)) {
+      const geometry = computeRetailGeometry(typeName)
+      const raster = retailRasterSize(typeName)
+      parts.push(`${geometry.widthMm.toFixed(2)} × ${geometry.heightMm.toFixed(2)} mm`, `${raster.dpi} DPI`)
+    } else if (isGenericType(typeName) && barcodeRenderedValue) {
+      const options = genericOptionsFor(typeName)
+      const geometry = computeGenericGeometry(typeName, barcodeRenderedValue, options)
+      const raster = genericRasterSize(typeName, barcodeRenderedValue, options)
+      parts.push(`${geometry.widthMm.toFixed(2)} × ${geometry.heightMm.toFixed(2)} mm`, `${raster.dpi} DPI`)
+    }
+  } catch {
+    // 紧凑摘要是辅助信息；详细规格与生成错误仍由原有路径负责。
+  }
+
+  barcodeCompactSummary.textContent = parts.join(' · ')
 }
 
 // 生产合规参数报告：SVG/EPS 为精确标称值，PNG 为整数像素量化后的实际值，
@@ -4441,6 +4481,7 @@ async function generateBarcode(notifyError = true) {
   const rawInput = barcodeInput.value
   const raw = rawInput.trim()
   const typeName = state.selections.bc
+  barcodeCompactSummary.textContent = `${typeName} · 等待有效输入`
   // 任何一次生成（含切换类型、非 GS1-128 类型）都推进序号，
   // 以作废仍在飞行中的旧 GS1-128 校验请求。
   const token = ++barcodeRequestSeq
@@ -4510,6 +4551,7 @@ async function generateBarcode(notifyError = true) {
     barcodeRenderedValue = value
     barcodeRenderedType = typeName
     renderBarcodeSpecReport(typeName)
+    renderBarcodeCompactSummary(typeName)
     if (isRetailPreview) {
       // 补零结果只用于预览：保存 / 复制 / EPS / Adobe 联动等导出控件保持禁用。
       setBarcodeExportEnabled(false)
@@ -4966,6 +5008,11 @@ function updateBarcodeFontPickerVisibility(typeName) {
     codabarStopSelect.value = state.codabar.stop
     codabarShowSsCheck.checked = state.codabar.showStartStop
   }
+
+  barcodeAdvancedSettings.hidden = !(code39 || msi || codabar)
+  const hasBaseSettings = !fixedFont || itf14
+  barcodeSettingsTitle.hidden = !hasBaseSettings
+  barcodeSettingsCard.hidden = !hasBaseSettings
 }
 
 function selectBarcodeType(typeName, replaceValue = false) {
