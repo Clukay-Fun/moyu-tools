@@ -68,11 +68,20 @@ function normalizeNotes(notes) {
 }
 
 function isUpdateable() {
-  return app.isPackaged && !process.env.PORTABLE_EXECUTABLE_DIR
+  return process.platform === 'win32' && app.isPackaged && !process.env.PORTABLE_EXECUTABLE_DIR
 }
 
 function doCheck() {
-  if (!isUpdateable() || checking || downloading) return
+  if (!isUpdateable()) {
+    patch({
+      status: state.portable ? 'portable' : 'unsupported',
+      message: state.portable
+        ? '便携版不支持自动更新，请前往 GitHub 手动下载'
+        : '当前运行方式不支持自动更新'
+    })
+    return { ok: false, message: state.message }
+  }
+  if (checking || downloading) return { ok: false, message: '更新任务正在进行' }
   checking = true
   patch({ status: 'checking', message: null })
   autoUpdater
@@ -81,6 +90,7 @@ function doCheck() {
     .finally(() => {
       checking = false
     })
+  return { ok: true }
 }
 
 export function initUpdater(window) {
@@ -92,8 +102,10 @@ export function initUpdater(window) {
 
   if (!isUpdateable()) {
     patch({
-      status: state.portable ? 'portable' : 'idle',
-      message: state.portable ? '便携版不支持自动更新，请前往 GitHub 手动下载' : null
+      status: state.portable ? 'portable' : 'unsupported',
+      message: state.portable
+        ? '便携版不支持自动更新，请前往 GitHub 手动下载'
+        : '当前运行方式不支持自动更新'
     })
     return
   }
@@ -105,6 +117,7 @@ export function initUpdater(window) {
       status: 'available',
       availableVersion: info?.version || null,
       releaseNotes: normalizeNotes(info?.releaseNotes),
+      lastCheckedAt: Date.now(),
       message: null
     })
   )
@@ -140,8 +153,7 @@ export const updateApi = {
     return { autoCheck: prefs.autoCheck }
   },
   check: () => {
-    doCheck()
-    return { ok: true }
+    return doCheck()
   },
   download: () => {
     if (downloading || state.status !== 'available') return { ok: false, message: '当前没有可下载的更新' }

@@ -3949,18 +3949,13 @@ async function addIllustratorInputs(picker) {
   try {
     const files = await picker()
     if (!files.length) return
-    const known = new Set(illustratorState.inputs.map((file) => `${file.name}\0${file.size}`))
-    const skippedIds = []
+    const known = new Set(illustratorState.inputs.map((file) => file.id))
     const added = files.filter((file) => {
-      const key = `${file.name}\0${file.size}`
-      if (known.has(key)) {
-        skippedIds.push(file.id)
-        return false
-      }
+      const key = file.id
+      if (known.has(key)) return false
       known.add(key)
       return true
     })
-    if (skippedIds.length) await window.api.removeIllustratorInputs(skippedIds)
     illustratorState.inputs.push(...added)
     added.forEach((file) => illustratorState.statuses.set(file.id, '待处理'))
     illustratorState.outputs = []
@@ -4519,6 +4514,7 @@ function renderBarcodeSpecReport(typeName) {
 // 若不设防会用旧数据覆盖新输入。这里用单调递增序号：只有序号仍等于当前值的
 // 回调才允许写入 DOM 与状态，落后的请求一律丢弃。
 let barcodeRequestSeq = 0
+let barcodeBatchRequestSeq = 0
 // 当前预览所依据的 GS1-128 校验结果，是参数报告与全部导出路径的唯一数据源。
 let gs1128Prepared = null
 
@@ -5076,6 +5072,9 @@ function selectBarcodeType(typeName, replaceValue = false) {
   const type = barcodeTypes[typeName]
   if (!type) return
 
+  barcodeBatchRequestSeq += 1
+  generateBarcodeBatchButton.disabled = false
+  generateBarcodeBatchButton.textContent = '批量生成'
   state.selections.bc = typeName
   document.querySelector('#bc-crumb').textContent = typeName
   barcodeInput.inputMode = type.inputMode
@@ -5181,6 +5180,10 @@ async function generateBarcodeBatch() {
   setBarcodeBatchExportEnabled(false)
   generateBarcodeBatchButton.disabled = true
   generateBarcodeBatchButton.textContent = '正在生成…'
+  const requestId = ++barcodeBatchRequestSeq
+  const batchType = state.selections.bc
+  const batchItf14Preset = isItf14Type(batchType) ? state.itf14Preset : null
+  const batchGenericOptions = genericOptionsFor(batchType)
   const fragment = document.createDocumentFragment()
   let validCount = 0
 
@@ -5190,19 +5193,20 @@ async function generateBarcodeBatch() {
 
     // 冻结生成时的 ITF-14 预设：生成后若切换预设，
     // 已有 SVG 与导出像素尺寸必须仍属同一模式。
-    const itf14Preset = isItf14Type(state.selections.bc) ? state.itf14Preset : null
+    const itf14Preset = batchItf14Preset
     // Code 39 的窄宽比 / Mod 43 / Full ASCII 随条目冻结，
     // 生成后改设置不得影响已有条目的 SVG 与导出像素。
-    const genericOptions = genericOptionsFor(state.selections.bc)
+    const genericOptions = batchGenericOptions
 
     try {
       // GS1-128 每条独立做一次 AI 校验，校验结果随条目冻结，
       // 后续导出只用这份结果，不重新校验、不共用上一条的数据。
-      const prepared = isGs1128Type(state.selections.bc) ? await prepareGs1128(value) : null
-      renderBarcodeSvg(svg, value, state.selections.bc, itf14Preset, prepared, genericOptions)
+      const prepared = isGs1128Type(batchType) ? await prepareGs1128(value) : null
+      if (requestId !== barcodeBatchRequestSeq) return
+      renderBarcodeSvg(svg, value, batchType, itf14Preset, prepared, genericOptions)
       item = {
         value,
-        type: state.selections.bc,
+        type: batchType,
         itf14Preset,
         prepared,
         genericOptions,
@@ -5211,16 +5215,17 @@ async function generateBarcodeBatch() {
       }
       validCount += 1
     } catch (error) {
+      if (requestId !== barcodeBatchRequestSeq) return
       item = {
         value,
-        type: state.selections.bc,
+        type: batchType,
         itf14Preset,
         prepared: null,
         genericOptions,
         valid: false,
-        error: (isGs1128Type(state.selections.bc) || isGenericType(state.selections.bc)) && error instanceof Error
+        error: (isGs1128Type(batchType) || isGenericType(batchType)) && error instanceof Error
           ? error.message
-          : friendlyBarcodeError(state.selections.bc)
+          : friendlyBarcodeError(batchType)
       }
     }
 
@@ -5230,9 +5235,11 @@ async function generateBarcodeBatch() {
     if ((index + 1) % 20 === 0) {
       barcodeBatchList.append(fragment)
       await nextFrame()
+      if (requestId !== barcodeBatchRequestSeq) return
     }
   }
 
+  if (requestId !== barcodeBatchRequestSeq) return
   barcodeBatchList.append(fragment)
   const invalidCount = values.length - validCount
   barcodeBatchSummary.textContent = `已生成 ${validCount} 条${invalidCount ? `，${invalidCount} 条输入无效` : ''}。`
@@ -6287,6 +6294,7 @@ function initUpdatePanel() {
       case 'up-to-date': return '已是最新版本'
       case 'error': return `更新出错：${s.message || '未知错误'}`
       case 'portable': return '便携版不支持自动更新，请前往 GitHub 手动下载'
+      case 'unsupported': return s.message || '当前运行方式不支持自动更新'
       default: return '尚未检查更新'
     }
   }
@@ -6312,6 +6320,7 @@ function initUpdatePanel() {
       case 'downloading': p.textContent = '下载中…'; p.disabled = true; break
       case 'downloaded': p.textContent = '立即重启更新'; break
       case 'portable': p.textContent = '前往 GitHub 下载'; break
+      case 'unsupported': p.textContent = '当前版本不支持自动更新'; p.disabled = true; break
       default: p.textContent = '检查更新'
     }
   }

@@ -413,6 +413,11 @@ async function registerIllustratorInput(filePath, ownerId) {
   if (!info.isFile() || info.size > 2 * 1024 * 1024 * 1024) {
     throw new Error(`${basename(filePath)} 不是文件或超过 2 GB`)
   }
+  for (const input of illustratorInputSessions.values()) {
+    if (input.ownerId === ownerId && input.path === filePath) {
+      return { id: input.id, name: input.name, size: input.size }
+    }
+  }
   const id = randomUUID()
   const input = {
     id,
@@ -431,10 +436,14 @@ async function collectIllustratorFolder(directory, ownerId, output = []) {
   for (const entry of entries) {
     if (output.length >= 500) break
     const entryPath = join(directory, entry.name)
-    if (entry.isDirectory()) {
-      await collectIllustratorFolder(entryPath, ownerId, output)
-    } else if (entry.isFile() && extname(entry.name).toLowerCase() === '.ai') {
-      output.push(await registerIllustratorInput(entryPath, ownerId))
+    try {
+      if (entry.isDirectory()) {
+        await collectIllustratorFolder(entryPath, ownerId, output)
+      } else if (entry.isFile() && extname(entry.name).toLowerCase() === '.ai') {
+        output.push(await registerIllustratorInput(entryPath, ownerId))
+      }
+    } catch {
+      // 单个无权限目录或失效文件不应中断整次文件夹导入。
     }
   }
   return output
@@ -477,6 +486,19 @@ function purgeOwnerSessions(ownerId) {
   for (const [id, entry] of officeInputSessions) {
     if (entry.ownerId === ownerId) officeInputSessions.delete(id)
   }
+  for (const [id, entry] of illustratorInputSessions) {
+    if (entry.ownerId === ownerId) illustratorInputSessions.delete(id)
+  }
+}
+
+function bindOwnerSessionCleanup(sender) {
+  const ownerId = sender.id
+  if (boundDropDestroyListeners.has(ownerId)) return
+  boundDropDestroyListeners.add(ownerId)
+  sender.once('destroyed', () => {
+    boundDropDestroyListeners.delete(ownerId)
+    purgeOwnerSessions(ownerId)
+  })
 }
 
 async function registerOfficeDropInput(filePath, ownerId, kind) {
@@ -662,13 +684,7 @@ ipcMain.handle('drop:scan-paths', async (event, payload) => {
   const ownerId = event.sender.id
   // 每个 sender 仅绑定一次：renderer 报错 / 切换 / 关闭时统一回收残留临时会话，
   // 避免连续拖入累积 destroyed 监听器（MaxListenersExceededWarning）。
-  if (!boundDropDestroyListeners.has(ownerId)) {
-    boundDropDestroyListeners.add(ownerId)
-    event.sender.once('destroyed', () => {
-      boundDropDestroyListeners.delete(ownerId)
-      purgeOwnerSessions(ownerId)
-    })
-  }
+  bindOwnerSessionCleanup(event.sender)
   return scanDroppedPaths({ paths, region, action, ownerId })
 })
 
@@ -1247,6 +1263,7 @@ ipcMain.handle('com:probe', async (event) => {
 
 ipcMain.handle('illustrator:pick-files', async (event) => {
   assertMainWindowSender(event)
+  bindOwnerSessionCleanup(event.sender)
   const ownerWindow = BrowserWindow.fromWebContents(event.sender)
   const result = await dialog.showOpenDialog(ownerWindow, {
     title: '选择 Illustrator 文件',
@@ -1263,6 +1280,7 @@ ipcMain.handle('illustrator:pick-files', async (event) => {
 
 ipcMain.handle('illustrator:add-paths', async (event, paths) => {
   assertMainWindowSender(event)
+  bindOwnerSessionCleanup(event.sender)
   if (!Array.isArray(paths) || paths.length === 0 || paths.length > 500) {
     throw new Error('一次只能拖入 1–500 个 Illustrator 文件')
   }
@@ -1281,6 +1299,7 @@ ipcMain.handle('illustrator:add-paths', async (event, paths) => {
 
 ipcMain.handle('illustrator:pick-folder', async (event) => {
   assertMainWindowSender(event)
+  bindOwnerSessionCleanup(event.sender)
   const ownerWindow = BrowserWindow.fromWebContents(event.sender)
   const result = await dialog.showOpenDialog(ownerWindow, {
     title: '选择 Illustrator 文件夹',

@@ -4,6 +4,9 @@ on:
     branches: [main]
 permissions:
   contents: write
+concurrency:
+  group: release-windows-main
+  cancel-in-progress: false
 jobs:
   release:
     runs-on: windows-2022
@@ -43,6 +46,19 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
 
+      - name: Verify release tag is available
+        id: tag_guard
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.bump.outputs.tag }}"
+          if gh release view "$TAG" >/dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "release tag already exists: $TAG" >&2
+            exit 1
+          fi
+          echo "safe_to_cleanup=true" >> "$GITHUB_OUTPUT"
+
       - name: Install dependencies (clean)
         run: npm ci
 
@@ -56,7 +72,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release view "${{ steps.bump.outputs.tag }}" --json assets -q '.assets[].name' | grep -E 'setup\.exe$|latest\.yml$|blockmap$'
+          ASSETS=$(gh release view "${{ steps.bump.outputs.tag }}" --json assets -q '.assets[].name')
+          grep -Eq 'setup\.exe$' <<< "$ASSETS"
+          grep -Fxq 'latest.yml' <<< "$ASSETS"
+          grep -Eq '\.blockmap$' <<< "$ASSETS"
 
       - name: Publish release
         shell: bash
@@ -65,7 +84,7 @@ jobs:
         run: gh release edit "${{ steps.bump.outputs.tag }}" --draft=false
 
       - name: Cleanup on failure
-        if: failure()
+        if: failure() && steps.tag_guard.outputs.safe_to_cleanup == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
