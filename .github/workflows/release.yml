@@ -74,7 +74,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.bump.outputs.tag }}"
-          RELEASE_ID=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -1)
+          RELEASE_ID=""
+          for ATTEMPT in {1..12}; do
+            RELEASE_ID=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -1)
+            [ -n "$RELEASE_ID" ] && break
+            echo "waiting for draft release metadata ($ATTEMPT/12)"
+            sleep 5
+          done
           test -n "$RELEASE_ID"
           ASSETS=$(gh api "repos/Clukay-Fun/moyu-tools/releases/$RELEASE_ID/assets" --jq '.[].name')
           grep -Eq 'setup\.exe$' <<< "$ASSETS"
