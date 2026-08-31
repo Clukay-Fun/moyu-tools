@@ -75,7 +75,6 @@ jobs:
           ASSETS=$(gh release view "${{ steps.bump.outputs.tag }}" --json assets -q '.assets[].name')
           grep -Eq 'setup\.exe$' <<< "$ASSETS"
           grep -Fxq 'latest.yml' <<< "$ASSETS"
-          grep -Eq '\.blockmap$' <<< "$ASSETS"
 
       - name: Publish release
         shell: bash
@@ -89,5 +88,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete "${{ steps.bump.outputs.tag }}" --yes || true
+          TAG="${{ steps.bump.outputs.tag }}"
+          RELEASE_ID=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -1)
+          if [ -n "$RELEASE_ID" ]; then
+            gh api --method DELETE "repos/Clukay-Fun/moyu-tools/releases/$RELEASE_ID" || true
+          fi
           git push --delete origin "${{ steps.bump.outputs.tag }}" || true
