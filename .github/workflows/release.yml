@@ -68,19 +68,24 @@ jobs:
         run: npm run build:win:release
 
       - name: Validate release assets
+        id: release
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ASSETS=$(gh release view "${{ steps.bump.outputs.tag }}" --json assets -q '.assets[].name')
+          TAG="${{ steps.bump.outputs.tag }}"
+          RELEASE_ID=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -1)
+          test -n "$RELEASE_ID"
+          ASSETS=$(gh api "repos/Clukay-Fun/moyu-tools/releases/$RELEASE_ID/assets" --jq '.[].name')
           grep -Eq 'setup\.exe$' <<< "$ASSETS"
           grep -Fxq 'latest.yml' <<< "$ASSETS"
+          echo "id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
 
       - name: Publish release
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit "${{ steps.bump.outputs.tag }}" --draft=false
+        run: gh api --method PATCH "repos/Clukay-Fun/moyu-tools/releases/${{ steps.release.outputs.id }}" -F draft=false
 
       - name: Cleanup on failure
         if: failure() && steps.tag_guard.outputs.safe_to_cleanup == 'true'
