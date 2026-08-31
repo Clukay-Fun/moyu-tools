@@ -75,14 +75,20 @@ jobs:
         run: |
           TAG="${{ steps.bump.outputs.tag }}"
           RELEASE_ID=""
-          for ATTEMPT in {1..12}; do
+          ASSETS=""
+          for ATTEMPT in {1..18}; do
             RELEASE_ID=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -1)
-            [ -n "$RELEASE_ID" ] && break
-            echo "waiting for draft release metadata ($ATTEMPT/12)"
+            if [ -n "$RELEASE_ID" ]; then
+              ASSETS=$(gh api "repos/Clukay-Fun/moyu-tools/releases/$RELEASE_ID/assets" --jq '.[].name')
+              if grep -Eq 'setup\.exe$' <<< "$ASSETS" && grep -Fxq 'latest.yml' <<< "$ASSETS"; then
+                break
+              fi
+            fi
+            echo "waiting for draft release assets ($ATTEMPT/18)"
             sleep 5
           done
           test -n "$RELEASE_ID"
-          ASSETS=$(gh api "repos/Clukay-Fun/moyu-tools/releases/$RELEASE_ID/assets" --jq '.[].name')
+          echo "$ASSETS"
           grep -Eq 'setup\.exe$' <<< "$ASSETS"
           grep -Fxq 'latest.yml' <<< "$ASSETS"
           echo "id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
