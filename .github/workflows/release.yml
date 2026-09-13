@@ -53,7 +53,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.bump.outputs.tag }}"
-          if gh release view "$TAG" >/dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+          EXISTING=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | tr -d '\r')
+          if [ -n "$EXISTING" ] || git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
             echo "release tag already exists: $TAG" >&2
             exit 1
           fi
@@ -62,10 +63,46 @@ jobs:
       - name: Install dependencies (clean)
         run: npm ci
 
-      - name: Build and publish (draft)
+      - name: Build local release assets
+        run: npm run build:win:nsis
+
+      # electron-builder can create two same-tag drafts concurrently for different
+      # assets. Own creation/upload here so every asset belongs to one release.
+      - name: Create draft release
+        id: draft
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:win:release
+        run: |
+          TAG="${{ steps.bump.outputs.tag }}"
+          test -s "release/moyu-tools-${TAG}-windows-x64-setup.exe"
+          test -s release/latest.yml
+          RELEASE_ID=$(gh api --method POST repos/Clukay-Fun/moyu-tools/releases \
+            -f tag_name="$TAG" -f target_commitish="$GITHUB_SHA" -f name="$TAG" \
+            -F draft=true -F prerelease=false --jq '.id' | tr -d '\r')
+          test -n "$RELEASE_ID"
+          echo "id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Upload release assets
+        timeout-minutes: 20
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.bump.outputs.tag }}"
+          FILES=("release/moyu-tools-${TAG}-windows-x64-setup.exe" release/latest.yml)
+          BLOCKMAP="release/moyu-tools-${TAG}-windows-x64-setup.exe.blockmap"
+          if [ -s "$BLOCKMAP" ]; then FILES+=("$BLOCKMAP"); fi
+          for ATTEMPT in 1 2 3; do
+            IDS=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | tr -d '\r')
+            if [ "$IDS" != "${{ steps.draft.outputs.id }}" ]; then
+              echo "::error::Release identity is ambiguous; refusing upload"
+              exit 1
+            fi
+            if gh release upload "$TAG" "${FILES[@]}" --clobber; then exit 0; fi
+            if [ "$ATTEMPT" -lt 3 ]; then sleep 10; fi
+          done
+          exit 1
 
       - name: Validate release assets
         id: release
@@ -75,16 +112,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.bump.outputs.tag }}"
-          RELEASE_ID=""
+          RELEASE_ID="${{ steps.draft.outputs.id }}"
           ASSETS=""
           EXPECTED_INSTALLER="moyu-tools-${TAG}-windows-x64-setup.exe"
           READY=false
           for ATTEMPT in {1..60}; do
             # Windows gh output can contain CRLF; normalize before exact matching.
-            if ! RELEASE_ID=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | tr -d '\r' | head -1); then
-              echo "::warning::Release metadata request failed; retrying"
-              RELEASE_ID=""
-            fi
             ASSETS=""
             if [ -n "$RELEASE_ID" ]; then
               if ! ASSETS=$(gh api "repos/Clukay-Fun/moyu-tools/releases/$RELEASE_ID/assets" --paginate --jq '.[] | select(.state == "uploaded" and .size > 0) | .name' | tr -d '\r'); then
@@ -117,14 +150,15 @@ jobs:
         run: gh api --method PATCH "repos/Clukay-Fun/moyu-tools/releases/${{ steps.release.outputs.id }}" -F draft=false
 
       - name: Cleanup on failure
-        if: failure() && steps.tag_guard.outputs.safe_to_cleanup == 'true'
+        if: failure() && steps.draft.outputs.id != ''
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ steps.bump.outputs.tag }}"
-          RELEASE_ID=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -1)
-          if [ -n "$RELEASE_ID" ]; then
-            gh api --method DELETE "repos/Clukay-Fun/moyu-tools/releases/$RELEASE_ID" || true
+          RELEASE_ID="${{ steps.draft.outputs.id }}"
+          IS_DRAFT=$(gh api "repos/Clukay-Fun/moyu-tools/releases/$RELEASE_ID" --jq '.draft' | tr -d '\r')
+          if [ "$IS_DRAFT" = true ]; then
+            gh api --method DELETE "repos/Clukay-Fun/moyu-tools/releases/$RELEASE_ID"
+          else
+            echo "Release is already public; preserving it and its tag"
           fi
-          git push --delete origin "${{ steps.bump.outputs.tag }}" || true
