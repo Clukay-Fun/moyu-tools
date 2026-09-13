@@ -90,13 +90,19 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.bump.outputs.tag }}"
+          OWN_ID="${{ steps.draft.outputs.id }}"
           FILES=("release/moyu-tools-${TAG}-windows-x64-setup.exe" release/latest.yml)
           BLOCKMAP="release/moyu-tools-${TAG}-windows-x64-setup.exe.blockmap"
           if [ -s "$BLOCKMAP" ]; then FILES+=("$BLOCKMAP"); fi
           for ATTEMPT in 1 2 3; do
+            # 刚创建的 release 立刻拿列表接口查，可能还没来得及出现（读己之写在
+            # 创建/列表这两个不同接口间不保证同步）——查到空不代表歧义，只有
+            # 查到「别的」id 才是真的歧义。用 Create draft release 那次 POST
+            # 响应里拿到的 id 本身已经是权威的，不需要靠列表接口反过来确认。
             IDS=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | tr -d '\r')
-            if [ "$IDS" != "${{ steps.draft.outputs.id }}" ]; then
-              echo "::error::Release identity is ambiguous; refusing upload"
+            OTHER=$(printf '%s\n' "$IDS" | grep -vFx "$OWN_ID" | grep -v '^$' || true)
+            if [ -n "$OTHER" ]; then
+              echo "::error::Release identity is ambiguous; refusing upload (found: $OTHER)"
               exit 1
             fi
             if gh release upload "$TAG" "${FILES[@]}" --clobber; then exit 0; fi
