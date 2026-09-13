@@ -69,6 +69,7 @@ jobs:
 
       - name: Validate release assets
         id: release
+        timeout-minutes: 15
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -76,21 +77,37 @@ jobs:
           TAG="${{ steps.bump.outputs.tag }}"
           RELEASE_ID=""
           ASSETS=""
-          for ATTEMPT in {1..18}; do
-            RELEASE_ID=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -1)
+          EXPECTED_INSTALLER="moyu-tools-${TAG}-windows-x64-setup.exe"
+          READY=false
+          for ATTEMPT in {1..60}; do
+            # Windows gh output can contain CRLF; normalize before exact matching.
+            if ! RELEASE_ID=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | tr -d '\r' | head -1); then
+              echo "::warning::Release metadata request failed; retrying"
+              RELEASE_ID=""
+            fi
+            ASSETS=""
             if [ -n "$RELEASE_ID" ]; then
-              ASSETS=$(gh api "repos/Clukay-Fun/moyu-tools/releases/$RELEASE_ID/assets" --jq '.[].name')
-              if grep -Eq 'setup\.exe$' <<< "$ASSETS" && grep -Fxq 'latest.yml' <<< "$ASSETS"; then
+              if ! ASSETS=$(gh api "repos/Clukay-Fun/moyu-tools/releases/$RELEASE_ID/assets" --paginate --jq '.[] | select(.state == "uploaded" and .size > 0) | .name' | tr -d '\r'); then
+                echo "::warning::Release assets request failed; retrying"
+                ASSETS=""
+              fi
+              if grep -Fxq "$EXPECTED_INSTALLER" <<< "$ASSETS" && grep -Fxq 'latest.yml' <<< "$ASSETS"; then
+                READY=true
                 break
               fi
             fi
-            echo "waiting for draft release assets ($ATTEMPT/18)"
-            sleep 5
+            echo "waiting for uploaded release assets ($ATTEMPT/60): ${ASSETS:-none}"
+            if [ "$ATTEMPT" -lt 60 ]; then sleep 10; fi
           done
-          test -n "$RELEASE_ID"
-          echo "$ASSETS"
-          grep -Eq 'setup\.exe$' <<< "$ASSETS"
-          grep -Fxq 'latest.yml' <<< "$ASSETS"
+          if [ "$READY" != true ]; then
+            echo "::error::Release $TAG assets did not become ready within the polling window"
+            for REQUIRED in "$EXPECTED_INSTALLER" latest.yml; do
+              if ! grep -Fxq "$REQUIRED" <<< "$ASSETS"; then
+                echo "::error::Missing uploaded asset: $REQUIRED"
+              fi
+            done
+            exit 1
+          fi
           echo "id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
 
       - name: Publish release
