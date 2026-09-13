@@ -88,6 +88,17 @@ export class BoardController {
     /** 自上次保存以来是否有改动 */
     this.dirty = false
     /**
+     * 单调递增的编辑序号（S6）。
+     *
+     * save() 打包场景到发起 IPC 写盘之间有一次 await——写盘期间用户仍能继续
+     * 编辑。若写盘成功后无条件把 dirty 置为 false、重置历史栈，写盘期间发生
+     * 的新改动会被错误地当成"已保存"（其实从未写进那份文件），且历史栈
+     * 会以包含这些新改动的当前场景为基线重置，undo 已经回不到写盘前的状态。
+     * 这里只做最小侵入的修复：save() 记下打包那一刻的序号，写盘成功后
+     * 比对是否有变化，不一致就保留 dirty=true、跳过历史重置与资源回收。
+     */
+    this.editSequence = 0
+    /**
      * 加入事务期间冻结的可视世界矩形。
      * 规格 3.1：事务中不得因逐张渲染、滚动或异步解码重新取值，
      * 否则同一批图片在不同时序下会落到不同位置。
@@ -345,6 +356,19 @@ export class BoardController {
   }
 
   /**
+   * 外部环境事件（非选区变化）导致工具栏显隐可能过期时，补一次重算。
+   *
+   * 已知场景：字体/对齐等浮层由全局 Escape 关闭时，焦点会被送回浮层的
+   * 触发按钮（无障碍要求），但那次交互本身不产生选区变化事件，工具栏
+   * 的显隐只在选区变化时重算，于是隐藏状态卡住——选区明明还在，
+   * 工具栏却再也不出现，直到用户重新点一次画布。
+   */
+  resyncToolbarVisibility() {
+    if (!this.ready || !this.dom) return
+    this.#syncObjectToolbar()
+  }
+
+  /**
    * 场景变更统一出口。
    * commit=true 时记录一步历史；撤销/重做自身还原场景时传 false，
    * 否则会把还原动作又压进栈里。
@@ -353,6 +377,7 @@ export class BoardController {
     // 合并事务进行中：本次改动不单独入历史，交给事务结束时统一推一条。
     // ⚠ 不能简单丢弃 commit——脏标记与恢复调度仍然要走。
     if (commit && this.mergingHistory) {
+      this.editSequence += 1
       this.dirty = true
       this.#reportDirty()
       this.recovery?.schedule()
@@ -364,6 +389,7 @@ export class BoardController {
       return
     }
     if (commit) {
+      this.editSequence += 1
       this.history.push(this.scene)
       this.dirty = true
       this.#reportDirty()
@@ -1565,6 +1591,8 @@ export class BoardController {
   }
 
   async save(asNew = false) {
+    // 打包这一刻的序号：下面 await 期间用户仍可能继续编辑。
+    const sequenceAtPack = this.editSequence
     try {
       const bytes = packBoard(this.scene, this.store)
       const result = await window.api.saveBoard({
@@ -1577,6 +1605,29 @@ export class BoardController {
       if (result.status !== 'saved') return false
 
       this.filePath = result.path
+      // 写盘期间场景又变了：这次成功写盘的是**打包那一刻**的内容，
+      // 不包含之后的新改动，不能把 dirty 清掉，也不能拿现在的场景
+      // 重置历史栈/回收资源——那会让 undo 回不到写盘前的状态，
+      // 还可能把已经写进这份文件的资源从仓库里回收掉。
+      const staleDuringSave = this.editSequence !== sequenceAtPack
+      if (staleDuringSave) {
+        this.#syncControls()
+        this.#syncStatus()
+        this.#reportDirty()
+        this.onStatus({
+          saved: result.path,
+          bytes: result.bytes,
+          warn: '保存期间又有新改动，已写入的是保存前的版本；新改动仍待保存'
+        })
+        // ⚠ 必须返回 false：调用方（confirmDiscard → 新建/打开，以及退出时
+        // 的 onBoardSaveRequest 握手）把返回值当"已安全落盘、可以继续丢弃/
+        // 退出"的信号。写盘本身确实成功了，但那是保存前的旧内容——当前场景
+        // 仍有磁盘上没有的新改动，dirty 也还是 true，对调用方来说这就不是
+        // 一次"完成的保存"，返回 true 会让新建/打开/退出直接把这些新改动
+        // 静默丢掉。
+        return false
+      }
+
       this.dirty = false
       // 正常保存后更新恢复基线：待写的快照作废，已落盘的快照删除（规格 7.3）
       await this.#resetRecoveryBaseline()
@@ -1714,6 +1765,13 @@ export class BoardController {
       getSelection: () => [...this.selection],
       getHistory: () => (this.history ? this.history.stats() : { undo: 0, redo: 0 }),
       getFileState: () => ({ path: this.filePath, dirty: this.dirty }),
+      // save/newBoard：暴露真实的返回值和"是否被阻止"给自动化测试用，
+      // 不给渲染层业务代码用（业务代码走顶部菜单的 controller.save() /
+      // controller.newBoard()）。此前保存竞态 harness 靠点菜单项触发保存，
+      // 菜单点击处理器里是 `void controller.save(false)`，返回值被丢弃，
+      // 测试只能拿到硬编码的 true——测不出"返回值有没有说谎"这个真正的 bug。
+      save: (asNew = false) => this.save(asNew),
+      newBoard: () => this.newBoard(),
       getBackground: () => ({ ...this.background }),
       getGrid: () => ({ show: this.showGrid, snap: this.snapGrid }),
       // 场景坐标 ↔ 屏幕坐标的换算依据。验收要在对象**真实所在的位置**发鼠标

@@ -1,6 +1,6 @@
 {
   "name": "moyu-tools",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "摸鱼工具箱桌面应用",
   "author": "Clukay",
   "private": true,
@@ -138,11 +138,14 @@
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "5.4.624",
     "qpdf-run": "0.2.1",
-    "sharp": "0.35.3",
+    "sharp": "0.35.4",
     "tesseract.js": "7.0.0",
     "electron-updater": "^6.3.0"
   },
   "optionalDependencies": {
     "winax": "3.6.9"
+  },
+  "overrides": {
+    "js-yaml": "4.3.2"
   }
 }

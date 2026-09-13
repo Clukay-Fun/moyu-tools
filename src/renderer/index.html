@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; connect-src 'self' ws:; img-src 'self' data: blob:"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws:; img-src 'self' data: blob:"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>摸鱼工具箱</title>
@@ -213,6 +213,7 @@
                       <span id="pdf-result-text">0 个文件 · 等待添加</span>
                     </div>
                     <button class="primary" id="run-pdf-action" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>开始转 PNG</button>
+                    <button class="gbtn format-cancel" id="pdf-cancel-action" type="button" hidden>取消任务</button>
                     <button class="gbtn open" id="open-pdf-output" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-open"></use></svg>打开所在位置</button>
                   </div>
                 </div>

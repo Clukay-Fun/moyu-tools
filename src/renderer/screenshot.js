@@ -2,6 +2,17 @@ import { installTooltips } from './tooltip.js'
 
 installTooltips()
 
+// OCR 首次运行要下载/初始化 Tesseract 核心和语言包，加上识别本身，几秒钟内
+// 只看得到一句静止的"正在提取文字…"——主进程其实一直在发这几个阶段的进度
+// （screenshot:ocr-progress），只是之前没有任何界面订阅它。
+const OCR_PROGRESS_LABELS = {
+  'loading tesseract core': '载入 OCR 核心',
+  'initializing tesseract': '初始化 OCR 核心',
+  'loading language traineddata': '载入中英文模型',
+  'initializing api': '初始化识别引擎',
+  'recognizing text': '正在识别文字'
+}
+
 const canvas = document.querySelector('#capture-canvas')
 const context = canvas.getContext('2d')
 const magnifier = document.querySelector('#capture-magnifier')
@@ -505,6 +516,14 @@ document.querySelector('#pin-capture').addEventListener('click', () => withBusy(
   await window.api.pinScreenshot(data)
   tip.textContent = '截图已钉住'
 }))
+window.api.onScreenshotOcrProgress((progress) => {
+  if (!busy) return
+  const label = OCR_PROGRESS_LABELS[progress.status]
+  if (!label) return
+  const percent = Number.isFinite(progress.progress) ? `${Math.round(progress.progress * 100)}%` : ''
+  tip.textContent = percent ? `${label} ${percent}` : label
+})
+
 document.querySelector('#ocr-capture').addEventListener('click', () => withBusy('正在提取文字…', async () => {
   const data = await canvasPngBytes(finalCanvas())
   const result = await window.api.recognizeScreenshot(data)

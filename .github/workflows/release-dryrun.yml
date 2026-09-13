@@ -4,6 +4,9 @@ on:
     branches: [ci/dryrun]
 permissions:
   contents: write
+concurrency:
+  group: release-dryrun
+  cancel-in-progress: false
 jobs:
   release:
     runs-on: windows-2022
@@ -30,7 +33,7 @@ jobs:
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Bump patch version
+      - name: Bump patch version (dry-run namespace)
         id: bump
         shell: bash
         run: |
@@ -38,7 +41,13 @@ jobs:
           BASE="${BASE#v}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
           PATCH=$((10#$PATCH + 1))
-          VERSION="$MAJOR.$MINOR.$PATCH"
+          # ⚠ 必须带一个正式发布永远不会产生的后缀（-dryrun.<run number>）。
+          # 之前这里跟 release.yml 算出的是同一个"下一个补丁版本"裸 tag，
+          # 两条流程要是撞上（同时触发、算出同一个版本号），演练这边的
+          # 清理步骤会直接按 tag 名删 Release/tag，删的可能是正式发布那份——
+          # 这不是靠"谁先跑谁锁住"能防住的时序问题，得让两边的版本号
+          # 命名空间从根上就不可能重叠。
+          VERSION="$MAJOR.$MINOR.$PATCH-dryrun.${{ github.run_number }}"
           node -e "const fs=require('fs');const f='package.json';const p=require('./'+f);p.version='$VERSION';fs.writeFileSync(f, JSON.stringify(p,null,2)+'\n');const lf='package-lock.json';const L=JSON.parse(fs.readFileSync(lf,'utf8'));if(L.version)L.version='$VERSION';if(L.packages&&L.packages[''])L.packages[''].version='$VERSION';fs.writeFileSync(lf, JSON.stringify(L,null,2)+'\n');"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
@@ -51,18 +60,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run build:win:release
 
-      - name: Validate release assets
+      - name: Validate release assets (stays draft — never touches production update source)
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          gh release view "${{ steps.bump.outputs.tag }}" --json assets,isDraft \
+            --jq 'if .isDraft then empty else "release is not a draft, refusing to proceed" | halt_error(1) end'
           gh release view "${{ steps.bump.outputs.tag }}" --json assets -q '.assets[].name' | grep -E 'setup\.exe$|latest\.yml$|blockmap$'
-
-      - name: Publish release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit "${{ steps.bump.outputs.tag }}" --draft=false
 
       - name: Cleanup test release (success)
         if: success()
@@ -70,8 +75,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete "${{ steps.bump.outputs.tag }}" --yes || true
-          git push --delete origin "${{ steps.bump.outputs.tag }}" || true
+          TAG="${{ steps.bump.outputs.tag }}"
+          # 防御性检查：只删自己命名空间里的 tag。哪怕以后有人改动了上面的
+          # 版本号拼接逻辑、不小心把 -dryrun. 后缀漏掉了，这里也会拒绝删除，
+          # 而不是照单全收地把任意 tag 名传给删除命令。
+          case "$TAG" in
+            *-dryrun.*) ;;
+            *) echo "拒绝清理：$TAG 不在演练命名空间内" >&2; exit 1 ;;
+          esac
+          gh release delete "$TAG" --yes || true
+          git push --delete origin "$TAG" || true
 
       - name: Cleanup on failure
         if: failure()
@@ -79,5 +92,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete "${{ steps.bump.outputs.tag }}" --yes || true
-          git push --delete origin "${{ steps.bump.outputs.tag }}" || true
+          TAG="${{ steps.bump.outputs.tag }}"
+          case "$TAG" in
+            *-dryrun.*) ;;
+            *) echo "拒绝清理：$TAG 不在演练命名空间内" >&2; exit 1 ;;
+          esac
+          gh release delete "$TAG" --yes || true
+          git push --delete origin "$TAG" || true

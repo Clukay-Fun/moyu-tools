@@ -1784,6 +1784,10 @@ label {
   color: #d54f50;
 }
 
+.illustrator-status.cancelled {
+  color: #8a8f9c;
+}
+
 .illustrator-config {
   display: flex;
   min-height: 76px;
@@ -4186,6 +4190,10 @@ label {
 .format-file-status.error {
   color: #d7525b;
   cursor: help;
+}
+
+.format-file-status.cancelled {
+  color: var(--faint);
 }
 
 .format-remove {
