@@ -206,13 +206,6 @@ export async function createFoldPreview(container, model) {
   const controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = true
   controls.dampingFactor = 0.12
-  controls.target.set(0, thickness, 0)
-  const resetView = () => {
-    camera.position.set(extent * 0.45, extent * 0.95, extent * 1.15)
-    controls.target.set(0, thickness, 0)
-    controls.update()
-  }
-  resetView()
 
   let fold = 0
   let assembly = 0
@@ -262,8 +255,28 @@ export async function createFoldPreview(container, model) {
       entry.pivot.quaternion.setFromAxisAngle(entry.axis, easeInOut(local) * entry.angle)
     }
   }
+  // 视角中心以合拢并装配后的盒子为准：先临时摆到终态量包围盒，再把整组平移到原点
+  fold = 1
+  assembly = 1
   applyFold()
   applyAssembly()
+  root.updateMatrixWorld(true)
+  const foldedBox = new THREE.Box3().setFromObject(root)
+  const foldedCenter = foldedBox.getCenter(new THREE.Vector3())
+  root.position.sub(foldedCenter)
+  const foldedSize = foldedBox.getSize(new THREE.Vector3()).length()
+  fold = 0
+  assembly = 0
+  applyFold()
+  applyAssembly()
+
+  const resetView = () => {
+    const distance = Math.max(extent, foldedSize * 1.6)
+    camera.position.set(distance * 0.45, distance * 0.95, distance * 1.15)
+    controls.target.set(0, 0, 0)
+    controls.update()
+  }
+  resetView()
 
   let frame = 0
   const render = () => {
