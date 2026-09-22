@@ -470,12 +470,20 @@ export function initDieline({ showToast }) {
     foldControl.hidden = Boolean(noFolds)
     const folded = noFolds || Number(foldRange.value) >= 100
     assemblyRange.disabled = !folded
+    query('#dieline-assembly-apart').disabled = !folded
+    query('#dieline-assembly-done').disabled = !folded
     assemblyControl.classList.toggle('disabled', !folded)
-    assemblyHint.textContent = folded ? '' : '先合拢'
     if (!folded && Number(assemblyRange.value) > 0) {
       assemblyRange.value = '0'
       foldPreview?.setAssembly(0)
     }
+    updateAssemblyLabel(folded)
+  }
+  function updateAssemblyLabel(folded = Number(foldRange.value) >= 100 || (currentModel && currentModel.foldSteps === 0)) {
+    const value = Number(assemblyRange.value)
+    assemblyHint.textContent = folded ? `${value}%` : '先合拢'
+    query('#dieline-assembly-apart').classList.toggle('active', folded && value <= 0)
+    query('#dieline-assembly-done').classList.toggle('active', folded && value >= 100)
   }
   function applyFoldValue() {
     const value = Number(foldRange.value) / 100
@@ -489,9 +497,13 @@ export function initDieline({ showToast }) {
   query('#dieline-fold-open').addEventListener('click', () => { foldRange.value = '0'; applyFoldValue() })
   query('#dieline-fold-close').addEventListener('click', () => { foldRange.value = '100'; applyFoldValue() })
   applyFoldValue()
-  assemblyRange.addEventListener('input', () => {
+  function applyAssemblyValue() {
     foldPreview?.setAssembly(Number(assemblyRange.value) / 100)
-  })
+    updateAssemblyLabel()
+  }
+  assemblyRange.addEventListener('input', applyAssemblyValue)
+  query('#dieline-assembly-apart').addEventListener('click', () => { assemblyRange.value = '0'; applyAssemblyValue() })
+  query('#dieline-assembly-done').addEventListener('click', () => { assemblyRange.value = '100'; applyAssemblyValue() })
   query('#dieline-3d-reset').addEventListener('click', () => foldPreview?.resetView())
   query('#dieline-3d-retry').addEventListener('click', () => { stageError.hidden = true; void updatePreview() })
   exportButton.addEventListener('click', exportPdf)

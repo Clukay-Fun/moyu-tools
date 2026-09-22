@@ -6255,7 +6255,8 @@ body.keyboard-focus .search input:focus-visible {
   font-weight: 600;
   cursor: pointer;
 }
-.dieline-fold-jump button:hover { color: var(--foreground); background: color-mix(in srgb, var(--foreground) 10%, transparent); }
+.dieline-fold-jump button:disabled { opacity: 0.5; cursor: not-allowed; }
+.dieline-fold-jump button:hover:not(:disabled) { color: var(--foreground); background: color-mix(in srgb, var(--foreground) 10%, transparent); }
 .dieline-fold-jump button.active { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
 
 .dieline-params {

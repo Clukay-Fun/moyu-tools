@@ -678,8 +678,11 @@
                           <span id="dieline-fold-value">0%</span>
                         </div>
                         <div class="dieline-fold-control" id="dieline-assembly-control" hidden>
-                          <label for="dieline-assembly-range">装配</label>
-                          <input id="dieline-assembly-range" type="range" min="0" max="100" value="0" disabled />
+                          <div class="dieline-fold-jump" role="group" aria-label="装配">
+                            <button type="button" id="dieline-assembly-apart" title="拆开">拆开</button>
+                            <button type="button" id="dieline-assembly-done" title="装配">装配</button>
+                          </div>
+                          <input id="dieline-assembly-range" type="range" min="0" max="100" value="0" disabled aria-label="装配进度" />
                           <span id="dieline-assembly-hint">先合拢</span>
                         </div>
                       </div>
