@@ -1,0 +1,466 @@
+import { buildModel, PDF_PAGE_LIMIT_MM } from '../dieline/model.js'
+import { DIELINE_TEMPLATES, getTemplate } from '../dieline/templates/index.js'
+import { renderModel2d, PAPER_COLORS } from '../dieline/render2d.js'
+
+const MM_PER_INCH = 25.4
+const DIMENSION_KEYS = ['length', 'width', 'height']
+const SVG_NS = 'http://www.w3.org/2000/svg'
+
+function formatMm(value, unit) {
+  if (!Number.isFinite(value)) return ''
+  if (unit === 'in') return Number((value / MM_PER_INCH).toFixed(3)).toString()
+  return Number(value.toFixed(2)).toString()
+}
+
+function formatSize(size) {
+  return `${formatMm(size.length)} × ${formatMm(size.width)} × ${formatMm(size.height)} mm`
+}
+
+function presetThumbnail(template) {
+  const result = buildModel(template, template.defaults)
+  const svg = document.createElementNS(SVG_NS, 'svg')
+  if (!result.ok) return svg
+  const part = result.model.parts[0]
+  const { minX, minY, maxX, maxY } = part.paperBounds
+  const pad = Math.max(maxX - minX, maxY - minY) * 0.05
+  svg.setAttribute('viewBox', `${minX - pad} ${minY - pad} ${maxX - minX + pad * 2} ${maxY - minY + pad * 2}`)
+  svg.setAttribute('aria-hidden', 'true')
+  const group = document.createElementNS(SVG_NS, 'g')
+  group.setAttribute('fill', '#f1ead9')
+  group.setAttribute('stroke', '#2036c9')
+  group.setAttribute('stroke-width', String(Math.max(maxX - minX, maxY - minY) / 110))
+  group.setAttribute('stroke-linejoin', 'round')
+  for (const path of part.layers.paper) {
+    const element = document.createElementNS(SVG_NS, 'path')
+    element.setAttribute('d', path)
+    group.append(element)
+  }
+  svg.append(group)
+  return svg
+}
+
+export function initDieline({ showToast }) {
+  const page = document.querySelector('#page-dieline')
+  if (!page) return null
+
+  const query = (selector) => page.querySelector(selector)
+  const presetList = query('#dieline-preset-list')
+  const presetSearch = query('#dieline-preset-search')
+  const stage = query('#dieline-stage')
+  const svg = query('#dieline-svg')
+  const sizesList = query('#dieline-sizes')
+  const empty = query('#dieline-empty')
+  const threeStage = query('#dieline-3d-stage')
+  const stageError = query('#dieline-stage-error')
+  const stageErrorText = query('#dieline-stage-error-text')
+  const foldRange = query('#dieline-fold-range')
+  const foldControl = query('#dieline-fold-control')
+  const foldValue = query('#dieline-fold-value')
+  const assemblyControl = query('#dieline-assembly-control')
+  const assemblyRange = query('#dieline-assembly-range')
+  const assemblyHint = query('#dieline-assembly-hint')
+  const materialSelect = query('#dieline-material')
+  const exportButton = query('#dieline-export-pdf')
+  const exportStatus = query('#dieline-export-status')
+  const structureContainer = query('#dieline-structure-params')
+  const paramInputs = Object.fromEntries([...page.querySelectorAll('input[data-param]')].map((input) => [input.dataset.param, input]))
+  const structureInputs = {}
+
+  let template = DIELINE_TEMPLATES[0]
+  let params = { ...template.defaults }
+  let unit = 'mm'
+  let focusParam = null
+  let currentModel = null
+  let foldPreview = null
+  let foldGeneration = 0
+  let foldTimer = 0
+  let isActive = false
+  let exporting = false
+  let view = { centerX: 0, centerY: 0, baseWidth: 1, baseHeight: 1, zoom: 1, fitted: false }
+  let drag = null
+
+  // ---------- 预设 ----------
+  function renderPresets(filter = '') {
+    presetList.replaceChildren()
+    const keyword = filter.trim().toLowerCase()
+    for (const entry of DIELINE_TEMPLATES) {
+      if (keyword && ![entry.name, entry.category, entry.description].join(' ').toLowerCase().includes(keyword)) continue
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.className = `dieline-preset${entry.id === template.id ? ' selected' : ''}`
+      button.setAttribute('role', 'option')
+      button.setAttribute('aria-selected', String(entry.id === template.id))
+      button.dataset.template = entry.id
+      const text = document.createElement('div')
+      const title = document.createElement('b')
+      title.textContent = entry.name
+      const detail = document.createElement('span')
+      detail.textContent = entry.category
+      text.append(title, detail)
+      button.append(presetThumbnail(entry), text)
+      button.addEventListener('click', () => selectTemplate(entry.id))
+      presetList.append(button)
+    }
+  }
+
+  function selectTemplate(id) {
+    const next = getTemplate(id)
+    if (!next || next === template) return
+    template = next
+    params = { ...template.defaults }
+    fillForm()
+    renderPresets(presetSearch.value)
+    renderProject({ refit: true })
+  }
+
+  // ---------- 表单 ----------
+  function fillForm() {
+    for (const key of DIMENSION_KEYS) paramInputs[key].value = formatMm(params[key], unit)
+    paramInputs.thickness.value = formatMm(params.thickness)
+    paramInputs.bleed.value = formatMm(params.bleed)
+    const [minT, maxT] = template.ranges.thickness
+    query('#dieline-thickness-range').textContent = `(${minT}~${maxT} mm)`
+    query('#dieline-range-hint').textContent = `长 ${template.ranges.length.join('–')} · 宽 ${template.ranges.width.join('–')} · 高 ${template.ranges.height.join('–')} mm`
+    materialSelect.replaceChildren()
+    for (const material of template.materials) {
+      const option = document.createElement('option')
+      option.value = material.id
+      option.textContent = material.label
+      materialSelect.append(option)
+    }
+    materialSelect.value = params.material
+    page.querySelectorAll('[data-unit-label]').forEach((label) => { label.textContent = unit })
+    renderStructureInputs()
+  }
+
+  function renderStructureInputs() {
+    for (const key of Object.keys(structureInputs)) delete structureInputs[key]
+    structureContainer.replaceChildren()
+    const schema = template.structureParams || []
+    query('#dieline-structure-title').hidden = !schema.length
+    structureContainer.hidden = !schema.length
+    for (const entry of schema) {
+      const label = document.createElement('label')
+      label.textContent = entry.label
+      const wrap = document.createElement('span')
+      wrap.className = 'dieline-input'
+      const input = document.createElement('input')
+      input.type = 'number'
+      input.step = String(entry.step || 0.5)
+      input.min = String(entry.min)
+      input.max = String(entry.max)
+      input.dataset.param = entry.key
+      input.value = Number.isFinite(params[entry.key]) ? formatMm(params[entry.key]) : ''
+      const unitLabel = document.createElement('em')
+      unitLabel.textContent = 'mm'
+      wrap.append(input, unitLabel)
+      label.append(wrap)
+      structureContainer.append(label)
+      structureInputs[entry.key] = input
+      bindParamInput(entry.key, input, () => {
+        const raw = input.value.trim()
+        return raw === '' ? null : Number(raw)
+      })
+    }
+    updateStructurePlaceholders()
+  }
+
+  function updateStructurePlaceholders() {
+    if (!template.resolveStructure) return
+    let resolved = null
+    try { resolved = template.resolveStructure(params) } catch { return }
+    for (const [key, input] of Object.entries(structureInputs)) {
+      input.placeholder = Number.isFinite(resolved[key]) ? `自动 ${formatMm(resolved[key])}` : '自动'
+    }
+  }
+
+  function readDimension(key) {
+    const raw = paramInputs[key].value.trim()
+    if (!raw) return NaN
+    const value = Number(raw)
+    if (!Number.isFinite(value)) return NaN
+    return unit === 'in' && DIMENSION_KEYS.includes(key) ? value * MM_PER_INCH : value
+  }
+
+  function setUnit(next) {
+    if (next === unit) return
+    unit = next
+    page.querySelectorAll('[data-dieline-unit]').forEach((button) => {
+      const selected = button.dataset.dielineUnit === unit
+      button.classList.toggle('selected', selected)
+      button.setAttribute('aria-pressed', String(selected))
+    })
+    for (const key of DIMENSION_KEYS) paramInputs[key].value = formatMm(params[key], unit)
+    page.querySelectorAll('[data-unit-label]').forEach((label) => { label.textContent = unit })
+  }
+
+  function stepThickness(direction) {
+    const [minT, maxT] = template.ranges.thickness
+    const current = Number.isFinite(params.thickness) ? params.thickness : template.defaults.thickness
+    params.thickness = Math.min(maxT, Math.max(minT, Number((current + direction * 0.1).toFixed(2))))
+    paramInputs.thickness.value = formatMm(params.thickness)
+    renderProject()
+  }
+
+  // ---------- 2D ----------
+  function renderSvg() {
+    if (!currentModel) return
+    renderModel2d(svg, currentModel, {
+      view,
+      paper: PAPER_COLORS[params.material] || PAPER_COLORS['corrugated-e'],
+      focusParam,
+      showAnnotations: query('#dieline-show-annotations').checked
+    })
+    svg.querySelectorAll('.dieline-annotation text').forEach((text) => {
+      text.addEventListener('click', () => {
+        const key = text.parentElement.dataset.param
+        const target = paramInputs[key] || structureInputs[key]
+        target?.focus()
+        target?.select()
+      })
+    })
+    query('#dieline-zoom-label').textContent = view.fitted && view.zoom === 1 ? '适配' : `${Math.round(view.zoom * 100)}%`
+  }
+
+  function fitCanvas({ preserveZoom = false } = {}) {
+    if (!currentModel || !stage.clientWidth || !stage.clientHeight) return
+    const { minX, minY, maxX, maxY } = currentModel.bounds
+    const padding = Math.max(maxX - minX, maxY - minY) * 0.12
+    view.centerX = (minX + maxX) / 2
+    view.centerY = (minY + maxY) / 2
+    view.baseWidth = maxX - minX + padding * 2
+    view.baseHeight = maxY - minY + padding * 2
+    const stageRatio = stage.clientWidth / stage.clientHeight
+    if (view.baseWidth / view.baseHeight > stageRatio) view.baseHeight = view.baseWidth / stageRatio
+    else view.baseWidth = view.baseHeight * stageRatio
+    if (!preserveZoom) view.zoom = 1
+    view.fitted = true
+    renderSvg()
+  }
+
+  function renderSizes(model) {
+    sizesList.replaceChildren()
+    const rows = [['制造尺寸', model.sizes.manufacturing, ''], ['内尺寸', model.sizes.inner, model.sizes.calibrated ? '' : '待校准'], ['外尺寸', model.sizes.outer, model.sizes.calibrated ? '' : '待校准']]
+    for (const [label, size, note] of rows) {
+      const term = document.createElement('dt')
+      term.textContent = label
+      const detail = document.createElement('dd')
+      detail.textContent = formatSize(size)
+      if (note) {
+        const small = document.createElement('small')
+        small.textContent = note
+        small.title = model.sizes.note || ''
+        detail.append(small)
+      }
+      sizesList.append(term, detail)
+    }
+  }
+
+  // ---------- 主渲染 ----------
+  function renderProject({ refit = false } = {}) {
+    const result = buildModel(template, params)
+    const errorLabels = { length: '长', width: '宽', height: '高', thickness: '厚度', bleed: '出血' }
+    for (const entry of template.structureParams || []) errorLabels[entry.key] = entry.label
+    for (const [key, input] of Object.entries({ ...paramInputs, ...structureInputs })) {
+      input.classList.toggle('invalid', !result.ok && result.errors.some((error) => error.startsWith(errorLabels[key] || '\u0000')))
+    }
+    updateStructurePlaceholders()
+    if (!result.ok) {
+      currentModel = null
+      disposePreview()
+      empty.textContent = result.errors.join(' · ')
+      empty.hidden = false
+      exportButton.disabled = true
+      return
+    }
+    const previous = currentModel
+    currentModel = result.model
+    empty.hidden = true
+    exportButton.disabled = exporting
+    renderSizes(currentModel)
+    if (!exporting) {
+      const oversize = currentModel.parts.find((part) => part.bounds.maxX - part.bounds.minX + 30 > PDF_PAGE_LIMIT_MM || part.bounds.maxY - part.bounds.minY + 41 > PDF_PAGE_LIMIT_MM)
+      exportStatus.classList.toggle('error', Boolean(oversize))
+      exportStatus.textContent = oversize
+        ? `${oversize.name}展开超过 PDF 单页上限 ${PDF_PAGE_LIMIT_MM} mm，导出会失败`
+        : `1:1 矢量刀模 · ${currentModel.parts.length > 1 ? `${currentModel.parts.length} 页，每部件一页` : '页面按展开尺寸生成'}`
+    }
+    const boundsChanged = !previous || ['minX', 'minY', 'maxX', 'maxY'].some((key) => previous.bounds[key] !== currentModel.bounds[key])
+    assemblyControl.hidden = currentModel.parts.length < 2
+    syncAssemblyAvailability()
+    if ((refit || boundsChanged) && stage.clientWidth > 0) fitCanvas({ preserveZoom: Boolean(previous && view.fitted && !refit) })
+    else renderSvg()
+    schedulePreview()
+  }
+
+  // ---------- 3D ----------
+  function disposePreview() {
+    foldGeneration += 1
+    clearTimeout(foldTimer)
+    foldPreview?.dispose()
+    foldPreview = null
+    threeStage.replaceChildren()
+  }
+
+  function schedulePreview() {
+    clearTimeout(foldTimer)
+    foldTimer = setTimeout(() => { void updatePreview() }, 140)
+  }
+
+  async function updatePreview() {
+    if (!isActive || !currentModel) return
+    const generation = ++foldGeneration
+    const model = currentModel
+    try {
+      foldPreview?.dispose()
+      foldPreview = null
+      const { createFoldPreview } = await import('../dieline/foldPreview.js')
+      if (generation !== foldGeneration || !isActive) return
+      const preview = await createFoldPreview(threeStage, model)
+      if (generation !== foldGeneration || !isActive) {
+        preview.dispose()
+        return
+      }
+      foldPreview = preview
+      foldPreview.setFold(Number(foldRange.value) / 100)
+      foldPreview.setAssembly(Number(assemblyRange.value) / 100)
+      stageError.hidden = true
+    } catch (error) {
+      if (generation !== foldGeneration) return
+      stageErrorText.textContent = `3D 预览不可用：${error.message || '未知错误'}`
+      stageError.hidden = false
+    }
+  }
+
+  // ---------- 导出 ----------
+  async function exportPdf() {
+    if (!currentModel || exporting) return
+    const snapshot = currentModel
+    const includeAnnotations = query('#dieline-export-annotations').checked
+    let destination = null
+    exporting = true
+    exportButton.disabled = true
+    exportStatus.classList.remove('error')
+    exportStatus.textContent = '正在生成 PDF…'
+    try {
+      const { length, width, height } = snapshot.params
+      destination = await window.api.choosePdfOutput({ type: 'pdf', name: `${snapshot.templateId}-${length}x${width}x${height}` })
+      if (destination.status !== 'selected') {
+        exportStatus.textContent = '已取消导出'
+        return
+      }
+      const { buildDielinePdf } = await import('../dieline/exportPdf.js')
+      const bytes = await buildDielinePdf(snapshot, { includeAnnotations })
+      await window.api.savePdfFile({ type: 'pdf', name: 'dieline.pdf', data: bytes, destinationId: destination.id })
+      exportStatus.textContent = `已保存 · ${snapshot.parts.length} 页 · 打印请按 100%`
+      showToast('刀模 PDF 已保存')
+    } catch (error) {
+      exportStatus.classList.add('error')
+      exportStatus.textContent = `导出失败：${error.message || error}`
+    } finally {
+      exporting = false
+      exportButton.disabled = !currentModel
+      if (destination?.id) void window.api.releasePdfOutput(destination.id)
+    }
+  }
+
+  // ---------- 事件 ----------
+  function bindParamInput(key, input, read) {
+    input.addEventListener('input', () => {
+      params[key] = read()
+      renderProject()
+    })
+    input.addEventListener('focus', () => {
+      focusParam = key
+      input.classList.add('focus-param')
+      renderSvg()
+    })
+    input.addEventListener('blur', () => {
+      focusParam = null
+      input.classList.remove('focus-param')
+      renderSvg()
+    })
+  }
+  for (const [key, input] of Object.entries(paramInputs)) bindParamInput(key, input, () => readDimension(key))
+  materialSelect.addEventListener('change', () => {
+    params.material = materialSelect.value
+    const material = template.materials.find((entry) => entry.id === params.material)
+    if (material && (params.thickness < material.thickness[0] || params.thickness > material.thickness[1])) {
+      params.thickness = material.thickness[0]
+      paramInputs.thickness.value = formatMm(params.thickness)
+    }
+    renderProject()
+  })
+  query('#dieline-thickness-dec').addEventListener('click', () => stepThickness(-1))
+  query('#dieline-thickness-inc').addEventListener('click', () => stepThickness(1))
+  page.querySelectorAll('[data-dieline-unit]').forEach((button) => button.addEventListener('click', () => setUnit(button.dataset.dielineUnit)))
+  query('#dieline-show-annotations').addEventListener('change', renderSvg)
+  presetSearch.addEventListener('input', () => renderPresets(presetSearch.value))
+  query('#dieline-zoom-in').addEventListener('click', () => { view.zoom = Math.min(8, view.zoom * 1.2); renderSvg() })
+  query('#dieline-zoom-out').addEventListener('click', () => { view.zoom = Math.max(0.15, view.zoom / 1.2); renderSvg() })
+  query('#dieline-fit').addEventListener('click', () => fitCanvas())
+  stage.addEventListener('wheel', (event) => {
+    if (!currentModel) return
+    event.preventDefault()
+    view.zoom = Math.max(0.15, Math.min(8, view.zoom * (event.deltaY < 0 ? 1.12 : 0.89)))
+    renderSvg()
+  }, { passive: false })
+  stage.addEventListener('pointerdown', (event) => {
+    if (!currentModel || event.target.closest('button, text')) return
+    drag = { x: event.clientX, y: event.clientY, centerX: view.centerX, centerY: view.centerY }
+    stage.setPointerCapture(event.pointerId)
+  })
+  stage.addEventListener('pointermove', (event) => {
+    if (!drag || !currentModel) return
+    const rect = stage.getBoundingClientRect()
+    view.centerX = drag.centerX - (event.clientX - drag.x) * (view.baseWidth / view.zoom) / Math.max(rect.width, 1)
+    view.centerY = drag.centerY - (event.clientY - drag.y) * (view.baseHeight / view.zoom) / Math.max(rect.height, 1)
+    renderSvg()
+  })
+  stage.addEventListener('pointerup', () => { drag = null })
+  stage.addEventListener('pointercancel', () => { drag = null })
+  // 装配只在完全合拢后可用；重新展开时把装配复位
+  function syncAssemblyAvailability() {
+    const noFolds = currentModel && currentModel.foldSteps === 0
+    foldControl.hidden = Boolean(noFolds)
+    const folded = noFolds || Number(foldRange.value) >= 100
+    assemblyRange.disabled = !folded
+    assemblyControl.classList.toggle('disabled', !folded)
+    assemblyHint.textContent = folded ? '' : '先合拢'
+    if (!folded && Number(assemblyRange.value) > 0) {
+      assemblyRange.value = '0'
+      foldPreview?.setAssembly(0)
+    }
+  }
+  foldRange.addEventListener('input', () => {
+    const value = Number(foldRange.value) / 100
+    foldValue.textContent = value < 0.02 ? '展开' : value > 0.98 ? '合拢' : `${Math.round(value * 100)}%`
+    foldPreview?.setFold(value)
+    syncAssemblyAvailability()
+  })
+  assemblyRange.addEventListener('input', () => {
+    foldPreview?.setAssembly(Number(assemblyRange.value) / 100)
+  })
+  query('#dieline-3d-reset').addEventListener('click', () => foldPreview?.resetView())
+  query('#dieline-3d-retry').addEventListener('click', () => { stageError.hidden = true; void updatePreview() })
+  exportButton.addEventListener('click', exportPdf)
+
+  fillForm()
+  renderPresets()
+  renderProject({ refit: true })
+
+  return {
+    renderProject,
+    activate() {
+      isActive = true
+      requestAnimationFrame(() => {
+        fitCanvas({ preserveZoom: true })
+        void updatePreview()
+      })
+    },
+    deactivate() {
+      isActive = false
+      disposePreview()
+    }
+  }
+}

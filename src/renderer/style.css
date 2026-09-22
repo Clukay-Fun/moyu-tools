@@ -5996,3 +5996,391 @@ body.keyboard-focus .search input:focus-visible {
   height: 0;
   overflow: hidden;
 }
+
+/* 刀模工作台：工程绘图优先，参数与检查面板保持紧凑。 */
+.page-dieline {
+  min-width: 0;
+  min-height: 0;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.dieline-heading {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 2px 3px;
+}
+
+.dieline-heading h1 {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 23px;
+  font-weight: 720;
+}
+
+.dieline-heading p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.dieline-draft-badge {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid rgba(201, 137, 46, 0.22);
+  border-radius: 999px;
+  background: rgba(240, 183, 83, 0.12);
+  color: #91621e;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.dieline-workbench {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  grid-template-columns: 200px minmax(0, 1fr) minmax(300px, 340px);
+  gap: 11px;
+}
+
+.dieline-presets,
+.dieline-canvas-card,
+.dieline-3d-card,
+.dieline-params,
+.dieline-export {
+  min-width: 0;
+  min-height: 0;
+  border-radius: 16px;
+  background: var(--card);
+}
+
+.dieline-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.dieline-presets h2,
+.dieline-params h2 {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.dieline-params h2 small {
+  margin-left: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.dieline-presets input[type="search"],
+.dieline-input input,
+.dieline-stepper input,
+.dieline-params select {
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-md);
+  outline: 0;
+  color: var(--foreground);
+  background: var(--control-bg);
+  font: inherit;
+  font-size: 12px;
+}
+
+.dieline-presets input[type="search"]:focus-visible,
+.dieline-input input:focus-visible,
+.dieline-stepper input:focus-visible,
+.dieline-params select:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.dieline-preset-list {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 6px;
+  overflow: auto;
+}
+
+.dieline-preset {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  padding: 7px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--foreground);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.dieline-preset:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+.dieline-preset.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.dieline-preset svg { width: 44px; height: 44px; display: block; }
+.dieline-preset b { display: block; font-size: 12px; }
+.dieline-preset span { display: block; color: var(--muted); font-size: 10px; line-height: 1.35; }
+
+.dieline-help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.dieline-canvas-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dieline-canvas-toolbar {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.dieline-legend { display: flex; align-items: center; gap: 12px; }
+.dieline-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.dieline-legend i { display: inline-block; width: 18px; height: 2px; border-radius: 2px; }
+.dieline-legend .bleed-swatch { background: #3fb950; }
+.dieline-legend .cut-swatch { background: #2036c9; }
+.dieline-legend .crease-swatch { background: repeating-linear-gradient(90deg, #e5312b 0 4px, transparent 4px 7px); }
+
+.dieline-canvas-actions { display: flex; align-items: center; gap: 6px; }
+.dieline-canvas-actions .gbtn { min-width: 30px; height: 28px; padding: 0 9px; }
+#dieline-zoom-label { min-width: 38px; text-align: center; font-variant-numeric: tabular-nums; }
+
+.dieline-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+.dieline-check input { accent-color: var(--accent); }
+
+.dieline-stage {
+  position: relative;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  background-color: rgba(238, 240, 247, 0.55);
+  background-image: radial-gradient(rgba(96, 104, 140, 0.18) 0.7px, transparent 0.8px);
+  background-size: 18px 18px;
+  cursor: grab;
+}
+.dieline-stage:active { cursor: grabbing; }
+.dieline-stage > svg { display: block; width: 100%; height: 100%; }
+.dieline-stage svg[hidden],
+.dieline-empty[hidden],
+.dieline-stage-error[hidden] { display: none !important; }
+
+.dieline-sizes {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  display: grid;
+  margin: 0;
+  gap: 4px;
+  pointer-events: none;
+  font-size: 11px;
+}
+.dieline-sizes dt { color: var(--muted); font-size: 10px; }
+.dieline-sizes dd { margin: 0 0 3px; color: var(--foreground); font-weight: 650; font-variant-numeric: tabular-nums; }
+.dieline-sizes dd small { margin-left: 4px; color: #91621e; font-weight: 500; }
+
+.dieline-annotation text { pointer-events: auto; cursor: pointer; }
+.dieline-annotation.secondary { color: #6b7390; stroke: #6b7390; opacity: 0.85; }
+.dieline-annotation.focus { color: #e5312b; stroke: #e5312b; opacity: 1; }
+.dieline-annotation.focus text { font-weight: 800; }
+
+.dieline-empty,
+.dieline-stage-error {
+  position: absolute;
+  inset: auto 12px 12px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: rgba(224, 85, 78, 0.12);
+  color: #a8332c;
+  font-size: 11.5px;
+}
+
+.dieline-side {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: minmax(220px, 40%) minmax(0, 1fr) auto;
+  gap: 11px;
+}
+
+.dieline-3d-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.dieline-3d-toolbar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--muted);
+  font-size: 11px;
+}
+.dieline-3d-toolbar .gbtn { height: 26px; padding: 0 9px; }
+.dieline-3d-stage {
+  min-height: 0;
+  flex: 1 1 auto;
+  background: linear-gradient(180deg, rgba(228, 232, 244, 0.7), rgba(246, 247, 251, 0.9));
+  cursor: grab;
+}
+.dieline-3d-stage:active { cursor: grabbing; }
+.dieline-3d-stage canvas { display: block; width: 100%; height: 100%; }
+.dieline-3d-card .dieline-stage-error { inset: 44px 12px auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.dieline-3d-card .dieline-stage-error .gbtn { height: 24px; padding: 0 8px; }
+
+.dieline-fold-control {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: auto 1fr 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--hairline);
+  color: var(--muted);
+  font-size: 11px;
+}
+.dieline-fold-control input { accent-color: var(--accent); }
+.dieline-fold-control span { text-align: right; font-variant-numeric: tabular-nums; }
+.dieline-fold-control[hidden] { display: none !important; }
+.dieline-fold-control.disabled { opacity: 0.55; }
+.dieline-fold-control input:disabled { cursor: not-allowed; }
+
+.dieline-params {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px;
+  overflow: auto;
+}
+.dieline-params > * { flex: 0 0 auto; }
+.dieline-params h2 { margin-top: 4px; }
+.dieline-param-head { display: flex; align-items: center; justify-content: space-between; }
+
+.dieline-unit-switch,
+.dieline-size-type {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+.dieline-unit-switch button,
+.dieline-size-type button {
+  flex: 1 1 auto;
+  min-width: 40px;
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dieline-unit-switch button.selected,
+.dieline-size-type button.selected { background: var(--card); color: var(--accent); box-shadow: 0 1px 3px rgba(20, 24, 48, 0.12); }
+.dieline-size-type button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.dieline-dimension-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.dieline-dimension-grid.single { grid-template-columns: minmax(0, 1fr); }
+.dieline-dimension-grid label {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.dieline-input { position: relative; display: flex; }
+.dieline-input input { width: 100%; padding-right: 34px; }
+.dieline-input em { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-style: normal; font-size: 10.5px; }
+.dieline-input input.invalid { border-color: rgba(224, 85, 78, 0.65); }
+.dieline-input input.focus-param { border-color: var(--accent); }
+
+.dieline-stepper {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--control-bg);
+}
+.dieline-stepper button {
+  border: 0;
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  color: var(--foreground);
+  font-size: 16px;
+  cursor: pointer;
+}
+.dieline-stepper input { border: 0; border-radius: 0; text-align: center; background: transparent; }
+
+.dieline-export {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+.dieline-export button.primary { width: 100%; }
+.dieline-export button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+.dieline-export-status { margin: 0; color: var(--muted); font-size: 10.5px; line-height: 1.4; }
+.dieline-export-status.error { color: #a8332c; }
+
+[data-theme="dark"] .dieline-stage { background-color: rgba(11, 16, 27, 0.32); }
+[data-theme="dark"] .dieline-3d-stage { background: linear-gradient(180deg, rgba(20, 26, 40, 0.8), rgba(12, 16, 26, 0.9)); }
+[data-theme="dark"] .dieline-draft-badge { color: #e0b768; }
+[data-theme="dark"] .dieline-sizes dd small { color: #e0b768; }
+
+@media (max-width: 1180px) {
+  .dieline-workbench { grid-template-columns: 180px minmax(0, 1fr) minmax(280px, 320px); }
+}
+
+@media (max-width: 860px) {
+  .page-dieline { overflow: auto; }
+  .dieline-heading { align-items: flex-start; flex-direction: column; gap: 7px; }
+  .dieline-workbench { display: flex; flex-direction: column; }
+  .dieline-presets, .dieline-canvas-card, .dieline-side { flex: 0 0 auto; }
+  .dieline-canvas-card { min-height: 380px; }
+  .dieline-side { grid-template-rows: 260px auto auto; }
+  .dieline-params { max-height: 360px; }
+}

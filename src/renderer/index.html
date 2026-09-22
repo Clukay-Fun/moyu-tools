@@ -54,6 +54,7 @@
             <button class="nav-ic" type="button" data-module="bc" data-tip="条码" aria-label="条码"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-barcode"></use></svg></button>
             <button class="nav-ic" type="button" data-module="image" data-tip="图片" aria-label="图片"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-image"></use></svg></button>
             <button class="nav-ic" type="button" data-module="video" data-tip="格式工厂" aria-label="格式工厂"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-video"></use></svg></button>
+            <button class="nav-ic" type="button" data-module="dieline" data-tip="刀模" aria-label="刀模"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5zM4 7.5l8 4.7 8-4.7M12 12.2V21M8 5.2l8 4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></button>
             <div class="rail-spacer"></div>
             <button class="nav-ic" type="button" data-module="more" data-tip="设置" aria-label="设置"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-settings"></use></svg></button>
           </nav>
@@ -628,6 +629,118 @@
                   </div>
                   <div class="format-progress-track"><span id="format-progress-fill"></span></div>
                   <button class="gbtn" id="format-save-results" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-save"></use></svg>保存到文件夹</button>
+                </div>
+              </section>
+
+              <section class="page page-dieline" id="page-dieline" aria-labelledby="dieline-title">
+                <header class="dieline-heading">
+                  <div>
+                    <h1 id="dieline-title">刀模生成器</h1>
+                    <p>左侧选预设，中间看刀模，右侧看 3D、调参数、导出 PDF</p>
+                  </div>
+                  <span class="dieline-draft-badge">工程草稿 · 结构比例待工厂校准</span>
+                </header>
+
+                <div class="dieline-workbench">
+                  <aside class="glass-card dieline-presets" id="dieline-presets" aria-label="预设资源">
+                    <h2>预设</h2>
+                    <input id="dieline-preset-search" type="search" placeholder="搜索模板" aria-label="搜索模板" autocomplete="off" />
+                    <div class="dieline-preset-list" id="dieline-preset-list" role="listbox" aria-label="模板列表"></div>
+                    <p class="dieline-help">只列出已完成 2D / 3D / PDF 闭环的模板。</p>
+                  </aside>
+
+                  <section class="glass-card dieline-canvas-card" aria-label="2D 刀模">
+                    <header class="dieline-canvas-toolbar">
+                      <div class="dieline-legend">
+                        <span><i class="bleed-swatch"></i>出血线</span>
+                        <span><i class="cut-swatch"></i>割线</span>
+                        <span><i class="crease-swatch"></i>折线</span>
+                      </div>
+                      <div class="dieline-canvas-actions">
+                        <label class="dieline-check"><input id="dieline-show-annotations" type="checkbox" checked />标注</label>
+                        <button class="gbtn ghost" id="dieline-zoom-out" type="button" aria-label="缩小" title="缩小">−</button>
+                        <span id="dieline-zoom-label">适配</span>
+                        <button class="gbtn ghost" id="dieline-zoom-in" type="button" aria-label="放大" title="放大">+</button>
+                        <button class="gbtn ghost" id="dieline-fit" type="button">适配</button>
+                      </div>
+                    </header>
+                    <div class="dieline-stage" id="dieline-stage">
+                      <svg id="dieline-svg" role="img" aria-label="二维刀模"></svg>
+                      <dl class="dieline-sizes" id="dieline-sizes" aria-live="polite"></dl>
+                      <div class="dieline-empty" id="dieline-empty" role="alert" aria-live="assertive" hidden></div>
+                    </div>
+                  </section>
+
+                  <div class="dieline-side">
+                    <section class="glass-card dieline-3d-card" aria-label="3D 预览">
+                      <header class="dieline-3d-toolbar">
+                        <span>3D 预览</span>
+                        <button class="gbtn ghost" id="dieline-3d-reset" type="button">复位视角</button>
+                      </header>
+                      <div class="dieline-3d-stage" id="dieline-3d-stage"></div>
+                      <div class="dieline-stage-error" id="dieline-stage-error" hidden>
+                        <span id="dieline-stage-error-text"></span>
+                        <button class="gbtn ghost" id="dieline-3d-retry" type="button">重试</button>
+                      </div>
+                      <div class="dieline-fold-control" id="dieline-fold-control">
+                        <label for="dieline-fold-range">展开 / 合拢</label>
+                        <input id="dieline-fold-range" type="range" min="0" max="100" value="0" />
+                        <span id="dieline-fold-value">展开</span>
+                      </div>
+                      <div class="dieline-fold-control" id="dieline-assembly-control" hidden>
+                        <label for="dieline-assembly-range">装配</label>
+                        <input id="dieline-assembly-range" type="range" min="0" max="100" value="0" disabled />
+                        <span id="dieline-assembly-hint">先合拢</span>
+                      </div>
+                    </section>
+
+                    <section class="glass-card dieline-params" id="dieline-params" aria-label="自定义参数">
+                      <div class="dieline-param-head">
+                        <h2>自定义尺寸</h2>
+                        <div class="dieline-unit-switch" role="group" aria-label="单位">
+                          <button type="button" class="selected" data-dieline-unit="mm" aria-pressed="true">mm</button>
+                          <button type="button" data-dieline-unit="in" aria-pressed="false">in</button>
+                        </div>
+                      </div>
+                      <div class="dieline-dimension-grid">
+                        <label>长度<span class="dieline-input"><input id="dieline-length" data-param="length" type="number" step="0.1" /><em data-unit-label>mm</em></span></label>
+                        <label>宽度<span class="dieline-input"><input id="dieline-width" data-param="width" type="number" step="0.1" /><em data-unit-label>mm</em></span></label>
+                        <label>高度<span class="dieline-input"><input id="dieline-height" data-param="height" type="number" step="0.1" /><em data-unit-label>mm</em></span></label>
+                      </div>
+                      <p class="dieline-help" id="dieline-range-hint"></p>
+
+                      <h2>自定义厚度 <small id="dieline-thickness-range"></small></h2>
+                      <div class="dieline-stepper">
+                        <button type="button" id="dieline-thickness-dec" aria-label="减小厚度">−</button>
+                        <input id="dieline-thickness" data-param="thickness" type="number" step="0.1" />
+                        <button type="button" id="dieline-thickness-inc" aria-label="增大厚度">+</button>
+                      </div>
+
+                      <h2>选择材质</h2>
+                      <select id="dieline-material" data-param="material"></select>
+
+                      <h2>尺寸类型</h2>
+                      <div class="dieline-size-type" role="group" aria-label="尺寸类型">
+                        <button type="button" class="selected" data-dieline-size-type="manufacturing" aria-pressed="true">制造尺寸</button>
+                        <button type="button" data-dieline-size-type="inner" aria-pressed="false" disabled title="补偿表待校准，暂只支持制造尺寸">内尺寸</button>
+                        <button type="button" data-dieline-size-type="outer" aria-pressed="false" disabled title="补偿表待校准，暂只支持制造尺寸">外尺寸</button>
+                      </div>
+
+                      <h2 id="dieline-structure-title">结构参数 <small>留空自动</small></h2>
+                      <div class="dieline-dimension-grid" id="dieline-structure-params"></div>
+
+                      <h2>出血 <small>mm</small></h2>
+                      <div class="dieline-dimension-grid single">
+                        <label>出血宽度<span class="dieline-input"><input id="dieline-bleed" data-param="bleed" type="number" step="0.5" /><em>mm</em></span></label>
+                      </div>
+                    </section>
+
+                    <section class="glass-card dieline-export" aria-label="导出">
+                      <label class="dieline-check"><input id="dieline-export-annotations" type="checkbox" checked />包含尺寸标注</label>
+                      <button class="primary" id="dieline-export-pdf" type="button">导出 PDF</button>
+                      <p class="dieline-export-status" id="dieline-export-status" aria-live="polite">1:1 矢量刀模 · 页面按展开尺寸生成</p>
+                    </section>
+                  </div>
                 </div>
               </section>
 

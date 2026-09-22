@@ -8,6 +8,7 @@ import { initBarcode } from './modules/barcode.js'
 import { initPdfTools } from './modules/pdf.js'
 import { initFormatFactory } from './modules/formatFactory.js'
 import { initUpdatePanel } from './modules/updatePanel.js'
+import { initDieline } from './modules/dieline.js'
 import { ImageEditorModal } from './board/editor/modal.js'
 import { RecoveryScheduler } from './board/recovery.js'
 import { cleanIpcError, illustratorFailureHint, isComCancelled } from './comErrors.js'
@@ -474,6 +475,7 @@ function animateEntry(element, { duration = 160, distance = 6, horizontal = fals
 
 function activateModule(module, action = '', animate = false) {
   const changed = state.module !== module
+  if (module !== 'dieline') dielineModule?.deactivate()
   state.module = module
 
   document.querySelectorAll('.nav-ic').forEach((button) => {
@@ -515,6 +517,8 @@ function activateModule(module, action = '', animate = false) {
     if (action) requestImageTool(action)
   } else if (module === 'video') {
     formatFactoryModule.setFormatAction(state.selections.video)
+  } else if (module === 'dieline') {
+    dielineModule?.activate()
   }
 
   // 离开画布时收起浮动工具栏，并取消待执行的跟随更新（S2）。
@@ -1724,6 +1728,8 @@ const pdfModule = initPdfTools({
   placePopover,
   isPopoverOpen
 })
+
+const dielineModule = initDieline({ showToast })
 
 window.addEventListener('beforeunload', () => {
   pdfModule.terminateQpdfRunner()
