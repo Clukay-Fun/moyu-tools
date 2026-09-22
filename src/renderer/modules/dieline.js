@@ -72,6 +72,7 @@ export function initDieline({ showToast }) {
   let template = DIELINE_TEMPLATES[0]
   let params = { ...template.defaults }
   let unit = 'mm'
+  let sizeType = 'manufacturing'
   let focusParam = null
   let currentModel = null
   let foldPreview = null
@@ -117,6 +118,49 @@ export function initDieline({ showToast }) {
   }
 
   // ---------- 表单 ----------
+  // 用户输入的是所选口径的尺寸，内部存制造尺寸。模板只提供正向换算（制造 → 内/外），
+  // 反向用逐维割线法：换算在每一维上是仿射的（k·x + b），两点即可解出，非仿射时再迭代几轮收敛。
+  function convert(dimensions) {
+    const probe = template.normalizeParams({ ...params, ...dimensions })
+    return template.sizes(probe)[sizeType]
+  }
+
+  function toManufacturing(typed) {
+    if (sizeType === 'manufacturing') return typed
+    let guess = { ...typed }
+    try {
+      for (let round = 0; round < 4; round += 1) {
+        const base = convert(guess)
+        let delta = 0
+        const next = { ...guess }
+        for (const key of DIMENSION_KEYS) {
+          const error = typed[key] - base[key]
+          if (Math.abs(error) < 1e-9) continue
+          const step = Math.max(Math.abs(guess[key]) * 0.01, 0.5)
+          const probed = convert({ ...next, [key]: guess[key] + step })[key]
+          const slope = (probed - base[key]) / step
+          next[key] = Math.abs(slope) > 1e-6 ? guess[key] + error / slope : guess[key] + error
+          delta = Math.max(delta, Math.abs(next[key] - guess[key]))
+        }
+        guess = next
+        if (delta < 1e-9) break
+      }
+    } catch { return typed }
+    return guess
+  }
+
+  function displayDimensions() {
+    if (sizeType === 'manufacturing') return { length: params.length, width: params.width, height: params.height }
+    try { return template.sizes(template.normalizeParams(params))[sizeType] } catch { return params }
+  }
+
+  function syncDimensionInputs() {
+    const shown = displayDimensions()
+    for (const key of DIMENSION_KEYS) {
+      if (document.activeElement !== paramInputs[key]) paramInputs[key].value = formatMm(shown[key], unit)
+    }
+  }
+
   function fillForm() {
     for (const key of DIMENSION_KEYS) paramInputs[key].value = formatMm(params[key], unit)
     paramInputs.thickness.value = formatMm(params.thickness)
@@ -153,7 +197,7 @@ export function initDieline({ showToast }) {
       input.min = String(entry.min)
       input.max = String(entry.max)
       input.dataset.param = entry.key
-      input.value = Number.isFinite(params[entry.key]) ? formatMm(params[entry.key]) : ''
+      input.value = formatMm(Number.isFinite(params[entry.key]) ? params[entry.key] : entry.auto(params))
       const unitLabel = document.createElement('em')
       unitLabel.textContent = 'mm'
       wrap.append(input, unitLabel)
@@ -168,12 +212,14 @@ export function initDieline({ showToast }) {
     updateStructurePlaceholders()
   }
 
+  // 结构参数改长宽高后会重算：只有用户没手动改过的才跟随
   function updateStructurePlaceholders() {
     if (!template.resolveStructure) return
     let resolved = null
     try { resolved = template.resolveStructure(params) } catch { return }
     for (const [key, input] of Object.entries(structureInputs)) {
-      input.placeholder = Number.isFinite(resolved[key]) ? `自动 ${formatMm(resolved[key])}` : '自动'
+      if (Number.isFinite(params[key]) || document.activeElement === input) continue
+      input.value = formatMm(resolved[key])
     }
   }
 
@@ -243,19 +289,19 @@ export function initDieline({ showToast }) {
 
   function renderSizes(model) {
     sizesList.replaceChildren()
-    const rows = [['制造尺寸', model.sizes.manufacturing, ''], ['内尺寸', model.sizes.inner, model.sizes.calibrated ? '' : '待校准'], ['外尺寸', model.sizes.outer, model.sizes.calibrated ? '' : '待校准']]
-    for (const [label, size, note] of rows) {
+    for (const [label, size] of [['制造尺寸', model.sizes.manufacturing], ['内尺寸', model.sizes.inner], ['外尺寸', model.sizes.outer]]) {
       const term = document.createElement('dt')
       term.textContent = label
       const detail = document.createElement('dd')
       detail.textContent = formatSize(size)
-      if (note) {
-        const small = document.createElement('small')
-        small.textContent = note
-        small.title = model.sizes.note || ''
-        detail.append(small)
-      }
       sizesList.append(term, detail)
+    }
+    if (!model.sizes.calibrated) {
+      const note = document.createElement('dd')
+      note.className = 'dieline-sizes-note'
+      note.textContent = `内/外尺寸为估算值 · ${model.sizes.note || ''}`
+      note.title = model.sizes.note || ''
+      sizesList.append(note)
     }
   }
 
@@ -283,6 +329,7 @@ export function initDieline({ showToast }) {
     exportButton.disabled = exporting
     exportAiButton.disabled = exporting || !isWindows
     renderSizes(currentModel)
+    syncDimensionInputs()
     if (!exporting) {
       const oversize = currentModel.parts.find((part) => part.bounds.maxX - part.bounds.minX + 30 > PDF_PAGE_LIMIT_MM || part.bounds.maxY - part.bounds.minY + 41 > PDF_PAGE_LIMIT_MM)
       exportStatus.classList.toggle('error', Boolean(oversize))
@@ -426,7 +473,26 @@ export function initDieline({ showToast }) {
       renderSvg()
     })
   }
-  for (const [key, input] of Object.entries(paramInputs)) bindParamInput(key, input, () => readDimension(key))
+  for (const [key, input] of Object.entries(paramInputs)) {
+    bindParamInput(key, input, () => {
+      const value = readDimension(key)
+      if (!DIMENSION_KEYS.includes(key) || sizeType === 'manufacturing') return value
+      if (!Number.isFinite(value)) return value
+      const typed = { ...displayDimensions(), [key]: value }
+      return toManufacturing(typed)[key]
+    })
+  }
+  page.querySelectorAll('[data-dieline-size-type]').forEach((button) => {
+    button.addEventListener('click', () => {
+      sizeType = button.dataset.dielineSizeType
+      page.querySelectorAll('[data-dieline-size-type]').forEach((item) => {
+        const selected = item === button
+        item.classList.toggle('selected', selected)
+        item.setAttribute('aria-pressed', String(selected))
+      })
+      syncDimensionInputs()
+    })
+  })
   materialSelect.addEventListener('change', () => {
     params.material = materialSelect.value
     const material = template.materials.find((entry) => entry.id === params.material)

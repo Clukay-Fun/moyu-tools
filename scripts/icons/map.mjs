@@ -17,6 +17,7 @@ export const ICON_MAP = {
   'nav-barcode': 'barcode',
   'nav-image': 'image',
   'nav-video': 'clapperboard',
+  'nav-dieline': 'package',
   'nav-settings': 'settings',
 
   // ── V2 第一批：高风险字符与彩色 emoji ──

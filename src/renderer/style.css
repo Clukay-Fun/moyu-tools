@@ -6031,6 +6031,7 @@ body.keyboard-focus .search input:focus-visible {
   letter-spacing: 0.02em;
 }
 
+.dieline-dimension-grid label small { color: var(--faint); font-size: 9.5px; font-weight: 500; }
 .dieline-params h2 small {
   margin-left: 4px;
   color: var(--muted);
@@ -6167,7 +6168,7 @@ body.keyboard-focus .search input:focus-visible {
 }
 .dieline-sizes dt { color: var(--muted); font-size: 10px; }
 .dieline-sizes dd { margin: 0 0 3px; color: var(--foreground); font-weight: 650; font-variant-numeric: tabular-nums; }
-.dieline-sizes dd small { margin-left: 4px; color: #91621e; font-weight: 500; }
+.dieline-sizes-note { margin-top: 4px !important; max-width: 260px; color: #91621e !important; font-size: 10px; font-weight: 500 !important; line-height: 1.35; }
 
 .dieline-annotation text { pointer-events: auto; cursor: pointer; }
 .dieline-annotation.secondary { color: #6b7390; stroke: #6b7390; opacity: 0.85; }
@@ -6305,6 +6306,7 @@ body.keyboard-focus .search input:focus-visible {
 .dieline-dimension-grid.single { grid-template-columns: minmax(0, 1fr); }
 .dieline-dimension-grid label {
   display: grid;
+  align-content: start;
   gap: 4px;
   color: var(--muted);
   font-size: 10.5px;
@@ -6318,6 +6320,7 @@ body.keyboard-focus .search input:focus-visible {
 
 .dieline-stepper {
   display: grid;
+  height: 34px;
   grid-template-columns: 34px minmax(0, 1fr) 34px;
   border: 1px solid var(--control-border);
   border-radius: var(--r-md);
@@ -6346,7 +6349,7 @@ body.keyboard-focus .search input:focus-visible {
 
 [data-theme="dark"] .dieline-stage { background-color: rgba(11, 16, 27, 0.32); }
 [data-theme="dark"] .dieline-3d-stage { background: linear-gradient(180deg, rgba(20, 26, 40, 0.8), rgba(12, 16, 26, 0.9)); }
-[data-theme="dark"] .dieline-sizes dd small { color: #e0b768; }
+[data-theme="dark"] .dieline-sizes-note { color: #e0b768 !important; }
 
 @media (max-width: 1180px) {
   .dieline-workbench { grid-template-columns: 180px minmax(0, 1fr) minmax(280px, 320px); }
