@@ -226,7 +226,6 @@ export function initFormatFactory({ state, renderSubmenu, showToast, bindFileDro
     const previousKind = formatConfig().kind
     state.selections.video = action
     const config = formatConfig()
-    document.querySelector('#format-crumb').textContent = action
     document.querySelector('#format-action-title').textContent = `${action}设置`
     document.querySelector('#format-action-copy').textContent = config.copy
     document.querySelector('#format-empty-title').textContent =

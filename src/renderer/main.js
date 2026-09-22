@@ -509,7 +509,6 @@ function activateModule(module, action = '', animate = false) {
     pdfModule.updatePdfState(state.selections.pdf)
     if (deferredMilestone) showToast(`“${action}”将在 ${deferredMilestone} 接入`)
   } else if (module === 'bc') {
-    document.querySelector('#bc-crumb').textContent = state.selections.bc
     if (action) barcodeModule.selectBarcodeType(action, true)
   } else if (module === 'image') {
     // U1：image 即统一画布。搜索传来的 action 走工具路由，不再切旧编辑器模式。

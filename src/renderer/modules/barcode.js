@@ -1030,7 +1030,6 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     generateBarcodeBatchButton.disabled = false
     generateBarcodeBatchButton.textContent = '批量生成'
     state.selections.bc = typeName
-    document.querySelector('#bc-crumb').textContent = typeName
     barcodeInput.inputMode = type.inputMode
     barcodeInput.maxLength = type.maxLength
     barcodeInput.placeholder = type.hint

@@ -917,17 +917,6 @@ label {
   text-align: center;
 }
 
-.crumb {
-  flex: none;
-  color: var(--faint);
-  font-size: 12px;
-}
-
-.crumb b {
-  color: var(--foreground);
-  font-weight: 600;
-}
-
 .glass-card {
   border: 1px solid var(--border);
   border-radius: var(--r-lg);

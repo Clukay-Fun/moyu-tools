@@ -110,7 +110,6 @@ export function initDieline({ showToast }) {
     const next = getTemplate(id)
     if (!next || next === template) return
     template = next
-    query('#dieline-crumb').textContent = template.name
     params = { ...template.defaults }
     fillForm()
     renderPresets(presetSearch.value)
@@ -493,7 +492,6 @@ export function initDieline({ showToast }) {
   exportAiButton.addEventListener('click', exportAi)
   if (!isWindows) exportAiButton.title = 'AI 导出需 Windows + Adobe Illustrator'
 
-  query('#dieline-crumb').textContent = template.name
   fillForm()
   renderPresets()
   renderProject({ refit: true })

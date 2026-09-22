@@ -720,7 +720,6 @@ export function initPdfTools({
     pdfDropZone.hidden = isPdfWatermarkAction(action)
     pdfWatermarkWorkbench.hidden = !isPdfWatermarkAction(action)
     document.querySelector('#page-pdf').classList.toggle('watermark-mode', isPdfWatermarkAction(action))
-    document.querySelector('#pdf-crumb').textContent = action
     document.querySelector('#pdf-empty-text').textContent = `拖入 ${config.inputLabel} 文件到这里`
     pdfEmptyAddLabel.textContent = `上传 ${config.inputLabel}`
     pdfAddFilesButton.textContent = `＋ 上传 ${config.inputLabel}`
