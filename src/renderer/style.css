@@ -6361,7 +6361,8 @@ body.keyboard-focus .search input:focus-visible {
   gap: 8px;
   padding: 12px;
 }
-.dieline-export button.primary { width: 100%; }
+.dieline-export-actions { display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; }
+.dieline-export-actions button { width: 100%; }
 .dieline-export button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 .dieline-export-status { margin: 0; color: var(--muted); font-size: 10.5px; line-height: 1.4; }
 .dieline-export-status.error { color: #a8332c; }

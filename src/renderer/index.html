@@ -737,7 +737,10 @@
 
                     <section class="glass-card dieline-export" aria-label="导出">
                       <label class="dieline-check"><input id="dieline-export-annotations" type="checkbox" checked />包含尺寸标注</label>
-                      <button class="primary" id="dieline-export-pdf" type="button">导出 PDF</button>
+                      <div class="dieline-export-actions">
+                        <button class="primary" id="dieline-export-pdf" type="button">导出 PDF</button>
+                        <button class="gbtn" id="dieline-export-ai" type="button" disabled title="经 Illustrator 另存为 .ai，需 Windows + Adobe Illustrator">导出 AI</button>
+                      </div>
                       <p class="dieline-export-status" id="dieline-export-status" aria-live="polite">1:1 矢量刀模 · 页面按展开尺寸生成</p>
                     </section>
                   </div>

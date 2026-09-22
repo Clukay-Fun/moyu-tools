@@ -1,6 +1,7 @@
 import { buildModel, PDF_PAGE_LIMIT_MM } from '../dieline/model.js'
 import { DIELINE_TEMPLATES, getTemplate } from '../dieline/templates/index.js'
 import { renderModel2d, PAPER_COLORS } from '../dieline/render2d.js'
+import { illustratorFailureHint, cleanIpcError } from '../comErrors.js'
 
 const MM_PER_INCH = 25.4
 const DIMENSION_KEYS = ['length', 'width', 'height']
@@ -61,6 +62,8 @@ export function initDieline({ showToast }) {
   const assemblyHint = query('#dieline-assembly-hint')
   const materialSelect = query('#dieline-material')
   const exportButton = query('#dieline-export-pdf')
+  const exportAiButton = query('#dieline-export-ai')
+  const isWindows = navigator.userAgent.includes('Windows')
   const exportStatus = query('#dieline-export-status')
   const structureContainer = query('#dieline-structure-params')
   const paramInputs = Object.fromEntries([...page.querySelectorAll('input[data-param]')].map((input) => [input.dataset.param, input]))
@@ -271,12 +274,14 @@ export function initDieline({ showToast }) {
       empty.textContent = result.errors.join(' · ')
       empty.hidden = false
       exportButton.disabled = true
+      exportAiButton.disabled = true
       return
     }
     const previous = currentModel
     currentModel = result.model
     empty.hidden = true
     exportButton.disabled = exporting
+    exportAiButton.disabled = exporting || !isWindows
     renderSizes(currentModel)
     if (!exporting) {
       const oversize = currentModel.parts.find((part) => part.bounds.maxX - part.bounds.minX + 30 > PDF_PAGE_LIMIT_MM || part.bounds.maxY - part.bounds.minY + 41 > PDF_PAGE_LIMIT_MM)
@@ -360,7 +365,47 @@ export function initDieline({ showToast }) {
     } finally {
       exporting = false
       exportButton.disabled = !currentModel
+      exportAiButton.disabled = !currentModel || !isWindows
       if (destination?.id) void window.api.releasePdfOutput(destination.id)
+    }
+  }
+
+  // AI 导出走条码同款链路：渲染层出 SVG → 主进程 → Illustrator COM 另存 .ai
+  async function exportAi() {
+    if (!currentModel || exporting) return
+    if (!isWindows) {
+      exportStatus.classList.add('error')
+      exportStatus.textContent = 'AI 导出仅 Windows + Illustrator 可用'
+      return
+    }
+    const snapshot = currentModel
+    const includeAnnotations = query('#dieline-export-annotations').checked
+    exporting = true
+    exportButton.disabled = true
+    exportAiButton.disabled = true
+    exportStatus.classList.remove('error')
+    exportStatus.textContent = '正在通过 Illustrator 生成 AI…'
+    try {
+      const { buildDielineSvg } = await import('../dieline/exportSvg.js')
+      const { length, width, height } = snapshot.params
+      const result = await window.api.exportDielineAi({
+        name: `${snapshot.templateId}-${length}x${width}x${height}`,
+        data: buildDielineSvg(snapshot, { includeAnnotations })
+      })
+      if (result.status === 'cancelled') {
+        exportStatus.textContent = '已取消导出'
+        return
+      }
+      exportStatus.textContent = `AI 已保存 · ${result.result?.name || ''} · 图层 BLEED / CUT / CREASE`
+      showToast('Illustrator 刀模已保存')
+    } catch (error) {
+      exportStatus.classList.add('error')
+      exportStatus.textContent = `AI 导出失败：${cleanIpcError(error?.message || error)}`
+      showToast(illustratorFailureHint(error?.message || error))
+    } finally {
+      exporting = false
+      exportButton.disabled = !currentModel
+      exportAiButton.disabled = !currentModel || !isWindows
     }
   }
 
@@ -444,6 +489,8 @@ export function initDieline({ showToast }) {
   query('#dieline-3d-reset').addEventListener('click', () => foldPreview?.resetView())
   query('#dieline-3d-retry').addEventListener('click', () => { stageError.hidden = true; void updatePreview() })
   exportButton.addEventListener('click', exportPdf)
+  exportAiButton.addEventListener('click', exportAi)
+  if (!isWindows) exportAiButton.title = 'AI 导出需 Windows + Adobe Illustrator'
 
   fillForm()
   renderPresets()

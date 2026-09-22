@@ -29,6 +29,7 @@ export function illustratorFailureHint(reason) {
   if (/Illustrator 脚本失败/.test(text)) return 'Illustrator 脚本执行失败，请查看提示详情'
   if (/超过 20 MB/.test(text)) return '条码 SVG 过大，请减少批量内容'
   if (/不支持的条码文件数据|条码文件格式与数据不匹配/.test(text)) return '条码数据无效，请重新生成'
+  if (/刀模 SVG/.test(text)) return '刀模数据无效，请调整参数后重试'
   if (/只允许从主窗口发起/.test(text)) return '请在主窗口中操作'
   if (/正在执行，请等待/.test(text)) return '已有联动任务在执行，请等待完成'
   if (/执行超时|进程已因超时重启/.test(text)) return 'Illustrator 未响应，请关闭它的弹窗后重试'

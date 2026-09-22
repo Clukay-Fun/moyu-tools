@@ -51,6 +51,7 @@ contextBridge.exposeInMainWorld(
     illustratorUngroupedCopy: (payload) =>
       ipcRenderer.invoke('barcode:illustrator-ungrouped-copy', payload),
     openBarcodeInIllustrator: (payload) => ipcRenderer.invoke('barcode:open-illustrator', payload),
+    exportDielineAi: (payload) => ipcRenderer.invoke('dieline:export-ai', payload),
     openBarcodeInPhotoshop: (payload) => ipcRenderer.invoke('barcode:open-photoshop', payload),
     saveImageFile: (payload) => ipcRenderer.invoke('image:save-file', payload),
     onBarcodeSaveProgress: (callback) => {

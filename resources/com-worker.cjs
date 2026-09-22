@@ -247,6 +247,27 @@ function illustratorSvgScript(inputPath, outputPath) {
   `
 }
 
+// 刀模 SVG → .ai：打开 SVG 后另存为 Illustrator 文档（保留 PDF 兼容，便于其他软件打开）。
+function dielineSvgAiScript(inputPath, outputPath) {
+  const input = extendScriptString(inputPath)
+  const output = extendScriptString(outputPath)
+  return `
+    var previousInteractionLevel = app.userInteractionLevel;
+    var document = null;
+    try {
+      app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
+      document = app.open(new File(${input}));
+      var options = new IllustratorSaveOptions();
+      options.pdfCompatible = true;
+      options.compressed = true;
+      document.saveAs(new File(${output}), options);
+    } finally {
+      if (document) document.close(SaveOptions.DONOTSAVECHANGES);
+      app.userInteractionLevel = previousInteractionLevel;
+    }
+  `
+}
+
 function createComObject(progId, activateExisting = false) {
   try {
     return new winax.Object(progId, { activate: activateExisting })
@@ -375,6 +396,16 @@ function runIllustratorSvg(payload) {
   return { outputPath: payload.outputPath || null }
 }
 
+function runDielineSvgAi(payload) {
+  const application = createComObject('Illustrator.Application', true)
+  try {
+    application.DoJavaScript(dielineSvgAiScript(payload.inputPath, payload.outputPath))
+  } finally {
+    release(application)
+  }
+  return { outputPath: payload.outputPath }
+}
+
 function runPhotoshopOpen(payload) {
   const application = createComObject('Photoshop.Application', true)
   try {
@@ -403,6 +434,7 @@ async function execute(id, command, payload) {
   if (command === 'office-to-pdf') return runOfficeToPdf(payload)
   if (command === 'illustrator-batch') return runIllustratorBatch(id, payload)
   if (command === 'illustrator-svg') return runIllustratorSvg(payload)
+  if (command === 'dieline-svg-ai') return runDielineSvgAi(payload)
   if (command === 'illustrator-ungrouped-copy') return runIllustratorUngroupedCopy(payload)
   if (command === 'photoshop-open') return runPhotoshopOpen(payload)
   throw new Error(`不支持的 COM 命令：${command}`)
