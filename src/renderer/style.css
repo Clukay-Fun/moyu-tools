@@ -6005,39 +6005,6 @@ body.keyboard-focus .search input:focus-visible {
   overflow: hidden;
 }
 
-.dieline-heading {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 2px 3px;
-}
-
-.dieline-heading h1 {
-  margin: 0;
-  color: var(--foreground);
-  font-size: 23px;
-  font-weight: 720;
-}
-
-.dieline-heading p {
-  margin: 3px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.dieline-draft-badge {
-  flex: 0 0 auto;
-  padding: 6px 10px;
-  border: 1px solid rgba(201, 137, 46, 0.22);
-  border-radius: 999px;
-  background: rgba(240, 183, 83, 0.12);
-  color: #91621e;
-  font-size: 11px;
-  font-weight: 650;
-}
-
 .dieline-workbench {
   display: grid;
   min-width: 0;
@@ -6369,7 +6336,6 @@ body.keyboard-focus .search input:focus-visible {
 
 [data-theme="dark"] .dieline-stage { background-color: rgba(11, 16, 27, 0.32); }
 [data-theme="dark"] .dieline-3d-stage { background: linear-gradient(180deg, rgba(20, 26, 40, 0.8), rgba(12, 16, 26, 0.9)); }
-[data-theme="dark"] .dieline-draft-badge { color: #e0b768; }
 [data-theme="dark"] .dieline-sizes dd small { color: #e0b768; }
 
 @media (max-width: 1180px) {
@@ -6378,7 +6344,6 @@ body.keyboard-focus .search input:focus-visible {
 
 @media (max-width: 860px) {
   .page-dieline { overflow: auto; }
-  .dieline-heading { align-items: flex-start; flex-direction: column; gap: 7px; }
   .dieline-workbench { display: flex; flex-direction: column; }
   .dieline-presets, .dieline-canvas-card, .dieline-side { flex: 0 0 auto; }
   .dieline-canvas-card { min-height: 380px; }
