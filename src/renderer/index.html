@@ -648,7 +648,7 @@
                       <div class="dieline-canvas-actions">
                         <label class="dieline-check"><input id="dieline-show-annotations" type="checkbox" checked />标注</label>
                         <button class="gbtn ghost" id="dieline-zoom-out" type="button" aria-label="缩小" title="缩小">−</button>
-                        <span id="dieline-zoom-label">适配</span>
+                        <span class="dieline-zoom-input"><input id="dieline-zoom-label" type="number" min="15" max="800" step="5" value="100" aria-label="缩放百分比" /><em>%</em></span>
                         <button class="gbtn ghost" id="dieline-zoom-in" type="button" aria-label="放大" title="放大">+</button>
                         <button class="gbtn ghost" id="dieline-fit" type="button">适配</button>
                       </div>
@@ -696,16 +696,15 @@
                           <button type="button" data-dieline-unit="in" aria-pressed="false">in</button>
                         </div>
                       </div>
-                      <div class="dieline-dimension-grid">
+                      <div class="dieline-dimension-grid triple">
                         <label>长度<span class="dieline-input"><input id="dieline-length" data-param="length" type="number" step="0.1" /><em data-unit-label>mm</em></span></label>
                         <label>宽度<span class="dieline-input"><input id="dieline-width" data-param="width" type="number" step="0.1" /><em data-unit-label>mm</em></span></label>
                         <label>高度<span class="dieline-input"><input id="dieline-height" data-param="height" type="number" step="0.1" /><em data-unit-label>mm</em></span></label>
                       </div>
-                      <p class="dieline-help" id="dieline-range-hint"></p>
 
                       <h2>厚度与出血 <small>mm</small></h2>
                       <div class="dieline-dimension-grid">
-                        <label>纸板厚度 <small id="dieline-thickness-range"></small>
+                        <label>纸板厚度
                           <span class="dieline-stepper">
                             <button type="button" id="dieline-thickness-dec" aria-label="减小厚度">−</button>
                             <input id="dieline-thickness" data-param="thickness" type="number" step="0.1" />
@@ -720,13 +719,13 @@
 
                       <h2>尺寸类型</h2>
                       <div class="dieline-size-type" role="group" aria-label="尺寸类型">
-                        <button type="button" class="selected" data-dieline-size-type="manufacturing" aria-pressed="true">制造尺寸</button>
-                        <button type="button" data-dieline-size-type="inner" aria-pressed="false">内尺寸</button>
-                        <button type="button" data-dieline-size-type="outer" aria-pressed="false">外尺寸</button>
+                        <button type="button" class="selected" data-dieline-size-type="manufacturing" aria-pressed="true" title="刀版尺寸，结构图上标注的尺寸">制造尺寸</button>
+                        <button type="button" data-dieline-size-type="inner" aria-pressed="false" title="包装能容纳的尺寸，通常小于制造尺寸">内尺寸</button>
+                        <button type="button" data-dieline-size-type="outer" aria-pressed="false" title="包装占用的空间，通常大于制造尺寸">外尺寸</button>
                       </div>
 
                       <h2 id="dieline-structure-title">结构参数</h2>
-                      <div class="dieline-dimension-grid" id="dieline-structure-params"></div>
+                      <div class="dieline-dimension-grid triple" id="dieline-structure-params"></div>
                     </section>
 
                     <section class="glass-card dieline-export" aria-label="导出">

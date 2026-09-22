@@ -166,8 +166,10 @@ export function initDieline({ showToast }) {
     paramInputs.thickness.value = formatMm(params.thickness)
     paramInputs.bleed.value = formatMm(params.bleed)
     const [minT, maxT] = template.ranges.thickness
-    query('#dieline-thickness-range').textContent = `(${minT}~${maxT} mm)`
-    query('#dieline-range-hint').textContent = `长 ${template.ranges.length.join('–')} · 宽 ${template.ranges.width.join('–')} · 高 ${template.ranges.height.join('–')} mm`
+    paramInputs.thickness.min = String(minT)
+    paramInputs.thickness.max = String(maxT)
+    paramInputs.thickness.title = `${minT}–${maxT} mm`
+    for (const key of DIMENSION_KEYS) paramInputs[key].title = `${template.ranges[key][0]}–${template.ranges[key][1]} mm`
     materialSelect.replaceChildren()
     for (const material of template.materials) {
       const option = document.createElement('option')
@@ -268,7 +270,8 @@ export function initDieline({ showToast }) {
         target?.select()
       })
     })
-    query('#dieline-zoom-label').textContent = view.fitted && view.zoom === 1 ? '适配' : `${Math.round(view.zoom * 100)}%`
+    const zoomInput = query('#dieline-zoom-label')
+    if (document.activeElement !== zoomInput) zoomInput.value = String(Math.round(view.zoom * 100))
   }
 
   function fitCanvas({ preserveZoom = false } = {}) {
@@ -295,13 +298,6 @@ export function initDieline({ showToast }) {
       const detail = document.createElement('dd')
       detail.textContent = formatSize(size)
       sizesList.append(term, detail)
-    }
-    if (!model.sizes.calibrated) {
-      const note = document.createElement('dd')
-      note.className = 'dieline-sizes-note'
-      note.textContent = `内/外尺寸为估算值 · ${model.sizes.note || ''}`
-      note.title = model.sizes.note || ''
-      sizesList.append(note)
     }
   }
 
@@ -510,6 +506,12 @@ export function initDieline({ showToast }) {
   query('#dieline-zoom-in').addEventListener('click', () => { view.zoom = Math.min(8, view.zoom * 1.2); renderSvg() })
   query('#dieline-zoom-out').addEventListener('click', () => { view.zoom = Math.max(0.15, view.zoom / 1.2); renderSvg() })
   query('#dieline-fit').addEventListener('click', () => fitCanvas())
+  query('#dieline-zoom-label').addEventListener('input', () => {
+    const value = Number(query('#dieline-zoom-label').value)
+    if (!Number.isFinite(value) || value <= 0) return
+    view.zoom = Math.max(0.15, Math.min(8, value / 100))
+    renderSvg()
+  })
   stage.addEventListener('wheel', (event) => {
     if (!currentModel) return
     event.preventDefault()

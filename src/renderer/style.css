@@ -6128,7 +6128,23 @@ body.keyboard-focus .search input:focus-visible {
 
 .dieline-canvas-actions { display: flex; align-items: center; gap: 6px; }
 .dieline-canvas-actions .gbtn { min-width: 30px; height: 28px; padding: 0 9px; }
-#dieline-zoom-label { min-width: 38px; text-align: center; font-variant-numeric: tabular-nums; }
+.dieline-zoom-input { position: relative; display: inline-flex; }
+.dieline-zoom-input input {
+  width: 58px;
+  height: 28px;
+  padding: 0 16px 0 6px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-md);
+  outline: 0;
+  color: var(--foreground);
+  background: var(--control-bg);
+  font: inherit;
+  font-size: 11px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.dieline-zoom-input input:focus-visible { border-color: var(--accent); }
+.dieline-zoom-input em { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); color: var(--muted); font-style: normal; font-size: 10px; }
 
 .dieline-check {
   display: inline-flex;
@@ -6168,7 +6184,6 @@ body.keyboard-focus .search input:focus-visible {
 }
 .dieline-sizes dt { color: var(--muted); font-size: 10px; }
 .dieline-sizes dd { margin: 0 0 3px; color: var(--foreground); font-weight: 650; font-variant-numeric: tabular-nums; }
-.dieline-sizes-note { margin-top: 4px !important; max-width: 260px; color: #91621e !important; font-size: 10px; font-weight: 500 !important; line-height: 1.35; }
 
 .dieline-annotation text { pointer-events: auto; cursor: pointer; }
 .dieline-annotation.secondary { color: #6b7390; stroke: #6b7390; opacity: 0.85; }
@@ -6304,6 +6319,9 @@ body.keyboard-focus .search input:focus-visible {
   gap: 8px;
 }
 .dieline-dimension-grid.single { grid-template-columns: minmax(0, 1fr); }
+.dieline-dimension-grid.triple { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.dieline-dimension-grid.triple .dieline-input input { padding-right: 24px; }
+.dieline-dimension-grid.triple .dieline-input em { right: 6px; }
 .dieline-dimension-grid label {
   display: grid;
   align-content: start;
@@ -6349,7 +6367,6 @@ body.keyboard-focus .search input:focus-visible {
 
 [data-theme="dark"] .dieline-stage { background-color: rgba(11, 16, 27, 0.32); }
 [data-theme="dark"] .dieline-3d-stage { background: linear-gradient(180deg, rgba(20, 26, 40, 0.8), rgba(12, 16, 26, 0.9)); }
-[data-theme="dark"] .dieline-sizes-note { color: #e0b768 !important; }
 
 @media (max-width: 1180px) {
   .dieline-workbench { grid-template-columns: 180px minmax(0, 1fr) minmax(280px, 320px); }
