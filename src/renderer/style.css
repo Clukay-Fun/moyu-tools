@@ -6022,8 +6022,7 @@ body.keyboard-focus .search input:focus-visible {
   overflow: hidden;
 }
 
-.dieline-presets h2,
-.dieline-params h2 {
+.dieline-presets h2 {
   margin: 0;
   color: var(--foreground);
   font-size: 12px;
@@ -6031,13 +6030,16 @@ body.keyboard-focus .search input:focus-visible {
   letter-spacing: 0.02em;
 }
 
-.dieline-dimension-grid label small { color: var(--faint); font-size: 9.5px; font-weight: 500; }
-.dieline-params h2 small {
-  margin-left: 4px;
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 500;
+/* 参数区没有分组大标题，每个字段自己的标题就是层级（与参考站一致） */
+.dieline-field-label,
+.dieline-field,
+.dieline-dimension-grid label {
+  color: var(--foreground);
+  font-size: 11px;
+  font-weight: 700;
 }
+
+.dieline-field { display: grid; gap: 5px; }
 
 .dieline-presets input[type="search"],
 .dieline-input input,
@@ -6278,12 +6280,12 @@ body.keyboard-focus .search input:focus-visible {
 .dieline-params {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 12px;
   padding: 12px;
   overflow: auto;
 }
 .dieline-params > * { flex: 0 0 auto; }
-.dieline-params h2 { margin-top: 4px; }
+
 .dieline-param-head { display: flex; align-items: center; justify-content: space-between; }
 
 .dieline-unit-switch,
@@ -6325,10 +6327,7 @@ body.keyboard-focus .search input:focus-visible {
 .dieline-dimension-grid label {
   display: grid;
   align-content: start;
-  gap: 4px;
-  color: var(--muted);
-  font-size: 10.5px;
-  font-weight: 600;
+  gap: 5px;
 }
 .dieline-input { position: relative; display: flex; }
 .dieline-input input { width: 100%; padding-right: 34px; }

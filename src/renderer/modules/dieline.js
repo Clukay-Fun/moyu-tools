@@ -186,7 +186,6 @@ export function initDieline({ showToast }) {
     for (const key of Object.keys(structureInputs)) delete structureInputs[key]
     structureContainer.replaceChildren()
     const schema = template.structureParams || []
-    query('#dieline-structure-title').hidden = !schema.length
     structureContainer.hidden = !schema.length
     for (const entry of schema) {
       const label = document.createElement('label')
