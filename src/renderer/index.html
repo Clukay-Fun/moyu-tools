@@ -662,24 +662,26 @@
 
                   <div class="dieline-side">
                     <section class="glass-card dieline-3d-card" aria-label="3D 预览">
-                      <header class="dieline-3d-toolbar">
-                        <span>3D 预览</span>
-                        <button class="gbtn ghost" id="dieline-3d-reset" type="button">复位视角</button>
-                      </header>
                       <div class="dieline-3d-stage" id="dieline-3d-stage"></div>
+                      <button class="gbtn ghost dieline-3d-reset" id="dieline-3d-reset" type="button" title="复位视角" aria-label="复位视角">⌂</button>
                       <div class="dieline-stage-error" id="dieline-stage-error" hidden>
                         <span id="dieline-stage-error-text"></span>
                         <button class="gbtn ghost" id="dieline-3d-retry" type="button">重试</button>
                       </div>
-                      <div class="dieline-fold-control" id="dieline-fold-control">
-                        <label for="dieline-fold-range">展开 / 合拢</label>
-                        <input id="dieline-fold-range" type="range" min="0" max="100" value="0" />
-                        <span id="dieline-fold-value">展开</span>
-                      </div>
-                      <div class="dieline-fold-control" id="dieline-assembly-control" hidden>
-                        <label for="dieline-assembly-range">装配</label>
-                        <input id="dieline-assembly-range" type="range" min="0" max="100" value="0" disabled />
-                        <span id="dieline-assembly-hint">先合拢</span>
+                      <div class="dieline-3d-controls">
+                        <div class="dieline-fold-control" id="dieline-fold-control">
+                          <div class="dieline-fold-jump" role="group" aria-label="展开 / 合拢">
+                            <button type="button" id="dieline-fold-open" title="展开">展开</button>
+                            <button type="button" id="dieline-fold-close" title="合拢">合拢</button>
+                          </div>
+                          <input id="dieline-fold-range" type="range" min="0" max="100" value="0" aria-label="折叠进度" />
+                          <span id="dieline-fold-value">0%</span>
+                        </div>
+                        <div class="dieline-fold-control" id="dieline-assembly-control" hidden>
+                          <label for="dieline-assembly-range">装配</label>
+                          <input id="dieline-assembly-range" type="range" min="0" max="100" value="0" disabled />
+                          <span id="dieline-assembly-hint">先合拢</span>
+                        </div>
                       </div>
                     </section>
 

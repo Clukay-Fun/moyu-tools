@@ -477,12 +477,18 @@ export function initDieline({ showToast }) {
       foldPreview?.setAssembly(0)
     }
   }
-  foldRange.addEventListener('input', () => {
+  function applyFoldValue() {
     const value = Number(foldRange.value) / 100
-    foldValue.textContent = value < 0.02 ? '展开' : value > 0.98 ? '合拢' : `${Math.round(value * 100)}%`
+    foldValue.textContent = `${Math.round(value * 100)}%`
+    query('#dieline-fold-open').classList.toggle('active', value <= 0)
+    query('#dieline-fold-close').classList.toggle('active', value >= 1)
     foldPreview?.setFold(value)
     syncAssemblyAvailability()
-  })
+  }
+  foldRange.addEventListener('input', applyFoldValue)
+  query('#dieline-fold-open').addEventListener('click', () => { foldRange.value = '0'; applyFoldValue() })
+  query('#dieline-fold-close').addEventListener('click', () => { foldRange.value = '100'; applyFoldValue() })
+  applyFoldValue()
   assemblyRange.addEventListener('input', () => {
     foldPreview?.setAssembly(Number(assemblyRange.value) / 100)
   })

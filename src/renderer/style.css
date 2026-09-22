@@ -6195,48 +6195,68 @@ body.keyboard-focus .search input:focus-visible {
 
 .dieline-3d-card {
   position: relative;
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
 }
-.dieline-3d-toolbar {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--hairline);
-  color: var(--muted);
-  font-size: 11px;
-}
-.dieline-3d-toolbar .gbtn { height: 26px; padding: 0 9px; }
 .dieline-3d-stage {
-  min-height: 0;
-  flex: 1 1 auto;
+  position: absolute;
+  inset: 0;
   background: linear-gradient(180deg, rgba(228, 232, 244, 0.7), rgba(246, 247, 251, 0.9));
   cursor: grab;
 }
 .dieline-3d-stage:active { cursor: grabbing; }
 .dieline-3d-stage canvas { display: block; width: 100%; height: 100%; }
+.dieline-3d-reset {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 14px;
+  opacity: 0.75;
+}
+.dieline-3d-reset:hover { opacity: 1; }
 .dieline-3d-card .dieline-stage-error { inset: 44px 12px auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .dieline-3d-card .dieline-stage-error .gbtn { height: 24px; padding: 0 8px; }
 
+.dieline-3d-controls {
+  position: absolute;
+  inset: auto 8px 8px;
+  display: grid;
+  gap: 4px;
+}
 .dieline-fold-control {
   display: grid;
-  flex: 0 0 auto;
-  grid-template-columns: auto 1fr 40px;
+  grid-template-columns: auto 1fr 36px;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  border-top: 1px solid var(--hairline);
+  padding: 5px 8px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+  backdrop-filter: blur(6px);
   color: var(--muted);
   font-size: 11px;
 }
-.dieline-fold-control input { accent-color: var(--accent); }
+.dieline-fold-control input { min-width: 0; accent-color: var(--accent); }
 .dieline-fold-control span { text-align: right; font-variant-numeric: tabular-nums; }
 .dieline-fold-control[hidden] { display: none !important; }
 .dieline-fold-control.disabled { opacity: 0.55; }
 .dieline-fold-control input:disabled { cursor: not-allowed; }
+.dieline-fold-jump { display: flex; gap: 2px; }
+.dieline-fold-jump button {
+  height: 22px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dieline-fold-jump button:hover { color: var(--foreground); background: color-mix(in srgb, var(--foreground) 10%, transparent); }
+.dieline-fold-jump button.active { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
 
 .dieline-params {
   display: flex;
