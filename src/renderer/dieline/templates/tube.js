@@ -77,12 +77,13 @@ export function buildTube(spec) {
     contour.push({ x: x1, y: H, edge: spansBottom[index] && spansBottom[index][1] >= x1 - 1e-6 ? 'none' : 'cut' })
     contour.push(...edgeSegments(x0, x1, H, spansBottom[index], -1, 'cut'))
     contour.push({ x: x0, y: H, edge: index === 0 ? 'none' : 'crease' })
+    const shaped = spec.panelShape?.(index, x0, x1, contour)
     panels.push({
-      id: IDS[index], name: NAMES[index], holes: [],
+      id: IDS[index], name: NAMES[index], holes: shaped?.holes || [],
       parent: index === 0 ? null : IDS[index - 1],
       hinge: index === 0 ? null : { a: [x0, 0], b: [x0, H] },
       order: 1, angle: index === 0 ? 0 : 90,
-      contour: dedupe(contour)
+      contour: dedupe(shaped?.contour || contour)
     })
   })
 
@@ -248,6 +249,45 @@ export function makeAttachments(H) {
               id: `${panelId}${end === 'top' ? 'Top' : 'Bottom'}Dust`, name: `${end === 'top' ? '上' : '下'}防尘翼`, holes: [],
               parent: panelId, order, angle: 90,
               hinge: end === 'top' ? { a: [a, y], b: [b, y] } : { a: [b, y], b: [a, y] },
+              contour
+            }]
+          }
+        }
+      }
+    },
+
+    /** 挂耳：带欧洲孔的矩形耳片，挂在盖板或面板上沿。 */
+    hangTab({ end, depth, holeDiameter, t, order = 5 }) {
+      return {
+        end,
+        build(panelId, x0, x1) {
+          const y = yOf(end)
+          const s = dir(end)
+          const outer = y + s * depth
+          const inset = t
+          const r = holeDiameter / 2
+          const cx = (x0 + x1) / 2
+          const cy = y + s * (depth * 0.55)
+          const hole = [
+            { x: cx - r, y: cy - r, r, edge: 'cut' }, { x: cx + r, y: cy - r, r, edge: 'cut' },
+            { x: cx + r, y: cy + r, r, edge: 'cut' }, { x: cx - r, y: cy + r, r, edge: 'cut' }
+          ]
+          const corner = Math.min(depth * 0.25, (x1 - x0) * 0.2)
+          const contour = end === 'top'
+            ? [
+                { x: x0 + inset, y, edge: 'cut' }, { x: x0 + inset, y: outer, r: corner, edge: 'cut' },
+                { x: x1 - inset, y: outer, r: corner, edge: 'cut' }, { x: x1 - inset, y, edge: 'crease' }
+              ]
+            : [
+                { x: x1 - inset, y, edge: 'cut' }, { x: x1 - inset, y: outer, r: corner, edge: 'cut' },
+                { x: x0 + inset, y: outer, r: corner, edge: 'cut' }, { x: x0 + inset, y, edge: 'crease' }
+              ]
+          return {
+            span: [x0 + inset, x1 - inset],
+            panels: [{
+              id: `${panelId}${end === 'top' ? 'Top' : 'Bottom'}Hang`, name: '挂耳', holes: [hole],
+              parent: panelId, order, angle: 0,
+              hinge: { a: [x0 + inset, y], b: [x1 - inset, y] },
               contour
             }]
           }
