@@ -219,6 +219,127 @@ export function makeAttachments(H) {
       }
     },
 
+    /** 单边斜切防尘翼：贴着盖板的一侧竖直，远离盖板的一侧斜收。 */
+    dustAngled({ end, depth, t, angleSide, order = 2 }) {
+      return {
+        end,
+        build(panelId, x0, x1) {
+          const y = yOf(end)
+          const s = dir(end)
+          const outer = y + s * depth
+          const inset = t
+          const run = Math.min(depth * 0.35, (x1 - x0) * 0.35)
+          const a = x0 + (angleSide === 'left' ? 0 : inset)
+          const b = x1 - (angleSide === 'right' ? 0 : inset)
+          const topA = angleSide === 'left' ? a + run : a
+          const topB = angleSide === 'right' ? b - run : b
+          const contour = end === 'top'
+            ? [
+                { x: a, y, edge: 'cut' }, { x: topA, y: outer, r: 2 * t, edge: 'cut' },
+                { x: topB, y: outer, r: 2 * t, edge: 'cut' }, { x: b, y, edge: 'crease' }
+              ]
+            : [
+                { x: b, y, edge: 'cut' }, { x: topB, y: outer, r: 2 * t, edge: 'cut' },
+                { x: topA, y: outer, r: 2 * t, edge: 'cut' }, { x: a, y, edge: 'crease' }
+              ]
+          return {
+            span: [a, b],
+            panels: [{
+              id: `${panelId}${end === 'top' ? 'Top' : 'Bottom'}Dust`, name: `${end === 'top' ? '上' : '下'}防尘翼`, holes: [],
+              parent: panelId, order, angle: 90,
+              hinge: end === 'top' ? { a: [a, y], b: [b, y] } : { a: [b, y], b: [a, y] },
+              contour
+            }]
+          }
+        }
+      }
+    },
+
+    /** 自锁底斜角片：一侧 45° 斜边，另一侧齐边（1-2-3 底的两片窄面）。 */
+    crashCorner({ end, depth, diagonal, order = 2 }) {
+      return {
+        end,
+        build(panelId, x0, x1) {
+          const y = yOf(end)
+          const s = dir(end)
+          const contour = [
+            { x: x0, y, edge: 'cut' },
+            { x: x0 + diagonal, y: y + s * diagonal, edge: 'cut' },
+            { x: x0 + diagonal, y: y + s * depth, edge: 'cut' },
+            { x: x1, y: y + s * depth, edge: 'cut' },
+            { x: x1, y, edge: 'crease' }
+          ]
+          return {
+            span: [x0, x1],
+            panels: [{
+              id: `${panelId}${end === 'top' ? 'Top' : 'Bottom'}Corner`, name: '自锁底斜角片', holes: [],
+              parent: panelId, order, angle: 90,
+              hinge: { a: [x0, y], b: [x1, y] },
+              contour
+            }]
+          }
+        }
+      }
+    },
+
+    /** 自锁底承片：两侧 45° 斜边 + 中央锁舌（与斜角片互锁的那一片）。 */
+    crashTab({ end, depth, diagonal, order = 3 }) {
+      return {
+        end,
+        build(panelId, x0, x1) {
+          const y = yOf(end)
+          const s = dir(end)
+          const contour = [
+            { x: x0, y, edge: 'cut' },
+            { x: x0 + diagonal, y: y + s * diagonal, edge: 'cut' },
+            { x: x0 + diagonal, y: y + s * depth, edge: 'cut' },
+            { x: x1 - diagonal, y: y + s * depth, edge: 'cut' },
+            { x: x1 - diagonal, y: y + s * diagonal, edge: 'cut' },
+            { x: x1, y, edge: 'crease' }
+          ]
+          return {
+            span: [x0, x1],
+            panels: [{
+              id: `${panelId}${end === 'top' ? 'Top' : 'Bottom'}Tab`, name: '自锁底承片', holes: [],
+              parent: panelId, order, angle: 90,
+              hinge: { a: [x0, y], b: [x1, y] },
+              contour
+            }]
+          }
+        }
+      }
+    },
+
+    /** 自锁底主片：两端深、中间浅的封底翼（带肩）。 */
+    crashMain({ end, depth, stepDepth, legWidth, order = 3 }) {
+      return {
+        end,
+        build(panelId, x0, x1) {
+          const y = yOf(end)
+          const s = dir(end)
+          const contour = [
+            { x: x0, y, edge: 'cut' },
+            { x: x0, y: y + s * depth, edge: 'cut' },
+            { x: x0 + legWidth, y: y + s * depth, edge: 'cut' },
+            { x: x0 + legWidth, y: y + s * stepDepth, edge: 'cut' },
+            { x: x1 - legWidth, y: y + s * stepDepth, edge: 'cut' },
+            { x: x1 - legWidth, y: y + s * depth, edge: 'cut' },
+            { x: x1, y: y + s * depth, edge: 'cut' },
+            { x: x1, y, edge: 'crease' }
+          ]
+          return {
+            span: [x0, x1],
+            panels: [{
+              id: `${panelId}${end === 'top' ? 'Top' : 'Bottom'}Main`, name: '自锁底主片', holes: [],
+              parent: panelId, order, angle: 90,
+              hinge: { a: [x0, y], b: [x1, y] },
+              contour
+            }]
+          }
+        }
+      }
+    },
+
     /** 锁底主片：封底翼 + 中央插舌。 */
     lockTongue({ end, depth, tongueW, tongueLen, t, order = 3 }) {
       return {
