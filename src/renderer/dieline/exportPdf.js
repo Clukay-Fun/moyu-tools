@@ -39,7 +39,7 @@ export async function buildDielinePdf(model, options) {
   }
 
   for (const part of model.parts) {
-    const bounds = includeAnnotations ? annotationBounds(model, part) : part.bounds
+    const bounds = includeAnnotations ? part.primaryAnnotationBounds : part.bounds
     const widthMm = bounds.maxX - bounds.minX + MARGIN * 2
     const heightMm = bounds.maxY - bounds.minY + MARGIN + FOOTER
     if (widthMm > PDF_PAGE_LIMIT_MM || heightMm > PDF_PAGE_LIMIT_MM) {
@@ -67,6 +67,15 @@ export async function buildDielinePdf(model, options) {
 
     if (includeAnnotations) {
       for (const annotation of model.annotations.filter((entry) => !entry.secondary && entry.part === part.id)) {
+        for (const line of annotation.witness || []) {
+          page.drawLine({
+            start: { x: toX(line.x1), y: toY(line.y1) },
+            end: { x: toX(line.x2), y: toY(line.y2) },
+            thickness: 0.2,
+            color: colors.annotation,
+            dashArray: [2, 2]
+          })
+        }
         const start = { x: toX(annotation.x1), y: toY(annotation.y1) }
         const end = { x: toX(annotation.x2), y: toY(annotation.y2) }
         page.drawLine({ start, end, thickness: 0.4, color: colors.annotation })
@@ -105,15 +114,4 @@ export async function buildDielinePdf(model, options) {
     page.drawText('100 mm calibration', { x: calX + 102 * MM, y: calY - 2, size: 6, font, color: colors.text })
   }
   return documentPdf.save()
-}
-
-function annotationBounds(model, part) {
-  const bounds = { ...part.bounds }
-  for (const annotation of model.annotations.filter((entry) => !entry.secondary && entry.part === part.id)) {
-    bounds.minX = Math.min(bounds.minX, annotation.x1, annotation.x2)
-    bounds.maxX = Math.max(bounds.maxX, annotation.x1, annotation.x2)
-    bounds.minY = Math.min(bounds.minY, annotation.y1, annotation.y2)
-    bounds.maxY = Math.max(bounds.maxY, annotation.y1, annotation.y2)
-  }
-  return { minX: bounds.minX - 4, minY: bounds.minY - 4, maxX: bounds.maxX + 18, maxY: bounds.maxY + 6 }
 }

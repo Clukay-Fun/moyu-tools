@@ -98,6 +98,9 @@ export function renderModel2d(svg, model, options) {
       if (annotation.param === focusParam) classes.push('focus')
       const offset = partOffset[annotation.part] || { x: 0, y: 0 }
       const item = el('g', { 'data-param': annotation.param, class: classes.join(' '), transform: `translate(${offset.x} ${offset.y})` })
+      for (const line of annotation.witness || []) {
+        item.append(el('line', { ...line, 'stroke-width': 0.5, 'stroke-dasharray': '2 2', opacity: 0.55 }))
+      }
       arrowLine(item, annotation, fontSize * 0.55)
       const midX = (annotation.x1 + annotation.x2) / 2
       const midY = (annotation.y1 + annotation.y2) / 2

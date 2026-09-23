@@ -31,6 +31,9 @@ export function buildDielineSvg(model, options = {}) {
     const offsets = Object.fromEntries(model.parts.map((part) => [part.id, part.layout]))
     for (const annotation of model.annotations.filter((entry) => !entry.secondary)) {
       const offset = offsets[annotation.part] || { x: 0, y: 0 }
+      for (const line of annotation.witness || []) {
+        rows.push(`<line x1="${line.x1 + offset.x}" y1="${line.y1 + offset.y}" x2="${line.x2 + offset.x}" y2="${line.y2 + offset.y}" stroke-width="0.12" stroke-dasharray="2 2" opacity="0.55"/>`)
+      }
       rows.push(`<line x1="${annotation.x1 + offset.x}" y1="${annotation.y1 + offset.y}" x2="${annotation.x2 + offset.x}" y2="${annotation.y2 + offset.y}"/>`)
       const midX = (annotation.x1 + annotation.x2) / 2 + offset.x
       const midY = (annotation.y1 + annotation.y2) / 2 + offset.y
