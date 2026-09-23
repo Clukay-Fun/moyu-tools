@@ -60,7 +60,7 @@ Release 正文使用 `更新内容` 标题，并按有内容的类别列出要�
 
 ```text
 moyu-tools-v<version>-windows-x64-setup.exe
-moyu-tools-v<version>-windows-x64-setup.sha256
+moyu-tools-v<version>-windows-x64-setup.exe.sha256
 ```
 
 实际平台、格式和命名以发布计划为准。
