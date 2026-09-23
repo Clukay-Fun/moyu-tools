@@ -934,9 +934,10 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
       setBarcodeMessage('内容已改变，请先重新生成条码。', 'error')
       return
     }
-    const originalLabel = button.textContent
+    const label = button.querySelector('span') || button
+    const originalLabel = label.textContent
     setBarcodeExportEnabled(false)
-    button.textContent = '处理中…'
+    label.textContent = '处理中…'
     barcodeOperationCount += 1
 
     try {
@@ -970,7 +971,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
       showToast('请确认 Adobe 软件已安装')
     } finally {
       barcodeOperationCount -= 1
-      button.textContent = originalLabel
+      label.textContent = originalLabel
       setBarcodeExportEnabled(hasCurrentBarcode())
     }
   }

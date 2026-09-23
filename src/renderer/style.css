@@ -11,6 +11,7 @@
   --accent-g: 120;
   --accent-b: 230;
   --accent: rgb(var(--accent-r), var(--accent-g), var(--accent-b));
+  --slogan-gradient: linear-gradient(105deg, #8b7cff 0%, #a887f4 18%, #d79cf6 23%, #a887f4 28%, #6676f6 38%, #5ba9f8 62%, #63d6dd 82%, #8fdfe0 100%);
   --accent-10: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.1);
   --accent-18: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.18);
   --accent-28: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.28);
@@ -521,6 +522,16 @@ label {
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.06);
 }
 
+.search:hover,
+.search:focus-within {
+  background: transparent;
+  box-shadow: none;
+}
+
+.search:focus-within {
+  border-color: var(--control-border-hover);
+}
+
 .search input {
   min-width: 0;
   flex: 1;
@@ -649,10 +660,16 @@ label {
 .slogan {
   min-width: 0;
   overflow: hidden;
-  color: var(--muted);
+  color: transparent;
   font-size: 13px;
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
+  background: var(--slogan-gradient);
+  background-clip: text;
+  filter: drop-shadow(0 2px 6px rgba(105, 118, 230, 0.2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .mochi {
@@ -972,17 +989,7 @@ body.home-active .pages {
       rgba(255, 255, 255, var(--home-shine-edge, 0)) 8%,
       transparent 24%
     ),
-    linear-gradient(
-      105deg,
-      #8b7cff 0%,
-      #a887f4 18%,
-      #d79cf6 23%,
-      #a887f4 28%,
-      #6676f6 38%,
-      #5ba9f8 62%,
-      #63d6dd 82%,
-      #8fdfe0 100%
-    );
+    var(--slogan-gradient);
   background-position: 0 0, 45% 50%;
   background-size: 100% 100%, 160% 160%;
   background-clip: text;
