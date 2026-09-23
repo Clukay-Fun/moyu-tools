@@ -674,17 +674,20 @@ label {
 
 .rail {
   display: flex;
-  width: 58px;
+  width: 64px;
   flex-shrink: 0;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
-  padding: 12px 0;
+  gap: 5px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 9px 0;
   border-right: 1px solid var(--hairline);
 }
 
 .rail-spacer {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 [data-theme="dark"] .rail {
@@ -693,21 +696,36 @@ label {
 
 .nav-ic {
   position: relative;
-  display: grid;
-  width: 42px;
-  height: 39px;
-  place-items: center;
+  display: flex;
+  width: 50px;
+  height: 52px;
+  flex: 0 0 52px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 3px 1px;
   border: 1px solid transparent;
   border-radius: 11px;
   color: var(--muted);
   background: transparent;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 9px;
+  font-weight: 600;
   cursor: pointer;
   transition: transform var(--dur-press) var(--ease-out),
               color var(--dur-press) ease,
               border-color var(--dur-press) ease,
               background-color var(--dur-press) ease;
+}
+
+.nav-label {
+  overflow: hidden;
+  max-width: 100%;
+  color: currentColor;
+  font-size: 9px;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nav-ic:hover {
@@ -2282,6 +2300,7 @@ label {
 
 .barcode-batch-input-section {
   flex: none;
+  padding: var(--sp-5);
 }
 
 .barcode-batch-result-section {
@@ -2292,7 +2311,7 @@ label {
 .batch-input-field textarea {
   min-width: 0;
   min-height: 112px;
-  padding: 10px 12px;
+  padding: 10px 14px;
   resize: vertical;
   border: 1px solid var(--control-border);
   border-radius: var(--r-md);
@@ -3492,7 +3511,7 @@ label {
   width: min(100%, 1080px);
   min-height: 0;
   flex: 1;
-  grid-template-columns: 142px minmax(0, 1fr);
+  grid-template-columns: 112px minmax(0, 1fr);
   gap: 16px;
   align-items: start;
   margin-inline: auto;
@@ -3515,11 +3534,11 @@ label {
 
 .settings-nav-item {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  gap: 8px;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 6px;
   align-items: center;
   min-height: 44px;
-  padding: 5px 8px;
+  padding: 5px 6px;
   border: 1px solid transparent;
   border-radius: var(--r-md);
   color: var(--muted);
@@ -3553,11 +3572,6 @@ label {
   color: inherit;
   font-size: 13px;
   font-weight: 650;
-}
-
-.settings-nav-item small {
-  color: var(--faint);
-  font-size: 10px;
 }
 
 /* 设置：更新卡片 */
@@ -4488,8 +4502,8 @@ body.keyboard-focus :where(
   }
 
   .settings-layout {
-    grid-template-columns: 136px minmax(0, 1fr);
-    gap: 14px;
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: 12px;
   }
 
   .image-side {
