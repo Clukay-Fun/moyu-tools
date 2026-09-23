@@ -1,6 +1,8 @@
 // 十字隔档：长向隔板（底部开半槽）与宽向隔板（顶部开半槽）互插成网格。
 // 两个部件各为单片平板，数量 = 格数 − 1；3D 装配按网格位置立起并互插。
 
+import { validateParams } from './common.js'
+
 function dividerContour(length, height, slotPositions, slotWidth, fromTop) {
   const depth = height / 2
   const half = slotWidth / 2
@@ -72,23 +74,14 @@ export const dividerTemplate = Object.freeze({
   },
 
   validate(params) {
-    const errors = []
-    const labels = { length: '长', width: '宽', height: '高', thickness: '厚度', bleed: '出血' }
-    for (const [key, [min, max]] of Object.entries(this.ranges)) {
-      const value = params[key]
-      if (!Number.isFinite(value) || value < min || value > max) errors.push(`${labels[key]}需在 ${min}–${max} mm`)
-    }
-    if (errors.length) return errors
-    for (const entry of this.structureParams) {
-      const value = params[entry.key]
-      if (value !== null && (!Number.isFinite(value) || value < entry.min || value > entry.max)) errors.push(`${entry.label}需在 ${entry.min}–${entry.max} mm`)
-    }
-    if (errors.length) return errors
-    const { columns, rows, slotClearance } = this.resolveStructure(params)
-    const slot = params.thickness + slotClearance
-    if (params.length / columns <= slot * 2) errors.push('长向格数过多，格宽小于两倍槽宽')
-    if (params.width / rows <= slot * 2) errors.push('宽向格数过多，格宽小于两倍槽宽')
-    return errors
+    return validateParams(this, params, (checked, structure) => {
+      const errors = []
+      const { columns, rows, slotClearance } = structure
+      const slot = params.thickness + slotClearance
+      if (params.length / columns <= slot * 2) errors.push('长向格数过多，格宽小于两倍槽宽')
+      if (params.width / rows <= slot * 2) errors.push('宽向格数过多，格宽小于两倍槽宽')
+      return errors
+    })
   },
 
   sizes(params) {

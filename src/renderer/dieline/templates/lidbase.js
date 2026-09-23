@@ -2,6 +2,7 @@
 // 无参考刀模；结构复用飞机盒盒体托盘，盖底配合规则参考行业公开资料：
 // 配合间隙 0.2–1.0 mm（精装）/ 瓦楞取 t/2，盖深默认「盖到底」。
 import { buildTrayPanels } from './tray.js'
+import { validateParams } from './common.js'
 
 export const lidBaseTemplate = Object.freeze({
   id: 'lid-base',
@@ -59,26 +60,16 @@ export const lidBaseTemplate = Object.freeze({
   },
 
   validate(params) {
-    const errors = []
-    const labels = { length: '长', width: '宽', height: '高', thickness: '厚度', bleed: '出血' }
-    for (const [key, [min, max]] of Object.entries(this.ranges)) {
-      const value = params[key]
-      if (!Number.isFinite(value) || value < min || value > max) errors.push(`${labels[key]}需在 ${min}–${max} mm`)
-    }
-    if (errors.length) return errors
-    for (const entry of this.structureParams) {
-      const value = params[entry.key]
-      if (value !== null && (!Number.isFinite(value) || value < entry.min || value > entry.max)) errors.push(`${entry.label}需在 ${entry.min}–${entry.max} mm`)
-    }
-    if (errors.length) return errors
-    const structure = this.resolveStructure(params)
-    const t = params.thickness
-    for (const [name, H] of [['底盒', params.height], ['盖', structure.lidHeight]]) {
-      if (H * 2 + t * 6 > params.length) errors.push(`${name}高度过大：长度需大于 2 倍高度加壁厚`)
-    }
-    if (structure.tabLength * 2 + 4 * t >= params.width) errors.push('锁舌长过大，两个锁舌会重叠')
-    if (structure.endFlapW * 2 > params.length) errors.push('端翼宽超过长度的一半')
-    return errors
+    return validateParams(this, params, (checked, structure) => {
+      const errors = []
+      const t = params.thickness
+      for (const [name, H] of [['底盒', params.height], ['盖', structure.lidHeight]]) {
+        if (H * 2 + t * 6 > params.length) errors.push(`${name}高度过大：长度需大于 2 倍高度加壁厚`)
+      }
+      if (structure.tabLength * 2 + 4 * t >= params.width) errors.push('锁舌长过大，两个锁舌会重叠')
+      if (structure.endFlapW * 2 > params.length) errors.push('端翼宽超过长度的一半')
+      return errors
+    })
   },
 
   sizes(params) {

@@ -1,7 +1,7 @@
 // 舌插盖自锁底盒（Tuck end mailer）：顶部单片插舌盖 + 两侧单边斜切防尘翼，底部 1-2-3 自锁底。
 // 结构比例按 scope/plans/active/dieline-refs/preset-gallery.png 中 "Tuck end mailer box packaging dieline"
 // 缩略图像素反推（面板链 L | W | L | W，盖深≈W，插舌≈0.26W，防尘翼≈0.62W，底深≈0.76W，斜边 45°），未经参考刀模校准。
-import { makeTemplate, CARTON_MATERIALS, fmt } from './common.js'
+import { makeTemplate, CARTON_MATERIALS, fmt, fitTo } from './common.js'
 import { buildTube, makeAttachments } from './tube.js'
 
 export const tuckMailerTemplate = makeTemplate({
@@ -20,7 +20,7 @@ export const tuckMailerTemplate = makeTemplate({
   },
   materials: CARTON_MATERIALS,
   structureParams: [
-    { key: 'glueFlap', label: '粘口宽', min: 8, max: 80, step: 0.5, auto: (p) => Math.min(30, Math.max(10, 0.12 * p.width + 6)) },
+    { key: 'glueFlap', label: '粘口宽', min: 8, max: 80, step: 0.5, auto: (p) => fitTo(Math.min(30, Math.max(10, 0.12 * p.width + 6)), 0.5 * p.width) },
     { key: 'lidDepth', label: '盖深', min: 10, max: 600, step: 0.5, auto: (p) => p.width },
     { key: 'tuckLength', label: '插舌长', min: 5, max: 200, step: 0.5, auto: (p) => 0.26 * p.width },
     { key: 'dustDepth', label: '防尘翼深', min: 5, max: 600, step: 0.5, auto: (p) => 0.62 * p.width },

@@ -1,6 +1,7 @@
 // 托盘 + 围套：双层侧墙锁底托盘（0421 类）+ 四面粘口套筒（0501 类），套筒沿托盘宽向套入。
 // 无参考刀模；托盘复用 tray.js，套筒内尺寸 = 托盘外尺寸 + 2×间隙。
 import { buildTrayPanels } from './tray.js'
+import { validateParams, fitTo } from './common.js'
 
 function buildSleevePanels({ faceL, faceH, depth, t, glueFlap }) {
   const widths = [faceL, faceH, faceL, faceH]
@@ -64,7 +65,7 @@ export const traySleeveTemplate = Object.freeze({
   structureParams: [
     { key: 'gap', label: '配合间隙', min: 0, max: 5, step: 0.1, auto: (p) => Math.min(2, Math.max(0.5, p.thickness / 2)) },
     { key: 'sleeveDepth', label: '围套宽', min: 20, max: 2000, step: 0.5, auto: (p) => p.width + 4 * p.thickness },
-    { key: 'glueFlap', label: '围套粘口', min: 15, max: 120, step: 0.5, auto: (p) => Math.min(50, Math.max(20, 0.08 * p.length)) },
+    { key: 'glueFlap', label: '围套粘口', min: 15, max: 120, step: 0.5, auto: (p) => fitTo(Math.min(50, Math.max(20, 0.08 * p.length)), 0.4 * p.length) },
     { key: 'endFlapW', label: '端翼宽', min: 10, max: 600, step: 0.5, auto: (p) => Math.min(0.4 * p.width, 0.45 * p.length) },
     { key: 'tabLength', label: '锁舌长', min: 5, max: 300, step: 0.5, auto: (p) => 0.2 * p.width }
   ],
@@ -97,25 +98,15 @@ export const traySleeveTemplate = Object.freeze({
   },
 
   validate(params) {
-    const errors = []
-    const labels = { length: '长', width: '宽', height: '高', thickness: '厚度', bleed: '出血' }
-    for (const [key, [min, max]] of Object.entries(this.ranges)) {
-      const value = params[key]
-      if (!Number.isFinite(value) || value < min || value > max) errors.push(`${labels[key]}需在 ${min}–${max} mm`)
-    }
-    if (errors.length) return errors
-    for (const entry of this.structureParams) {
-      const value = params[entry.key]
-      if (value !== null && (!Number.isFinite(value) || value < entry.min || value > entry.max)) errors.push(`${entry.label}需在 ${entry.min}–${entry.max} mm`)
-    }
-    if (errors.length) return errors
-    const structure = this.resolveStructure(params)
-    const t = params.thickness
-    if (params.height * 2 + t * 6 > params.length) errors.push('高度过大：长度需大于 2 倍高度加壁厚')
-    if (structure.tabLength * 2 + 4 * t >= params.width) errors.push('锁舌长过大，两个锁舌会重叠')
-    if (structure.endFlapW * 2 > params.length) errors.push('端翼宽超过长度的一半')
-    if (structure.glueFlap >= params.length) errors.push('围套粘口需小于长度')
-    return errors
+    return validateParams(this, params, (checked, structure) => {
+      const errors = []
+      const t = params.thickness
+      if (params.height * 2 + t * 6 > params.length) errors.push('高度过大：长度需大于 2 倍高度加壁厚')
+      if (structure.tabLength * 2 + 4 * t >= params.width) errors.push('锁舌长过大，两个锁舌会重叠')
+      if (structure.endFlapW * 2 > params.length) errors.push('端翼宽超过长度的一半')
+      if (structure.glueFlap >= params.length) errors.push('围套粘口需小于长度')
+      return errors
+    })
   },
 
   sizes(params) {

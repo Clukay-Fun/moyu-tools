@@ -154,9 +154,18 @@ export function makeAttachments(H) {
           const inset = t + 1
           const r = Math.min(tuckLength * 0.45, (x1 - x0) * 0.2)
           const prefix = `${panelId}${end === 'top' ? 'Top' : 'Bottom'}`
+          // 盖板外侧只有插舌覆盖的中段是共边，两侧让位段必须自己画出来
           const lidContour = end === 'top'
-            ? [{ x: x0, y: yLid, edge: 'none' }, { x: x1, y: yLid, edge: 'cut' }, { x: x1, y, edge: 'crease' }, { x: x0, y, edge: 'cut' }]
-            : [{ x: x0, y, edge: 'crease' }, { x: x1, y, edge: 'cut' }, { x: x1, y: yLid, edge: 'none' }, { x: x0, y: yLid, edge: 'cut' }]
+            ? [
+                { x: x0, y: yLid, edge: 'cut' }, { x: x0 + inset, y: yLid, edge: 'none' },
+                { x: x1 - inset, y: yLid, edge: 'cut' }, { x: x1, y: yLid, edge: 'cut' },
+                { x: x1, y, edge: 'crease' }, { x: x0, y, edge: 'cut' }
+              ]
+            : [
+                { x: x0, y, edge: 'crease' }, { x: x1, y, edge: 'cut' },
+                { x: x1, y: yLid, edge: 'cut' }, { x: x1 - inset, y: yLid, edge: 'none' },
+                { x: x0 + inset, y: yLid, edge: 'cut' }, { x: x0, y: yLid, edge: 'cut' }
+              ]
           const tuckContour = end === 'top'
             ? [{ x: x0 + inset, y: yTuck, r, edge: 'cut' }, { x: x1 - inset, y: yTuck, r, edge: 'cut' }, { x: x1 - inset, y: yLid, edge: 'crease' }, { x: x0 + inset, y: yLid, edge: 'cut' }]
             : [{ x: x0 + inset, y: yLid, edge: 'crease' }, { x: x1 - inset, y: yLid, edge: 'cut' }, { x: x1 - inset, y: yTuck, r, edge: 'cut' }, { x: x0 + inset, y: yTuck, r, edge: 'cut' }]

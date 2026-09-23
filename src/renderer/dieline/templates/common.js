@@ -16,6 +16,44 @@ export const CARTON_MATERIALS = Object.freeze([
 
 export const fmt = (value) => Number(value.toFixed(1)).toString()
 
+/** 自动结构值：有绝对下限时也不能超过它所依附的尺寸，否则小盒子会算出比盒子还大的粘口。 */
+export const fitTo = (value, limit) => Math.min(value, limit)
+
+// 长宽高不设行业标准上下限，只挡住画不出几何的值；10 m 是防呆上限，正常盒型碰不到。
+const MAX_DIMENSION_MM = 10000
+const DIMENSION_LABELS = Object.freeze({ length: '长', width: '宽', height: '高' })
+
+/**
+ * 通用参数校验：长宽高只要求正数，厚度/出血与结构参数仍按模板范围。
+ * @param {object} template 模板本身（取 ranges / structureParams / resolveStructure）
+ * @param {object} params 归一化后的参数
+ * @param {Function} [extraValidate] 模板自己的结构冲突校验，签名 (params, structure) => string[]
+ * @returns {string[]}
+ */
+export function validateParams(template, params, extraValidate) {
+  const errors = []
+  for (const [key, label] of Object.entries(DIMENSION_LABELS)) {
+    const value = params[key]
+    if (!Number.isFinite(value) || value <= 0) errors.push(`${label}需大于 0`)
+    else if (value > MAX_DIMENSION_MM) errors.push(`${label}超过 ${MAX_DIMENSION_MM} mm`)
+  }
+  for (const [key, label] of [['thickness', '厚度'], ['bleed', '出血']]) {
+    const range = template.ranges[key]
+    if (!range) continue
+    const value = params[key]
+    if (!Number.isFinite(value) || value < range[0] || value > range[1]) errors.push(`${label}需在 ${range[0]}–${range[1]} mm`)
+  }
+  if (errors.length) return errors
+  for (const entry of template.structureParams || []) {
+    const value = params[entry.key]
+    if (value !== null && (!Number.isFinite(value) || value < entry.min || value > entry.max)) {
+      errors.push(`${entry.label}需在 ${entry.min}–${entry.max} mm`)
+    }
+  }
+  if (errors.length) return errors
+  return extraValidate ? extraValidate.call(template, params, template.resolveStructure(params)) : []
+}
+
 /**
  * @param {object} spec 模板描述：id/version/name/category/description/defaults/ranges/materials/structureParams/build/extraValidate/sizes/sizeConversion
  */
@@ -48,19 +86,7 @@ export function makeTemplate(spec) {
     },
 
     validate(params) {
-      const errors = []
-      const labels = { length: '长', width: '宽', height: '高', thickness: '厚度', bleed: '出血' }
-      for (const [key, [min, max]] of Object.entries(this.ranges)) {
-        const value = params[key]
-        if (!Number.isFinite(value) || value < min || value > max) errors.push(`${labels[key]}需在 ${min}–${max} mm`)
-      }
-      if (errors.length) return errors
-      for (const entry of this.structureParams) {
-        const value = params[entry.key]
-        if (value !== null && (!Number.isFinite(value) || value < entry.min || value > entry.max)) errors.push(`${entry.label}需在 ${entry.min}–${entry.max} mm`)
-      }
-      if (errors.length) return errors
-      return spec.extraValidate ? spec.extraValidate.call(this, params, this.resolveStructure(params)) : []
+      return validateParams(this, params, spec.extraValidate)
     }
   }
   if (!spec.sizes) {

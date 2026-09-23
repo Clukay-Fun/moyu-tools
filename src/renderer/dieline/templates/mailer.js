@@ -2,6 +2,7 @@
 // 结构比例来自 scope/plans/active/m0-dieline-mailer.md 的样本（400×202×62，t=1.5）像素反推，误差 ±2 mm；
 // 三种尺寸换算只有单个厚度样本，标记为「待校准」。
 import { buildTrayPanels, mirrorPanel, rect } from './tray.js'
+import { validateParams } from './common.js'
 
 const SAMPLE_THICKNESS = 1.5
 const SAMPLE_OFFSETS = Object.freeze({
@@ -59,24 +60,14 @@ export const mailerTemplate = Object.freeze({
   },
 
   validate(params) {
-    const errors = []
-    const labels = { length: '长', width: '宽', height: '高', thickness: '厚度', bleed: '出血' }
-    for (const [key, [min, max]] of Object.entries(this.ranges)) {
-      const value = params[key]
-      if (!Number.isFinite(value) || value < min || value > max) errors.push(`${labels[key]}需在 ${min}–${max} mm`)
-    }
-    if (errors.length) return errors
-    for (const entry of this.structureParams) {
-      const value = params[entry.key]
-      if (value !== null && (!Number.isFinite(value) || value < entry.min || value > entry.max)) errors.push(`${entry.label}需在 ${entry.min}–${entry.max} mm`)
-    }
-    if (errors.length) return errors
-    const structure = this.resolveStructure(params)
-    if (params.height * 2 + params.thickness * 6 > params.length) errors.push('长度需大于 2 倍高度加壁厚，否则侧墙无法折叠')
-    if (structure.tabLength * 2 + 4 * params.thickness >= params.width) errors.push('锁舌长过大，两个锁舌会重叠')
-    if (structure.endFlapW * 2 > params.length) errors.push('端翼宽超过长度的一半')
-    if (structure.earNotch >= params.width) errors.push('盖耳让位不能超过宽度')
-    return errors
+    return validateParams(this, params, (checked, structure) => {
+      const errors = []
+      if (params.height * 2 + params.thickness * 6 > params.length) errors.push('长度需大于 2 倍高度加壁厚，否则侧墙无法折叠')
+      if (structure.tabLength * 2 + 4 * params.thickness >= params.width) errors.push('锁舌长过大，两个锁舌会重叠')
+      if (structure.endFlapW * 2 > params.length) errors.push('端翼宽超过长度的一半')
+      if (structure.earNotch >= params.width) errors.push('盖耳让位不能超过宽度')
+      return errors
+    })
   },
 
   sizes(params) {

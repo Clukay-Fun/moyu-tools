@@ -169,7 +169,6 @@ export function initDieline({ showToast }) {
     paramInputs.thickness.min = String(minT)
     paramInputs.thickness.max = String(maxT)
     paramInputs.thickness.title = `${minT}–${maxT} mm`
-    for (const key of DIMENSION_KEYS) paramInputs[key].title = `${template.ranges[key][0]}–${template.ranges[key][1]} mm`
     materialSelect.replaceChildren()
     for (const material of template.materials) {
       const option = document.createElement('option')

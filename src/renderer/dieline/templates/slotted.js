@@ -1,6 +1,21 @@
 // 四面板开槽箱公共结构：粘口 | L 面 | W 面 | L 面(+包差) | W 面，两端各挂一片摇盖，面板间按开槽宽让位。
 // 0201 对口箱（摇盖深 = W/2）与全盖舌插盒（摇盖深 = W）都由它生成。
 
+// 顶点的 edge 表示「从该点到下一点」那条边；重合顶点要保留后者的边类型，
+// 否则末面板的外侧边会继承前一个顶点的 none，变成没人画的缺口。
+function dedupe(contour) {
+  const result = []
+  for (const vertex of contour) {
+    const previous = result[result.length - 1]
+    if (previous && Math.abs(previous.x - vertex.x) < 1e-6 && Math.abs(previous.y - vertex.y) < 1e-6) previous.edge = vertex.edge
+    else result.push({ ...vertex })
+  }
+  const first = result[0]
+  const last = result[result.length - 1]
+  if (result.length > 1 && Math.abs(first.x - last.x) < 1e-6 && Math.abs(first.y - last.y) < 1e-6) result.pop()
+  return result
+}
+
 function rectPanel(x1, y1, x2, y2, edges) {
   return [
     { x: x1, y: y1, edge: edges.top || 'cut' },
@@ -51,13 +66,13 @@ export function buildSlottedPanels(spec) {
       { x: x1 - sr, y: H, edge: 'none' },
       { x: x0 + sl, y: H, edge: hasLeftSlot ? 'cut' : 'none' },
       { x: x0, y: H, edge: index === 0 ? 'none' : 'crease' }
-    ].filter((vertex, position, list) => position === 0 || vertex.x !== list[position - 1].x || vertex.y !== list[position - 1].y)
+    ]
     push({
       id: ids[index], name: names[index],
       parent: index === 0 ? null : ids[index - 1],
       hinge: index === 0 ? null : { a: [x0, 0], b: [x0, H] },
       order: 1, angle: index === 0 ? 0 : 90,
-      contour
+      contour: dedupe(contour)
     })
     const flapOrder = index % 2 === 1 ? 2 : 3 // 宽面摇盖先合，长面摇盖后合
     push({

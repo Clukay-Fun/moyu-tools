@@ -1,11 +1,11 @@
 // 管状折叠纸盒系列：直插盒（STE）、反插盒（RTE）、化妆品挂孔盒、0217 提手锁底箱。
 // 参考 scope/plans/active/dieline-refs/preset-gallery.png 的盒型缩略图，比例为常规折叠纸盒经验值，未经参考刀模校准。
-import { makeTemplate, CARTON_MATERIALS, CORRUGATED_MATERIALS, fmt } from './common.js'
+import { makeTemplate, CARTON_MATERIALS, CORRUGATED_MATERIALS, fmt, fitTo } from './common.js'
 import { buildTube, makeAttachments } from './tube.js'
 
 const TUBE_RANGES = { length: [20, 1200], width: [15, 800], height: [20, 1500], thickness: [0.3, 5], bleed: [0, 10] }
 
-const glueParam = { key: 'glueFlap', label: '粘口宽', min: 8, max: 80, step: 0.5, auto: (p) => Math.min(30, Math.max(10, 0.12 * p.width + 6)) }
+const glueParam = { key: 'glueFlap', label: '粘口宽', min: 8, max: 80, step: 0.5, auto: (p) => fitTo(Math.min(30, Math.max(10, 0.12 * p.width + 6)), 0.5 * p.width) }
 const tuckParam = { key: 'tuckLength', label: '插舌长', min: 6, max: 120, step: 0.5, auto: (p) => Math.min(45, Math.max(12, 0.5 * p.width)) }
 const dustParam = { key: 'dustDepth', label: '防尘翼深', min: 5, max: 800, step: 0.5, auto: (p) => Math.max(5, 0.62 * p.width) }
 
@@ -119,10 +119,10 @@ export const carryHandleTemplate = makeTemplate({
   ranges: { length: [60, 1200], width: [40, 800], height: [60, 1200], thickness: [1, 8], bleed: [0, 10] },
   materials: CORRUGATED_MATERIALS,
   structureParams: [
-    { key: 'glueFlap', label: '粘口宽', min: 15, max: 100, step: 0.5, auto: (p) => Math.min(50, Math.max(25, 0.15 * p.width)) },
-    { key: 'handleHeight', label: '提手高', min: 30, max: 300, step: 0.5, auto: (p) => Math.min(120, Math.max(50, 0.35 * p.width + 30)) },
-    { key: 'handleSlotW', label: '提手孔长', min: 40, max: 200, step: 0.5, auto: (p) => Math.min(110, Math.max(60, 0.35 * p.length)) },
-    { key: 'handleSlotH', label: '提手孔宽', min: 15, max: 60, step: 0.5, auto: () => 25 },
+    { key: 'glueFlap', label: '粘口宽', min: 15, max: 100, step: 0.5, auto: (p) => fitTo(Math.min(50, Math.max(25, 0.15 * p.width)), 0.4 * p.width) },
+    { key: 'handleHeight', label: '提手高', min: 30, max: 300, step: 0.5, auto: (p) => fitTo(Math.min(120, Math.max(50, 0.35 * p.width + 30)), 2 * p.width) },
+    { key: 'handleSlotW', label: '提手孔长', min: 40, max: 200, step: 0.5, auto: (p) => fitTo(Math.min(110, Math.max(60, 0.35 * p.length)), p.length - 20) },
+    { key: 'handleSlotH', label: '提手孔宽', min: 15, max: 60, step: 0.5, auto: (p) => fitTo(25, Math.max(15, 0.5 * p.width)) },
     { key: 'tongueW', label: '锁舌宽', min: 20, max: 400, step: 0.5, auto: (p) => Math.max(20, 0.3 * p.length) }
   ],
   extraValidate(params, structure) {

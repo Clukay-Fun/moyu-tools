@@ -4,6 +4,7 @@
 // 结构与尺寸换算来自 scope/plans/active/m0-dieline-0201.md 的样本（434×214×278，t=2）；
 // 内/外尺寸公式按该单样本线性推导（内→制造 +2t/+2t/+4t，制造→外 +t/+t/+2t），标记待校准。
 import { buildSlottedPanels } from './slotted.js'
+import { validateParams, fitTo } from './common.js'
 
 export const rsc0201Template = Object.freeze({
   id: 'rsc-0201',
@@ -27,7 +28,7 @@ export const rsc0201Template = Object.freeze({
   ],
   sizeConversion: { status: 'single-sample', sampleThickness: 2 },
   structureParams: [
-    { key: 'glueFlap', label: '粘口宽', min: 15, max: 120, step: 0.5, auto: (p) => Math.min(60, Math.max(25, 0.1 * p.length)) },
+    { key: 'glueFlap', label: '粘口宽', min: 15, max: 120, step: 0.5, auto: (p) => fitTo(Math.min(60, Math.max(25, 0.1 * p.length)), 0.4 * p.length) },
     { key: 'flapDepth', label: '摇盖深', min: 10, max: 1000, step: 0.5, auto: (p) => p.width / 2 },
     { key: 'slotWidth', label: '开槽宽', min: 2, max: 30, step: 0.5, auto: (p) => 3 * p.thickness },
     { key: 'wrapAllowance', label: '包差', min: 0, max: 40, step: 0.5, auto: () => 0 }
@@ -54,24 +55,14 @@ export const rsc0201Template = Object.freeze({
   },
 
   validate(params) {
-    const errors = []
-    const labels = { length: '长', width: '宽', height: '高', thickness: '厚度', bleed: '出血' }
-    for (const [key, [min, max]] of Object.entries(this.ranges)) {
-      const value = params[key]
-      if (!Number.isFinite(value) || value < min || value > max) errors.push(`${labels[key]}需在 ${min}–${max} mm`)
-    }
-    if (errors.length) return errors
-    for (const entry of this.structureParams) {
-      const value = params[entry.key]
-      if (value !== null && (!Number.isFinite(value) || value < entry.min || value > entry.max)) errors.push(`${entry.label}需在 ${entry.min}–${entry.max} mm`)
-    }
-    if (errors.length) return errors
-    const structure = this.resolveStructure(params)
-    if (structure.glueFlap >= params.length) errors.push('粘口宽需小于长度')
-    if (structure.slotWidth >= Math.min(params.length, params.width) / 2) errors.push('开槽宽过大')
-    if (structure.flapDepth > params.width) errors.push('摇盖深超过宽度，合拢时会互相压叠')
-    if (structure.wrapAllowance > params.length / 4) errors.push('包差不能超过长度的四分之一')
-    return errors
+    return validateParams(this, params, (checked, structure) => {
+      const errors = []
+      if (structure.glueFlap >= params.length) errors.push('粘口宽需小于长度')
+      if (structure.slotWidth >= Math.min(params.length, params.width) / 2) errors.push('开槽宽过大')
+      if (structure.flapDepth > params.width) errors.push('摇盖深超过宽度，合拢时会互相压叠')
+      if (structure.wrapAllowance > params.length / 4) errors.push('包差不能超过长度的四分之一')
+      return errors
+    })
   },
 
   sizes(params) {
