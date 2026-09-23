@@ -24,6 +24,7 @@ const state = {
   progress: null,
   lastCheckedAt: null,
   autoCheck: DEFAULT_PREFS.autoCheck,
+  promptOnAvailable: false,
   portable: false,
   message: null
 }
@@ -71,7 +72,7 @@ function isUpdateable() {
   return process.platform === 'win32' && app.isPackaged && !process.env.PORTABLE_EXECUTABLE_DIR
 }
 
-function doCheck() {
+function doCheck(source = 'manual') {
   if (!isUpdateable()) {
     patch({
       status: state.portable ? 'portable' : 'unsupported',
@@ -83,7 +84,7 @@ function doCheck() {
   }
   if (checking || downloading) return { ok: false, message: '更新任务正在进行' }
   checking = true
-  patch({ status: 'checking', message: null })
+  patch({ status: 'checking', message: null, promptOnAvailable: source === 'startup' })
   autoUpdater
     .checkForUpdates()
     .catch((err) => patch({ status: 'error', message: err?.message || '检查更新失败' }))
@@ -122,7 +123,7 @@ export function initUpdater(window) {
     })
   )
   autoUpdater.on('update-not-available', (info) =>
-    patch({ status: 'up-to-date', availableVersion: info?.version || null, lastCheckedAt: Date.now(), message: null })
+    patch({ status: 'up-to-date', availableVersion: info?.version || null, lastCheckedAt: Date.now(), message: null, promptOnAvailable: false })
   )
   autoUpdater.on('download-progress', (p) =>
     patch({
@@ -140,7 +141,7 @@ export function initUpdater(window) {
   )
 
   // 主窗可交互约 5 秒后后台检查；不阻塞启动。
-  if (prefs.autoCheck) setTimeout(doCheck, 5000)
+  if (prefs.autoCheck) setTimeout(() => doCheck('startup'), 5000)
   else patch({ status: 'idle' })
 }
 

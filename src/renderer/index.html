@@ -22,7 +22,6 @@
         <header class="topbar">
           <div class="brand">
             <span class="brand-logo"><img data-app-logo alt="" /></span>
-            <b>摸鱼工具箱</b>
           </div>
 
           <div class="search-wrap">
@@ -42,8 +41,11 @@
             <div class="search-results" id="search-results" role="listbox"></div>
           </div>
 
-          <div class="slogan">干活快一点，摸鱼久一点</div>
-          <div class="mochi"><i></i><span>摸鱼中</span><time id="mochi-time">00:00</time></div>
+          <div class="topbar-right">
+            <span class="slogan">干活快一点，摸鱼久一点</span>
+            <div class="mochi"><i></i><span>摸鱼中</span><time id="mochi-time">00:00</time></div>
+          </div>
+
         </header>
 
         <div class="app-body">
@@ -64,7 +66,7 @@
           <main class="content">
             <div class="pages">
               <section class="page page-home active" id="page-home" aria-labelledby="home-slogan">
-                <h1 id="home-slogan">干活久一点，摸鱼久一点</h1>
+                <h1 id="home-slogan" class="home-slogan" data-text="干活快一点，摸鱼久一点">干活快一点，摸鱼久一点</h1>
               </section>
 
               <section class="page" id="page-pdf">
@@ -737,151 +739,143 @@
                 </div>
               </section>
 
-              <section class="page" id="page-more">
-                <header class="settings-heading">
-                  <div>
-                    <h1>设置</h1>
-                  </div>
-                </header>
+              <section class="page page-settings" id="page-more">
                 <div class="settings-layout">
-                  <nav class="settings-nav" aria-label="设置导航">
-                    <a class="settings-nav-item active" href="#settings-shortcut" data-settings-target="settings-shortcut">
-                      <svg class="ic" aria-hidden="true"><use href="#ic-keyboard"></use></svg>
-                      <span><b>快捷键</b></span>
-                    </a>
-                    <a class="settings-nav-item" href="#settings-appearance" data-settings-target="settings-appearance">
-                      <svg class="ic" aria-hidden="true"><use href="#ic-appearance"></use></svg>
-                      <span><b>外观</b></span>
-                    </a>
-                    <a class="settings-nav-item" href="#settings-update" data-settings-target="settings-update">
-                      <svg class="ic" aria-hidden="true"><use href="#ic-update"></use></svg>
-                      <span><b>更新</b></span>
-                    </a>
-                    <a class="settings-nav-item" href="#settings-about" data-settings-target="settings-about">
-                      <svg class="ic" aria-hidden="true"><use href="#ic-info"></use></svg>
-                      <span><b>关于</b></span>
-                    </a>
-                  </nav>
-
                   <div class="settings-content">
-                  <!-- ══ F-16 · 全局截图快捷键 ══
-                       默认 Ctrl+Shift+A 与飞书等软件冲突。冲突不是两边都能
-                       同时解决的问题，所以不抢占，让用户自己改或关掉。 -->
-                  <section class="setting-card" id="settings-shortcut" data-settings-section>
-                    <div class="setting-card-heading">
-                      <div><h2>快捷键</h2></div>
-                    </div>
-                    <div class="setting-row shortcut-row">
-                      <div class="setting-row-copy">
-                        <b>区域截图</b>
+                    <!-- ══ F-16 · 全局截图快捷键 ══
+                         默认 Ctrl+Shift+A 与飞书等软件冲突。冲突不是两边都能
+                         同时解决的问题，所以不抢占，让用户自己改或关掉。 -->
+                    <section class="settings-section" id="settings-shortcut" data-settings-section>
+                      <header class="settings-section-head">
+                        <svg class="ic" aria-hidden="true"><use href="#ic-keyboard"></use></svg><h2>快捷键</h2>
+                      </header>
+                      <div class="settings-section-body">
+                        <div class="setting-row">
+                          <span class="setting-label">区域截图</span>
+                          <div class="setting-row-control shortcut-controls">
+                            <button class="gbtn shortcut-input" id="shortcut-capture" type="button"
+                                    aria-describedby="shortcut-status">Control+Shift+A</button>
+                            <button class="gbtn ghost" id="shortcut-reset" type="button">恢复默认</button>
+                            <label class="toggle-wrap icon-only-toggle" data-tip="启用全局截图快捷键">
+                              <input type="checkbox" id="shortcut-enabled" checked />
+                              <span class="toggle" aria-hidden="true"></span>
+                              <span class="sr-only">启用</span>
+                            </label>
+                          </div>
+                        </div>
                         <p class="shortcut-status" id="shortcut-status" hidden></p>
                       </div>
-                      <div class="setting-row-control shortcut-controls">
-                        <button class="gbtn shortcut-input" id="shortcut-capture" type="button"
-                                aria-describedby="shortcut-status">Control+Shift+A</button>
-                        <button class="gbtn ghost" id="shortcut-reset" type="button">恢复默认</button>
-                        <label class="toggle-wrap icon-only-toggle" data-tip="启用全局截图快捷键">
-                          <input type="checkbox" id="shortcut-enabled" checked />
-                          <span class="toggle" aria-hidden="true"></span>
-                          <span class="sr-only">启用</span>
-                        </label>
-                      </div>
-                    </div>
-                  </section>
+                    </section>
 
-                  <section class="setting-card" id="settings-appearance" data-settings-section>
-                    <div class="setting-card-heading">
-                      <div><h2>外观</h2></div>
-                    </div>
-                    <h3 class="settings-group-title">主题</h3>
-                    <div class="theme-options">
-                      <label class="theme-option"><input type="radio" name="theme" value="light" />浅色</label>
-                      <label class="theme-option"><input type="radio" name="theme" value="dark" />深色</label>
-                      <label class="theme-option"><input type="radio" name="theme" value="system" checked />跟随系统</label>
-                    </div>
-                    <div class="color-picker-section">
-                      <h3 class="settings-group-title">强调色</h3>
-                      <div class="accent-color-row">
-                        <div class="accent-presets" aria-label="强调色预设">
-                          <button type="button" data-accent="#6978E6" style="--preset:#6978E6" aria-label="蓝紫色"></button>
-                          <button type="button" data-accent="#8B6FD9" style="--preset:#8B6FD9" aria-label="紫色"></button>
-                          <button type="button" data-accent="#3C8ED9" style="--preset:#3C8ED9" aria-label="蓝色"></button>
-                          <button type="button" data-accent="#36A477" style="--preset:#36A477" aria-label="绿色"></button>
-                          <button type="button" data-accent="#E58A34" style="--preset:#E58A34" aria-label="橙色"></button>
-                          <button type="button" data-accent="#D65B72" style="--preset:#D65B72" aria-label="玫红色"></button>
+                    <section class="settings-section" id="settings-appearance" data-settings-section>
+                      <header class="settings-section-head">
+                        <svg class="ic" aria-hidden="true"><use href="#ic-appearance"></use></svg><h2>外观</h2>
+                      </header>
+                      <div class="settings-section-body">
+                        <div class="setting-row is-wide">
+                          <span class="setting-label">主题</span>
+                          <div class="theme-options" role="radiogroup" aria-label="主题">
+                            <label class="theme-option"><input type="radio" name="theme" value="light" /><span>浅色</span></label>
+                            <label class="theme-option"><input type="radio" name="theme" value="dark" /><span>深色</span></label>
+                            <label class="theme-option"><input type="radio" name="theme" value="system" checked /><span>跟随系统</span></label>
+                          </div>
                         </div>
-                        <button class="gbtn ghost" id="toggle-custom-accent" type="button" aria-expanded="false">自定义…</button>
-                      </div>
-                      <div class="accent-current-row">
-                        <span>当前颜色</span>
-                        <span id="color-swatch"></span>
-                        <input id="color-hex" value="#6978E6" maxlength="7" aria-label="十六进制主题色" />
-                        <button id="reset-accent" type="button">重置默认</button>
-                      </div>
-                      <div class="color-picker-row" id="custom-accent-panel" hidden>
-                        <div class="wheel-wrap">
-                          <canvas class="color-wheel" id="color-wheel" width="200" height="200"></canvas>
-                          <div class="wheel-marker" id="wheel-marker"></div>
+                        <div class="setting-row">
+                          <span class="setting-label">强调色</span>
+                          <div class="setting-row-control accent-color-row">
+                            <div class="accent-presets" aria-label="强调色预设">
+                              <button type="button" data-accent="#6978E6" style="--preset:#6978E6" aria-label="蓝紫色"></button>
+                              <button type="button" data-accent="#8B6FD9" style="--preset:#8B6FD9" aria-label="紫色"></button>
+                              <button type="button" data-accent="#3C8ED9" style="--preset:#3C8ED9" aria-label="蓝色"></button>
+                              <button type="button" data-accent="#36A477" style="--preset:#36A477" aria-label="绿色"></button>
+                              <button type="button" data-accent="#E58A34" style="--preset:#E58A34" aria-label="橙色"></button>
+                              <button type="button" data-accent="#D65B72" style="--preset:#D65B72" aria-label="玫红色"></button>
+                            </div>
+                            <button class="gbtn ghost" id="toggle-custom-accent" type="button" aria-expanded="false">自定义…</button>
+                          </div>
                         </div>
-                        <div class="color-controls">
-                          <label class="slider-row"><b class="red">R</b><input type="range" id="color-r" min="0" max="255" value="105" /><span id="color-r-value">105</span></label>
-                          <label class="slider-row"><b class="green">G</b><input type="range" id="color-g" min="0" max="255" value="120" /><span id="color-g-value">120</span></label>
-                          <label class="slider-row"><b class="blue">B</b><input type="range" id="color-b" min="0" max="255" value="230" /><span id="color-b-value">230</span></label>
+                        <div class="setting-row">
+                          <span class="setting-label">当前颜色</span>
+                          <div class="setting-row-control accent-current-row">
+                            <span id="color-swatch"></span>
+                            <input id="color-hex" value="#6978E6" maxlength="7" aria-label="十六进制主题色" />
+                            <button id="reset-accent" type="button">重置默认</button>
+                          </div>
+                        </div>
+                        <div class="color-picker-row" id="custom-accent-panel" hidden>
+                          <div class="wheel-wrap">
+                            <canvas class="color-wheel" id="color-wheel" width="200" height="200"></canvas>
+                            <div class="wheel-marker" id="wheel-marker"></div>
+                          </div>
+                          <div class="color-controls">
+                            <label class="slider-row"><b class="red">R</b><input type="range" id="color-r" min="0" max="255" value="105" /><span id="color-r-value">105</span></label>
+                            <label class="slider-row"><b class="green">G</b><input type="range" id="color-g" min="0" max="255" value="120" /><span id="color-g-value">120</span></label>
+                            <label class="slider-row"><b class="blue">B</b><input type="range" id="color-b" min="0" max="255" value="230" /><span id="color-b-value">230</span></label>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </section>
+                    </section>
 
-                  <section class="setting-card" id="settings-update" data-settings-section>
-                    <div class="setting-card-heading">
-                      <div><h2>更新</h2></div>
-                    </div>
-                    <h3 class="settings-group-title">当前版本</h3>
-                    <div class="update-meta">
-                      <div><span>当前版本</span><b id="update-current">—</b></div>
-                      <div><span>更新频道</span><b>稳定版</b></div>
-                      <div><span>最近检查</span><b id="update-last">—</b></div>
-                    </div>
-                    <h3 class="settings-group-title">更新状态</h3>
-                    <div class="update-state-card">
-                      <div class="update-status" id="update-status" aria-live="polite">
-                        <p id="update-status-text">正在读取更新状态…</p>
-                        <p class="update-notes" id="update-notes" hidden></p>
+                    <section class="settings-section" id="settings-update" data-settings-section>
+                      <header class="settings-section-head">
+                        <svg class="ic" aria-hidden="true"><use href="#ic-update"></use></svg><h2>更新</h2>
+                      </header>
+                      <div class="settings-section-body">
+                        <div class="version-hero">
+                          <div class="version-hero-copy">
+                            <span>当前版本</span>
+                            <b id="update-current">—</b>
+                          </div>
+                          <span class="version-badge">稳定版</span>
+                        </div>
+                        <p class="version-hero-meta">最近检查：<span id="update-last">—</span></p>
+                        <div class="update-notice" id="update-status" aria-live="polite">
+                          <svg class="ic" aria-hidden="true"><use href="#ic-info"></use></svg>
+                          <div class="update-notice-copy">
+                            <p id="update-status-text">正在读取更新状态…</p>
+                            <div class="update-notes" id="update-notes" hidden></div>
+                          </div>
+                          <div class="update-actions">
+                            <button class="gbtn primary" id="update-primary" type="button" disabled>检查更新</button>
+                            <button class="gbtn ghost" id="update-secondary" type="button" hidden>稍后安装</button>
+                          </div>
+                        </div>
+                        <div class="settings-divider"></div>
+                        <div class="setting-row">
+                          <span class="setting-label">自动检查更新<small>应用启动后在后台检查新版本</small></span>
+                          <label class="toggle-wrap icon-only-toggle">
+                            <input type="checkbox" id="update-autocheck" checked />
+                            <span class="toggle" aria-hidden="true"></span>
+                            <span class="sr-only">自动检查更新</span>
+                          </label>
+                        </div>
                       </div>
-                      <div class="update-actions">
-                        <button class="gbtn primary" id="update-primary" type="button" disabled>检查更新</button>
-                        <button class="gbtn ghost" id="update-secondary" type="button" hidden>稍后安装</button>
-                      </div>
-                    </div>
-                    <h3 class="settings-group-title update-preferences-title">自动更新</h3>
-                    <div class="setting-row">
-                      <div class="setting-row-copy"><b>自动检查更新</b><span>应用启动后在后台检查新版本</span></div>
-                      <label class="toggle-wrap icon-only-toggle">
-                        <input type="checkbox" id="update-autocheck" checked />
-                        <span class="toggle" aria-hidden="true"></span>
-                        <span class="sr-only">自动检查更新</span>
-                      </label>
-                    </div>
-                  </section>
+                    </section>
 
-                  <section class="setting-card about" id="settings-about" data-settings-section>
-                    <div class="setting-card-heading">
-                      <div><h2>关于</h2></div>
-                    </div>
-                    <h3 class="settings-group-title about-group-title">应用信息</h3>
-                    <div class="about-meta">
-                      <div><span>当前版本</span><b id="app-version">正在读取…</b></div>
-                      <div><span>运行方式</span><b>Electron · 本地处理</b></div>
-                      <div><span>作者</span><b>Clukay</b></div>
-                    </div>
-                    <h3 class="settings-group-title">项目</h3>
-                    <button class="github-link" id="open-github" type="button">
-                      <svg class="ic" aria-hidden="true"><use href="#ic-github"></use></svg>
-                      <span><b>GitHub 开源项目</b><small>github.com/Clukay-Fun/moyu-tools</small></span>
-                      <svg class="ic github-link-arrow" aria-hidden="true"><use href="#ic-external-link"></use></svg>
-                    </button>
-                    <p class="about-credit">如果这个工具对你有帮助，欢迎在 GitHub 提交反馈或点一颗 Star。</p>
-                  </section>
+                    <section class="settings-section" id="settings-about" data-settings-section>
+                      <header class="settings-section-head">
+                        <svg class="ic" aria-hidden="true"><use href="#ic-info"></use></svg><h2>关于</h2>
+                      </header>
+                      <div class="settings-section-body">
+                        <div class="about-brand">
+                          <span class="about-logo"><img data-app-logo alt="" /></span>
+                          <div class="about-brand-copy">
+                            <b>摸鱼工具箱</b>
+                            <span id="app-version">正在读取…</span>
+                          </div>
+                          <small class="about-tagline">干活快一点，摸鱼久一点</small>
+                        </div>
+                        <div class="settings-divider"></div>
+                        <div class="setting-row"><span class="setting-label">运行方式</span><b class="setting-value">Electron · 本地处理</b></div>
+                        <div class="setting-row"><span class="setting-label">作者</span><b class="setting-value">Clukay</b></div>
+                        <div class="settings-divider"></div>
+                        <button class="github-link" id="open-github" type="button">
+                          <svg class="ic" aria-hidden="true"><use href="#ic-github"></use></svg>
+                          <span><b>GitHub 开源项目</b><small>查看源码、提交反馈或 Star 项目</small></span>
+                          <svg class="ic github-link-arrow" aria-hidden="true"><use href="#ic-external-link"></use></svg>
+                        </button>
+                      </div>
+                    </section>
                   </div>
                 </div>
               </section>
@@ -965,6 +959,15 @@
         </section>
       </div>
 
+      <dialog class="update-available-dialog" id="update-available-dialog" aria-labelledby="update-dialog-title">
+        <h2 id="update-dialog-title">发现新版本</h2>
+        <p id="update-dialog-description"></p>
+        <div class="update-notes" id="update-dialog-notes" hidden></div>
+        <div class="update-dialog-actions">
+          <button class="gbtn ghost" id="update-dialog-later" type="button">稍后</button>
+          <button class="gbtn primary" id="update-dialog-download" type="button">下载更新</button>
+        </div>
+      </dialog>
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
     </div>
 

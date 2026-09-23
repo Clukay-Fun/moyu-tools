@@ -48,9 +48,47 @@ export function initUpdatePanel({
     statusText: document.querySelector('#update-status-text'),
     notes: document.querySelector('#update-notes'),
     primary: document.querySelector('#update-primary'),
-    secondary: document.querySelector('#update-secondary')
+    secondary: document.querySelector('#update-secondary'),
+    dialog: document.querySelector('#update-available-dialog'),
+    dialogTitle: document.querySelector('#update-dialog-title'),
+    dialogDescription: document.querySelector('#update-dialog-description'),
+    dialogNotes: document.querySelector('#update-dialog-notes'),
+    dialogLater: document.querySelector('#update-dialog-later'),
+    dialogDownload: document.querySelector('#update-dialog-download')
   }
   if (!el.current) return
+  let promptedVersion = null
+
+  const allowedNoteTags = new Set(['H2', 'H3', 'H4', 'P', 'UL', 'OL', 'LI', 'STRONG', 'B', 'EM', 'I', 'CODE', 'PRE', 'BR'])
+  const blockedNoteTags = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'SVG', 'MATH', 'FORM', 'INPUT', 'BUTTON', 'TEXTAREA', 'IMG'])
+
+  function appendSafeNoteNode(parent, node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      parent.append(document.createTextNode(node.textContent || ''))
+      return
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE || blockedNoteTags.has(node.tagName)) return
+    const child = allowedNoteTags.has(node.tagName)
+      ? document.createElement(node.tagName.toLowerCase())
+      : document.createDocumentFragment()
+    for (const descendant of node.childNodes) appendSafeNoteNode(child, descendant)
+    parent.append(child)
+  }
+
+  function renderNotes(target, notes) {
+    const value = String(notes || '').trim()
+    target.replaceChildren()
+    target.hidden = !value
+    target.classList.remove('is-plain')
+    if (!value) return
+    const body = new DOMParser().parseFromString(value, 'text/html').body
+    if (!body.children.length) {
+      target.textContent = value
+      target.classList.add('is-plain')
+      return
+    }
+    for (const child of body.childNodes) appendSafeNoteNode(target, child)
+  }
 
   const fmtTime = (ts) => {
     if (!ts) return '—'
@@ -72,29 +110,38 @@ export function initUpdatePanel({
   }
 
   function render(s) {
-    el.current.textContent = s.currentVersion || '—'
+    el.current.textContent = s.currentVersion ? `v${s.currentVersion}` : '—'
     el.last.textContent = fmtTime(s.lastCheckedAt)
     el.autocheck.checked = !!s.autoCheck
     el.statusText.textContent = statusLabel(s)
-    if (s.releaseNotes) {
-      el.notes.textContent = s.releaseNotes
-      el.notes.hidden = false
-    } else {
-      el.notes.hidden = true
-      el.notes.textContent = ''
-    }
+    renderNotes(el.notes, s.releaseNotes)
     el.secondary.hidden = s.status !== 'downloaded'
     const p = el.primary
     p.disabled = false
+    p.hidden = false
     switch (s.status) {
       case 'available': p.textContent = '下载更新'; break
       case 'checking': p.textContent = '检查中…'; p.disabled = true; break
       case 'downloading': p.textContent = '下载中…'; p.disabled = true; break
       case 'downloaded': p.textContent = '立即重启更新'; break
       case 'portable': p.textContent = '前往 GitHub 下载'; break
-      case 'unsupported': p.textContent = '当前版本不支持自动更新'; p.disabled = true; break
+      // 这种状态下没有任何可执行动作，按钮直接收起，不摆一个点不动的主按钮
+      case 'unsupported': p.hidden = true; break
       default: p.textContent = '检查更新'
     }
+    if (s.status === 'available' && s.promptOnAvailable && s.availableVersion !== promptedVersion && el.dialog) {
+      promptedVersion = s.availableVersion
+      el.dialogTitle.textContent = `发现新版本 v${s.availableVersion}`
+      el.dialogDescription.textContent = `当前版本 v${s.currentVersion}，可下载新版本并在准备好后安装。`
+      renderNotes(el.dialogNotes, s.releaseNotes)
+      el.dialog.showModal()
+      el.dialogLater.focus()
+    }
+  }
+
+  async function downloadUpdate() {
+    const result = await window.api.update.download()
+    if (!result?.ok) showToast(result?.message || '下载更新失败')
   }
 
   el.primary.addEventListener('click', async () => {
@@ -105,7 +152,7 @@ export function initUpdatePanel({
       await window.api.update.install()
       return
     }
-    if (s.status === 'available') { await window.api.update.download(); return }
+    if (s.status === 'available') { await downloadUpdate(); return }
     await window.api.update.check()
   })
   el.secondary.addEventListener('click', () => {
@@ -114,6 +161,11 @@ export function initUpdatePanel({
   })
   el.autocheck.addEventListener('change', async () => {
     await window.api.update.setAutoCheck(el.autocheck.checked)
+  })
+  el.dialogLater?.addEventListener('click', () => el.dialog.close())
+  el.dialogDownload?.addEventListener('click', () => {
+    el.dialog.close()
+    void downloadUpdate()
   })
 
   window.api.update.onState(render)

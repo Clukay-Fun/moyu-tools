@@ -375,8 +375,118 @@ const formatFactoryModule = initFormatFactory({ state, renderSubmenu, showToast,
 const submenu = document.querySelector('#submenu')
 const searchInput = document.querySelector('#feature-search')
 const searchResults = document.querySelector('#search-results')
+const homePage = document.querySelector('#page-home')
+const homeSlogan = document.querySelector('#home-slogan')
 const toast = document.querySelector('#toast')
 let toastTimer
+
+const homePointer = {
+  targetX: 0,
+  targetY: 0,
+  x: 0,
+  y: 0,
+  targetShineX: 50,
+  targetShineY: 50,
+  shineX: 50,
+  shineY: 50,
+  targetShineOpacity: 0,
+  shineOpacity: 0,
+  bounds: null,
+  sloganBounds: null,
+  frame: 0
+}
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+function scheduleHomeParallax() {
+  if (!homePointer.frame) homePointer.frame = requestAnimationFrame(updateHomeParallax)
+}
+
+function writeHomeParallax() {
+  homePage.style.setProperty('--home-title-x', `${homePointer.x * 5}px`)
+  homePage.style.setProperty('--home-title-y', `${homePointer.y * 3}px`)
+  homePage.style.setProperty('--home-shine-x', `${homePointer.shineX}%`)
+  homePage.style.setProperty('--home-shine-y', `${homePointer.shineY}%`)
+  homePage.style.setProperty('--home-shine-core', `${homePointer.shineOpacity * 0.95}`)
+  homePage.style.setProperty('--home-shine-edge', `${homePointer.shineOpacity * 0.25}`)
+}
+
+function updateHomeParallax() {
+  homePointer.frame = 0
+  homePointer.x += (homePointer.targetX - homePointer.x) * 0.26
+  homePointer.y += (homePointer.targetY - homePointer.y) * 0.26
+  homePointer.shineX += (homePointer.targetShineX - homePointer.shineX) * 0.34
+  homePointer.shineY += (homePointer.targetShineY - homePointer.shineY) * 0.34
+  homePointer.shineOpacity += (homePointer.targetShineOpacity - homePointer.shineOpacity) * 0.24
+  writeHomeParallax()
+
+  const settled = Math.abs(homePointer.targetX - homePointer.x) < 0.002
+    && Math.abs(homePointer.targetY - homePointer.y) < 0.002
+    && Math.abs(homePointer.targetShineX - homePointer.shineX) < 0.02
+    && Math.abs(homePointer.targetShineY - homePointer.shineY) < 0.02
+    && Math.abs(homePointer.targetShineOpacity - homePointer.shineOpacity) < 0.002
+  if (settled) {
+    homePointer.x = homePointer.targetX
+    homePointer.y = homePointer.targetY
+    homePointer.shineX = homePointer.targetShineX
+    homePointer.shineY = homePointer.targetShineY
+    homePointer.shineOpacity = homePointer.targetShineOpacity
+    writeHomeParallax()
+    return
+  }
+  scheduleHomeParallax()
+}
+
+function resetHomeParallax() {
+  homePointer.targetX = 0
+  homePointer.targetY = 0
+  homePointer.targetShineX = 50
+  homePointer.targetShineY = 50
+  homePointer.targetShineOpacity = 0
+  homePointer.bounds = null
+  homePointer.sloganBounds = null
+  if (prefersReducedMotion.matches) {
+    if (homePointer.frame) cancelAnimationFrame(homePointer.frame)
+    homePointer.frame = 0
+    homePointer.x = homePointer.y = 0
+    homePointer.shineX = homePointer.shineY = 50
+    homePointer.shineOpacity = 0
+    writeHomeParallax()
+    return
+  }
+  scheduleHomeParallax()
+}
+
+function captureHomeBounds() {
+  homePointer.bounds = homePage.getBoundingClientRect()
+  homePointer.sloganBounds = homeSlogan.getBoundingClientRect()
+}
+
+function moveHomeParallax(event) {
+  if (!document.body.classList.contains('home-active') || event.pointerType === 'touch' || prefersReducedMotion.matches) return
+  if (!homePointer.bounds || !homePointer.sloganBounds) captureHomeBounds()
+  if (!homePointer.bounds.width || !homePointer.bounds.height || !homePointer.sloganBounds.width || !homePointer.sloganBounds.height) return
+
+  const localX = (event.clientX - homePointer.bounds.left) / homePointer.bounds.width
+  const localY = (event.clientY - homePointer.bounds.top) / homePointer.bounds.height
+  const shineX = (event.clientX - homePointer.sloganBounds.left) / homePointer.sloganBounds.width
+  const shineY = (event.clientY - homePointer.sloganBounds.top) / homePointer.sloganBounds.height
+  homePointer.targetX = Math.max(-1, Math.min(1, (localX - 0.5) * 2))
+  homePointer.targetY = Math.max(-1, Math.min(1, (localY - 0.5) * 2))
+  homePointer.targetShineX = shineX * 100
+  homePointer.targetShineY = shineY * 100
+  homePointer.targetShineOpacity = 1
+  scheduleHomeParallax()
+}
+
+window.addEventListener('pointermove', moveHomeParallax)
+window.addEventListener('pointerleave', resetHomeParallax)
+window.addEventListener('resize', () => {
+  homePointer.bounds = null
+  homePointer.sloganBounds = null
+})
+prefersReducedMotion.addEventListener('change', () => {
+  if (prefersReducedMotion.matches) resetHomeParallax()
+})
 
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Tab') document.body.classList.add('keyboard-focus')
@@ -475,6 +585,8 @@ function animateEntry(element, { duration = 160, distance = 6, horizontal = fals
 
 function activateModule(module, action = '', animate = false) {
   const changed = state.module !== module
+  document.body.classList.toggle('home-active', module === 'home')
+  if (module !== 'home') resetHomeParallax()
   if (module !== 'dieline') dielineModule?.deactivate()
   state.module = module
 
@@ -1905,7 +2017,7 @@ function updateMochiTimer() {
   const elapsedSeconds = Math.floor((Date.now() - timerStartedAt) / 1000)
   const minutes = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0')
   const seconds = String(elapsedSeconds % 60).padStart(2, '0')
-  mochiTime.textContent = `${minutes}:${seconds}`
+  if (mochiTime) mochiTime.textContent = `${minutes}:${seconds}`
 }
 
 updateMochiTimer()
@@ -2113,7 +2225,8 @@ settingsLayout?.addEventListener('scroll', syncSettingsNavigation, { passive: tr
 syncSettingsNavigation()
 
 window.api.getAppInfo().then((info) => {
-  document.querySelector('#app-version').textContent = info.version
+  document.title = `摸鱼工具箱 v${info.version}`
+  document.querySelector('#app-version').textContent = `v${info.version}`
 }).catch(() => {
   document.querySelector('#app-version').textContent = '版本信息不可用'
 })
