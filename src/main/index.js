@@ -228,8 +228,8 @@ registerBoardHandlers({ ipcMain, dialog, BrowserWindow, app, assertMainWindowSen
 // 格式工厂 IPC（format:*）已拆到 ./modules/formatFactory.js。
 registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, app, assertMainWindowSender })
 
-// 刀模 AI 导出（dieline:*）：渲染层给 SVG，主进程经 Illustrator COM worker 另存为 .ai。
-registerDielineHandlers({ ipcMain, dialog, BrowserWindow, assertMainWindowSender, app, utilityProcess })
+// 刀模发送到 Illustrator（dieline:*）：渲染层给 SVG，主进程交给 COM worker 打开。
+registerDielineHandlers({ ipcMain, assertMainWindowSender, app, utilityProcess })
 
 // Office/Adobe COM 联动的公共基础设施（com:probe / com:show-result）已拆到 ./modules/comWorker.js。
 registerComWorkerHandlers({ ipcMain, shell, app, utilityProcess, assertMainWindowSender })

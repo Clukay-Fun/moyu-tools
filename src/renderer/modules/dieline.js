@@ -411,12 +411,12 @@ export function initDieline({ showToast }) {
     }
   }
 
-  // AI 导出走条码同款链路：渲染层出 SVG → 主进程 → Illustrator COM 另存 .ai
+  // 与条码相同：渲染层出 SVG → 主进程 → Illustrator 打开，不自动保存文件。
   async function exportAi() {
     if (!currentModel || exporting) return
     if (!isWindows) {
       exportStatus.classList.add('error')
-      exportStatus.textContent = 'AI 导出仅 Windows + Illustrator 可用'
+      exportStatus.textContent = '发送到 Illustrator 仅 Windows + Illustrator 可用'
       return
     }
     const snapshot = currentModel
@@ -425,23 +425,18 @@ export function initDieline({ showToast }) {
     exportButton.disabled = true
     exportAiButton.disabled = true
     exportStatus.classList.remove('error')
-    exportStatus.textContent = '正在通过 Illustrator 生成 AI…'
+    exportStatus.textContent = '正在发送到 Illustrator…'
     try {
       const { buildDielineSvg } = await import('../dieline/exportSvg.js')
-      const { length, width, height } = snapshot.params
-      const result = await window.api.exportDielineAi({
-        name: `${snapshot.templateId}-${length}x${width}x${height}`,
+      const result = await window.api.sendDielineToIllustrator({
         data: buildDielineSvg(snapshot, { includeAnnotations })
       })
-      if (result.status === 'cancelled') {
-        exportStatus.textContent = '已取消导出'
-        return
-      }
-      exportStatus.textContent = `AI 已保存 · ${result.result?.name || ''} · 图层 BLEED / CUT / CREASE`
-      showToast('Illustrator 刀模已保存')
+      if (result?.status !== 'opened') throw new Error('Illustrator 未确认打开刀模')
+      exportStatus.textContent = '已发送到 Illustrator · 请在 Illustrator 中另存文件'
+      showToast('刀模已发送到 Illustrator')
     } catch (error) {
       exportStatus.classList.add('error')
-      exportStatus.textContent = `AI 导出失败：${cleanIpcError(error?.message || error)}`
+      exportStatus.textContent = `发送失败：${cleanIpcError(error?.message || error)}`
       showToast(illustratorFailureHint(error?.message || error))
     } finally {
       exporting = false
@@ -574,7 +569,7 @@ export function initDieline({ showToast }) {
   query('#dieline-3d-retry').addEventListener('click', () => { stageError.hidden = true; void updatePreview() })
   exportButton.addEventListener('click', exportPdf)
   exportAiButton.addEventListener('click', exportAi)
-  if (!isWindows) exportAiButton.title = 'AI 导出需 Windows + Adobe Illustrator'
+  if (!isWindows) exportAiButton.title = '发送到 Illustrator 需 Windows + Adobe Illustrator'
 
   fillForm()
   renderPresets()

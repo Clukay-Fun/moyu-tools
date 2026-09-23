@@ -1,12 +1,10 @@
 import { randomUUID } from 'node:crypto'
-import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
+import { mkdir, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { writeFileAtomic } from '../lib/atomicWrite.js'
-import { assertOutputFile, sanitizeFileBaseName } from '../lib/outputPath.js'
-import { registerComResult, runComCommand } from './comWorker.js'
+import { runComCommand } from './comWorker.js'
 
-// 刀模 AI 导出：渲染层用与 2D / PDF 同源的路径生成 SVG，主进程只做数据校验，
-// 再交给受控 Illustrator COM worker 另存为 .ai（与条码 EPS 导出同一条链路）。
+// 刀模发送到 Illustrator：渲染层用与 2D / PDF 同源的路径生成 SVG，
+// 主进程只做数据校验，再交给受控 COM worker 打开（与条码同一条链路）。
 // ⚠ 仅 Windows + 已安装 Illustrator 可用。
 
 const MAX_SVG_BYTES = 20 * 1024 * 1024
@@ -22,33 +20,19 @@ function normalizeSvg(payload) {
   return data
 }
 
-export function registerDielineHandlers({ ipcMain, dialog, BrowserWindow, assertMainWindowSender, app, utilityProcess }) {
-  ipcMain.handle('dieline:export-ai', async (event, payload) => {
+export function registerDielineHandlers({ ipcMain, assertMainWindowSender, app, utilityProcess }) {
+  ipcMain.handle('dieline:send-illustrator', async (event, payload) => {
     assertMainWindowSender(event)
     const svg = normalizeSvg(payload)
-    const ownerWindow = BrowserWindow.fromWebContents(event.sender)
-    const selection = await dialog.showSaveDialog(ownerWindow, {
-      title: '导出 Illustrator 刀模',
-      defaultPath: `${sanitizeFileBaseName(payload?.name, 'dieline')}.ai`,
-      filters: [{ name: 'Adobe Illustrator', extensions: ['ai'] }]
-    })
-    if (selection.canceled || !selection.filePath) return { status: 'cancelled' }
-
     const temporaryDirectory = join(app.getPath('temp'), 'moyu-tools-com')
     await mkdir(temporaryDirectory, { recursive: true })
-    const jobId = randomUUID()
-    const inputPath = join(temporaryDirectory, `${jobId}.svg`)
-    const outputPath = join(temporaryDirectory, `${jobId}.ai`)
+    const inputPath = join(temporaryDirectory, `${randomUUID()}.svg`)
     await writeFile(inputPath, svg, 'utf8')
     try {
-      // 先落到临时目录再原子写入目标：Illustrator 另存失败时不会留下半截文件
-      await runComCommand({ app, utilityProcess }, event, 'dieline-svg-ai', { inputPath, outputPath }, { timeoutMs: 10 * 60 * 1000 })
-      await assertOutputFile(outputPath, 'Illustrator 刀模')
-      await writeFileAtomic(selection.filePath, await readFile(outputPath))
-      await assertOutputFile(selection.filePath, 'Illustrator 刀模')
-      return { status: 'saved', result: registerComResult(event.sender.id, selection.filePath) }
+      await runComCommand({ app, utilityProcess }, event, 'illustrator-svg', { inputPath }, { timeoutMs: 10 * 60 * 1000 })
+      return { status: 'opened' }
     } finally {
-      await Promise.all([unlink(inputPath).catch(() => {}), unlink(outputPath).catch(() => {})])
+      await unlink(inputPath).catch(() => {})
     }
   })
 }
