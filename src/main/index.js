@@ -58,6 +58,17 @@ ipcMain.on('startup:report-ready', () => {
 })
 
 let mainWindow = null
+const hasSingleInstanceLock = app.requestSingleInstanceLock()
+if (!hasSingleInstanceLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    if (!mainWindow || mainWindow.isDestroyed()) return
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.show()
+    mainWindow.focus()
+  })
+}
 
 function assertMainWindowSender(event) {
   if (!mainWindow || event.sender !== mainWindow.webContents) {
@@ -309,7 +320,7 @@ ipcMain.on('board:dirty', (event, dirty) => {
   boardHasUnsavedChanges = Boolean(dirty)
 })
 
-app.whenReady().then(() => {
+if (hasSingleInstanceLock) app.whenReady().then(() => {
   // 隐藏 Electron 默认原生菜单栏（File/Edit/...），应用使用自身渲染层界面。
   Menu.setApplicationMenu(null)
   // macOS 首次截图若在点击后才编译 ScreenCaptureKit 侧车，会额外等待约一秒。
