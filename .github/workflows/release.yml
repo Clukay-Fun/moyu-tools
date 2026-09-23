@@ -1,11 +1,11 @@
 name: release-windows
 on:
   push:
-    branches: [main]
+    tags: ['v*']
 permissions:
   contents: write
 concurrency:
-  group: release-windows-main
+  group: release-windows
   cancel-in-progress: false
 jobs:
   release:
@@ -28,23 +28,42 @@ jobs:
           if TAG=$(gh api repos/Clukay-Fun/moyu-tools/releases/latest --jq '.tag_name' 2>/dev/null); then
             echo "latest release tag: $TAG"
           else
-            TAG="v$(node -p "require('./package.json').version")"
-            echo "no latest release, using package.json: $TAG"
+            TAG=""
+            echo "no latest release; release notes will use recent commits"
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Bump patch version
+      - name: Validate release tag and package versions
         id: bump
         shell: bash
         run: |
-          BASE="${{ steps.base.outputs.tag }}"
-          BASE="${BASE#v}"
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
-          PATCH=$((10#$PATCH + 1))
-          VERSION="$MAJOR.$MINOR.$PATCH"
-          node -e "const fs=require('fs');const f='package.json';const p=require('./'+f);p.version='$VERSION';fs.writeFileSync(f, JSON.stringify(p,null,2)+'\n');const lf='package-lock.json';const L=JSON.parse(fs.readFileSync(lf,'utf8'));if(L.version)L.version='$VERSION';if(L.packages&&L.packages[''])L.packages[''].version='$VERSION';fs.writeFileSync(lf, JSON.stringify(L,null,2)+'\n');"
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          LOCK_VERSION=$(node -p "require('./package-lock.json').version")
+          LOCK_ROOT_VERSION=$(node -p "require('./package-lock.json').packages[''].version")
+
+          if [ "$TAG" != "v$PACKAGE_VERSION" ] || [ "$LOCK_VERSION" != "$PACKAGE_VERSION" ] || [ "$LOCK_ROOT_VERSION" != "$PACKAGE_VERSION" ]; then
+            echo "::error::Release tag, package.json and package-lock.json versions must match (tag=$TAG, package=$PACKAGE_VERSION, lock=$LOCK_VERSION, lock root=$LOCK_ROOT_VERSION)"
+            exit 1
+          fi
+
+          if ! node -e 'if (!/^\d+\.\d+\.\d+$/.test(process.argv[1])) process.exit(1)' "$VERSION"; then
+            echo "::error::Release tag must use vMAJOR.MINOR.PATCH format: $TAG"
+            exit 1
+          fi
+
+          BASE_TAG="${{ steps.base.outputs.tag }}"
+          if [ -n "$BASE_TAG" ]; then
+            BASE_VERSION="${BASE_TAG#v}"
+            if ! node -e 'const parse = (v) => v.split(".").map(Number); const a = parse(process.argv[1]); const b = parse(process.argv[2]); for (let i = 0; i < 3; i++) { if (a[i] !== b[i]) process.exit(a[i] > b[i] ? 0 : 1) } process.exit(1)' "$VERSION" "$BASE_VERSION"; then
+              echo "::error::Release version $VERSION must be greater than latest release $BASE_TAG"
+              exit 1
+            fi
+          fi
+
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Verify release tag is available
         id: tag_guard
@@ -54,8 +73,14 @@ jobs:
         run: |
           TAG="${{ steps.bump.outputs.tag }}"
           EXISTING=$(gh api repos/Clukay-Fun/moyu-tools/releases --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | tr -d '\r')
-          if [ -n "$EXISTING" ] || git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
-            echo "release tag already exists: $TAG" >&2
+          if [ -n "$EXISTING" ]; then
+            echo "a GitHub release already exists for tag: $TAG" >&2
+            exit 1
+          fi
+
+          git fetch origin main --quiet
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD; then
+            echo "::error::Release tag must point to a commit already merged into main"
             exit 1
           fi
           echo "safe_to_cleanup=true" >> "$GITHUB_OUTPUT"
@@ -66,12 +91,31 @@ jobs:
       - name: Build local release assets
         run: npm run build:win:nsis
 
+      - name: Generate installer SHA-256 checksum
+        shell: bash
+        run: |
+          INSTALLER="release/moyu-tools-${{ steps.bump.outputs.tag }}-windows-x64-setup.exe"
+          node - "$INSTALLER" <<'NODE'
+          const fs = require('node:fs')
+          const path = require('node:path')
+          const crypto = require('node:crypto')
+          const file = process.argv[2]
+          const hash = crypto.createHash('sha256')
+          const stream = fs.createReadStream(file)
+          stream.on('data', (chunk) => hash.update(chunk))
+          stream.on('error', (error) => { console.error(error); process.exitCode = 1 })
+          stream.on('end', () => {
+            const line = `${hash.digest('hex')}  ${path.basename(file)}\n`
+            fs.writeFileSync(`${file}.sha256`, line, 'utf8')
+          })
+          NODE
+
       - name: Prepare release notes
         shell: bash
         env:
           BASE_TAG: ${{ steps.base.outputs.tag }}
         run: |
-          if git rev-parse --quiet --verify "${BASE_TAG}^{commit}" >/dev/null; then
+          if [ -n "$BASE_TAG" ] && git rev-parse --quiet --verify "${BASE_TAG}^{commit}" >/dev/null; then
             SUBJECTS=$(git log --no-merges --reverse --format='%s' "${BASE_TAG}..HEAD")
           else
             SUBJECTS=$(git log --no-merges --reverse --format='%s' -n 20 HEAD)
@@ -160,8 +204,9 @@ jobs:
         run: |
           TAG="${{ steps.bump.outputs.tag }}"
           OWN_ID="${{ steps.draft.outputs.id }}"
-          FILES=("release/moyu-tools-${TAG}-windows-x64-setup.exe" release/latest.yml)
-          BLOCKMAP="release/moyu-tools-${TAG}-windows-x64-setup.exe.blockmap"
+          INSTALLER="release/moyu-tools-${TAG}-windows-x64-setup.exe"
+          FILES=("$INSTALLER" "$INSTALLER.sha256" release/latest.yml)
+          BLOCKMAP="$INSTALLER.blockmap"
           if [ -s "$BLOCKMAP" ]; then FILES+=("$BLOCKMAP"); fi
           for ATTEMPT in 1 2 3; do
             # 刚创建的 release 立刻拿列表接口查，可能还没来得及出现（读己之写在
@@ -190,6 +235,7 @@ jobs:
           RELEASE_ID="${{ steps.draft.outputs.id }}"
           ASSETS=""
           EXPECTED_INSTALLER="moyu-tools-${TAG}-windows-x64-setup.exe"
+          EXPECTED_CHECKSUM="$EXPECTED_INSTALLER.sha256"
           READY=false
           for ATTEMPT in {1..60}; do
             # Windows gh output can contain CRLF; normalize before exact matching.
@@ -199,7 +245,7 @@ jobs:
                 echo "::warning::Release assets request failed; retrying"
                 ASSETS=""
               fi
-              if grep -Fxq "$EXPECTED_INSTALLER" <<< "$ASSETS" && grep -Fxq 'latest.yml' <<< "$ASSETS"; then
+              if grep -Fxq "$EXPECTED_INSTALLER" <<< "$ASSETS" && grep -Fxq "$EXPECTED_CHECKSUM" <<< "$ASSETS" && grep -Fxq 'latest.yml' <<< "$ASSETS"; then
                 READY=true
                 break
               fi
@@ -209,7 +255,7 @@ jobs:
           done
           if [ "$READY" != true ]; then
             echo "::error::Release $TAG assets did not become ready within the polling window"
-            for REQUIRED in "$EXPECTED_INSTALLER" latest.yml; do
+            for REQUIRED in "$EXPECTED_INSTALLER" "$EXPECTED_CHECKSUM" latest.yml; do
               if ! grep -Fxq "$REQUIRED" <<< "$ASSETS"; then
                 echo "::error::Missing uploaded asset: $REQUIRED"
               fi
