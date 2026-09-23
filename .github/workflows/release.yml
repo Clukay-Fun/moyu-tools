@@ -66,6 +66,71 @@ jobs:
       - name: Build local release assets
         run: npm run build:win:nsis
 
+      - name: Prepare release notes
+        shell: bash
+        env:
+          BASE_TAG: ${{ steps.base.outputs.tag }}
+        run: |
+          if git rev-parse --quiet --verify "${BASE_TAG}^{commit}" >/dev/null; then
+            SUBJECTS=$(git log --no-merges --reverse --format='%s' "${BASE_TAG}..HEAD")
+          else
+            SUBJECTS=$(git log --no-merges --reverse --format='%s' -n 20 HEAD)
+          fi
+
+          NEW_ITEMS=()
+          IMPROVED_ITEMS=()
+          FIXED_ITEMS=()
+          OTHER_ITEMS=()
+          while IFS= read -r SUBJECT; do
+            [ -n "$SUBJECT" ] || continue
+            if [[ "$SUBJECT" =~ ^chore\(release\): ]]; then
+              continue
+            fi
+            if [[ "$SUBJECT" =~ ^([a-z]+)(\([^)]+\))?:[[:space:]]*(.+)$ ]]; then
+              TYPE="${BASH_REMATCH[1]}"
+              SUMMARY="${BASH_REMATCH[3]}"
+            else
+              TYPE="other"
+              SUMMARY="$SUBJECT"
+            fi
+
+            case "$TYPE" in
+              feat) NEW_ITEMS+=("$SUMMARY") ;;
+              fix) FIXED_ITEMS+=("$SUMMARY") ;;
+              style|perf|refactor) IMPROVED_ITEMS+=("$SUMMARY") ;;
+              *) OTHER_ITEMS+=("$SUMMARY") ;;
+            esac
+          done <<< "$SUBJECTS"
+
+          {
+            echo '## 更新内容'
+            if ((${#NEW_ITEMS[@]})); then
+              echo
+              echo '### 新增'
+              printf -- '- %s\n' "${NEW_ITEMS[@]}"
+            fi
+            if ((${#IMPROVED_ITEMS[@]})); then
+              echo
+              echo '### 改进'
+              printf -- '- %s\n' "${IMPROVED_ITEMS[@]}"
+            fi
+            if ((${#FIXED_ITEMS[@]})); then
+              echo
+              echo '### 修复'
+              printf -- '- %s\n' "${FIXED_ITEMS[@]}"
+            fi
+            if ((${#OTHER_ITEMS[@]})); then
+              echo
+              echo '### 其他调整'
+              printf -- '- %s\n' "${OTHER_ITEMS[@]}"
+            fi
+          } > release-notes.md
+
+          if ! grep -qE '^- ' release-notes.md; then
+            echo '::error::Release notes are empty; add descriptive commits before publishing.'
+            exit 1
+          fi
+
       # electron-builder can create two same-tag drafts concurrently for different
       # assets. Own creation/upload here so every asset belongs to one release.
       - name: Create draft release
@@ -75,10 +140,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.bump.outputs.tag }}"
+          BODY="$(cat release-notes.md)"
           test -s "release/moyu-tools-${TAG}-windows-x64-setup.exe"
           test -s release/latest.yml
           RELEASE_ID=$(gh api --method POST repos/Clukay-Fun/moyu-tools/releases \
             -f tag_name="$TAG" -f target_commitish="$GITHUB_SHA" -f name="$TAG" \
+            -f body="$BODY" \
             -F draft=true -F prerelease=false --jq '.id' | tr -d '\r')
           test -n "$RELEASE_ID"
           echo "id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
