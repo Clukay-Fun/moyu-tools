@@ -3,11 +3,12 @@ import { rsc0201Template } from './rsc0201.js'
 import { lidBaseTemplate } from './lidbase.js'
 import { traySleeveTemplate } from './traysleeve.js'
 import { dividerTemplate } from './divider.js'
+import { wrapCartonTemplate } from './wrapcarton.js'
 import { tuckEndTemplate, reverseTuckTemplate, cosmeticBoxTemplate, carryHandleTemplate } from './tuckboxes.js'
 
 export const DIELINE_TEMPLATES = Object.freeze([
   mailerTemplate, rsc0201Template, lidBaseTemplate, traySleeveTemplate, dividerTemplate,
-  tuckEndTemplate, reverseTuckTemplate, cosmeticBoxTemplate, carryHandleTemplate
+  tuckEndTemplate, reverseTuckTemplate, cosmeticBoxTemplate, wrapCartonTemplate, carryHandleTemplate
 ])
 
 export function getTemplate(id) {
