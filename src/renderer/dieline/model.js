@@ -107,18 +107,21 @@ export function buildModel(template, rawParams) {
     part.primaryAnnotationBounds = annotationBounds(part.bounds, placed.filter((annotation) => !annotation.secondary))
     annotations.push(...placed)
   }
-  // 多部件在 2D / 3D 里从左到右平铺，间距按标注占位计算；PDF 每个部件独立一页，用各自坐标
-  const gap = Math.max(40, ...parts.map((part) => (part.annotationBounds.maxX - part.bounds.maxX) * 1.2))
+  // 多部件在 2D / 3D 里自上而下平铺，横向居中对齐；PDF 每个部件独立一页，用各自坐标
+  const gap = Math.max(40, ...parts.map((part) => (part.annotationBounds.maxY - part.bounds.maxY) * 1.2))
+  const widest = Math.max(...parts.map((part) => part.annotationBounds.maxX - part.annotationBounds.minX))
   let cursor = 0
   const overall = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
   for (const part of parts) {
-    part.layout = { x: cursor - part.annotationBounds.minX, y: 0 }
-    cursor += part.annotationBounds.maxX - part.annotationBounds.minX + gap
+    const width = part.annotationBounds.maxX - part.annotationBounds.minX
+    part.layout = { x: (widest - width) / 2 - part.annotationBounds.minX, y: cursor - part.annotationBounds.minY }
+    cursor += part.annotationBounds.maxY - part.annotationBounds.minY + gap
     overall.minX = Math.min(overall.minX, part.annotationBounds.minX + part.layout.x)
     overall.maxX = Math.max(overall.maxX, part.annotationBounds.maxX + part.layout.x)
-    overall.minY = Math.min(overall.minY, part.annotationBounds.minY)
-    overall.maxY = Math.max(overall.maxY, part.annotationBounds.maxY)
+    overall.minY = Math.min(overall.minY, part.annotationBounds.minY + part.layout.y)
+    overall.maxY = Math.max(overall.maxY, part.annotationBounds.maxY + part.layout.y)
   }
+
   const model = {
     templateId: template.id,
     templateVersion: template.version,
