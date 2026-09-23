@@ -1,4 +1,6 @@
-// 0201 对口运输箱（RSC）。
+// FEFCO 0201 普通平口箱（RSC）：四面板粘口成筒，上下各四片对称摇盖。
+// 摇盖深默认 W/2（对口），加大到 W 即为全盖；包差用于外圈长面比内圈略宽的图纸
+// （见 dieline-refs/tuck-wrap-215x65x780.png，215 / 65 / 220 / 65，端盖深 65）。
 // 结构与尺寸换算来自 scope/plans/active/m0-dieline-0201.md 的样本（434×214×278，t=2）；
 // 内/外尺寸公式按该单样本线性推导（内→制造 +2t/+2t/+4t，制造→外 +t/+t/+2t），标记待校准。
 import { buildSlottedPanels } from './slotted.js'
@@ -6,9 +8,9 @@ import { buildSlottedPanels } from './slotted.js'
 export const rsc0201Template = Object.freeze({
   id: 'rsc-0201',
   version: '0.2.0-draft',
-  name: '0201 对口箱',
+  name: '普通平口箱（RSC）',
   category: '运输纸箱',
-  description: '四面墙 + 上下对口摇盖 + 粘口，小型家具与整件运输外箱',
+  description: '最经典的对称摇盖纸箱，成本低、封箱快、利用率高，广泛用于电商快递与批量运输',
   defaults: { length: 434, width: 214, height: 278, thickness: 2, bleed: 3, material: 'corrugated-b' },
   ranges: {
     length: [50, 2000],
@@ -27,7 +29,8 @@ export const rsc0201Template = Object.freeze({
   structureParams: [
     { key: 'glueFlap', label: '粘口宽', min: 15, max: 120, step: 0.5, auto: (p) => Math.min(60, Math.max(25, 0.1 * p.length)) },
     { key: 'flapDepth', label: '摇盖深', min: 10, max: 1000, step: 0.5, auto: (p) => p.width / 2 },
-    { key: 'slotWidth', label: '开槽宽', min: 2, max: 30, step: 0.5, auto: (p) => 3 * p.thickness }
+    { key: 'slotWidth', label: '开槽宽', min: 2, max: 30, step: 0.5, auto: (p) => 3 * p.thickness },
+    { key: 'wrapAllowance', label: '包差', min: 0, max: 40, step: 0.5, auto: () => 0 }
   ],
 
   normalizeParams(raw) {
@@ -67,6 +70,7 @@ export const rsc0201Template = Object.freeze({
     if (structure.glueFlap >= params.length) errors.push('粘口宽需小于长度')
     if (structure.slotWidth >= Math.min(params.length, params.width) / 2) errors.push('开槽宽过大')
     if (structure.flapDepth > params.width) errors.push('摇盖深超过宽度，合拢时会互相压叠')
+    if (structure.wrapAllowance > params.length / 4) errors.push('包差不能超过长度的四分之一')
     return errors
   },
 
@@ -83,8 +87,8 @@ export const rsc0201Template = Object.freeze({
 
   build(params) {
     const { length: L, width: W, height: H, thickness: t } = params
-    const { glueFlap, flapDepth: D, slotWidth: s } = this.resolveStructure(params)
-    const { panels, total } = buildSlottedPanels({ L, W, H, t, glueFlap, flapDepth: D, slotWidth: s })
+    const { glueFlap, flapDepth: D, slotWidth: s, wrapAllowance } = this.resolveStructure(params)
+    const { panels, total } = buildSlottedPanels({ L, W, H, t, glueFlap, flapDepth: D, slotWidth: s, wrapAllowance })
     const half = s / 2
     const fmt = (value) => Number(value.toFixed(1)).toString()
     const annotations = [
@@ -93,7 +97,10 @@ export const rsc0201Template = Object.freeze({
       { param: 'height', label: `H ${fmt(H)} mm`, x1: total + 14, y1: 0, x2: total + 14, y2: H },
       { param: 'glueFlap', label: `粘口 ${fmt(glueFlap)}`, x1: -glueFlap, y1: -D - 8, x2: 0, y2: -D - 8, secondary: true },
       { param: 'flapDepth', label: `摇盖 ${fmt(D)}`, x1: total + 14, y1: -D, x2: total + 14, y2: 0, secondary: true },
-      { param: 'slotWidth', label: `槽 ${fmt(s)}`, x1: L - half, y1: -D - 8, x2: L + half, y2: -D - 8, secondary: true }
+      { param: 'slotWidth', label: `槽 ${fmt(s)}`, x1: L - half, y1: -D - 8, x2: L + half, y2: -D - 8, secondary: true },
+      ...(wrapAllowance > 0
+        ? [{ param: 'wrapAllowance', label: `包差 ${fmt(wrapAllowance)}`, x1: L + W, y1: H + D + 14, x2: L + W + L + wrapAllowance, y2: H + D + 14, secondary: true }]
+        : [])
     ]
     return { parts: [{ id: 'body', name: '箱体', count: 1, panels }], annotations }
   }
