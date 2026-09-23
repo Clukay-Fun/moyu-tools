@@ -83,12 +83,14 @@ jobs:
           OTHER_ITEMS=()
           while IFS= read -r SUBJECT; do
             [ -n "$SUBJECT" ] || continue
-            if [[ "$SUBJECT" =~ ^chore\(release\): ]]; then
+            if [[ "$SUBJECT" == "chore(release):"* ]]; then
               continue
             fi
-            if [[ "$SUBJECT" =~ ^([a-z]+)(\([^)]+\))?:[[:space:]]*(.+)$ ]]; then
-              TYPE="${BASH_REMATCH[1]}"
-              SUMMARY="${BASH_REMATCH[3]}"
+            if [[ "$SUBJECT" == *:* ]]; then
+              HEADER="${SUBJECT%%:*}"
+              TYPE="${HEADER%%(*}"
+              SUMMARY="${SUBJECT#*:}"
+              SUMMARY="${SUMMARY# }"
             else
               TYPE="other"
               SUMMARY="$SUBJECT"
