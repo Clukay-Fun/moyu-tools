@@ -138,7 +138,7 @@
         <dl class="cat-meta">
           <dt>时长</dt><dd>按用途命名，同用途才共用：<code>--dur-hover</code> 悬停的颜色/背景/边框 · <code>--dur-press</code> 按下与开关 · <code>--dur-popover</code> 浮层入场 · <code>--dur-popover-exit</code> 浮层退场 · <code>--dur-panel</code> 面板（轻提示、图片编辑面板）。取值不同的旧写法（进度条 160ms、拖放高亮 150ms 等）保持原值，不为统一改变节奏</dd>
           <dt>缓动</dt><dd><code>--ease-out</code>——出现和位移；颜色、背景这类非位移变化用 <code>ease</code>；两个位置之间来回滑（分段指示器）现在用的是 <code>cubic-bezier(0.77, 0, 0.175, 1)</code>，还没有变量</dd>
-          <dt>减弱动效</dt><dd>系统开启「减少动态效果」时，全局兜底只保留颜色/透明度过渡，位移、缩放、按下回弹一律不动（<code>style.css</code>「减弱动效兜底」）</dd>
+          <dt>减弱动效</dt><dd>系统开启「减少动态效果」时，全局兜底只保留颜色/透明度过渡，位移、缩放、按下回弹一律不动（<code>styles/08-global-overrides.css</code>「减弱动效兜底」）</dd>
         </dl>
         <div class="cat-stage"><div class="cat-motion-tokens" data-motion-tokens></div></div>
       </div>
@@ -267,7 +267,7 @@
     <!-- ══ 输入框 ══ -->
     <section class="cat-section" id="inputs">
       <h2>输入框</h2>
-      <p>文本、数字、搜索、多行、下拉共用一套底色/边框/焦点（<code>style.css</code> 顶部「全应用控件基础」）。模块只决定宽度与布局。</p>
+      <p>文本、数字、搜索、多行、下拉共用一套底色/边框/焦点（<code>styles/01-controls.css</code>「全应用控件基础」）。模块只决定宽度与布局。</p>
       <div class="cat-item">
         <dl class="cat-meta">
           <dt>选择器</dt><dd><code>input[type=text|number|search]</code> <code>textarea</code> <code>select</code>（在应用里会被增强为 <code>.app-select-trigger</code>）</dd>
