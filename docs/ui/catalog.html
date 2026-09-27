@@ -79,7 +79,7 @@
     [data-demo] .toast { position: static; opacity: 1; transform: none; }
   </style>
 </head>
-<body data-theme="light">
+<body data-theme="light" class="keyboard-focus">
   <!-- 应用的图标 sprite 由构建插件注入，这里只内联目录用到的几个 -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></symbol>
@@ -136,9 +136,9 @@
 
       <div class="cat-item">
         <dl class="cat-meta">
-          <dt>时长</dt><dd><code>--dur-press</code> 按下、悬停、开关等即时反馈 · <code>--dur-popover</code> 菜单、气泡等浮层出现</dd>
+          <dt>时长</dt><dd>按用途命名，同用途才共用：<code>--dur-hover</code> 悬停的颜色/背景/边框 · <code>--dur-press</code> 按下与开关 · <code>--dur-popover</code> 浮层入场 · <code>--dur-popover-exit</code> 浮层退场 · <code>--dur-panel</code> 面板（轻提示、图片编辑面板）。取值不同的旧写法（进度条 160ms、拖放高亮 150ms 等）保持原值，不为统一改变节奏</dd>
           <dt>缓动</dt><dd><code>--ease-out</code>——出现和位移；颜色、背景这类非位移变化用 <code>ease</code>；两个位置之间来回滑（分段指示器）现在用的是 <code>cubic-bezier(0.77, 0, 0.175, 1)</code>，还没有变量</dd>
-          <dt>减弱动效</dt><dd>系统开启「减少动态效果」时关掉位移和缩放，只保留颜色/透明度（<code>@media (prefers-reduced-motion: reduce)</code>）</dd>
+          <dt>减弱动效</dt><dd>系统开启「减少动态效果」时，全局兜底只保留颜色/透明度过渡，位移、缩放、按下回弹一律不动（<code>style.css</code>「减弱动效兜底」）</dd>
         </dl>
         <div class="cat-stage"><div class="cat-motion-tokens" data-motion-tokens></div></div>
       </div>
@@ -146,13 +146,13 @@
       <div class="cat-motion-grid">
         <article class="cat-motion-card">
           <div class="cat-motion-stage" data-loop="press">
-            <button class="gbtn cat-sim" type="button" style="--cat-press:0.98">.gbtn</button>
-            <button class="cbtn cat-sim" type="button" style="--cat-press:0.97">.cbtn</button>
-            <button class="tool-btn cat-sim" type="button" style="--cat-press:0.96"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-crop"></use></svg>工具</button>
+            <button class="gbtn cat-sim" type="button" style="--cat-press:var(--press-scale)">.gbtn</button>
+            <button class="gbtn primary cat-sim" type="button" style="--cat-press:var(--press-scale)">.primary</button>
+            <button class="cbtn cat-sim" type="button" style="--cat-press:var(--press-scale)">.cbtn</button>
           </div>
           <h3>按下回弹</h3>
-          <p><code>transform</code> · <code>--dur-press</code> · <code>--ease-out</code></p>
-          <p class="cat-note">现在各写各的：0.98 / 0.97 / 0.96；B 片统一为 0.97</p>
+          <p><code>scale(var(--press-scale))</code>（0.97）· <code>--dur-press</code> · <code>--ease-out</code></p>
+          <p class="cat-note">图片编辑器内的工具按钮、对象按钮、色块保留各自取值（0.96 / 0.94 / 0.9）</p>
         </article>
 
         <article class="cat-motion-card">
@@ -161,8 +161,8 @@
             <div class="app-menu cat-static-menu" style="min-width:110px"><button type="button" class="cat-sim">菜单项</button><button type="button">菜单项</button></div>
           </div>
           <h3>悬停反馈</h3>
-          <p>颜色 / 背景 / 边框 · <code>--dur-press</code> · <code>ease</code></p>
-          <p class="cat-note">菜单项仍写死 110ms，B 片定档位</p>
+          <p>颜色 / 背景 / 边框 · <code>--dur-hover</code> · <code>ease</code></p>
+          <p class="cat-note">画布命令菜单项是 110ms，比 --dur-hover 快，保持原值</p>
         </article>
 
         <article class="cat-motion-card">
@@ -174,7 +174,7 @@
           </div>
           <h3>浮层开合</h3>
           <p>入场 <code>opacity + translateY(-2px) + scale(0.98)</code> · <code>--dur-popover</code></p>
-          <p class="cat-note">退场目前是瞬间消失；B 片加 120ms 淡出</p>
+          <p class="cat-note">退场 <code>.closing</code> 淡出 · <code>--dur-popover-exit</code>（120ms），结束后才设 <code>hidden</code>；淡出途中可被重新打开</p>
         </article>
 
         <article class="cat-motion-card">
@@ -205,7 +205,7 @@
           </div>
           <h3>轻提示</h3>
           <p>从下方 8px 淡入 · 180ms · <code>--ease-out</code></p>
-          <p class="cat-note">180ms 写死；无 --dur 档位对应</p>
+          <p class="cat-note">已改用 <code>--dur-panel</code></p>
         </article>
 
         <article class="cat-motion-card">
@@ -272,7 +272,7 @@
         <dl class="cat-meta">
           <dt>选择器</dt><dd><code>input[type=text|number|search]</code> <code>textarea</code> <code>select</code>（在应用里会被增强为 <code>.app-select-trigger</code>）</dd>
           <dt>错误态</dt><dd>加 <code>aria-invalid="true"</code>；目前只有增强下拉读这个属性，文本框的错误态各模块各写各的——属于第一批统一项</dd>
-          <dt>焦点态</dt><dd>点进输入框看：目前只把边框换成 <code>--control-border-hover</code>，没有外发光（<code>box-shadow: none</code>）——键盘用户不易分辨，第一批统一项</dd>
+          <dt>焦点态</dt><dd>鼠标点进输入框：边框换成 <code>--control-border-hover</code>。<b>键盘 Tab</b> 聚焦：贴边 2px 主题色实线内圈（对浅色底约 3.6～3.9:1）+ 外层 5px 柔光（<code>--focus-ring-*</code> / <code>--focus-glow</code>），只在键盘操作时出现——在本页按 Tab 即可看到；开关的焦点画在滑轨上</dd>
           <dt>带单位</dt><dd><code>.dieline-input</code>（单位在框内右侧）、<code>.dieline-stepper</code>（加减步进）——目前是刀模私有，候选提升为公共组件</dd>
           <dt>现用模块</dt><dd>条码、PDF、刀模、格式工厂、设置</dd>
         </dl>
@@ -364,7 +364,7 @@
       <h2>使用约定</h2>
       <p class="cat-rule">颜色、字号、圆角、间距从变量取；需要新值时先加变量，再在这里补示例。</p>
       <p class="cat-rule">浅色模式下 <code>--border</code> / <code>--control-border</code> 是<b>白色半透明</b>，放在浅底上几乎看不见——需要可见描边时用 <code>color-mix(in srgb, var(--foreground) 13%, transparent)</code>。这一条是第一批统一的候选：给中性灰描边单独立一个变量。</p>
-      <p class="cat-rule">焦点态目前只改边框色（<code>box-shadow: none</code>），键盘用户不易分辨——属于第一批统一项。</p>
+      <p class="cat-rule">键盘焦点统一为「实线内圈 + 柔光」（<code>--focus-ring-color</code> / <code>--focus-glow</code>），只在 Tab 操作时出现；焦点样式里不要改 <code>border-radius</code>，outline 与 box-shadow 本身会跟随控件圆角；新增的可交互控件如果真实的 input 被隐藏了，要把焦点环画到可见的替身上（参考开关）。</p>
       <p class="cat-rule">目录建成时顺手修掉的：深色模式下 <code>.gbtn.primary</code> 丢失主题色填充（一条多余的 <code>[data-theme="dark"] .gbtn</code> 规则特异性更高）；开关禁用态与可用态看不出区别。</p>
       <p class="cat-rule warn">刀模画布、图片编辑器、截图覆盖层有各自的交互约束，<b>不</b>为了统一去改它们已验收的样式。</p>
       <p class="cat-rule">盘点现状：<code>node scripts/style-report.mjs</code>（加 <code>--json</code> 输出机器可读结果）。</p>
@@ -588,8 +588,11 @@
       const W = 120, H = 72
       const curve = `<svg class="cat-curve" viewBox="0 0 ${W} ${H}"><path d="M0 ${H} C ${x1 * W} ${H - y1 * H}, ${x2 * W} ${H - y2 * H}, ${W} 0" fill="none" stroke="var(--accent)" stroke-width="2"/><path d="M0 ${H} L${W} 0" stroke="var(--hairline)" stroke-dasharray="3 3"/></svg>`
       host.innerHTML = `
+        <div><b>--dur-hover</b><span>${read('--dur-hover')}</span></div>
         <div><b>--dur-press</b><span>${read('--dur-press')}</span></div>
         <div><b>--dur-popover</b><span>${read('--dur-popover')}</span></div>
+        <div><b>--dur-popover-exit</b><span>${read('--dur-popover-exit')}</span></div>
+        <div><b>--dur-panel</b><span>${read('--dur-panel')}</span></div>
         <div>${curve}<b>--ease-out</b><span>${ease}</span></div>`
     }
 
@@ -600,7 +603,12 @@
         press: (stage, on) => { stage.dataset.state = on ? 'on' : 'off' },
         hover: (stage, on) => { stage.dataset.state = on ? 'on' : 'off' },
         drop: (stage, on) => { stage.dataset.state = on ? 'on' : 'off' },
-        popover: (stage, on) => { stage.querySelector('.app-menu').hidden = !on },
+        popover: (stage, on) => {
+          const menu = stage.querySelector('.app-menu')
+          if (on) { menu.classList.remove('closing'); menu.hidden = false; return }
+          menu.classList.add('closing')
+          setTimeout(() => { if (menu.classList.contains('closing')) { menu.classList.remove('closing'); menu.hidden = true } }, 160)
+        },
         indicator: (stage, on) => {
           const sw = stage.querySelector('.barcode-mode-switch')
           sw.dataset.mode = on ? 'batch' : 'single'

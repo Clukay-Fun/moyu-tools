@@ -80,9 +80,19 @@
   --icon-btn-lg: 36px;
 
   /* 焦点环。只在键盘 Tab 时出现，鼠标点击不显示。 */
+  /* 键盘焦点：贴边的实色内圈保证可辨（主题色对白底约 4:1），外面再加一圈柔光；只在 Tab 操作时出现 */
   --focus-ring-color: var(--accent);
   --focus-ring-width: 2px;
-  --focus-ring-offset: 2px;
+  --focus-ring-offset: 0px;
+  --focus-glow: 0 0 0 5px rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.24);
+  /* 按下回弹的统一缩放 */
+  --press-scale: 0.97;
+  /* 浮层退场比入场略短 */
+  --dur-popover-exit: 120ms;
+  /* 悬停：颜色、背景、边框的渐变（取值与按压相同，但用途不同，分开命名） */
+  --dur-hover: 140ms;
+  /* 面板：整块内容的出现/消失（轻提示、图片编辑面板） */
+  --dur-panel: 180ms;
 
   /* 动效。按压要快到几乎无感，弹层要能被看清但不拖沓。 */
   --dur-press: 140ms;
@@ -220,9 +230,9 @@ select {
   outline: 0;
   color: var(--foreground);
   background-color: var(--control-bg);
-  transition: border-color var(--dur-press) ease,
-              background-color var(--dur-press) ease,
-              box-shadow var(--dur-press) ease;
+  transition: border-color var(--dur-hover) ease,
+              background-color var(--dur-hover) ease,
+              box-shadow var(--dur-hover) ease;
 }
 
 input[type="text"]:hover:not(:disabled),
@@ -276,9 +286,9 @@ input[type="radio"] {
   border: 1px solid var(--control-border);
   background: var(--control-bg);
   cursor: pointer;
-  transition: border-color var(--dur-press) ease,
-              background-color var(--dur-press) ease,
-              box-shadow var(--dur-press) ease;
+  transition: border-color var(--dur-hover) ease,
+              background-color var(--dur-hover) ease,
+              box-shadow var(--dur-hover) ease;
 }
 
 input[type="checkbox"] { border-radius: 5px; }
@@ -760,9 +770,9 @@ label {
   font-weight: 600;
   cursor: pointer;
   transition: transform var(--dur-press) var(--ease-out),
-              color var(--dur-press) ease,
-              border-color var(--dur-press) ease,
-              background-color var(--dur-press) ease;
+              color var(--dur-hover) ease,
+              border-color var(--dur-hover) ease,
+              background-color var(--dur-hover) ease;
 }
 
 .nav-label {
@@ -888,9 +898,9 @@ label {
   text-align: left;
   cursor: pointer;
   transition: transform var(--dur-press) var(--ease-out),
-              color var(--dur-press) ease,
-              border-color var(--dur-press) ease,
-              background-color var(--dur-press) ease;
+              color var(--dur-hover) ease,
+              border-color var(--dur-hover) ease,
+              background-color var(--dur-hover) ease;
 }
 
 .submenu-item:hover {
@@ -1073,9 +1083,9 @@ body.home-active .page-home.active h1.home-slogan {
   border-radius: var(--r-md);
   cursor: pointer;
   transition: transform var(--dur-press) var(--ease-out),
-              color var(--dur-press) ease,
-              border-color var(--dur-press) ease,
-              background-color var(--dur-press) ease,
+              color var(--dur-hover) ease,
+              border-color var(--dur-hover) ease,
+              background-color var(--dur-hover) ease,
               filter var(--dur-press) ease;
 }
 
@@ -1097,14 +1107,14 @@ body.home-active .page-home.active h1.home-slogan {
 }
 
 .gbtn.danger:hover {
-  border-color: rgba(213, 79, 80, 0.34);
-  color: #c83d40;
-  background: rgba(213, 79, 80, 0.1);
+  border-color: color-mix(in srgb, var(--danger) 34%, transparent);
+  color: color-mix(in srgb, var(--danger) 88%, #000);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
 }
 
 .gbtn:active,
 .primary:active {
-  transform: scale(0.98);
+  transform: scale(var(--press-scale));
 }
 
 .gbtn:disabled,
@@ -1390,7 +1400,7 @@ body.home-active .page-home.active h1.home-slogan {
 .pdf-watermark-file > small.error {
   max-width: 150px;
   overflow: hidden;
-  color: #d54f50;
+  color: var(--danger);
   text-overflow: ellipsis;
 }
 
@@ -1632,8 +1642,8 @@ body.home-active .page-home.active h1.home-slogan {
 }
 
 .pdf-page-card footer .delete:hover {
-  color: #d54f50;
-  background: rgba(213, 79, 80, 0.1);
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
 }
 
 .pdf-page-dialog-footer {
@@ -1722,6 +1732,12 @@ body.home-active .page-home.active h1.home-slogan {
   transform: translateX(15px);
 }
 
+body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: var(--focus-glow);
+}
+
 .toggle-wrap:has(input:disabled) {
   cursor: not-allowed;
   opacity: 0.48;
@@ -1803,7 +1819,7 @@ body.home-active .page-home.active h1.home-slogan {
 }
 
 .cell-progress.error {
-  color: #d54f50;
+  color: var(--danger);
 }
 
 .cell-action {
@@ -1903,7 +1919,7 @@ body.home-active .page-home.active h1.home-slogan {
 }
 
 .illustrator-status.error {
-  color: #d54f50;
+  color: var(--danger);
 }
 
 .illustrator-status.cancelled {
@@ -1977,12 +1993,12 @@ body.home-active .page-home.active h1.home-slogan {
 }
 
 #illustrator-drop-zone .pdf-remove-file {
-  color: #d54f50;
-  background: rgba(213, 79, 80, 0.08);
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
 }
 
 #illustrator-drop-zone .pdf-remove-file:hover {
-  background: rgba(213, 79, 80, 0.16);
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
 }
 
 .illustrator-empty-actions {
@@ -2046,19 +2062,19 @@ body.home-active .page-home.active h1.home-slogan {
 }
 
 .pdf-remove-file:hover {
-  color: #d54f50;
-  background: rgba(213, 79, 80, 0.1);
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
 }
 
 #pdf-drop-zone .pdf-remove-file,
 .pdf-watermark-file-list .pdf-remove-file {
-  color: #d54f50;
-  background: rgba(213, 79, 80, 0.08);
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
 }
 
 #pdf-drop-zone .pdf-remove-file:hover,
 .pdf-watermark-file-list .pdf-remove-file:hover {
-  background: rgba(213, 79, 80, 0.16);
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
 }
 
 .result,
@@ -2180,8 +2196,8 @@ body.home-active .page-home.active h1.home-slogan {
 }
 
 .result-dot.error {
-  background: #d54f50;
-  box-shadow: 0 0 0 4px rgba(213, 79, 80, 0.1);
+  background: var(--danger);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 10%, transparent);
 }
 
 #run-pdf-action {
@@ -2385,7 +2401,7 @@ body.home-active .page-home.active h1.home-slogan {
 }
 
 .barcode-message.error {
-  color: #d54f50;
+  color: var(--danger);
 }
 
 .barcode-message.success {
@@ -2615,7 +2631,7 @@ body.home-active .page-home.active h1.home-slogan {
 .batch-item.error .batch-error {
   display: grid;
   place-items: center;
-  color: #d54f50;
+  color: var(--danger);
   font-size: var(--fs-sm);
   text-align: center;
 }
@@ -3362,7 +3378,7 @@ body.home-active .page-home.active h1.home-slogan {
 }
 
 .image-bottom b.error {
-  color: #d54f50;
+  color: var(--danger);
 }
 
 .screenshot-editor {
@@ -3790,7 +3806,7 @@ body.home-active .page-home.active h1.home-slogan {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: color var(--dur-press) ease, background-color var(--dur-press) ease, border-color var(--dur-press) ease;
+  transition: color var(--dur-hover) ease, background-color var(--dur-hover) ease, border-color var(--dur-hover) ease;
 }
 
 .theme-option:hover {
@@ -4062,7 +4078,7 @@ body.home-active .page-home.active h1.home-slogan {
   background: transparent;
   text-align: left;
   cursor: pointer;
-  transition: border-color var(--dur-press) ease, background-color var(--dur-press) ease, transform 120ms var(--ease-out);
+  transition: border-color var(--dur-hover) ease, background-color var(--dur-hover) ease, transform 120ms var(--ease-out);
 }
 
 .github-link:hover {
@@ -4071,7 +4087,7 @@ body.home-active .page-home.active h1.home-slogan {
 }
 
 .github-link:active {
-  transform: scale(0.99);
+  transform: scale(var(--press-scale));
 }
 
 .github-link > .ic:first-child {
@@ -4117,7 +4133,7 @@ body.home-active .page-home.active h1.home-slogan {
   opacity: 0;
   pointer-events: none;
   transform: translateY(8px);
-  transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+  transition: opacity var(--dur-panel) var(--ease-out), transform var(--dur-panel) var(--ease-out);
   backdrop-filter: blur(24px);
 }
 
@@ -4475,6 +4491,24 @@ body.home-active .page-home.active h1.home-slogan {
 .ic-sm { width: var(--ic-sm); height: var(--ic-sm); }
 .ic-lg { width: var(--ic-lg); height: var(--ic-lg); }
 
+/* ══ 减弱动效兜底 ══
+   系统开启「减少动态效果」时，位移、缩放、滑动一律不做过渡，
+   颜色和透明度照常渐变——状态变化仍然能被感知，但画面不会动。 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-property: color, background-color, border-color, opacity, box-shadow, outline-color !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  :where(button, a, [role="button"], label):active {
+    transform: none !important;
+  }
+}
+
 /* ══ V1 · 键盘焦点环 ══
    ⚠ 不用 `*:focus-visible`。全局通配会把焦点环套到 div、span 这类
    本不该获得焦点的元素上（它们可能因为 contenteditable 或第三方库
@@ -4490,7 +4524,9 @@ body.keyboard-focus :where(
 ):focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring-color);
   outline-offset: var(--focus-ring-offset);
-  border-radius: inherit;
+  box-shadow: var(--focus-glow);
+  /* 不要写 border-radius: inherit——那取的是父元素圆角，会把控件自己的圆角改掉；
+     outline 与 box-shadow 本身就跟随元素自身的圆角 */
 }
 
 * {
@@ -4962,15 +4998,15 @@ body.keyboard-focus :where(
   font: 13px var(--font);
   cursor: pointer;
   transition:
-    color var(--dur-press) ease,
-    background-color var(--dur-press) ease,
-    border-color var(--dur-press) ease,
+    color var(--dur-hover) ease,
+    background-color var(--dur-hover) ease,
+    border-color var(--dur-hover) ease,
     transform 160ms var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
   .cbtn:hover { border-color: var(--control-border-hover); color: var(--accent); background: var(--control-bg-hover); }
 }
-.cbtn:active { transform: scale(0.97); }
+.cbtn:active { transform: scale(var(--press-scale)); }
 .cbtn.primary {
   border-color: transparent;
   color: #fff;
@@ -5170,7 +5206,7 @@ body.keyboard-focus :where(
   height: 18px;
   border-radius: 999px;
   background: var(--hairline-strong, var(--border));
-  transition: background-color var(--dur-press) ease;
+  transition: background-color var(--dur-hover) ease;
 }
 
 .canvas-toggle-indicator::after {
@@ -5504,6 +5540,19 @@ body.keyboard-focus :where(
 }
 .app-menu button[aria-checked="true"]::after { content: " ✓"; color: var(--accent); }
 
+/* 退场：先加 .closing 播放淡出，动画结束后脚本再设 hidden（见 main.js closePopover） */
+.app-menu.closing,
+.cmd-menu.closing,
+#overlay-layer > .app-menu.closing,
+#overlay-layer > .cmd-menu.closing {
+  opacity: 0;
+  transform: translateY(-2px) scale(0.98);
+  /* 淡出期间菜单还在原位，不能挡住下方的点击；
+     #overlay-layer 里的菜单会把 pointer-events 设回 auto，所以这里带上同等特异性的选择器 */
+  pointer-events: none;
+  transition-duration: var(--dur-popover-exit);
+}
+
 @starting-style {
   .search-results.open,
   .cmd-menu:not([hidden]),
@@ -5526,7 +5575,7 @@ body.keyboard-focus :where(
   font-size: var(--fs-md);
   cursor: pointer;
   transition: transform var(--dur-press) var(--ease-out),
-              color var(--dur-press) ease, background-color var(--dur-press) ease;
+              color var(--dur-hover) ease, background-color var(--dur-hover) ease;
 }
 .txt-btn.icon-only {
   display: inline-grid;
@@ -5538,10 +5587,10 @@ body.keyboard-focus :where(
 @media (hover: hover) and (pointer: fine) {
   .txt-btn:hover:not(:disabled) { color: var(--accent); background: var(--accent-10); }
 }
-.txt-btn:active:not(:disabled) { transform: scale(0.97); }
+.txt-btn:active:not(:disabled) { transform: scale(var(--press-scale)); }
 .txt-btn[aria-pressed="true"] { color: var(--accent); background: var(--accent-18); }
 .txt-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.txt-btn.txt-danger { color: #d54f50; }
+.txt-btn.txt-danger { color: var(--danger); }
 .txt-btn.txt-danger:disabled { color: var(--muted); }
 
 .txt-select {
@@ -5759,8 +5808,8 @@ body.keyboard-focus :where(
   display: flex;
   flex-direction: column;
   background: var(--background);
-  transition: opacity 180ms var(--ease-out),
-              transform 180ms var(--ease-out);
+  transition: opacity var(--dur-panel) var(--ease-out),
+              transform var(--dur-panel) var(--ease-out);
 }
 
 .img-editor[hidden] { display: none; }
@@ -5822,9 +5871,9 @@ body.keyboard-focus :where(
   cursor: pointer;
   /* 只过渡具体属性，不用 all */
   transition: transform var(--dur-press) var(--ease-out),
-              background-color var(--dur-press) ease,
-              color var(--dur-press) ease,
-              border-color var(--dur-press) ease;
+              background-color var(--dur-hover) ease,
+              color var(--dur-hover) ease,
+              border-color var(--dur-hover) ease;
 }
 
 .tool-btn span { font-size: 17px; line-height: 1; }
@@ -5971,7 +6020,7 @@ body.keyboard-focus :where(
   cursor: pointer;
   padding: 0;
   transition: transform var(--dur-press) var(--ease-out),
-              border-color var(--dur-press) ease;
+              border-color var(--dur-hover) ease;
 }
 
 .img-editor-swatch:active { transform: scale(0.9); }
@@ -6028,6 +6077,7 @@ body.keyboard-focus .pdf-watermark-controls select:focus-visible,
 body.keyboard-focus .search input:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring-color);
   outline-offset: var(--focus-ring-offset);
+  box-shadow: var(--focus-glow);
 }
 
 /* ══ 图标 sprite 容器 ══

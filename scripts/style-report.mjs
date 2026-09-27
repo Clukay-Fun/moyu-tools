@@ -177,6 +177,19 @@ for (const rule of rules) {
 const orphanClasses = [...declaredClasses].filter((name) => !haystack.includes(name)).sort()
 
 // ── 6. 动效清单：每条过渡拆成 属性 / 时长 / 曲线，标出是否走变量 ──
+/** 从 start 处的 "name(" 开始，按括号配对截到对应的 ")"，嵌套的 var() 不会被截断 */
+function takeBalanced(value, start) {
+  let depth = 0
+  for (let index = start; index < value.length; index += 1) {
+    if (value[index] === '(') depth += 1
+    else if (value[index] === ')') {
+      depth -= 1
+      if (depth === 0) return value.slice(start, index + 1)
+    }
+  }
+  return value.slice(start)
+}
+
 function splitTopLevel(value) {
   const parts = []
   let depth = 0
@@ -200,12 +213,15 @@ for (const rule of rules) {
     const prop = declaration.slice(0, colon).trim()
     const value = declaration.slice(colon + 1).trim().replace(/\s+/g, ' ')
     if (prop === 'transform' && selector.includes(':active') && /scale\(/.test(value)) {
-      motion.push({ selector, kind: 'press', property: 'transform', value: value.match(/scale\([^)]*\)/)[0], media: rule.atRule })
+      motion.push({ selector, kind: 'press', property: 'transform', value: takeBalanced(value, value.indexOf('scale(')), media: rule.atRule })
     }
     if ((prop !== 'transition' && prop !== 'animation') || value === 'none') continue
     for (const item of splitTopLevel(value)) {
       const duration = (item.match(/var\(--dur-[\w-]+\)|\b[\d.]+m?s\b/) || [''])[0]
-      const easing = (item.match(/var\(--ease-[\w-]+\)|cubic-bezier\([^)]*\)|\b(ease-in-out|ease-in|ease-out|ease|linear)\b/) || ['ease'])[0]
+      const easingAt = item.search(/var\(--ease-|cubic-bezier\(/)
+      const easing = easingAt >= 0
+        ? takeBalanced(item, easingAt)
+        : (item.match(/\b(ease-in-out|ease-in|ease-out|ease|linear)\b/) || ['ease'])[0]
       const property = item.split(' ')[0]
       motion.push({
         selector,

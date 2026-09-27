@@ -20,9 +20,13 @@ const WINDOW = { width: 1440, height: 900, dpr: 2 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 let shots = 0
 
+// ⚠ npx 只是包装进程，kill 它杀不掉真正的 Electron——残留的实例会占着单实例锁，
+//   下一次启动（包括手动 npm run dev）会直接退出。所以放进独立进程组，退出时整组杀掉。
 const app = spawn('npx', ['electron', `--remote-debugging-port=${PORT}`, 'out/main/index.js'],
-  { stdio: 'ignore' })
-process.on('exit', () => app.kill('SIGKILL'))
+  { stdio: 'ignore', detached: true })
+process.on('exit', () => {
+  try { process.kill(-app.pid, 'SIGKILL') } catch { app.kill('SIGKILL') }
+})
 
 async function connect(pick) {
   for (let i = 0; i < 80; i += 1) {

@@ -1213,6 +1213,7 @@ function openPopover(menu) {
   const entry = popovers.find((p) => p.menu === menu)
   if (!entry) return
   closePopovers(menu) // 同层互斥
+  cancelPopoverExit(menu) // 淡出途中被重新打开：直接回到展开态
   menu.hidden = false
   entry.trigger?.setAttribute('aria-expanded', 'true')
   if (!isPopoverOpen(menu)) openPopovers.push(entry)
@@ -1223,8 +1224,42 @@ function closePopover(menu) {
   const at = openPopovers.findIndex((p) => p.menu === menu)
   if (at === -1) return
   const [entry] = openPopovers.splice(at, 1)
-  entry.menu.hidden = true
   entry.trigger?.setAttribute('aria-expanded', 'false')
+  hidePopoverWithExit(entry.menu)
+}
+
+// 浮层退场：先加 .closing 播放淡出（--dur-popover-exit），结束后再设 hidden。
+// ⚠ 必须能被打断——淡出期间用户可能又点开同一个菜单；此时 openPopover 会撤掉 .closing，
+//   这里的收尾检查到类名已不在就什么都不做，否则菜单会在刚打开时被隐藏掉。
+const popoverExitTimers = new WeakMap()
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+function hidePopoverWithExit(menu) {
+  if (menu.hidden || reducedMotionQuery.matches) {
+    menu.hidden = true
+    return
+  }
+  menu.classList.add('closing')
+  const finish = () => {
+    clearTimeout(popoverExitTimers.get(menu))
+    popoverExitTimers.delete(menu)
+    menu.removeEventListener('transitionend', onEnd)
+    if (!menu.classList.contains('closing')) return
+    menu.classList.remove('closing')
+    menu.hidden = true
+  }
+  const onEnd = (event) => {
+    if (event.target === menu && event.propertyName === 'opacity') finish()
+  }
+  menu.addEventListener('transitionend', onEnd)
+  // 兜底：元素不可见或过渡被跳过时 transitionend 不会触发
+  popoverExitTimers.set(menu, setTimeout(finish, 240))
+}
+
+function cancelPopoverExit(menu) {
+  menu.classList.remove('closing')
+  clearTimeout(popoverExitTimers.get(menu))
+  popoverExitTimers.delete(menu)
 }
 
 /** 关闭全部（可留一个）。点画布空白、切模块等场景用。 */

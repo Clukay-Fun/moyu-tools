@@ -4,7 +4,7 @@ window.MOTION_INVENTORY = [
     "selector": "input[type=\"text\"], input[type=\"number\"], input[type=\"search\"], textarea, select",
     "kind": "transition",
     "property": "border-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -13,7 +13,7 @@ window.MOTION_INVENTORY = [
     "selector": "input[type=\"text\"], input[type=\"number\"], input[type=\"search\"], textarea, select",
     "kind": "transition",
     "property": "background-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -22,7 +22,7 @@ window.MOTION_INVENTORY = [
     "selector": "input[type=\"text\"], input[type=\"number\"], input[type=\"search\"], textarea, select",
     "kind": "transition",
     "property": "box-shadow",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -31,7 +31,7 @@ window.MOTION_INVENTORY = [
     "selector": "input[type=\"checkbox\"], input[type=\"radio\"]",
     "kind": "transition",
     "property": "border-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -40,7 +40,7 @@ window.MOTION_INVENTORY = [
     "selector": "input[type=\"checkbox\"], input[type=\"radio\"]",
     "kind": "transition",
     "property": "background-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -49,7 +49,7 @@ window.MOTION_INVENTORY = [
     "selector": "input[type=\"checkbox\"], input[type=\"radio\"]",
     "kind": "transition",
     "property": "box-shadow",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -121,7 +121,7 @@ window.MOTION_INVENTORY = [
     "selector": ".nav-ic",
     "kind": "transition",
     "property": "color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -130,7 +130,7 @@ window.MOTION_INVENTORY = [
     "selector": ".nav-ic",
     "kind": "transition",
     "property": "border-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -139,7 +139,7 @@ window.MOTION_INVENTORY = [
     "selector": ".nav-ic",
     "kind": "transition",
     "property": "background-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -166,7 +166,7 @@ window.MOTION_INVENTORY = [
     "selector": ".submenu-item",
     "kind": "transition",
     "property": "color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -175,7 +175,7 @@ window.MOTION_INVENTORY = [
     "selector": ".submenu-item",
     "kind": "transition",
     "property": "border-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -184,7 +184,7 @@ window.MOTION_INVENTORY = [
     "selector": ".submenu-item",
     "kind": "transition",
     "property": "background-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -220,7 +220,7 @@ window.MOTION_INVENTORY = [
     "selector": ".gbtn, .primary",
     "kind": "transition",
     "property": "color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -229,7 +229,7 @@ window.MOTION_INVENTORY = [
     "selector": ".gbtn, .primary",
     "kind": "transition",
     "property": "border-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -238,7 +238,7 @@ window.MOTION_INVENTORY = [
     "selector": ".gbtn, .primary",
     "kind": "transition",
     "property": "background-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -256,7 +256,7 @@ window.MOTION_INVENTORY = [
     "selector": ".gbtn:active, .primary:active",
     "kind": "press",
     "property": "transform",
-    "value": "scale(0.98)",
+    "value": "scale(var(--press-scale))",
     "media": null
   },
   {
@@ -326,7 +326,7 @@ window.MOTION_INVENTORY = [
     "selector": ".theme-option",
     "kind": "transition",
     "property": "color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -335,7 +335,7 @@ window.MOTION_INVENTORY = [
     "selector": ".theme-option",
     "kind": "transition",
     "property": "background-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -344,7 +344,7 @@ window.MOTION_INVENTORY = [
     "selector": ".theme-option",
     "kind": "transition",
     "property": "border-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -353,7 +353,7 @@ window.MOTION_INVENTORY = [
     "selector": ".github-link",
     "kind": "transition",
     "property": "border-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -362,7 +362,7 @@ window.MOTION_INVENTORY = [
     "selector": ".github-link",
     "kind": "transition",
     "property": "background-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -380,25 +380,25 @@ window.MOTION_INVENTORY = [
     "selector": ".github-link:active",
     "kind": "press",
     "property": "transform",
-    "value": "scale(0.99)",
+    "value": "scale(var(--press-scale))",
     "media": null
   },
   {
     "selector": ".toast",
     "kind": "transition",
     "property": "opacity",
-    "duration": "180ms",
+    "duration": "var(--dur-panel)",
     "easing": "var(--ease-out)",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".toast",
     "kind": "transition",
     "property": "transform",
-    "duration": "180ms",
+    "duration": "var(--dur-panel)",
     "easing": "var(--ease-out)",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
@@ -414,7 +414,7 @@ window.MOTION_INVENTORY = [
     "selector": ".cbtn",
     "kind": "transition",
     "property": "color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -423,7 +423,7 @@ window.MOTION_INVENTORY = [
     "selector": ".cbtn",
     "kind": "transition",
     "property": "background-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -432,7 +432,7 @@ window.MOTION_INVENTORY = [
     "selector": ".cbtn",
     "kind": "transition",
     "property": "border-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -450,7 +450,7 @@ window.MOTION_INVENTORY = [
     "selector": ".cbtn:active",
     "kind": "press",
     "property": "transform",
-    "value": "scale(0.97)",
+    "value": "scale(var(--press-scale))",
     "media": null
   },
   {
@@ -493,7 +493,7 @@ window.MOTION_INVENTORY = [
     "selector": ".canvas-toggle-indicator",
     "kind": "transition",
     "property": "background-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -538,7 +538,7 @@ window.MOTION_INVENTORY = [
     "selector": ".txt-btn",
     "kind": "transition",
     "property": "color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -547,7 +547,7 @@ window.MOTION_INVENTORY = [
     "selector": ".txt-btn",
     "kind": "transition",
     "property": "background-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -556,7 +556,7 @@ window.MOTION_INVENTORY = [
     "selector": ".txt-btn:active:not(:disabled)",
     "kind": "press",
     "property": "transform",
-    "value": "scale(0.97)",
+    "value": "scale(var(--press-scale))",
     "media": null
   },
   {
@@ -597,18 +597,18 @@ window.MOTION_INVENTORY = [
     "selector": ".img-editor",
     "kind": "transition",
     "property": "opacity",
-    "duration": "180ms",
+    "duration": "var(--dur-panel)",
     "easing": "var(--ease-out)",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".img-editor",
     "kind": "transition",
     "property": "transform",
-    "duration": "180ms",
+    "duration": "var(--dur-panel)",
     "easing": "var(--ease-out)",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
@@ -624,7 +624,7 @@ window.MOTION_INVENTORY = [
     "selector": ".tool-btn",
     "kind": "transition",
     "property": "background-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -633,7 +633,7 @@ window.MOTION_INVENTORY = [
     "selector": ".tool-btn",
     "kind": "transition",
     "property": "color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -642,7 +642,7 @@ window.MOTION_INVENTORY = [
     "selector": ".tool-btn",
     "kind": "transition",
     "property": "border-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
@@ -667,7 +667,7 @@ window.MOTION_INVENTORY = [
     "selector": ".img-editor-swatch",
     "kind": "transition",
     "property": "border-color",
-    "duration": "var(--dur-press)",
+    "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
     "media": null
