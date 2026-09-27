@@ -49,6 +49,8 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-small);
   background: var(--card-thin);
+  box-shadow: var(--glass-rim);
+  backdrop-filter: var(--glass-blur-control);
 }
 
 .segments button {
@@ -66,7 +68,7 @@
 .segments button.on {
   color: var(--accent);
   background: var(--selection-bg);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: var(--glass-raised);
   font-weight: 600;
 }
 
@@ -79,10 +81,11 @@
 .format-grid button,
 .app-button {
   padding: 8px 4px;
-  border: 1px solid var(--control-border);
+  border: 1px solid var(--button-border);
   border-radius: var(--r-sm);
   color: var(--muted);
-  background: var(--control-bg);
+  background: var(--button-bg);
+  box-shadow: var(--button-shadow);
   cursor: pointer;
 }
 
@@ -591,10 +594,11 @@
 .image-panel .brush-choice button {
   min-width: 0;
   height: 34px;
-  border: 1px solid var(--control-border);
+  border: 1px solid var(--button-border);
   border-radius: 7px;
   color: var(--muted);
-  background: var(--control-bg);
+  background: var(--button-bg);
+  box-shadow: var(--button-shadow);
   font-size: var(--fs-xs);
   cursor: pointer;
 }
@@ -613,10 +617,11 @@
 
 .image-panel .format-choice button {
   height: 32px;
-  border: 1px solid var(--control-border);
+  border: 1px solid var(--button-border);
   border-radius: 7px;
   color: var(--muted);
-  background: var(--control-bg);
+  background: var(--button-bg);
+  box-shadow: var(--button-shadow);
   font-size: var(--fs-xs);
   cursor: pointer;
 }

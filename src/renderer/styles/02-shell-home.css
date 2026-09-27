@@ -17,31 +17,31 @@
   position: absolute;
   border-radius: 50%;
   filter: blur(86px);
-  opacity: 0.55;
+  opacity: 0.8;
 }
 
 .orb-1 {
   top: -150px;
   left: -80px;
-  width: 440px;
-  height: 440px;
-  background: #cdb8ee;
+  width: 520px;
+  height: 520px;
+  background: #b9a0f2;
 }
 
 .orb-2 {
   right: 6%;
   bottom: -140px;
-  width: 380px;
-  height: 380px;
-  background: #b6e1dc;
+  width: 460px;
+  height: 460px;
+  background: #92d8d0;
 }
 
 .orb-3 {
   top: 42%;
   left: 43%;
-  width: 290px;
-  height: 290px;
-  background: #eee0bc;
+  width: 340px;
+  height: 340px;
+  background: #f2cfa0;
 }
 
 [data-theme="dark"] .orb-1 {
@@ -57,7 +57,7 @@
 }
 
 [data-theme="dark"] .orb {
-  opacity: 0.2;
+  opacity: 0.3;
 }
 
 [data-theme="dark"] .panel {

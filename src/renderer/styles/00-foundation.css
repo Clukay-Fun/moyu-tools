@@ -17,7 +17,7 @@
   --accent-28: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.28);
   --background: #e7e9ee;
   --panel: rgba(255, 255, 255, 0.27);
-  --card: rgba(255, 255, 255, 0.2);
+  --card: rgba(255, 255, 255, 0.14);
   --card-thin: rgba(255, 255, 255, 0.13);
   --card-thick: rgba(255, 255, 255, 0.38);
   --card-solid: rgba(247, 248, 251, 0.97);
@@ -33,12 +33,17 @@
   /* 浮层专用底色。--card 是给大面板用的，做到 0.2 才够通透；
      浮层里有文字和色块，压在棋盘格、图片、控制点上时必须**挡住**下面的东西，
      0.82 仍会透出控制点的轮廓，所以提到 0.95。模糊只是质感，挡不挡得住看 alpha。 */
-  --menu-surface: rgba(255, 255, 255, 0.95);
+  --menu-surface: rgba(255, 255, 255, 0.9);
   --control-height: 36px;
   --control-bg: rgba(255, 255, 255, 0.2);
   --control-bg-hover: rgba(255, 255, 255, 0.36);
   --control-bg-active: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.12);
   --control-border: rgba(255, 255, 255, 0.58);
+  /* 浅色按钮不画边线（边框透明占位，尺寸不变），靠更白的底色 + 轻投影区分；深色沿用控件边框和底色 */
+  --button-border: transparent;
+  --button-bg: rgba(255, 255, 255, 0.62);
+  /* 浅色按钮不加顶部白高光：贴边的 1px 白线看起来就像一圈白边 */
+  --button-shadow: 0 1px 3px rgba(35, 39, 65, 0.1);
   --control-border-hover: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.42);
   --selection-bg: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.14);
   --selection-border: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.34);
@@ -140,6 +145,17 @@
   --shadow-small: 0 5px 14px rgba(35, 39, 65, 0.08);
   --shadow-panel: 0 20px 55px rgba(35, 39, 65, 0.14);
   --shadow: var(--shadow-panel);
+  /* 毛玻璃：模糊 + 提饱和让透出的背景色更鲜；边沿光（顶亮底暗）让玻璃有厚度；
+     顶部柔光是一层向下渐隐的内阴影，不占 background，悬停改底色时不会丢。 */
+  --glass-blur: blur(30px) saturate(180%);
+  --glass-blur-control: blur(18px) saturate(170%);
+  --glass-rim: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --glass-sheen: inset 0 18px 24px -20px rgba(255, 255, 255, 0.45);
+  --glass: var(--glass-rim), var(--glass-sheen);
+  /* 选项切换里「选中那一格」的浮起感 */
+  --glass-raised: 0 1px 4px rgba(35, 39, 65, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  /* 卡片折射边：左上亮、右下淡，画在 ::before 上，不占 background */
+  --glass-edge: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.2) 45%, rgba(255, 255, 255, 0.5));
   --radius: 16px;
   --radius-small: 10px;
   --font: "Segoe UI", "PingFang SC", "Microsoft YaHei UI", system-ui, sans-serif;
@@ -152,7 +168,7 @@
   --accent-b: 255;
   --background: #0b1018;
   --panel: rgba(13, 19, 29, 0.88);
-  --card: rgba(28, 37, 52, 0.72);
+  --card: rgba(28, 37, 52, 0.62);
   --card-thin: rgba(24, 32, 46, 0.62);
   --card-thick: rgba(29, 39, 55, 0.92);
   --card-solid: #151d2a;
@@ -165,11 +181,14 @@
   /* 引用了 --foreground 的变量必须在主题块里重新声明，否则继承的是 :root 上按浅色算好的值 */
   --border-neutral: color-mix(in srgb, var(--foreground) 13%, transparent);
   --border-neutral-hover: color-mix(in srgb, var(--foreground) 22%, transparent);
-  --menu-surface: rgba(19, 26, 38, 0.97);
+  --menu-surface: rgba(19, 26, 38, 0.92);
   --control-bg: rgba(25, 34, 49, 0.82);
   --control-bg-hover: rgba(35, 46, 65, 0.92);
   --control-bg-active: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.16);
   --control-border: rgba(159, 177, 204, 0.2);
+  --button-border: var(--control-border);
+  --button-bg: var(--control-bg);
+  --button-shadow: var(--glass);
   --control-border-hover: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.52);
   --selection-bg: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.18);
   --selection-border: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.42);
@@ -179,6 +198,13 @@
   --checker: rgba(195, 210, 235, 0.055);
   --shadow-small: 0 7px 20px rgba(0, 0, 0, 0.28);
   --shadow-panel: 0 24px 64px rgba(0, 0, 0, 0.42);
+  --glass-blur: blur(30px) saturate(135%);
+  --glass-blur-control: blur(18px) saturate(130%);
+  --glass-rim: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  --glass-sheen: inset 0 22px 26px -18px rgba(255, 255, 255, 0.07), inset 0 -12px 18px -14px rgba(0, 0, 0, 0.18);
+  --glass: var(--glass-rim), var(--glass-sheen);
+  --glass-raised: 0 2px 6px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --glass-edge: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.1));
 }
 
 *,

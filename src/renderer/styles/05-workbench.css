@@ -288,6 +288,8 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
   border: 1px solid var(--control-border);
   border-radius: var(--r-md);
   background: var(--control-bg);
+  box-shadow: var(--glass-rim);
+  backdrop-filter: var(--glass-blur-control);
 }
 
 .illustrator-mode-switch button {
@@ -304,6 +306,7 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
 .illustrator-mode-switch button.active {
   color: var(--accent);
   background: var(--accent-10);
+  box-shadow: var(--glass-raised);
   font-weight: 650;
 }
 
@@ -607,6 +610,8 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
   border: 1px solid var(--border);
   border-radius: var(--r-md);
   background: var(--card-thin);
+  box-shadow: var(--glass-rim);
+  backdrop-filter: var(--glass-blur-control);
 }
 
 .barcode-mode-switch::before {
@@ -616,7 +621,7 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
   border-radius: var(--r-sm);
   border: 1px solid var(--selection-border);
   background: var(--selection-bg);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: var(--glass-raised);
   content: "";
   pointer-events: none;
   transform: translateX(0);

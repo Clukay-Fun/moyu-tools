@@ -161,13 +161,8 @@
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   background: var(--card);
-  box-shadow: var(--shadow-small), inset 0 1px rgba(255, 255, 255, 0.36);
-  backdrop-filter: blur(22px) saturate(145%);
-}
-
-[data-theme="dark"] .settings-section-body {
-  box-shadow: var(--shadow-small), inset 0 1px rgba(255, 255, 255, 0.055);
-  backdrop-filter: blur(22px) saturate(115%);
+  box-shadow: var(--shadow-small), var(--glass);
+  backdrop-filter: var(--glass-blur);
 }
 
 .theme-options {
@@ -201,6 +196,7 @@
   border-color: var(--accent);
   color: var(--accent);
   background: var(--accent-10);
+  box-shadow: var(--glass-raised);
 }
 
 .theme-option input {

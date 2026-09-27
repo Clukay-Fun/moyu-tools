@@ -72,6 +72,13 @@
     .cat-slogan.play { animation: home-slogan-enter 580ms cubic-bezier(0.22, 0.8, 0.32, 1) both; }
     .cat-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
     .cat-table th, .cat-table td { padding: 6px 10px; border-bottom: 1px solid var(--hairline); text-align: left; white-space: nowrap; }
+    .cat-glass-stage { position: relative; display: flex; gap: 14px; align-items: flex-start; overflow: hidden; background:
+      radial-gradient(circle at 18% 30%, rgba(124, 108, 255, 0.55), transparent 42%),
+      radial-gradient(circle at 70% 70%, rgba(99, 214, 221, 0.55), transparent 40%),
+      radial-gradient(circle at 88% 18%, rgba(245, 158, 178, 0.5), transparent 36%), var(--background); }
+    .cat-glass-demo { display: grid; gap: 10px; padding: 14px; }
+    .cat-glass-menu { position: static; display: grid; min-width: 120px; }
+    .cat-glass-menu button { padding: 6px 10px; border: 0; border-radius: 7px; color: var(--foreground); background: transparent; text-align: left; font: inherit; }
     .cat-table th { position: sticky; top: 0; background: var(--card-solid); color: var(--faint); font-weight: 600; }
     .cat-table td code { font-size: 11px; }
     .cat-table tr.raw td:nth-child(3), .cat-table tr.raw td:nth-child(4) { color: var(--danger); }
@@ -123,6 +130,25 @@
       <div class="cat-item">
         <dl class="cat-meta"><dt>间距</dt><dd><code>--sp-1</code> 到 <code>--sp-5</code>（4 / 6 / 8 / 12 / 16）</dd></dl>
         <div class="cat-stage"><div class="cat-scale" data-scale="sp"></div></div>
+      </div>
+      <div class="cat-item">
+        <dl class="cat-meta"><dt>毛玻璃</dt><dd><code>--glass-blur</code>（卡片、菜单）/ <code>--glass-blur-control</code>（按钮、切换槽）负责模糊与提饱和；<code>--glass-rim</code> 边沿光（顶亮底暗）；<code>--glass-sheen</code> 顶部柔光；二者合成 <code>--glass</code>。<code>--glass-raised</code> 用于选项切换的选中格；<code>--glass-edge</code> 是卡片与设置块的折射边（左上亮、右下淡，画在 <code>::before</code>）。背后有颜色时效果才明显，下面垫了彩色光斑演示</dd></dl>
+        <div class="cat-pair">
+        <div class="cat-stage cat-glass-stage" data-theme="light"><span class="cat-label">浅色</span>
+          <div class="glass-card cat-glass-demo">
+            <div class="segments"><button type="button" class="on">单个</button><button type="button">批量</button></div>
+            <div style="display:flex;gap:8px"><button class="gbtn" type="button">次要按钮</button><button class="cbtn ghost" type="button">画布按钮</button></div>
+          </div>
+          <div class="app-menu cat-glass-menu"><button type="button">打开项目</button><button type="button">保存项目</button><button type="button">导出 PNG</button></div>
+        </div>
+        <div class="cat-stage cat-glass-stage" data-theme="dark"><span class="cat-label">深色</span>
+          <div class="glass-card cat-glass-demo">
+            <div class="segments"><button type="button" class="on">单个</button><button type="button">批量</button></div>
+            <div style="display:flex;gap:8px"><button class="gbtn" type="button">次要按钮</button><button class="cbtn ghost" type="button">画布按钮</button></div>
+          </div>
+          <div class="app-menu cat-glass-menu"><button type="button">打开项目</button><button type="button">保存项目</button><button type="button">导出 PNG</button></div>
+        </div>
+        </div>
       </div>
     </section>
 
@@ -250,6 +276,7 @@
         <dl class="cat-meta">
           <dt>主按钮</dt><dd><code>.gbtn.primary</code> / <code>.primary</code>——每个区域最多一个，承担当前任务的最终动作（导出、保存、生成）</dd>
           <dt>次按钮</dt><dd><code>.gbtn</code>——添加文件、打开、辅助动作</dd>
+          <dt>按钮外观</dt><dd>边框、底色、阴影取 <code>--button-border</code> / <code>--button-bg</code> / <code>--button-shadow</code>：浅色<b>不画边线</b>（边框透明占位），靠更白的底色 + 轻投影区分，也不加顶部白高光；深色沿用控件边框与玻璃高光</dd>
           <dt>弱按钮</dt><dd><code>.gbtn.ghost</code>——清空、恢复默认、取消这类不改变结果的动作</dd>
           <dt>危险按钮</dt><dd><code>.gbtn.danger</code>——删除、覆盖；颜色取 <code>--danger</code></dd>
           <dt>现用模块</dt><dd>全部模块</dd>
@@ -364,7 +391,7 @@
     <section class="cat-section" id="rules">
       <h2>使用约定</h2>
       <p class="cat-rule">颜色、字号、圆角、间距从变量取；需要新值时先加变量，再在这里补示例。</p>
-      <p class="cat-rule">浅色模式下 <code>--border</code> / <code>--control-border</code> 是<b>白色半透明</b>，放在浅底上几乎看不见——需要可见描边时用 <code>color-mix(in srgb, var(--foreground) 13%, transparent)</code>。这一条是第一批统一的候选：给中性灰描边单独立一个变量。</p>
+      <p class="cat-rule">浅色模式下 <code>--border</code> / <code>--control-border</code> 是<b>白色半透明</b>，放在浅底上几乎看不见——需要可见描边时用 <code>--border-neutral</code>（悬停 <code>--border-neutral-hover</code>）；按钮不走这条，见上方「按钮外观」。</p>
       <p class="cat-rule">键盘焦点统一为「实线内圈 + 柔光」（<code>--focus-ring-color</code> / <code>--focus-glow</code>），只在 Tab 操作时出现；焦点样式里不要改 <code>border-radius</code>，outline 与 box-shadow 本身会跟随控件圆角；新增的可交互控件如果真实的 input 被隐藏了，要把焦点环画到可见的替身上（参考开关）。</p>
       <p class="cat-rule">目录建成时顺手修掉的：深色模式下 <code>.gbtn.primary</code> 丢失主题色填充（一条多余的 <code>[data-theme="dark"] .gbtn</code> 规则特异性更高）；开关禁用态与可用态看不出区别。</p>
       <p class="cat-rule warn">刀模画布、图片编辑器、截图覆盖层有各自的交互约束，<b>不</b>为了统一去改它们已验收的样式。</p>

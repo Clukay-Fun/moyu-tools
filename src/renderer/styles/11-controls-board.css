@@ -1,14 +1,9 @@
 /* ══ F-16 · 快捷键设置 ══ */
 .shortcut-status[hidden] { display: none; }
 
-/* 设置页的控件描边：--control-border 在浅色模式是白色，这里统一换成中性灰 */
-.page-settings .gbtn,
+/* 设置页的输入框描边：--control-border 在浅色模式是白色，这里换成中性灰（按钮已统一走 --button-border） */
 .page-settings .accent-current-row #color-hex {
   border-color: var(--border-neutral);
-}
-
-.page-settings .gbtn:hover {
-  border-color: var(--border-neutral-hover);
 }
 
 .shortcut-input {
@@ -48,8 +43,8 @@
   border: 1px solid var(--border);
   border-radius: var(--r-md);
   background: var(--menu-surface);
-  box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(24px) saturate(150%);
+  box-shadow: var(--shadow-panel), var(--glass-rim);
+  backdrop-filter: var(--glass-blur);
   transform-origin: top left;
   transition: opacity var(--dur-popover) var(--ease-out),
               transform var(--dur-popover) var(--ease-out);

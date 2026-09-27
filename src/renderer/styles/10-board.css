@@ -68,10 +68,11 @@
   justify-content: center;
   gap: var(--sp-2);
   padding: 7px 13px;
-  border: 1px solid var(--control-border);
+  border: 1px solid var(--button-border);
   border-radius: var(--radius-small);
   color: var(--foreground);
-  background: var(--control-bg);
+  background: var(--button-bg);
+  box-shadow: var(--button-shadow);
   font: 13px var(--font);
   cursor: pointer;
   transition:
@@ -95,8 +96,9 @@
 .cbtn.ghost {
   padding: 5px 10px;
   font-size: var(--fs-md);
-  background: var(--control-bg);
-  backdrop-filter: blur(18px) saturate(150%);
+  background: var(--button-bg);
+  box-shadow: var(--button-shadow);
+  backdrop-filter: var(--glass-blur-control);
 }
 
 /* 截图分裂按钮：视觉是一个整体 */
@@ -125,8 +127,8 @@
   border-radius: 11px;
   /* ⚠ 不用 --card：菜单会浮在棋盘格和图片上方，0.2 的底色让文字和色块糊成一片。 */
   background: var(--menu-surface);
-  box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(24px) saturate(150%);
+  box-shadow: var(--shadow-panel), var(--glass-rim);
+  backdrop-filter: var(--glass-blur);
   transform-origin: top left;
   transition: opacity var(--dur-popover) var(--ease-out),
               transform var(--dur-popover) var(--ease-out);
