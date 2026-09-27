@@ -127,7 +127,7 @@ export function initIllustrator({ showToast, bindFileDropZone, droppedFilePaths 
       renderIllustratorFiles()
       appendIllustratorLog(`已添加 ${added.length} 个文件，共 ${illustratorState.inputs.length} 个。`)
     } catch (error) {
-      appendIllustratorLog(`添加失败：${error instanceof Error ? error.message : String(error)}`)
+      appendIllustratorLog(`添加失败：${cleanIpcError(error instanceof Error ? error.message : String(error))}`)
       showToast('无法添加 Illustrator 文件')
     }
   }
@@ -171,7 +171,7 @@ export function initIllustrator({ showToast, bindFileDropZone, droppedFilePaths 
         appendIllustratorLog('任务已取消；当前 COM 操作完成后停止。')
       }
     } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error)
+      const reason = cleanIpcError(error instanceof Error ? error.message : String(error))
       illustratorState.inputs.forEach((file) => {
         if (illustratorState.statuses.get(file.id) === '处理中') {
           illustratorState.statuses.set(file.id, '失败')

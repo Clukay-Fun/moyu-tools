@@ -835,7 +835,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
         setBarcodeMessage('已取消保存。')
       }
     } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error)
+      const reason = cleanIpcError(error instanceof Error ? error.message : String(error))
       setBarcodeMessage(`保存失败：${reason}`, 'error')
       showToast('条码保存失败，请检查目标位置是否可写')
     } finally {
@@ -859,7 +859,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
       setBarcodeMessage('条码矢量图已复制到剪贴板。', 'success')
       showToast('条码矢量图已复制')
     } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error)
+      const reason = cleanIpcError(error instanceof Error ? error.message : String(error))
       setBarcodeMessage(`复制失败：${reason}`, 'error')
       showToast('条码矢量图复制失败')
     } finally {
@@ -978,7 +978,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
         showToast(label)
       }
     } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error)
+      const reason = cleanIpcError(error instanceof Error ? error.message : String(error))
       setBarcodeMessage(`联动失败：${reason}`, 'error')
       showToast('请确认 Adobe 软件已安装')
     } finally {
@@ -1287,7 +1287,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
         stopProgress()
       }
     } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error)
+      const reason = cleanIpcError(error instanceof Error ? error.message : String(error))
       barcodeBatchSummary.textContent = `批量保存失败：${reason}`
       showToast('批量条码保存失败')
     } finally {

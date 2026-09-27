@@ -779,7 +779,7 @@ function ensureBoardController() {
       await window.api.writeRecovery({ data: bytes, projectPath: boardController.filePath })
     },
     // 快照失败不能打断用户操作，只提示一次
-    onError: (error) => showToast(`恢复快照写入失败：${error.message}`)
+    onError: (error) => showToast(`恢复快照写入失败：${cleanIpcError(error?.message ?? error)}`)
   }))
 
   boardController.mount({
@@ -852,7 +852,7 @@ async function checkRecoverySnapshot(controller) {
   try {
     found = await window.api.readRecovery()
   } catch (error) {
-    showToast(`读取恢复快照失败：${error.message}`)
+    showToast(`读取恢复快照失败：${cleanIpcError(error?.message ?? error)}`)
     return
   }
   if (found?.status === 'corrupt') {
@@ -1098,7 +1098,7 @@ async function beginRegionScreenshot() {
     return true
   } catch (error) {
     regionCaptureBusy = false
-    showToast(`截图失败：${error instanceof Error ? error.message : error}`)
+    showToast(`截图失败：${cleanIpcError(error?.message ?? error)}`)
     return false
   }
 }

@@ -1878,7 +1878,7 @@ export function initPdfTools({
       setPdfResult(message, hasOutput ? 'success' : '')
       if (hasOutput) showToast(message)
     } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error)
+      const reason = cleanIpcError(error?.message ?? error)
       if (!isPdfWatermarkAction()) {
         state.pdfFileStatuses = currentPdfFiles().map(() => ({
           status: '导出失败',
@@ -1915,7 +1915,7 @@ export function initPdfTools({
       renderPdfFiles()
       setPdfResult(`${input.name} 已添加`)
     } catch (error) {
-      setPdfResult(`无法选择文件：${error instanceof Error ? error.message : String(error)}`, 'error')
+      setPdfResult(`无法选择文件：${cleanIpcError(error?.message ?? error)}`, 'error')
     }
   })
   pdfEmptyAddButton.addEventListener('click', () => pdfAddFilesButton.click())
@@ -1935,7 +1935,7 @@ export function initPdfTools({
       setPdfDestination(result)
       setPdfResult('输出位置已选择')
     } catch (error) {
-      setPdfResult(`无法选择输出位置：${error instanceof Error ? error.message : String(error)}`, 'error')
+      setPdfResult(`无法选择输出位置：${cleanIpcError(error?.message ?? error)}`, 'error')
     }
   })
   pdfFileInput.addEventListener('change', () => addPdfToolFiles(pdfFileInput.files))
@@ -2166,7 +2166,7 @@ export function initPdfTools({
       document.querySelector('#pdf-page-output-path').textContent = result.path
       updatePdfRunState()
     } catch (error) {
-      setPdfResult(`无法选择输出位置：${error instanceof Error ? error.message : String(error)}`, 'error')
+      setPdfResult(`无法选择输出位置：${cleanIpcError(error?.message ?? error)}`, 'error')
     }
   })
   document.querySelector('#pdf-save-page-organizer').addEventListener('click', async () => {
@@ -2189,7 +2189,7 @@ export function initPdfTools({
         closePdfPageOrganizer()
       }
     } catch (error) {
-      setPdfResult(`保存失败：${error instanceof Error ? error.message : String(error)}`, 'error')
+      setPdfResult(`保存失败：${cleanIpcError(error?.message ?? error)}`, 'error')
     } finally {
       state.pdfBusy = false
       updatePdfRunState()

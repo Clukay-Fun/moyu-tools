@@ -281,7 +281,7 @@ export function initFormatFactory({ state, renderSubmenu, showToast, bindFileDro
       addFormatInputs(result.files)
       if (result.errors.length) showToast(`${result.errors.length} 个文件未能加入`)
     } catch (error) {
-      showToast(`添加文件失败：${error.message}`)
+      showToast(`添加文件失败：${cleanIpcError(error?.message ?? error)}`)
     }
   }
 
@@ -293,7 +293,7 @@ export function initFormatFactory({ state, renderSubmenu, showToast, bindFileDro
       if (result.truncated) showToast('文件超过 100 个，已取前 100 个')
       else if (result.errors.length) showToast(`${result.errors.length} 个文件未能加入`)
     } catch (error) {
-      showToast(`读取文件夹失败：${error.message}`)
+      showToast(`读取文件夹失败：${cleanIpcError(error?.message ?? error)}`)
     }
   }
 
@@ -391,7 +391,7 @@ export function initFormatFactory({ state, renderSubmenu, showToast, bindFileDro
         showToast('格式转换任务完成')
       }
     } catch (error) {
-      formatStatusText.textContent = `处理失败：${error.message}`
+      formatStatusText.textContent = `处理失败：${cleanIpcError(error?.message ?? error)}`
       showToast('格式转换失败')
     } finally {
       formatState.busy = false
@@ -424,7 +424,7 @@ export function initFormatFactory({ state, renderSubmenu, showToast, bindFileDro
         showToast('格式转换结果已保存')
       }
     } catch (error) {
-      showToast(`保存失败：${error.message}`)
+      showToast(`保存失败：${cleanIpcError(error?.message ?? error)}`)
     } finally {
       formatState.saving = false
       formatSaveButton.disabled = formatState.results.length === 0

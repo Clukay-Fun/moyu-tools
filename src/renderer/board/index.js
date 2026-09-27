@@ -49,6 +49,7 @@ import {
 } from './export.js'
 import { defaultImageSize, placeNodes, LAYOUT } from './layout.js'
 import { BoardOverlay } from './overlay.js'
+import { cleanIpcError } from '../comErrors.js'
 import {
   createGuide, moveGuide, removeGuide, shouldDropGuide, validateGuides,
   computeSnap, RULER, GRID
@@ -1471,7 +1472,7 @@ export class BoardController {
         })
       }
     } catch (error) {
-      this.onStatus({ error: `拖入失败：${error instanceof Error ? error.message : String(error)}` })
+      this.onStatus({ error: `拖入失败：${cleanIpcError(error?.message ?? error)}` })
     }
   }
 
@@ -1642,7 +1643,7 @@ export class BoardController {
       return true
     } catch (error) {
       // 抛错路径同样不得回收资源
-      this.onStatus({ error: error instanceof Error ? error.message : '保存失败' })
+      this.onStatus({ error: cleanIpcError(error?.message ?? error) || '保存失败' })
       return false
     }
   }
@@ -1678,7 +1679,7 @@ export class BoardController {
       this.onStatus({ opened: result.path })
       return true
     } catch (error) {
-      this.onStatus({ error: error instanceof Error ? error.message : '打开失败' })
+      this.onStatus({ error: cleanIpcError(error?.message ?? error) || '打开失败' })
       return false
     }
   }
@@ -1723,7 +1724,7 @@ export class BoardController {
       }
       return { status: result?.status ?? 'cancelled', plan }
     } catch (error) {
-      this.onStatus({ error: error instanceof Error ? error.message : '导出失败' })
+      this.onStatus({ error: cleanIpcError(error?.message ?? error) || '导出失败' })
       return { status: 'error' }
     }
   }

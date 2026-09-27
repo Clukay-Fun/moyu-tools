@@ -1,4 +1,5 @@
 import { installTooltips } from './tooltip.js'
+import { cleanIpcError } from './comErrors.js'
 
 installTooltips()
 
@@ -291,7 +292,7 @@ async function withBusy(message, action) {
   try {
     await action()
   } catch (error) {
-    tip.textContent = error?.message || '截图操作失败，请重试'
+    tip.textContent = cleanIpcError(error?.message ?? error) || '截图操作失败，请重试'
   } finally {
     busy = false
     toolbar.querySelectorAll('button').forEach((button) => { button.disabled = false })
@@ -617,7 +618,7 @@ async function initialize(nextSessionId) {
 
 function startSession(nextSessionId) {
   initialize(nextSessionId).catch((error) => {
-    tip.textContent = error?.message || '截图初始化失败'
+    tip.textContent = cleanIpcError(error?.message ?? error) || '截图初始化失败'
     setTimeout(cancelSelection, 1200)
   })
 }

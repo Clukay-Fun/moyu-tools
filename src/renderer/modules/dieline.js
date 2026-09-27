@@ -403,7 +403,7 @@ export function initDieline({ showToast }) {
       showToast('刀模 PDF 已保存')
     } catch (error) {
       exportStatus.classList.add('error')
-      exportStatus.textContent = `导出失败：${error.message || error}`
+      exportStatus.textContent = `导出失败：${cleanIpcError(error?.message ?? error)}`
     } finally {
       exporting = false
       exportButton.disabled = !currentModel
