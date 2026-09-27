@@ -113,7 +113,7 @@ try {
 
   const MODULES = [
     ['pdf', 'PDF'], ['ai', 'Adobe'], ['bc', '条码'],
-    ['image', '图片画布'], ['video', '格式工厂'], ['more', '设置']
+    ['image', '图片画布'], ['video', '格式工厂'], ['dieline', '刀模'], ['more', '设置']
   ]
 
   for (const theme of ['light', 'dark']) {
@@ -123,7 +123,7 @@ try {
 
     for (const [mod, label] of MODULES) {
       await P.ev(`document.querySelector('.nav-ic[data-module="${mod}"]').click(); true`)
-      await sleep(mod === 'image' ? 1400 : 700)
+      await sleep(mod === 'image' ? 1400 : mod === 'dieline' ? 2200 : 700)
       lastPx = await shot(P, `${theme}-${mod}-默认`)
       record(`${theme}-${mod}-默认`, `${label} 模块 · 默认状态`)
     }

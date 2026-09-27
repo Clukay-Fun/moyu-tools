@@ -326,45 +326,45 @@ window.MOTION_INVENTORY = [
     "selector": ".theme-option",
     "kind": "transition",
     "property": "color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".theme-option",
     "kind": "transition",
     "property": "background-color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".theme-option",
     "kind": "transition",
     "property": "border-color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".github-link",
     "kind": "transition",
     "property": "border-color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".github-link",
     "kind": "transition",
     "property": "background-color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
@@ -414,27 +414,27 @@ window.MOTION_INVENTORY = [
     "selector": ".cbtn",
     "kind": "transition",
     "property": "color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".cbtn",
     "kind": "transition",
     "property": "background-color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".cbtn",
     "kind": "transition",
     "property": "border-color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
@@ -442,7 +442,7 @@ window.MOTION_INVENTORY = [
     "kind": "transition",
     "property": "transform",
     "duration": "160ms",
-    "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+    "easing": "var(--ease-out)",
     "tokenized": false,
     "media": null
   },
@@ -493,18 +493,18 @@ window.MOTION_INVENTORY = [
     "selector": ".canvas-toggle-indicator",
     "kind": "transition",
     "property": "background-color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".canvas-toggle-indicator::after",
     "kind": "transition",
     "property": "transform",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
@@ -529,27 +529,27 @@ window.MOTION_INVENTORY = [
     "selector": ".txt-btn",
     "kind": "transition",
     "property": "transform",
-    "duration": "140ms",
-    "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
-    "tokenized": false,
+    "duration": "var(--dur-press)",
+    "easing": "var(--ease-out)",
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".txt-btn",
     "kind": "transition",
     "property": "color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".txt-btn",
     "kind": "transition",
     "property": "background-color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
@@ -582,7 +582,7 @@ window.MOTION_INVENTORY = [
     "kind": "transition",
     "property": "transform",
     "duration": "160ms",
-    "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+    "easing": "var(--ease-out)",
     "tokenized": false,
     "media": null
   },
@@ -598,7 +598,7 @@ window.MOTION_INVENTORY = [
     "kind": "transition",
     "property": "opacity",
     "duration": "180ms",
-    "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+    "easing": "var(--ease-out)",
     "tokenized": false,
     "media": null
   },
@@ -607,7 +607,7 @@ window.MOTION_INVENTORY = [
     "kind": "transition",
     "property": "transform",
     "duration": "180ms",
-    "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+    "easing": "var(--ease-out)",
     "tokenized": false,
     "media": null
   },
@@ -615,36 +615,36 @@ window.MOTION_INVENTORY = [
     "selector": ".tool-btn",
     "kind": "transition",
     "property": "transform",
-    "duration": "140ms",
-    "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
-    "tokenized": false,
+    "duration": "var(--dur-press)",
+    "easing": "var(--ease-out)",
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".tool-btn",
     "kind": "transition",
     "property": "background-color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".tool-btn",
     "kind": "transition",
     "property": "color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".tool-btn",
     "kind": "transition",
     "property": "border-color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {
@@ -658,18 +658,18 @@ window.MOTION_INVENTORY = [
     "selector": ".img-editor-swatch",
     "kind": "transition",
     "property": "transform",
-    "duration": "140ms",
-    "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
-    "tokenized": false,
+    "duration": "var(--dur-press)",
+    "easing": "var(--ease-out)",
+    "tokenized": true,
     "media": null
   },
   {
     "selector": ".img-editor-swatch",
     "kind": "transition",
     "property": "border-color",
-    "duration": "140ms",
+    "duration": "var(--dur-press)",
     "easing": "ease",
-    "tokenized": false,
+    "tokenized": true,
     "media": null
   },
   {

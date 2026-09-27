@@ -27,6 +27,9 @@
   --muted: #707387;
   --faint: #9da0b3;
   --danger: #d54f50;
+  /* 可见的中性描边：--border / --control-border 在浅色下是白色半透明，浅底上看不见 */
+  --border-neutral: color-mix(in srgb, var(--foreground) 13%, transparent);
+  --border-neutral-hover: color-mix(in srgb, var(--foreground) 22%, transparent);
   /* 浮层专用底色。--card 是给大面板用的，做到 0.2 才够通透；
      浮层里有文字和色块，压在棋盘格、图片、控制点上时必须**挡住**下面的东西，
      0.82 仍会透出控制点的轮廓，所以提到 0.95。模糊只是质感，挡不挡得住看 alpha。 */
@@ -149,6 +152,9 @@
   --muted: #a8b3c7;
   --faint: #758198;
   --danger: #e36a6c;
+  /* 引用了 --foreground 的变量必须在主题块里重新声明，否则继承的是 :root 上按浅色算好的值 */
+  --border-neutral: color-mix(in srgb, var(--foreground) 13%, transparent);
+  --border-neutral-hover: color-mix(in srgb, var(--foreground) 22%, transparent);
   --menu-surface: rgba(19, 26, 38, 0.97);
   --control-bg: rgba(25, 34, 49, 0.82);
   --control-bg-hover: rgba(35, 46, 65, 0.92);
@@ -494,7 +500,7 @@ label {
 }
 
 .brand b {
-  font-size: 15px;
+  font-size: var(--fs-lg);
   white-space: nowrap;
 }
 
@@ -593,7 +599,7 @@ label {
 .search-group {
   padding: 10px 8px 5px;
   color: var(--accent);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   font-weight: 700;
   letter-spacing: 0.04em;
 }
@@ -684,7 +690,7 @@ label {
   border: 1px solid var(--border);
   border-radius: var(--radius-small);
   background: rgba(255, 255, 255, 0.35);
-  font-size: 12px;
+  font-size: var(--fs-md);
   backdrop-filter: blur(18px);
 }
 
@@ -856,7 +862,7 @@ label {
   z-index: 1;
   padding: 8px 8px 5px;
   color: var(--faint);
-  font-size: 10px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -932,7 +938,7 @@ label {
 .submenu-soon {
   padding: 9px;
   color: var(--faint);
-  font-size: 12px;
+  font-size: var(--fs-md);
 }
 
 .content {
@@ -1159,7 +1165,7 @@ body.home-active .page-home.active h1.home-slogan {
   align-items: center;
   gap: 6px;
   color: var(--faint);
-  font-size: 11px;
+  font-size: var(--fs-sm);
 }
 
 .pdf-options select,
@@ -1206,7 +1212,7 @@ body.home-active .page-home.active h1.home-slogan {
   max-width: 150px;
   overflow: hidden;
   color: var(--faint);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1262,7 +1268,7 @@ body.home-active .page-home.active h1.home-slogan {
   grid-column: 1 / -1;
   margin: 0;
   color: var(--foreground);
-  font-size: 12px;
+  font-size: var(--fs-md);
 }
 
 .pdf-watermark-mode {
@@ -1293,7 +1299,7 @@ body.home-active .page-home.active h1.home-slogan {
   display: grid;
   gap: 5px;
   color: var(--faint);
-  font-size: 10px;
+  font-size: var(--fs-xs);
 }
 
 .pdf-watermark-controls label:first-child,
@@ -1353,7 +1359,7 @@ body.home-active .page-home.active h1.home-slogan {
 .pdf-watermark-file-strip > span {
   padding-top: 7px;
   color: var(--faint);
-  font-size: 10px;
+  font-size: var(--fs-xs);
 }
 
 .pdf-watermark-file,
@@ -1367,7 +1373,7 @@ body.home-active .page-home.active h1.home-slogan {
   border-radius: 8px;
   color: var(--muted);
   background: var(--card-thin);
-  font-size: 10px;
+  font-size: var(--fs-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1415,7 +1421,7 @@ body.home-active .page-home.active h1.home-slogan {
   display: block;
   margin-top: 3px;
   color: var(--faint);
-  font-size: 10px;
+  font-size: var(--fs-xs);
 }
 
 .pdf-watermark-run {
@@ -1461,7 +1467,7 @@ body.home-active .page-home.active h1.home-slogan {
 .pdf-watermark-preview-nav span {
   min-width: 76px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   text-align: center;
 }
 
@@ -1530,7 +1536,7 @@ body.home-active .page-home.active h1.home-slogan {
 .pdf-page-dialog > header span {
   overflow: hidden;
   color: var(--faint);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1602,7 +1608,7 @@ body.home-active .page-home.active h1.home-slogan {
   flex: 1;
   overflow: hidden;
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--fs-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1652,7 +1658,7 @@ body.home-active .page-home.active h1.home-slogan {
   overflow: hidden;
   max-width: min(48vw, 560px);
   color: var(--faint);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1823,7 +1829,7 @@ body.home-active .page-home.active h1.home-slogan {
   border-radius: var(--r-md);
   color: var(--accent);
   background: var(--accent-10);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   font-weight: 800;
 }
 
@@ -1883,7 +1889,7 @@ body.home-active .page-home.active h1.home-slogan {
 .pdf-file-name small {
   overflow: hidden;
   color: var(--faint);
-  font-size: 10px;
+  font-size: var(--fs-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2375,7 +2381,7 @@ body.home-active .page-home.active h1.home-slogan {
   min-height: 18px;
   margin: -5px 2px 0;
   color: var(--faint);
-  font-size: 11px;
+  font-size: var(--fs-sm);
 }
 
 .barcode-message.error {
@@ -2592,7 +2598,7 @@ body.home-active .page-home.active h1.home-slogan {
   justify-content: space-between;
   gap: 8px;
   color: var(--faint);
-  font-size: 10px;
+  font-size: var(--fs-xs);
 }
 
 .batch-item footer span:first-child {
@@ -2610,7 +2616,7 @@ body.home-active .page-home.active h1.home-slogan {
   display: grid;
   place-items: center;
   color: #d54f50;
-  font-size: 11px;
+  font-size: var(--fs-sm);
   text-align: center;
 }
 
@@ -2656,7 +2662,7 @@ body.home-active .page-home.active h1.home-slogan {
   align-items: center;
   gap: var(--sp-2);
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--fs-xs);
 }
 
 .barcode-font-picker[hidden],
@@ -2721,7 +2727,7 @@ body.home-active .page-home.active h1.home-slogan {
 
 .label {
   color: var(--faint);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -2744,7 +2750,7 @@ body.home-active .page-home.active h1.home-slogan {
   border-radius: 7px;
   color: var(--muted);
   background: transparent;
-  font-size: 11px;
+  font-size: var(--fs-sm);
   cursor: pointer;
 }
 
@@ -2812,7 +2818,7 @@ body.home-active .page-home.active h1.home-slogan {
 
 .app-button span {
   color: var(--faint);
-  font-size: 10px;
+  font-size: var(--fs-xs);
 }
 
 .image-editor {
@@ -2854,14 +2860,14 @@ body.home-active .page-home.active h1.home-slogan {
   max-width: 160px;
   overflow: hidden;
   color: var(--foreground);
-  font-size: 12px;
+  font-size: var(--fs-md);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .image-zoom {
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-md);
 }
 
 .image-history {
@@ -2932,7 +2938,7 @@ body.home-active .page-home.active h1.home-slogan {
   color: #fff;
   background: rgba(35, 39, 52, 0.92);
   content: attr(data-name);
-  font-size: 10px;
+  font-size: var(--fs-xs);
   opacity: 0;
   pointer-events: none;
   transform: translateX(-50%);
@@ -3079,7 +3085,7 @@ body.home-active .page-home.active h1.home-slogan {
 
 .image-empty b {
   color: var(--foreground);
-  font-size: 15px;
+  font-size: var(--fs-lg);
 }
 
 .image-view-zoom {
@@ -3122,7 +3128,7 @@ body.home-active .page-home.active h1.home-slogan {
 .image-view-zoom output {
   min-width: 42px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   text-align: right;
 }
 
@@ -3166,7 +3172,7 @@ body.home-active .page-home.active h1.home-slogan {
   display: grid;
   gap: 6px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-sm);
 }
 
 .image-resize-fields input:not([type="checkbox"]),
@@ -3188,12 +3194,12 @@ body.home-active .page-home.active h1.home-slogan {
 .image-resize-fields p {
   margin: 0;
   color: var(--faint);
-  font-size: 11px;
+  font-size: var(--fs-sm);
 }
 
 .image-empty span {
   color: var(--faint);
-  font-size: 11px;
+  font-size: var(--fs-sm);
 }
 
 .image-empty .gbtn {
@@ -3211,7 +3217,7 @@ body.home-active .page-home.active h1.home-slogan {
   flex-direction: column;
   gap: 6px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-sm);
 }
 
 .image-panel input[type="text"],
@@ -3280,7 +3286,7 @@ body.home-active .page-home.active h1.home-slogan {
   border-radius: 7px;
   color: var(--muted);
   background: var(--control-bg);
-  font-size: 10px;
+  font-size: var(--fs-xs);
   cursor: pointer;
 }
 
@@ -3302,7 +3308,7 @@ body.home-active .page-home.active h1.home-slogan {
   border-radius: 7px;
   color: var(--muted);
   background: var(--control-bg);
-  font-size: 10px;
+  font-size: var(--fs-xs);
   cursor: pointer;
 }
 
@@ -3323,14 +3329,14 @@ body.home-active .page-home.active h1.home-slogan {
 
 .image-side h3 {
   margin: 0 0 9px;
-  font-size: 15px;
+  font-size: var(--fs-lg);
 }
 
 .image-side p {
   min-height: 44px;
   margin: 0 0 18px;
   color: var(--faint);
-  font-size: 12px;
+  font-size: var(--fs-md);
   line-height: 1.65;
 }
 
@@ -3347,7 +3353,7 @@ body.home-active .page-home.active h1.home-slogan {
   padding: 0 18px;
   border-top: 1px solid var(--hairline);
   color: var(--faint);
-  font-size: 11px;
+  font-size: var(--fs-sm);
 }
 
 .image-bottom b {
@@ -3432,7 +3438,7 @@ body.home-active .page-home.active h1.home-slogan {
   gap: 10px;
   padding: 0 14px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-md);
 }
 
 .ocr-overlay {
@@ -3480,7 +3486,7 @@ body.home-active .page-home.active h1.home-slogan {
 .ocr-dialog > header span,
 .ocr-dialog > footer span {
   color: var(--faint);
-  font-size: 11px;
+  font-size: var(--fs-sm);
 }
 
 .ocr-progress {
@@ -3509,7 +3515,7 @@ body.home-active .page-home.active h1.home-slogan {
 .ocr-progress > span {
   min-width: 116px;
   color: var(--faint);
-  font-size: 10px;
+  font-size: var(--fs-xs);
   text-align: right;
 }
 
@@ -3557,7 +3563,7 @@ body.home-active .page-home.active h1.home-slogan {
   .image-save,
   .image-cancel {
     padding-inline: 9px;
-    font-size: 11px;
+    font-size: var(--fs-sm);
   }
 
   .ocr-overlay {
@@ -3633,7 +3639,7 @@ body.home-active .page-home.active h1.home-slogan {
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   font-weight: 650;
 }
 
@@ -3665,7 +3671,7 @@ body.home-active .page-home.active h1.home-slogan {
 .about-logo img { width: 100%; height: 100%; object-fit: contain; }
 
 .about-brand-copy { display: flex; align-items: baseline; gap: 8px; }
-.about-brand-copy b { font-size: 15px; font-weight: 700; }
+.about-brand-copy b { font-size: var(--fs-lg); font-weight: 700; }
 .about-brand-copy span { color: var(--muted); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
 
 .about-tagline {
@@ -3778,18 +3784,18 @@ body.home-active .page-home.active h1.home-slogan {
   align-items: center;
   justify-content: center;
   /* 浅色模式下 --border 是白色，这里用中性灰，否则选项看不出边界 */
-  border: 1px solid color-mix(in srgb, var(--foreground) 13%, transparent);
+  border: 1px solid var(--border-neutral);
   border-radius: var(--r-md);
   color: var(--muted);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: color 140ms ease, background-color 140ms ease, border-color 140ms ease;
+  transition: color var(--dur-press) ease, background-color var(--dur-press) ease, border-color var(--dur-press) ease;
 }
 
 .theme-option:hover {
   color: var(--foreground);
-  border-color: color-mix(in srgb, var(--foreground) 22%, transparent);
+  border-color: var(--border-neutral-hover);
 }
 
 .theme-option:has(input:checked) {
@@ -4002,7 +4008,7 @@ body.home-active .page-home.active h1.home-slogan {
 .slider-row span {
   width: 34px;
   color: var(--faint);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   text-align: right;
 }
 
@@ -4036,7 +4042,7 @@ body.home-active .page-home.active h1.home-slogan {
   border: 0;
   color: var(--muted);
   background: transparent;
-  font-size: 12px;
+  font-size: var(--fs-md);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -4056,7 +4062,7 @@ body.home-active .page-home.active h1.home-slogan {
   background: transparent;
   text-align: left;
   cursor: pointer;
-  transition: border-color 140ms ease, background-color 140ms ease, transform 120ms var(--ease-out);
+  transition: border-color var(--dur-press) ease, background-color var(--dur-press) ease, transform 120ms var(--ease-out);
 }
 
 .github-link:hover {
@@ -4080,13 +4086,13 @@ body.home-active .page-home.active h1.home-slogan {
 }
 
 .github-link b {
-  font-size: 12px;
+  font-size: var(--fs-md);
 }
 
 .github-link small {
   overflow: hidden;
   color: var(--faint);
-  font-size: 10px;
+  font-size: var(--fs-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -4107,7 +4113,7 @@ body.home-active .page-home.active h1.home-slogan {
   color: var(--foreground);
   background: rgba(247, 248, 251, 0.96);
   box-shadow: var(--shadow-panel);
-  font-size: 12px;
+  font-size: var(--fs-md);
   opacity: 0;
   pointer-events: none;
   transform: translateY(8px);
@@ -4700,7 +4706,7 @@ body.keyboard-focus :where(
   border: 1px solid var(--hairline);
   border-radius: var(--r-sm);
   background: var(--card-thin);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   line-height: 1.5;
   overflow: auto;
 }
@@ -4712,7 +4718,7 @@ body.keyboard-focus :where(
   align-items: center;
   gap: 6px;
   margin-top: 6px;
-  font-size: 12px;
+  font-size: var(--fs-md);
   cursor: pointer;
 }
 
@@ -4874,7 +4880,7 @@ body.keyboard-focus :where(
 
 .app-note {
   margin: 6px 0 0;
-  font-size: 11px;
+  font-size: var(--fs-sm);
   line-height: 1.5;
   color: var(--muted, #7b7f92);
 }
@@ -4956,10 +4962,10 @@ body.keyboard-focus :where(
   font: 13px var(--font);
   cursor: pointer;
   transition:
-    color 140ms ease,
-    background-color 140ms ease,
-    border-color 140ms ease,
-    transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+    color var(--dur-press) ease,
+    background-color var(--dur-press) ease,
+    border-color var(--dur-press) ease,
+    transform 160ms var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
   .cbtn:hover { border-color: var(--control-border-hover); color: var(--accent); background: var(--control-bg-hover); }
@@ -4975,7 +4981,7 @@ body.keyboard-focus :where(
 }
 .cbtn.ghost {
   padding: 5px 10px;
-  font-size: 12px;
+  font-size: var(--fs-md);
   background: var(--control-bg);
   backdrop-filter: blur(18px) saturate(150%);
 }
@@ -5164,7 +5170,7 @@ body.keyboard-focus :where(
   height: 18px;
   border-radius: 999px;
   background: var(--hairline-strong, var(--border));
-  transition: background-color 140ms ease;
+  transition: background-color var(--dur-press) ease;
 }
 
 .canvas-toggle-indicator::after {
@@ -5177,7 +5183,7 @@ body.keyboard-focus :where(
   background: #fff;
   box-shadow: 0 1px 3px rgba(25, 30, 46, 0.22);
   content: "";
-  transition: transform 140ms ease;
+  transition: transform var(--dur-press) ease;
 }
 
 .canvas-toggle-row[aria-checked="true"] .canvas-toggle-indicator { background: var(--accent); }
@@ -5306,11 +5312,11 @@ body.keyboard-focus :where(
 /* 设置页的控件描边：--control-border 在浅色模式是白色，这里统一换成中性灰 */
 .page-settings .gbtn,
 .page-settings .accent-current-row #color-hex {
-  border-color: color-mix(in srgb, var(--foreground) 13%, transparent);
+  border-color: var(--border-neutral);
 }
 
 .page-settings .gbtn:hover {
-  border-color: color-mix(in srgb, var(--foreground) 22%, transparent);
+  border-color: var(--border-neutral-hover);
 }
 
 .shortcut-input {
@@ -5326,7 +5332,7 @@ body.keyboard-focus :where(
 }
 .shortcut-status {
   margin: 2px 0 0;
-  font-size: 12px;
+  font-size: var(--fs-md);
   color: var(--muted);
 }
 .shortcut-status.error { color: var(--danger); }
@@ -5399,7 +5405,7 @@ body.keyboard-focus :where(
   background: transparent;
   color: var(--foreground);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-md);
   text-align: left;
   white-space: nowrap;
   cursor: pointer;
@@ -5519,8 +5525,8 @@ body.keyboard-focus :where(
   font: inherit;
   font-size: var(--fs-md);
   cursor: pointer;
-  transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1),
-              color 140ms ease, background-color 140ms ease;
+  transition: transform var(--dur-press) var(--ease-out),
+              color var(--dur-press) ease, background-color var(--dur-press) ease;
 }
 .txt-btn.icon-only {
   display: inline-grid;
@@ -5633,7 +5639,7 @@ body.keyboard-focus :where(
   transition:
     color 130ms ease,
     background-color 130ms ease,
-    transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+    transform 160ms var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
   .obj-btn:hover { color: var(--accent); background: var(--accent-10); }
@@ -5753,8 +5759,8 @@ body.keyboard-focus :where(
   display: flex;
   flex-direction: column;
   background: var(--background);
-  transition: opacity 180ms cubic-bezier(0.23, 1, 0.32, 1),
-              transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+  transition: opacity 180ms var(--ease-out),
+              transform 180ms var(--ease-out);
 }
 
 .img-editor[hidden] { display: none; }
@@ -5815,10 +5821,10 @@ body.keyboard-focus :where(
   font-size: var(--fs-sm);
   cursor: pointer;
   /* 只过渡具体属性，不用 all */
-  transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1),
-              background-color 140ms ease,
-              color 140ms ease,
-              border-color 140ms ease;
+  transition: transform var(--dur-press) var(--ease-out),
+              background-color var(--dur-press) ease,
+              color var(--dur-press) ease,
+              border-color var(--dur-press) ease;
 }
 
 .tool-btn span { font-size: 17px; line-height: 1; }
@@ -5964,8 +5970,8 @@ body.keyboard-focus :where(
   border: 2px solid transparent;
   cursor: pointer;
   padding: 0;
-  transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1),
-              border-color 140ms ease;
+  transition: transform var(--dur-press) var(--ease-out),
+              border-color var(--dur-press) ease;
 }
 
 .img-editor-swatch:active { transform: scale(0.9); }
@@ -6075,7 +6081,7 @@ body.keyboard-focus .search input:focus-visible {
 .dieline-presets h2 {
   margin: 0;
   color: var(--foreground);
-  font-size: 12px;
+  font-size: var(--fs-md);
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -6085,7 +6091,7 @@ body.keyboard-focus .search input:focus-visible {
 .dieline-field,
 .dieline-dimension-grid label {
   color: var(--foreground);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   font-weight: 700;
 }
 
@@ -6104,7 +6110,7 @@ body.keyboard-focus .search input:focus-visible {
   color: var(--foreground);
   background: var(--control-bg);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-md);
 }
 
 .dieline-presets input[type="search"]:focus-visible,
@@ -6142,8 +6148,8 @@ body.keyboard-focus .search input:focus-visible {
 .dieline-preset:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
 .dieline-preset.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .dieline-preset svg { width: 44px; height: 44px; display: block; }
-.dieline-preset b { display: block; font-size: 12px; }
-.dieline-preset span { display: block; color: var(--muted); font-size: 10px; line-height: 1.35; }
+.dieline-preset b { display: block; font-size: var(--fs-md); }
+.dieline-preset span { display: block; color: var(--muted); font-size: var(--fs-xs); line-height: 1.35; }
 
 .dieline-help {
   margin: 0;
@@ -6168,7 +6174,7 @@ body.keyboard-focus .search input:focus-visible {
   padding: 9px 12px;
   border-bottom: 1px solid var(--hairline);
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-sm);
 }
 
 .dieline-legend { display: flex; align-items: center; gap: 12px; }
@@ -6191,19 +6197,19 @@ body.keyboard-focus .search input:focus-visible {
   color: var(--foreground);
   background: var(--control-bg);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--fs-sm);
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
 .dieline-zoom-input input:focus-visible { border-color: var(--accent); }
-.dieline-zoom-input em { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); color: var(--muted); font-style: normal; font-size: 10px; }
+.dieline-zoom-input em { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); color: var(--muted); font-style: normal; font-size: var(--fs-xs); }
 
 .dieline-check {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-sm);
   cursor: pointer;
 }
 .dieline-check input { accent-color: var(--accent); }
@@ -6232,9 +6238,9 @@ body.keyboard-focus .search input:focus-visible {
   margin: 0;
   gap: 4px;
   pointer-events: none;
-  font-size: 11px;
+  font-size: var(--fs-sm);
 }
-.dieline-sizes dt { color: var(--muted); font-size: 10px; }
+.dieline-sizes dt { color: var(--muted); font-size: var(--fs-xs); }
 .dieline-sizes dd { margin: 0 0 3px; color: var(--foreground); font-weight: 650; font-variant-numeric: tabular-nums; }
 
 .dieline-annotation text { pointer-events: auto; cursor: pointer; }
@@ -6303,7 +6309,7 @@ body.keyboard-focus .search input:focus-visible {
   background: color-mix(in srgb, var(--card) 70%, transparent);
   backdrop-filter: blur(6px);
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-sm);
 }
 .dieline-fold-control input { min-width: 0; accent-color: var(--accent); }
 .dieline-fold-control span { text-align: right; font-variant-numeric: tabular-nums; }
@@ -6319,7 +6325,7 @@ body.keyboard-focus .search input:focus-visible {
   background: color-mix(in srgb, var(--foreground) 6%, transparent);
   color: var(--muted);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   cursor: pointer;
 }
@@ -6357,7 +6363,7 @@ body.keyboard-focus .search input:focus-visible {
   background: transparent;
   color: var(--muted);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   cursor: pointer;
 }
