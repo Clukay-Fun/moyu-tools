@@ -1,0 +1,259 @@
+/* ══ 全应用控件基础 ═══════════════════════════════════════
+   各模块可以决定宽度与布局，但底色、边框、焦点和禁用状态只有这一套。
+   原生 select / checkbox / range 在 Windows 深色模式下会各自使用系统
+   颜色，无法与应用主题保持一致，因此在这里统一绘制。 */
+input[type="text"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+  border: 1px solid var(--control-border);
+  outline: 0;
+  color: var(--foreground);
+  background-color: var(--control-bg);
+  transition: border-color var(--dur-hover) ease,
+              background-color var(--dur-hover) ease,
+              box-shadow var(--dur-hover) ease;
+}
+
+input[type="text"]:hover:not(:disabled):not([aria-invalid="true"]),
+input[type="number"]:hover:not(:disabled):not([aria-invalid="true"]),
+input[type="search"]:hover:not(:disabled):not([aria-invalid="true"]),
+textarea:hover:not(:disabled):not([aria-invalid="true"]),
+select:hover:not(:disabled):not([aria-invalid="true"]) {
+  border-color: var(--control-border-hover);
+  background-color: var(--control-bg-hover);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--control-border-hover);
+  background-color: var(--control-bg-hover);
+  box-shadow: none;
+}
+
+/* ══ 带单位输入框 .unit-input ══
+   <span class="unit-input"><input type="number" /><em>mm</em></span>
+   单位贴在框内右侧；宽度由外层决定。 */
+.unit-input {
+  position: relative;
+  display: flex;
+}
+
+.unit-input input,
+.stepper input {
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-md);
+  outline: 0;
+  color: var(--foreground);
+  background: var(--control-bg);
+  font: inherit;
+  font-size: var(--fs-md);
+}
+
+.unit-input input {
+  width: 100%;
+  padding-right: 34px;
+}
+
+.unit-input em {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-style: normal;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.unit-input input:focus-visible,
+.stepper input:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+/* ══ 步进器 .stepper ══
+   <span class="stepper"><button aria-label="减小">−</button><input type="number" /><button aria-label="增大">+</button></span>
+   加减逻辑由使用方处理（取值范围、步长各不相同）；输入框本身仍可直接键入和用方向键调整。 */
+.stepper {
+  display: grid;
+  height: 34px;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  overflow: hidden;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-md);
+  background: var(--control-bg);
+}
+
+.stepper button {
+  border: 0;
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  color: var(--foreground);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.stepper input {
+  border: 0;
+  border-radius: 0;
+  text-align: center;
+  background: transparent;
+}
+
+/* 步进器是 overflow: hidden 的整体，内部元素的焦点环会被裁成两条竖线。
+   输入框聚焦时焦点画到外框上；两端按钮的键盘焦点收进按钮内侧。 */
+.stepper input:focus-visible,
+body.keyboard-focus .stepper input:focus-visible {
+  /* 带上 body.keyboard-focus：全局键盘焦点规则特异性相同且位置更靠后，不写会被它覆盖 */
+  box-shadow: none;
+  outline: none;
+}
+
+.stepper:has(input:focus-visible) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+body.keyboard-focus .stepper:has(input:focus-visible) {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: var(--focus-glow);
+}
+
+body.keyboard-focus .stepper button:focus-visible {
+  outline-offset: calc(var(--focus-ring-width) * -1 - 1px);
+  box-shadow: none;
+}
+
+select {
+  min-height: var(--control-height);
+  padding-right: 32px !important;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--faint) 50%),
+    linear-gradient(135deg, var(--faint) 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) calc(50% - 2px),
+    calc(100% - 11px) calc(50% - 2px);
+  background-repeat: no-repeat;
+  background-size: 5px 5px, 5px 5px;
+}
+
+select option {
+  color: var(--foreground);
+  background: var(--card-solid);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  display: inline-grid;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  place-content: center;
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  cursor: pointer;
+  transition: border-color var(--dur-hover) ease,
+              background-color var(--dur-hover) ease,
+              box-shadow var(--dur-hover) ease;
+}
+
+input[type="checkbox"] { border-radius: 5px; }
+input[type="radio"] { border-radius: 50%; }
+
+input[type="checkbox"]::before {
+  width: 8px;
+  height: 5px;
+  border-bottom: 2px solid #fff;
+  border-left: 2px solid #fff;
+  content: "";
+  opacity: 0;
+  transform: translateY(-1px) rotate(-45deg) scale(0.7);
+  transition: opacity var(--dur-press) ease, transform var(--dur-press) var(--ease-out);
+}
+
+input[type="radio"]::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  content: "";
+  opacity: 0;
+  transform: scale(0.65);
+  transition: opacity var(--dur-press) ease, transform var(--dur-press) var(--ease-out);
+}
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-10);
+}
+
+input[type="checkbox"]:checked::before,
+input[type="radio"]:checked::before {
+  opacity: 1;
+  transform: translateY(-1px) rotate(-45deg) scale(1);
+}
+
+input[type="radio"]:checked::before { transform: scale(1); }
+
+input[type="range"] {
+  height: 20px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: var(--r-full);
+  background: var(--hairline);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  appearance: none;
+  border: 2px solid var(--card-solid);
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 1px 5px var(--accent-28);
+}
+
+input[type="color"] {
+  overflow: hidden;
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  cursor: pointer;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 3px; }
+input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 5px; }
+
+:where(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+button,
+label {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 焦点环统一在下方的 :where(...) 规则里定义（V1）。
+   这里原先有一条硬编码 2px/accent 的规则，与 token 并存等于两个真值源，
+   已合并。 */

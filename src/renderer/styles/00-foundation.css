@@ -1,0 +1,218 @@
+@font-face {
+  font-family: "Moyu OCR-B";
+  src: url("../../../assets/fonts/OCR-B.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
+:root {
+  --accent-r: 105;
+  --accent-g: 120;
+  --accent-b: 230;
+  --accent: rgb(var(--accent-r), var(--accent-g), var(--accent-b));
+  --slogan-gradient: linear-gradient(105deg, #8b7cff 0%, #a887f4 18%, #d79cf6 23%, #a887f4 28%, #6676f6 38%, #5ba9f8 62%, #63d6dd 82%, #8fdfe0 100%);
+  --accent-10: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.1);
+  --accent-18: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.18);
+  --accent-28: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.28);
+  --background: #e7e9ee;
+  --panel: rgba(255, 255, 255, 0.27);
+  --card: rgba(255, 255, 255, 0.2);
+  --card-thin: rgba(255, 255, 255, 0.13);
+  --card-thick: rgba(255, 255, 255, 0.38);
+  --card-solid: rgba(247, 248, 251, 0.97);
+  --border: rgba(255, 255, 255, 0.58);
+  --hairline: rgba(20, 22, 40, 0.08);
+  --foreground: #252734;
+  --muted: #707387;
+  --faint: #9da0b3;
+  --danger: #d54f50;
+  /* 可见的中性描边：--border / --control-border 在浅色下是白色半透明，浅底上看不见 */
+  --border-neutral: color-mix(in srgb, var(--foreground) 13%, transparent);
+  --border-neutral-hover: color-mix(in srgb, var(--foreground) 22%, transparent);
+  /* 浮层专用底色。--card 是给大面板用的，做到 0.2 才够通透；
+     浮层里有文字和色块，压在棋盘格、图片、控制点上时必须**挡住**下面的东西，
+     0.82 仍会透出控制点的轮廓，所以提到 0.95。模糊只是质感，挡不挡得住看 alpha。 */
+  --menu-surface: rgba(255, 255, 255, 0.95);
+  --control-height: 36px;
+  --control-bg: rgba(255, 255, 255, 0.2);
+  --control-bg-hover: rgba(255, 255, 255, 0.36);
+  --control-bg-active: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.12);
+  --control-border: rgba(255, 255, 255, 0.58);
+  --control-border-hover: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.42);
+  --selection-bg: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.14);
+  --selection-border: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.34);
+  --canvas-bg: #f4f6f9;
+  --scrollbar-thumb: rgba(92, 98, 121, 0.42);
+  --scrollbar-thumb-hover: rgba(92, 98, 121, 0.64);
+  --scrollbar-track: transparent;
+
+  /* ══ 层级常量（S1）══
+     所有浮层一律引用这几个变量，不再各模块随手写数字。
+     顺序即规格：画布对象 < 选择框/控制点 < 对象浮动工具栏 <
+     下拉菜单/色盘 < Toast < 全屏模态编辑器 < 原生系统对话框（不归 CSS 管）。
+     ⚠ 中间留空档是给同层内部排序用的，不要把新浮层塞进空档里当"新层"。 */
+  --z-canvas: 1;
+  --z-canvas-helpers: 6;   /* 标尺网格参考线：画在对象之上、工具栏之下 */
+  --z-ruler: 10;
+  --z-float-toolbar: 20;   /* 对象侧栏 / 文本横栏 */
+  --z-popover: 40;         /* 下拉菜单 / 色盘 */
+  --z-toast: 60;
+  --z-modal: 80;           /* 全屏模态编辑器 */
+  --z-chrome: 20;          /* 顶栏等应用外壳 */
+
+  /* ══ V1 · 图标与交互 Token ══
+     ⚠ 本片**只定义**，不迁移既有样式。项目里现存 74 种 padding 组合、
+     17 种圆角值，一次性收敛会让基础设施阶段失控。旧值在 V3b 按模块逐步
+     收敛；**新代码一律用这里的变量**。 */
+
+  /* 图标尺寸：14 行内密集 / 16 默认按钮 / 20 主导航 */
+  --ic-sm: 14px;
+  --ic-md: 16px;
+  --ic-lg: 20px;
+  /* 描边 1.75 而非 Lucide 默认的 2：本项目边框与分隔线都很细，2 会显得笨重。
+     也不用 1.5——Windows 小尺寸下 1.5 可能被舍入到几乎看不见。 */
+  --ic-stroke: 1.75;
+
+  /* 图标按钮的点击区。视觉是图标本身，命中区由这三档保证。 */
+  --icon-btn-sm: 28px;
+  --icon-btn-md: 32px;
+  --icon-btn-lg: 36px;
+
+  /* 焦点环。只在键盘 Tab 时出现，鼠标点击不显示。 */
+  /* 键盘焦点：贴边的实色内圈保证可辨（主题色对白底约 4:1），外面再加一圈柔光；只在 Tab 操作时出现 */
+  --focus-ring-color: var(--accent);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 0px;
+  --focus-glow: 0 0 0 5px rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.24);
+  /* 按下回弹的统一缩放 */
+  --press-scale: 0.97;
+  /* 浮层退场比入场略短 */
+  --dur-popover-exit: 120ms;
+  /* 悬停：颜色、背景、边框的渐变（取值与按压相同，但用途不同，分开命名） */
+  --dur-hover: 140ms;
+  /* 面板：整块内容的出现/消失（轻提示、图片编辑面板） */
+  --dur-panel: 180ms;
+
+  /* 动效。按压要快到几乎无感，弹层要能被看清但不拖沓。 */
+  --dur-press: 140ms;
+  --dur-popover: 160ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* ══ V3b · 视觉体系标度 ══
+     不是拍脑袋定的：按现有 CSS 里各值的**使用频次**选标准档，
+     让收敛时改动最小。原始分布——
+       圆角 17 种（7px×14、8px×14、10px×12、11px×8…）
+       字号 11 种（12px×39、11px×36、10px×18…）
+       间距 17 种（8px×18、12px×14、10px×13、6px×13…）
+       高度 45 种（34px×10、32px×4、30px×4…）
+     ⚠ 只有正在收敛的模块改用这些变量，其余模块保持原值，
+       避免一次性横扫造成无法定位的视觉变化。 */
+
+  /* 圆角：吸收 6/7/8/9 → sm，10/11/12 → md，50%/99px → full */
+  --r-sm: 8px;
+  --r-md: 11px;
+  --r-lg: var(--radius);
+  --r-full: 999px;
+
+  /* 字号：12 是基准，11 次级，10 辅助，15 标题 */
+  --fs-xs: 10px;
+  --fs-sm: 11px;
+  --fs-md: 12px;
+  --fs-lg: 15px;
+
+  /* 间距：2 的倍数为主，吸收 3/5/7/9/13/14 这类零散值 */
+  --sp-1: 4px;
+  --sp-2: 6px;
+  --sp-3: 8px;
+  --sp-4: 12px;
+  --sp-5: 16px;
+
+  /* 控件高度：与 V1 的图标按钮三档对齐，34px 归并到 32px */
+  --h-sm: 28px;
+  --h-md: 32px;
+  --h-lg: 36px;
+  /* 例外：组件**内部**的微层叠（空态压在画布上、提示压在按钮上一类，
+     数值都 < 10 且不跨组件）不纳入本表，硬编码即可——把它们也变量化
+     只会让这张表失去"跨组件顺序"的含义。 */
+  /* 透明画布的棋盘格。比 --hairline 更淡，避免和网格线抢注意力。 */
+  --checker: rgba(20, 22, 40, 0.035);
+  --shadow-small: 0 5px 14px rgba(35, 39, 65, 0.08);
+  --shadow-panel: 0 20px 55px rgba(35, 39, 65, 0.14);
+  --shadow: var(--shadow-panel);
+  --radius: 16px;
+  --radius-small: 10px;
+  --font: "Segoe UI", "PingFang SC", "Microsoft YaHei UI", system-ui, sans-serif;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --accent-r: 126;
+  --accent-g: 145;
+  --accent-b: 255;
+  --background: #0b1018;
+  --panel: rgba(13, 19, 29, 0.88);
+  --card: rgba(28, 37, 52, 0.72);
+  --card-thin: rgba(24, 32, 46, 0.62);
+  --card-thick: rgba(29, 39, 55, 0.92);
+  --card-solid: #151d2a;
+  --border: rgba(159, 177, 204, 0.18);
+  --hairline: rgba(159, 177, 204, 0.12);
+  --foreground: #edf3fb;
+  --muted: #a8b3c7;
+  --faint: #758198;
+  --danger: #e36a6c;
+  /* 引用了 --foreground 的变量必须在主题块里重新声明，否则继承的是 :root 上按浅色算好的值 */
+  --border-neutral: color-mix(in srgb, var(--foreground) 13%, transparent);
+  --border-neutral-hover: color-mix(in srgb, var(--foreground) 22%, transparent);
+  --menu-surface: rgba(19, 26, 38, 0.97);
+  --control-bg: rgba(25, 34, 49, 0.82);
+  --control-bg-hover: rgba(35, 46, 65, 0.92);
+  --control-bg-active: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.16);
+  --control-border: rgba(159, 177, 204, 0.2);
+  --control-border-hover: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.52);
+  --selection-bg: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.18);
+  --selection-border: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.42);
+  --canvas-bg: #1b2432;
+  --scrollbar-thumb: rgba(142, 158, 184, 0.48);
+  --scrollbar-thumb-hover: rgba(170, 185, 209, 0.72);
+  --checker: rgba(195, 210, 235, 0.055);
+  --shadow-small: 0 7px 20px rgba(0, 0, 0, 0.28);
+  --shadow-panel: 0 24px 64px rgba(0, 0, 0, 0.42);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 720px;
+  min-height: 480px;
+  overflow: hidden;
+  color: var(--foreground);
+  background: var(--background);
+  font: 14px var(--font);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  color: inherit;
+}

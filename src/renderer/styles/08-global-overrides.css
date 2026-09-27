@@ -1,0 +1,244 @@
+/* ══ V1 · 图标基类 ══
+   尺寸与描边全部走 token；颜色用 currentColor，自动跟随按钮的 color，
+   亮暗主题不需要两套图标。 */
+.ic {
+  width: var(--ic-md);
+  height: var(--ic-md);
+  stroke-width: var(--ic-stroke);
+  flex: none;
+  /* 图标是装饰，可读名称由按钮的 aria-label 提供，不让读屏重复念 */
+  pointer-events: none;
+}
+.ic-sm { width: var(--ic-sm); height: var(--ic-sm); }
+.ic-lg { width: var(--ic-lg); height: var(--ic-lg); }
+
+/* ══ 减弱动效兜底 ══
+   系统开启「减少动态效果」时，位移、缩放、滑动一律不做过渡，
+   颜色和透明度照常渐变——状态变化仍然能被感知，但画面不会动。 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-property: color, background-color, border-color, opacity, box-shadow, outline-color !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  :where(button, a, [role="button"], label):active {
+    transform: none !important;
+  }
+}
+
+/* ══ V1 · 键盘焦点环 ══
+   ⚠ 不用 `*:focus-visible`。全局通配会把焦点环套到 div、span 这类
+   本不该获得焦点的元素上（它们可能因为 contenteditable 或第三方库
+   意外可聚焦），出现"焦点框飘在奇怪位置"。这里只覆盖**真实可交互**元素。
+   用 :where() 保持零特异性，任何组件都能覆盖它而不必写 !important。 */
+body.keyboard-focus :where(
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [tabindex]:not([tabindex="-1"])
+):focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: var(--focus-glow);
+  /* 不要写 border-radius: inherit——那取的是父元素圆角，会把控件自己的圆角改掉；
+     outline 与 box-shadow 本身就跟随元素自身的圆角 */
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  min-width: 44px;
+  min-height: 44px;
+  border: 3px solid transparent;
+  border-radius: var(--r-full);
+  background-color: var(--scrollbar-thumb);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+@media (max-width: 1100px) {
+  .format-workspace {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+
+  .format-file-head,
+  .format-file-item {
+    grid-template-columns: minmax(120px, 1fr) minmax(64px, 0.45fr) minmax(74px, 0.55fr) 28px;
+  }
+
+  .format-file-head .cell-detail,
+  .format-file-head .cell-meta,
+  .format-file-item .format-detail,
+  .format-file-item .format-size {
+    display: none;
+  }
+}
+
+@media (max-width: 940px) {
+  .brand b,
+  .slogan {
+    display: none;
+  }
+
+  .search-wrap {
+    flex: 1;
+  }
+
+  .toolbar-hint {
+    display: none;
+  }
+
+  .image-side {
+    width: 190px;
+  }
+
+}
+
+@media (max-height: 760px) {
+  .barcode-single-section {
+    padding: var(--sp-4);
+    padding-bottom: calc(var(--sp-4) + var(--sp-2));
+  }
+
+  .barcode-pane {
+    gap: var(--sp-3);
+  }
+
+  .barcode-mode-switch {
+    margin-bottom: var(--sp-2);
+  }
+
+  .artboard {
+    height: clamp(180px, 30vh, 260px);
+    min-height: 180px;
+    padding: 4%;
+  }
+
+  .barcode-spec-footer {
+    padding-top: var(--sp-2);
+  }
+}
+
+@media (max-width: 780px) {
+  .submenu {
+    width: 158px;
+  }
+
+  .barcode-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .control-column {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 0;
+  }
+
+  .image-zoom {
+    display: none;
+  }
+
+  .image-filename {
+    max-width: 90px;
+  }
+
+  .format-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .pdf-watermark-workbench {
+    grid-template-columns: 1fr;
+  }
+
+  .pdf-watermark-left {
+    min-height: 460px;
+  }
+
+  .pdf-watermark-controls {
+    max-height: 320px;
+  }
+
+  .format-run {
+    margin-top: 0;
+  }
+
+  .format-file-head,
+  .format-file-item {
+    grid-template-columns: minmax(0, 1fr) minmax(84px, auto) 28px;
+  }
+
+  .format-file-head .cell-detail,
+  .format-file-head .cell-meta,
+  .format-file-head .cell-target,
+  .format-file-item .format-detail,
+  .format-file-item .format-size,
+  .format-file-item .format-target {
+    display: none;
+  }
+
+  .format-result-bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .format-progress-track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@media (max-height: 560px) {
+  .pages {
+    padding-bottom: 22px;
+  }
+
+  .format-file-panel {
+    min-height: 0;
+  }
+
+  .format-control-panel {
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .format-action-copy,
+  .format-engine-card {
+    display: none;
+  }
+
+  .format-control-actions {
+    margin: 0 -10px -10px;
+    padding: 8px 10px 10px;
+  }
+}

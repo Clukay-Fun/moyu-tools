@@ -10,12 +10,19 @@
 //   样式表里没有嵌套语法（原生 CSS nesting），只有 @media / @supports 这类条件组，
 //   按层级计数即可。真引入嵌套语法时这个脚本要改。
 import { readFileSync, writeFileSync } from 'node:fs'
-import { join, dirname } from 'node:path'
+import { join, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const cssPath = join(root, 'src/renderer/style.css')
-const css = readFileSync(cssPath, 'utf8')
+function cssFilesInOrder(path) {
+  const source = readFileSync(path, 'utf8')
+  const imports = [...source.matchAll(/^@import url\(['"](.+?)['"]\);\s*$/gm)]
+  if (!imports.length) return [{ path, css: source }]
+  return imports.flatMap((match) => cssFilesInOrder(resolve(dirname(path), match[1])))
+}
+const cssFiles = cssFilesInOrder(cssPath)
+const css = cssFiles.map((file) => file.css).join('\n')
 
 // 选择器前缀 → 模块。顺序有意义：先匹配到的算数。
 const MODULES = [
@@ -251,6 +258,11 @@ const report = {
   lines: css.split('\n').length,
   rules: rules.filter((r) => !r.selector.startsWith('@')).length,
   atRules: rules.filter((r) => r.selector.startsWith('@')).length,
+  files: cssFiles.map(({ path, css }) => ({
+    file: path.slice(root.length + 1),
+    lines: css.split('\n').length,
+    rules: parseRules(stripComments(css)).filter((rule) => !rule.selector.startsWith('@')).length
+  })),
   modules: Object.fromEntries([...byModule].sort((a, b) => b[1].rules - a[1].rules)),
   tokens: { defined: defined.size, used: used.size, unused: unusedTokens, undefined: undefinedTokens },
   literals: {
@@ -272,6 +284,9 @@ if (process.argv.includes('--json')) {
   const pad = (text, width) => String(text).padEnd(width)
   console.log(`样式地图 · ${report.file}`)
   console.log(`${report.lines} 行 · ${report.rules} 条规则 · ${report.atRules} 条 @ 规则 · ${report.tokens.defined} 个变量\n`)
+  console.log('文件分布：')
+  for (const file of report.files) console.log(`  ${pad(file.file, 45)} ${file.rules} 条规则`)
+  console.log('')
   console.log('规则分布：')
   for (const [name, entry] of Object.entries(report.modules)) {
     console.log(`  ${pad(name, 16)} ${pad(entry.rules + ' 条', 9)} ${entry.declarations} 条声明`)

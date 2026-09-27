@@ -1,0 +1,1026 @@
+@media (max-width: 780px) {
+  .pdf-page-dialog > header,
+  .pdf-page-dialog-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pdf-page-dialog-actions {
+    justify-content: stretch;
+  }
+
+  .pdf-page-dialog-actions > button {
+    flex: 1;
+  }
+}
+
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  color: var(--muted);
+  font-size: var(--fs-md);
+  cursor: pointer;
+}
+
+.toggle-wrap input {
+  position: absolute;
+  opacity: 0;
+}
+
+.toggle {
+  position: relative;
+  width: 36px;
+  height: 21px;
+  border-radius: 99px;
+  background: var(--faint);
+}
+
+.toggle::after {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  content: "";
+  transition: transform var(--dur-press) var(--ease-out);
+}
+
+.toggle-wrap input:checked + .toggle {
+  background: var(--accent);
+}
+
+.toggle-wrap input:checked + .toggle::after {
+  transform: translateX(15px);
+}
+
+body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: var(--focus-glow);
+}
+
+.toggle-wrap:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.file-list {
+  display: flex;
+  min-height: 150px;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#pdf-drop-zone {
+  min-height: 220px;
+  flex: 1 1 0;
+}
+
+#pdf-drop-zone[hidden] {
+  display: none;
+}
+
+.pdf-list-title {
+  padding: 11px 14px 0;
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 650;
+}
+
+.file-head {
+  display: flex;
+  flex: none;
+  padding: 10px 14px 9px;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--faint);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.cell-index {
+  width: 38px;
+  text-align: center;
+}
+
+.cell-name {
+  flex: 1;
+}
+
+.cell-pages {
+  width: 86px;
+  text-align: center;
+}
+
+.cell-meta {
+  width: 110px;
+}
+
+.cell-status {
+  width: 80px;
+  text-align: right;
+}
+
+.cell-size {
+  width: 90px;
+  text-align: right;
+}
+
+.cell-progress {
+  width: 96px;
+  text-align: center;
+}
+
+.cell-progress.success {
+  color: #4a9a6a;
+}
+
+.cell-progress.busy {
+  color: #d49119;
+}
+
+.cell-progress.error {
+  color: var(--danger);
+}
+
+.cell-action {
+  width: 33px;
+}
+
+.empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  color: var(--faint);
+  text-align: center;
+}
+
+.hint-mark {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: var(--r-md);
+  color: var(--accent);
+  background: var(--accent-10);
+  font-size: var(--fs-sm);
+  font-weight: 800;
+}
+
+.empty small {
+  font-size: var(--fs-sm);
+}
+
+.file-list .empty.hidden {
+  display: none;
+}
+
+.pdf-drop-zone.drag-over {
+  border-color: var(--accent-28);
+  background: var(--accent-10);
+}
+
+.file-drop-target,
+.board-stage {
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+.file-drop-target.drag-over,
+.board-stage.drag-over {
+  border-color: color-mix(in srgb, var(--accent) 78%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 24%, transparent);
+  background-color: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+.pdf-file-body {
+  min-height: 0;
+  overflow: auto;
+}
+
+.pdf-file-row {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--muted);
+  font-size: var(--fs-md);
+}
+
+.pdf-file-row .cell-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdf-file-name {
+  display: grid;
+  gap: 3px;
+}
+
+.pdf-file-name small {
+  overflow: hidden;
+  color: var(--faint);
+  font-size: var(--fs-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.illustrator-status.success {
+  color: #4a9a6a;
+}
+
+.illustrator-status.busy {
+  color: #d49119;
+}
+
+.illustrator-status.error {
+  color: var(--danger);
+}
+
+.illustrator-status.cancelled {
+  color: #8a8f9c;
+}
+
+.illustrator-config {
+  display: flex;
+  min-height: 76px;
+  flex: none;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: 12px 16px;
+}
+
+.illustrator-config-group {
+  display: grid;
+  gap: 6px;
+}
+
+.illustrator-config > .toggle-wrap,
+.illustrator-config > #illustrator-run,
+.illustrator-config > #illustrator-stop {
+  align-self: flex-end;
+}
+
+.illustrator-config > .toggle-wrap {
+  margin-bottom: 10px;
+}
+
+.section-label {
+  color: var(--faint);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.illustrator-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(94px, 1fr));
+  padding: 3px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-md);
+  background: var(--control-bg);
+}
+
+.illustrator-mode-switch button {
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.illustrator-mode-switch button.active {
+  color: var(--accent);
+  background: var(--accent-10);
+  font-weight: 650;
+}
+
+#illustrator-run[hidden],
+#illustrator-stop[hidden] {
+  display: none;
+}
+
+#illustrator-drop-zone {
+  min-height: 280px;
+  flex: 1 1 0;
+}
+
+#illustrator-drop-zone .pdf-remove-file {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+
+#illustrator-drop-zone .pdf-remove-file:hover {
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+}
+
+.illustrator-empty-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.illustrator-progress-card {
+  display: grid;
+  min-height: 88px;
+  flex: none;
+  gap: 9px;
+  padding: 11px 14px;
+}
+
+.illustrator-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.illustrator-section-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+.illustrator-section-head b,
+.illustrator-log-title {
+  color: var(--foreground);
+  font-size: var(--fs-md);
+}
+
+.illustrator-section-head span {
+  color: var(--faint);
+  font-size: var(--fs-sm);
+}
+
+.illustrator-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.illustrator-log-card {
+  display: grid;
+  flex-basis: 112px;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 5px;
+}
+
+.pdf-remove-file {
+  width: 25px;
+  height: 25px;
+  margin-left: 8px;
+  border: 0;
+  border-radius: var(--r-sm);
+  color: var(--faint);
+  background: transparent;
+  cursor: pointer;
+}
+
+.pdf-remove-file:hover {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+#pdf-drop-zone .pdf-remove-file,
+.pdf-watermark-file-list .pdf-remove-file {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+
+#pdf-drop-zone .pdf-remove-file:hover,
+.pdf-watermark-file-list .pdf-remove-file:hover {
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+}
+
+.result,
+.run-card {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  color: var(--muted);
+  font-size: var(--fs-md);
+}
+
+.pdf-result-card {
+  display: grid;
+  height: 116px;
+  min-height: 116px;
+  flex: none;
+  gap: 0;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  padding: 0;
+}
+
+.pdf-output-row,
+.pdf-run-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 12px 16px;
+}
+
+.pdf-output-row {
+  border-bottom: 1px solid var(--hairline);
+}
+
+.pdf-output-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 3px;
+}
+
+.pdf-output-copy b {
+  color: var(--foreground);
+  font-size: var(--fs-md);
+}
+
+.pdf-result-summary {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.result #pdf-result-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result #run-pdf-action,
+.result #choose-pdf-output,
+.result #open-pdf-output {
+  flex: none;
+}
+
+.pdf-output-path {
+  max-width: min(28vw, 280px);
+  overflow: hidden;
+  color: var(--faint);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdf-output-copy .pdf-output-path {
+  max-width: none;
+}
+
+#page-pdf.watermark-mode .pdf-result-card {
+  display: flex;
+  height: 68px;
+  min-height: 68px;
+  align-items: center;
+}
+
+#page-pdf.watermark-mode .pdf-output-row,
+#page-pdf.watermark-mode .pdf-run-row {
+  min-width: 0;
+  flex: 1;
+  padding: 10px 14px;
+}
+
+#page-pdf.watermark-mode .pdf-output-row {
+  border-right: 1px solid var(--hairline);
+  border-bottom: 0;
+}
+
+#page-pdf.watermark-mode #run-pdf-action {
+  display: none;
+}
+
+.result-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9da0b3;
+}
+
+.result-dot.busy {
+  background: #e3a62a;
+  box-shadow: 0 0 0 4px rgba(227, 166, 42, 0.1);
+}
+
+.result-dot.success {
+  background: #4a9a6a;
+  box-shadow: 0 0 0 4px rgba(74, 154, 106, 0.1);
+}
+
+.result-dot.error {
+  background: var(--danger);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+#run-pdf-action {
+  margin-left: auto;
+}
+
+.result .open {
+  margin-left: 0;
+}
+
+.progress-track {
+  height: 7px;
+  flex: 1;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.17);
+}
+
+.progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--accent);
+}
+
+.progress-text {
+  color: var(--faint);
+  white-space: nowrap;
+}
+
+.log-card {
+  flex: 0 0 84px;
+  padding: 10px 14px;
+  overflow: hidden;
+}
+
+.log-inner {
+  height: 100%;
+  overflow: auto;
+  color: var(--muted);
+  font: 11px/1.7 "Cascadia Code", Consolas, monospace;
+  white-space: pre-wrap;
+}
+
+.barcode-grid {
+  display: grid;
+  width: 100%;
+  max-width: 1680px;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) clamp(240px, 24vw, 320px);
+  gap: var(--sp-4);
+  margin: 0 auto;
+  padding-bottom: var(--sp-2);
+}
+
+.barcode-work {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  align-self: start;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.barcode-single-section {
+  overflow: hidden;
+  padding: var(--sp-5);
+  padding-bottom: calc(var(--sp-5) + var(--sp-2));
+}
+
+.barcode-mode-switch {
+  position: relative;
+  display: grid;
+  width: fit-content;
+  grid-template-columns: repeat(2, minmax(92px, 1fr));
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-4);
+  padding: var(--sp-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--card-thin);
+}
+
+.barcode-mode-switch::before {
+  position: absolute;
+  inset: var(--sp-1) auto var(--sp-1) var(--sp-1);
+  width: calc(50% - var(--sp-1));
+  border-radius: var(--r-sm);
+  border: 1px solid var(--selection-border);
+  background: var(--selection-bg);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.08);
+  content: "";
+  pointer-events: none;
+  transform: translateX(0);
+  transition: transform 180ms cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.barcode-mode-switch[data-mode="batch"]::before {
+  transform: translateX(100%);
+}
+
+.barcode-mode-switch button {
+  position: relative;
+  z-index: 1;
+  height: var(--h-sm);
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-radius: var(--r-sm);
+  color: var(--muted);
+  background: transparent;
+  font-size: var(--fs-md);
+  cursor: pointer;
+}
+
+.barcode-mode-switch button.on {
+  color: var(--accent);
+  background: transparent;
+  box-shadow: none;
+  font-weight: 650;
+}
+
+.barcode-pane {
+  display: none;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.barcode-pane.active {
+  display: flex;
+}
+
+.barcode-input {
+  display: flex;
+  gap: var(--sp-3);
+}
+
+.barcode-input-field {
+  display: grid;
+  flex: none;
+  gap: 7px;
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 650;
+}
+
+.barcode-input input {
+  min-width: 0;
+  height: var(--control-height);
+  flex: 1;
+  padding: 0 14px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-md);
+  outline: 0;
+  color: var(--foreground);
+  background: var(--control-bg);
+}
+
+.barcode-input input:focus::placeholder {
+  color: transparent;
+}
+
+.artboard {
+  display: flex;
+  height: clamp(220px, 34vh, 420px);
+  min-height: 220px;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 6%;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background:
+    repeating-conic-gradient(var(--checker) 0% 25%, transparent 0% 50%) 50% / 20px 20px,
+    var(--canvas-bg);
+}
+
+.artboard svg {
+  display: block;
+  width: 80%;
+  height: auto;
+  max-height: 80%;
+  overflow: visible;
+  filter: drop-shadow(0 7px 14px rgba(35, 39, 65, 0.08));
+}
+
+.barcode-message {
+  min-height: 18px;
+  margin: -5px 2px 0;
+  color: var(--faint);
+  font-size: var(--fs-sm);
+}
+
+.barcode-message.error {
+  color: var(--danger);
+}
+
+.barcode-message.success {
+  color: #4a9a6a;
+}
+
+.barcode-message.preview {
+  color: #b58900;
+}
+
+.batch-input-field {
+  display: grid;
+  flex: none;
+  gap: 7px;
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 650;
+}
+
+.barcode-batch-section {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+}
+
+.barcode-batch-input-section {
+  flex: none;
+  padding: var(--sp-5);
+}
+
+.barcode-batch-result-section {
+  min-height: 240px;
+  flex: 1;
+}
+
+.batch-input-field textarea {
+  min-width: 0;
+  min-height: 112px;
+  padding: 10px 14px;
+  resize: vertical;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-md);
+  outline: 0;
+  color: var(--foreground);
+  background: var(--control-bg);
+  font: 12px/1.55 Consolas, monospace;
+  user-select: text;
+}
+
+.batch-input-field textarea:focus {
+  border-color: var(--control-border-hover);
+}
+
+.batch-input-field small,
+.batch-summary {
+  color: var(--faint);
+  font-size: var(--fs-sm);
+  font-weight: 400;
+}
+
+.batch-generate-row,
+.batch-export-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+}
+
+.batch-generate-row button {
+  width: auto;
+  min-width: 0;
+  font-size: var(--fs-md);
+}
+
+.batch-result-head {
+  display: flex;
+  flex: none;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.batch-result-head b {
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 650;
+}
+
+.batch-list {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  align-content: start;
+  gap: var(--sp-3);
+  overflow: auto;
+}
+
+.batch-export-actions {
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--hairline);
+}
+
+.barcode-compact-summary {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.barcode-spec-footer {
+  display: grid;
+  flex: none;
+  gap: var(--sp-2);
+  padding: var(--sp-3) 2px var(--sp-2);
+  border-top: 1px solid var(--hairline);
+}
+
+.barcode-spec-details,
+.barcode-advanced-settings {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.barcode-spec-details:has(.barcode-spec-report[hidden]) {
+  display: none;
+}
+
+.barcode-spec-details summary,
+.barcode-advanced-settings summary {
+  width: fit-content;
+  color: var(--accent);
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.barcode-settings-card {
+  flex: none;
+}
+
+.barcode-settings-title[hidden] {
+  display: none !important;
+}
+
+.barcode-settings-card[hidden] {
+  display: none !important;
+}
+
+.barcode-advanced-settings {
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--hairline);
+}
+
+.barcode-advanced-content {
+  display: grid;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+}
+
+.barcode-export-section {
+  display: grid;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--hairline);
+}
+
+.barcode-export-card .barcode-export-section {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.barcode-grid .control-card > .label,
+.barcode-export-section > .label {
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 750;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.barcode-advanced-settings summary {
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 750;
+}
+
+.batch-item {
+  display: grid;
+  min-width: 0;
+  min-height: 112px;
+  grid-template-rows: 1fr auto;
+  gap: var(--sp-2);
+  padding: 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.batch-item svg {
+  width: 100%;
+  max-height: 75px;
+  overflow: visible;
+}
+
+.batch-item footer {
+  display: flex;
+  min-width: 0;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--faint);
+  font-size: var(--fs-xs);
+}
+
+.batch-item footer span:first-child {
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.batch-item.error {
+  border-color: rgba(224, 85, 78, 0.35);
+}
+
+.batch-item.error .batch-error {
+  display: grid;
+  place-items: center;
+  color: var(--danger);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
+.barcode-mock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.bars {
+  display: flex;
+  height: 104px;
+  align-items: flex-end;
+}
+
+.barcode-digits {
+  color: var(--foreground);
+  font: 18px Consolas, monospace;
+  letter-spacing: 0.3em;
+}
+
+.control-column,
+.control-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.control-column {
+  align-self: start;
+  margin-top: calc(var(--h-sm) + var(--sp-1) + var(--sp-1) + var(--sp-4) - 4px);
+}
+
+.control-card {
+  padding: var(--sp-4);
+}
+
+.barcode-font-picker,
+.barcode-preset-picker {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+
+.barcode-font-picker[hidden],
+.barcode-preset-picker[hidden],
+.barcode-advanced-settings[hidden],
+.barcode-advanced-content > [hidden] {
+  display: none !important;
+}
+
+.barcode-font-picker select,
+.barcode-preset-picker select {
+  width: 124px;
+  height: var(--control-height);
+  padding: 0 8px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-sm);
+  outline: 0;
+  color: var(--foreground);
+  background-color: var(--control-bg);
+}
+
+.barcode-advanced-content label {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}

@@ -1,0 +1,294 @@
+/* ══ U4 · 全屏图片编辑器 ══════════════════════════════════
+   覆盖内容区，不覆盖顶栏与左侧导航。
+   动效取值理由：入场是"元素出现"，用强 ease-out；停在 180ms 以内，
+   编辑器是高频入口，再慢就显得拖沓。不从 scale(0) 起，那看着像凭空冒出来。 */
+.img-editor {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+  transition: opacity var(--dur-panel) var(--ease-out),
+              transform var(--dur-panel) var(--ease-out);
+}
+
+.img-editor[hidden] { display: none; }
+
+@starting-style {
+  .img-editor {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+.img-editor-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--hairline);
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+}
+
+.img-editor-bar b { font-size: var(--fs-md); }
+
+.img-editor-size {
+  font-size: var(--fs-md);
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.img-editor-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 84px 1fr 244px;
+}
+
+/* ── 工具栏 ── */
+.img-editor-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: 10px 8px;
+  overflow-y: auto;
+  border-right: 1px solid var(--hairline);
+}
+
+.tool-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 9px 4px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  /* 只过渡具体属性，不用 all */
+  transition: transform var(--dur-press) var(--ease-out),
+              background-color var(--dur-hover) ease,
+              color var(--dur-hover) ease,
+              border-color var(--dur-hover) ease;
+}
+
+.tool-btn span { font-size: 17px; line-height: 1; }
+/* 图标与文字混排时，图标要跟着基线走 */
+.gbtn > .ic, .cbtn > .ic { vertical-align: -3px; margin-right: 2px; }
+
+/* 工具与动作之间的分隔。动作不是模式——点了立刻执行完、没有按下态，
+   视觉上必须和上面那组分开，否则用户会以为点了"钉住"就进入了钉住模式。 */
+.rail-split {
+  width: 100%;
+  margin: 8px 0;
+  border: 0;
+  border-top: 1px solid var(--hairline);
+}
+.rail-split[hidden] { display: none; }
+
+/* 动作按钮：比工具再淡一档，且永远不会有 aria-pressed 的高亮态 */
+.tool-btn.action-btn { color: var(--faint); }
+.tool-btn.action-btn[hidden] { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .tool-btn.action-btn:hover:not(:disabled) { color: var(--accent); background: var(--accent-10); }
+}
+.tool-btn.action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 只读（图片被锁定）时，被禁用的工具要一眼看出来 */
+.img-editor.read-only .tool-btn:disabled { opacity: 0.35; }
+
+@media (hover: hover) {
+  .tool-btn:hover { color: var(--accent); background: var(--accent-10); }
+}
+
+.tool-btn:active { transform: scale(0.96); }
+
+.tool-btn[aria-pressed="true"] {
+  color: var(--accent);
+  background: var(--accent-18);
+  border-color: var(--accent);
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+/* ── 画布区 ── */
+.img-editor-stage {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  /* 棋盘格由 .checkerboard 提供，与汇总画布共用同一套 token */
+}
+
+/* 操作提示浮条：贴在画布区顶部，不拦截鼠标 */
+.img-editor-stage-hint {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  max-width: calc(100% - 24px);
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  box-shadow: var(--shadow-small);
+}
+.img-editor-stage-hint[hidden] { display: none; }
+/* 前置条件没满足时更醒目，但仍是提示不是报错 */
+.img-editor-stage-hint.blocked {
+  border-color: var(--accent-28);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.img-editor-stage canvas {
+  display: block;
+  box-shadow: var(--shadow-panel);
+}
+
+/* ── 参数面板 ── */
+.img-editor-panel {
+  border-left: 1px solid var(--hairline);
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.img-editor-hint {
+  font-size: var(--fs-md);
+  color: var(--faint);
+  line-height: 1.6;
+}
+
+.img-editor-options { display: flex; flex-direction: column; gap: var(--sp-3); }
+
+.img-editor-options label.inline-value {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-md);
+  color: var(--muted);
+}
+
+.img-editor-options output { font-variant-numeric: tabular-nums; }
+
+.img-editor-options input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+.img-editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.img-editor-field > span { font-size: var(--fs-md); color: var(--muted); }
+
+.img-editor-field input[type="text"],
+.img-editor-field input[type="number"],
+.img-editor-field select {
+  width: 100%;
+  height: var(--control-height);
+  padding: 0 9px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-md);
+  background-color: var(--control-bg);
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--fs-md);
+}
+
+.img-editor-swatches { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+
+.img-editor-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform var(--dur-press) var(--ease-out),
+              border-color var(--dur-hover) ease;
+}
+
+.img-editor-swatch:active { transform: scale(0.9); }
+.img-editor-swatch[aria-pressed="true"] { border-color: var(--foreground); }
+
+/* 尊重系统的减少动态偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .img-editor,
+  .tool-btn,
+  .img-editor-swatch {
+    transition-duration: 1ms;
+  }
+}
+
+
+/* ══ V1 · 减弱动效 ══
+   关掉**位移、缩放与模糊**，保留颜色与透明度过渡——后者帮助理解状态变化，
+   不会引起前庭不适。不是一刀切把所有动画设成 0。 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  :where(button, a, .txt-btn, .tool-btn, .obj-btn, .cbtn, .gbtn, .nav-ic):active {
+    transform: none !important;
+  }
+  .cmd-menu, .app-menu, .img-editor, .toast {
+    transition-property: opacity !important;
+  }
+  .barcode-mode-switch::before {
+    transition-duration: 0ms;
+  }
+  .submenu-indicator.ready {
+    transition-duration: 0ms;
+  }
+}
+
+
+/* ══ V1 · 把被 outline:none 抹掉的焦点环补回来 ══
+   下面这些选择器为了去掉**鼠标点击**时的焦点框写了 outline: none。
+   而上面的通用焦点规则用了 :where()，特异性为 0，会被它们盖掉——
+   结果就是这些输入控件按 Tab 时完全看不到焦点。
+   这里按同样的选择器补一条 :focus-visible，只在**键盘**聚焦时出现。
+   ⚠ 新增控件如果也要去掉鼠标焦点框，记得同步加进这份名单。 */
+body.keyboard-focus #ocr-result:focus-visible,
+body.keyboard-focus .barcode-input input:focus-visible,
+body.keyboard-focus .barcode-preset-picker select:focus-visible,
+body.keyboard-focus .batch-input-field textarea:focus-visible,
+body.keyboard-focus .color-preview input:focus-visible,
+body.keyboard-focus .format-options input[type="number"]:focus-visible,
+body.keyboard-focus .image-panel select:focus-visible,
+body.keyboard-focus .pdf-options input:focus-visible,
+body.keyboard-focus .pdf-watermark-controls select:focus-visible,
+body.keyboard-focus .search input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: var(--focus-glow);
+}
+
+/* ══ 图标 sprite 容器 ══
+   ⚠ 必须脱离文档流。sprite 默认是 display:inline，即使 width/height 都是 0，
+   它所在的**行盒**照样占位——实测把整个界面下推了 20px，
+   而 svg 自身的 getBoundingClientRect().height 仍然是 0，
+   只查它的高度是查不出来的。 */
+#icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}

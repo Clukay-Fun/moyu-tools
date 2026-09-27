@@ -1,0 +1,22 @@
+/* ══ 输入错误态：统一读 aria-invalid ══
+   <input aria-invalid="true">、增强下拉、步进器（错误画在外框上）共用同一套红。
+   ⚠ 放在文件末尾：需要压过各模块自己的聚焦 / 悬停样式（它们特异性相同、位置更靠前）。
+   :not(:disabled) 既让禁用的输入框不显示错误，也把特异性抬到与模块规则持平。
+   键盘焦点的实线内圈（outline）照常显示，外层柔光换成红色。 */
+:is(input, textarea, select)[aria-invalid="true"]:not(:disabled),
+.app-select-trigger[aria-invalid="true"]:not(:disabled),
+.stepper:has(input[aria-invalid="true"]:not(:disabled)) {
+  border-color: color-mix(in srgb, var(--danger) 65%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 12%, transparent);
+}
+
+.stepper input[aria-invalid="true"]:not(:disabled) {
+  border: 0;
+  box-shadow: none;
+}
+
+/* 错误态 + 键盘焦点：实线内圈（主题色）表示焦点，外层光保持红色表示错误仍在。
+   步进器的键盘焦点规则特异性更高，这里单独补一条与普通输入框保持一致。 */
+body.keyboard-focus .stepper:has(input[aria-invalid="true"]:not(:disabled):focus-visible) {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 12%, transparent);
+}

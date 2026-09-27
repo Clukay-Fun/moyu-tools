@@ -1,0 +1,450 @@
+/* ══ F-16 · 快捷键设置 ══ */
+.shortcut-status[hidden] { display: none; }
+
+/* 设置页的控件描边：--control-border 在浅色模式是白色，这里统一换成中性灰 */
+.page-settings .gbtn,
+.page-settings .accent-current-row #color-hex {
+  border-color: var(--border-neutral);
+}
+
+.page-settings .gbtn:hover {
+  border-color: var(--border-neutral-hover);
+}
+
+.shortcut-input {
+  min-width: 164px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3px;
+}
+/* 录制中：用主题色描边表明"正在等你按键"，比换文案更快被感知 */
+.shortcut-input.recording {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-10);
+}
+.shortcut-status {
+  margin: 2px 0 0;
+  font-size: var(--fs-md);
+  color: var(--muted);
+}
+.shortcut-status.error { color: var(--danger); }
+.shortcut-status.ok { color: var(--accent); }
+
+/* ══ S1 · 应用自己的下拉菜单 ══
+   原生 <select> 的弹窗由系统绘制，透明度、圆角、模糊都控制不了，
+   压在画布上会露出下面的内容。这里只替换**确实存在遮挡问题**的那几个
+   （文本工具栏的字体与对齐），其余模块的原生下拉先不动。
+
+   ⚠ 用 position: fixed 并挂在 <body> 下：既绕开 .canvas-shell 的
+   overflow: hidden 裁切，也绕开祖先的层叠上下文。挂在原位的话，
+   菜单会被画布容器切掉一截。 */
+.app-menu {
+  position: fixed;
+  z-index: var(--z-popover);
+  min-width: 120px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--menu-surface);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(24px) saturate(150%);
+  transform-origin: top left;
+  transition: opacity var(--dur-popover) var(--ease-out),
+              transform var(--dur-popover) var(--ease-out);
+}
+
+#overlay-layer {
+  position: fixed;
+  z-index: var(--z-popover);
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+#overlay-layer > .app-menu {
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+#overlay-layer > .cmd-menu {
+  position: fixed;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+.pdf-quality-menu {
+  min-width: 0;
+}
+
+.pdf-quality-menu button[aria-selected="true"] {
+  color: #fff;
+  background: var(--accent);
+}
+.app-menu[hidden] { display: none; }
+.app-menu button {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--fs-md);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* 原生 select 仅保留为业务数据源；可视触发器和菜单统一由应用绘制。 */
+.app-select-native {
+  position: absolute !important;
+  width: 1px !important;
+  min-width: 0 !important;
+  height: 1px !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.app-select-trigger {
+  display: inline-flex;
+  min-width: 72px;
+  min-height: var(--control-height);
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 30px 0 10px;
+  overflow: hidden;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-sm);
+  color: var(--foreground);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--faint) 50%) calc(100% - 16px) calc(50% - 2px) / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--faint) 50%, transparent 50%) calc(100% - 11px) calc(50% - 2px) / 5px 5px no-repeat,
+    var(--control-bg);
+  font: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-select-trigger:hover:not(:disabled) {
+    border-color: var(--control-border-hover);
+    background-color: var(--control-bg-hover);
+  }
+}
+
+.app-select-menu button[aria-selected="true"] {
+  color: #fff;
+  background: var(--accent);
+}
+
+.app-select-menu button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.pdf-options .app-select-trigger {
+  height: var(--control-height);
+  border-radius: 8px;
+}
+
+.pdf-watermark-controls .app-select-trigger,
+.format-options .app-select-trigger,
+.image-panel .app-select-trigger,
+.img-editor-field .app-select-trigger {
+  width: 100%;
+}
+
+.format-options .app-select-trigger {
+  grid-column: 1 / -1;
+}
+
+.format-options label:has(select),
+.format-options label:has(.app-select-trigger) {
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--sp-3);
+}
+
+.format-options label > .app-select-trigger {
+  grid-column: 2;
+}
+
+.barcode-font-picker .app-select-trigger,
+.barcode-preset-picker .app-select-trigger {
+  width: 124px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .app-menu button:hover { color: var(--accent); background: var(--accent-10); }
+}
+.app-menu button[aria-checked="true"]::after { content: " ✓"; color: var(--accent); }
+
+/* 退场：先加 .closing 播放淡出，动画结束后脚本再设 hidden（见 main.js closePopover） */
+.app-menu.closing,
+.cmd-menu.closing,
+#overlay-layer > .app-menu.closing,
+#overlay-layer > .cmd-menu.closing {
+  opacity: 0;
+  transform: translateY(-2px) scale(0.98);
+  /* 淡出期间菜单还在原位，不能挡住下方的点击；
+     #overlay-layer 里的菜单会把 pointer-events 设回 auto，所以这里带上同等特异性的选择器 */
+  pointer-events: none;
+  transition-duration: var(--dur-popover-exit);
+}
+
+@starting-style {
+  .search-results.open,
+  .cmd-menu:not([hidden]),
+  .app-menu:not([hidden]) {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.98);
+  }
+}
+
+/* 触发钮：外观与工具栏其他按钮一致，右侧带一个下拉标记 */
+.txt-trigger::after { content: " ▾"; color: var(--faint); font-size: var(--fs-xs); }
+
+.txt-btn {
+  padding: 5px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--fs-md);
+  cursor: pointer;
+  transition: transform var(--dur-press) var(--ease-out),
+              color var(--dur-hover) ease, background-color var(--dur-hover) ease;
+}
+.txt-btn.icon-only {
+  display: inline-grid;
+  width: var(--icon-btn-sm);
+  height: var(--icon-btn-sm);
+  place-items: center;
+  padding: 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  .txt-btn:hover:not(:disabled) { color: var(--accent); background: var(--accent-10); }
+}
+.txt-btn:active:not(:disabled) { transform: scale(var(--press-scale)); }
+.txt-btn[aria-pressed="true"] { color: var(--accent); background: var(--accent-18); }
+.txt-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.txt-btn.txt-danger { color: var(--danger); }
+.txt-btn.txt-danger:disabled { color: var(--muted); }
+
+.txt-select {
+  height: var(--control-height);
+  max-width: 104px;
+  padding: 0 4px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-sm);
+  background-color: var(--control-bg);
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--fs-md);
+}
+.txt-select:disabled { opacity: 0.35; }
+
+.txt-color {
+  width: 26px;
+  height: var(--control-height);
+  padding: 0;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-sm);
+  background: none;
+  cursor: pointer;
+}
+.txt-color:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* 比例输入只容纳“100%”一类短值，不跟普通文本框一起拉宽。 */
+.txt-scale {
+  box-sizing: border-box;
+  width: 6ch;
+  min-width: 0;
+  height: var(--control-height);
+  padding: 0 6px;
+  border-radius: var(--r-sm);
+  text-align: center;
+  font-size: var(--fs-md);
+  font-variant-numeric: tabular-nums;
+}
+
+.txt-sep {
+  width: 1px;
+  height: 18px;
+  margin: 0 2px;
+  background: var(--hairline);
+}
+
+/* 锁定态：只留解锁 / 复制 / 删除，其余禁用但**不隐藏**——
+   隐藏会让工具栏宽度突变，用户以为按钮消失了 */
+.text-toolbar.locked .txt-select,
+.text-toolbar.locked .txt-color { opacity: 0.35; }
+
+.object-toolbar .obj-group {
+  display: flex;
+  flex-direction: row;
+  gap: var(--sp-1);
+  align-items: center;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  /* 与所有浮层统一：--card 的 0.2 会把下面的图片和控制点透出来 */
+  background: var(--menu-surface);
+  box-shadow: var(--shadow-small);
+  backdrop-filter: blur(20px) saturate(150%);
+}
+.object-toolbar.collapsed .obj-group { display: none; }
+
+/* 侧栏本身吃掉指针事件，点空白不穿透到画布取消选择 */
+.object-toolbar .obj-group,
+.object-toolbar .obj-btn,
+.object-toolbar .cmd-menu {
+  pointer-events: auto;
+}
+
+.obj-btn {
+  /* 图标 + 短标签横排；整个矩形都是点击区，不依赖单个字符 */
+  display: grid;
+  grid-template-columns: 18px;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+  gap: var(--sp-2);
+  width: auto;
+  min-width: 0;
+  min-height: var(--h-md);
+  width: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-sm);
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-size: var(--fs-md);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 130ms ease,
+    background-color 130ms ease,
+    transform 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .obj-btn:hover { color: var(--accent); background: var(--accent-10); }
+}
+.obj-btn:active { transform: scale(0.94); }
+.obj-btn[hidden] { display: none; }
+
+.obj-ic {
+  /* 尺寸由 .ic 的 token 给（16px），这里只负责在 18px 栅格里居中。
+     font-size 已无意义——里面是 svg 不是字符了（V2）。 */
+  width: 18px;
+}
+.obj-label {
+  display: none;
+}
+
+/* 收起按钮只有箭头，不占标签宽度 */
+.obj-collapse {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  min-width: 22px;
+  width: 22px;
+  padding: 0;
+}
+
+/* 锁定态：按钮高亮；文案由 JS 在「锁定 / 已锁定」间切换 */
+.obj-lock[aria-pressed="true"] {
+  color: var(--accent);
+  background: var(--accent-18);
+  font-weight: 600;
+}
+
+.obj-danger { color: #c0453f; }
+@media (hover: hover) and (pointer: fine) {
+  .obj-danger:hover { color: #ffffff; background: #c0453f; }
+}
+.obj-btn[aria-pressed="true"] { color: var(--accent); background: var(--accent-10); }
+
+.object-toolbar > .obj-btn[data-obj="collapse"] {
+  width: 18px;
+  height: var(--h-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--card);
+  backdrop-filter: blur(20px);
+  font-size: var(--fs-sm);
+}
+/* 翻到左侧时收起箭头方向反转 */
+.object-toolbar.flipped { flex-direction: row; }
+
+.object-toolbar #object-more-menu { top: auto; bottom: 0; right: calc(100% + 6px); }
+.object-toolbar.flipped #object-more-menu { right: auto; left: calc(100% + 6px); }
+
+/* ── 辅助层：标尺 / 网格 / 参考线（U3 / 规格 3.3）────────────
+   全部叠在画布之上、控制器之下；不参与导出。 */
+.board-overlay {
+  position: absolute;
+  z-index: var(--z-canvas-helpers);
+  inset: 0;
+  pointer-events: none;
+}
+
+.ruler {
+  position: absolute;
+  z-index: var(--z-ruler);
+  color: var(--faint);
+  background: var(--card-thin);
+  backdrop-filter: blur(14px);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  cursor: crosshair;
+}
+.ruler-x {
+  top: 0;
+  right: 0;
+  left: 20px;
+  height: 18px;
+  border-bottom: 1px solid var(--hairline);
+}
+.ruler-y {
+  top: 18px;
+  bottom: 0;
+  left: 0;
+  width: 20px;
+  border-right: 1px solid var(--hairline);
+}
+.ruler-corner {
+  position: absolute;
+  z-index: calc(var(--z-ruler) + 1);
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 18px;
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  background: var(--card-thin);
+  backdrop-filter: blur(14px);
+}
+/* 标尺内的刻度与文字用 canvas 绘制，保持屏幕尺寸不随画布缩放 */
+.ruler canvas { display: block; width: 100%; height: 100%; }
+
+/* 默认是干净的大画布；需要精确排版时再从「视图」打开标尺。 */
+.canvas-shell:not(.show-rulers) .ruler,
+.canvas-shell:not(.show-rulers) .ruler-corner {
+  display: none;
+}

@@ -1,0 +1,421 @@
+.glass-card {
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-small), inset 0 1px rgba(255, 255, 255, 0.36);
+  backdrop-filter: blur(22px) saturate(145%);
+}
+
+[data-theme="dark"] .glass-card {
+  box-shadow: var(--shadow-small), inset 0 1px rgba(255, 255, 255, 0.055);
+  backdrop-filter: blur(22px) saturate(115%);
+}
+
+.gbtn,
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  height: var(--h-lg);
+  padding: 0 var(--sp-4);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: transform var(--dur-press) var(--ease-out),
+              color var(--dur-hover) ease,
+              border-color var(--dur-hover) ease,
+              background-color var(--dur-hover) ease,
+              filter var(--dur-press) ease;
+}
+
+.gbtn {
+  border: 1px solid var(--control-border);
+  color: var(--muted);
+  background: var(--control-bg);
+  backdrop-filter: blur(16px);
+}
+
+.gbtn:hover {
+  border-color: var(--control-border-hover);
+  color: var(--accent);
+  background: var(--control-bg-active);
+}
+
+.gbtn.danger {
+  color: var(--danger);
+}
+
+.gbtn.danger:hover {
+  border-color: color-mix(in srgb, var(--danger) 34%, transparent);
+  color: color-mix(in srgb, var(--danger) 88%, #000);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+.gbtn:active,
+.primary:active {
+  transform: scale(var(--press-scale));
+}
+
+.gbtn:disabled,
+.primary:disabled,
+.format-grid button:disabled {
+  cursor: not-allowed;
+  filter: none;
+  opacity: 0.48;
+  transform: none;
+}
+
+.primary {
+  border: 1px solid var(--accent);
+  color: #fff;
+  background: var(--accent);
+  box-shadow: 0 4px 12px var(--accent-28);
+  font-weight: 650;
+}
+
+.primary:hover {
+  filter: brightness(1.06);
+}
+
+.toolbar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.toolbar-wrap {
+  flex-wrap: wrap;
+}
+
+.toolbar-hint {
+  margin-left: auto;
+  color: var(--faint);
+  font-size: var(--fs-md);
+  text-align: right;
+}
+
+.toolbar-space {
+  flex: 1;
+}
+
+.pdf-options {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pdf-options:empty {
+  display: none;
+}
+
+.pdf-options label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--faint);
+  font-size: var(--fs-sm);
+}
+
+.pdf-options select,
+.pdf-options input {
+  height: var(--control-height);
+  padding: 0 9px;
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  outline: 0;
+  color: var(--foreground);
+  background-color: var(--control-bg);
+}
+
+.pdf-select-trigger {
+  min-width: 72px;
+  height: var(--control-height);
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  color: var(--foreground);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--faint) 50%) calc(100% - 15px) calc(50% - 2px) / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--faint) 50%, transparent 50%) calc(100% - 10px) calc(50% - 2px) / 5px 5px no-repeat,
+    var(--control-bg);
+  cursor: pointer;
+}
+
+.pdf-select-trigger:hover {
+  border-color: var(--control-border-hover);
+  background-color: var(--control-bg-hover);
+}
+
+.pdf-options input {
+  width: 116px;
+  user-select: text;
+}
+
+.pdf-options .compact {
+  min-height: 34px;
+  padding: 6px 10px;
+}
+
+.pdf-option-status {
+  max-width: 150px;
+  overflow: hidden;
+  color: var(--faint);
+  font-size: var(--fs-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdf-watermark-workbench {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 12px;
+}
+
+.pdf-watermark-workbench[hidden] {
+  display: none;
+}
+
+.pdf-watermark-left {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.pdf-watermark-controls {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  padding: 14px;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.pdf-watermark-controls-title {
+  margin-bottom: 13px;
+  color: var(--foreground);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+}
+
+.pdf-watermark-controls section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 9px;
+  padding: 0 0 14px;
+}
+
+.pdf-watermark-controls section + section {
+  padding-top: 13px;
+  border-top: 1px solid var(--hairline);
+}
+
+.pdf-watermark-controls h3 {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--foreground);
+  font-size: var(--fs-md);
+}
+
+.pdf-watermark-mode {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 3px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-md);
+  background: var(--control-bg);
+}
+
+.pdf-watermark-mode button {
+  height: 32px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.pdf-watermark-mode button.active {
+  color: var(--accent);
+  background: var(--accent-10);
+  font-weight: 650;
+}
+
+.pdf-watermark-controls label {
+  display: grid;
+  gap: 5px;
+  color: var(--faint);
+  font-size: var(--fs-xs);
+}
+
+.pdf-watermark-controls label:first-child,
+.pdf-watermark-controls .pdf-watermark-range,
+.pdf-watermark-file-list,
+#pdf-watermark-image-button,
+#pdf-watermark-image-name {
+  grid-column: 1 / -1;
+}
+
+.pdf-watermark-controls input,
+.pdf-watermark-controls select {
+  width: 100%;
+  height: var(--control-height);
+  padding: 0 9px;
+  border: 1px solid var(--control-border);
+  border-radius: 9px;
+  outline: 0;
+  color: var(--foreground);
+  background-color: var(--control-bg);
+}
+
+.pdf-watermark-range {
+  grid-template-columns: 1fr auto 62px;
+  align-items: center;
+}
+
+.pdf-watermark-range input[type="range"] {
+  grid-column: 1 / 3;
+  padding: 0;
+  accent-color: var(--accent);
+}
+
+.pdf-watermark-range input[type="number"] {
+  grid-column: 3;
+}
+
+.pdf-watermark-file-list {
+  display: grid;
+  min-width: 0;
+  max-height: 76px;
+  flex: 1;
+  gap: 5px;
+  overflow: auto;
+}
+
+.pdf-watermark-file-strip {
+  display: flex;
+  min-height: 46px;
+  flex: none;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.pdf-watermark-file-strip > span {
+  padding-top: 7px;
+  color: var(--faint);
+  font-size: var(--fs-xs);
+}
+
+.pdf-watermark-file,
+.pdf-watermark-file-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+  padding: 7px 9px;
+  border-radius: 8px;
+  color: var(--muted);
+  background: var(--card-thin);
+  font-size: var(--fs-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdf-watermark-file > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pdf-watermark-file > small {
+  color: var(--faint);
+}
+
+.pdf-watermark-file > small.error {
+  max-width: 150px;
+  overflow: hidden;
+  color: var(--danger);
+  text-overflow: ellipsis;
+}
+
+.pdf-watermark-file.active {
+  border-color: var(--accent);
+  background: var(--accent-10);
+}
+
+.pdf-watermark-preview-card {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pdf-watermark-preview-card > header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.pdf-watermark-preview-card > header span {
+  display: block;
+  margin-top: 3px;
+  color: var(--faint);
+  font-size: var(--fs-xs);
+}
+
+.pdf-watermark-run {
+  width: 100%;
+  min-height: var(--h-lg);
+  flex: none;
+  margin-top: auto;
+}
+
+.pdf-watermark-preview-stage {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  padding: 18px;
+  place-items: center;
+  overflow: auto;
+}
+
+#pdf-watermark-preview {
+  max-width: 100%;
+  max-height: 100%;
+  background: #fff;
+  box-shadow: 0 9px 26px rgba(25, 28, 45, 0.16);
+}
+
+.pdf-watermark-preview-stage > .empty {
+  position: absolute;
+  inset: 0;
+}
+
+.pdf-watermark-preview-nav {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 7px 12px;
+  border-top: 1px solid var(--hairline);
+}
+
+.pdf-watermark-preview-nav span {
+  min-width: 76px;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
