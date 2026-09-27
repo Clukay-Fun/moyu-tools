@@ -128,10 +128,22 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     saveBarcodeBatchPngButton.disabled = !enabled
   }
 
+  // 提示区只管文字；输入框的 aria-invalid 只由「内容校验」决定。
+  // ⚠ 保存、复制、联动失败也用 'error' 样式显示，但那不是输入内容的问题——
+  //   若在这里顺手标 aria-invalid，读屏会报「输入无效」，输入框也会无端变红。
   function setBarcodeMessage(message, type = '') {
     barcodeMessage.textContent = message
     barcodeMessage.className = `barcode-message${type ? ` ${type}` : ''}`
-    barcodeInput.classList.toggle('invalid', type === 'error')
+  }
+
+  function setBarcodeInputInvalid(invalid) {
+    barcodeInput.setAttribute('aria-invalid', String(invalid))
+  }
+
+  /** 输入内容不符合码制要求：显示原因，并把输入框标为无效 */
+  function setBarcodeContentError(message) {
+    setBarcodeMessage(message, 'error')
+    setBarcodeInputInvalid(true)
   }
 
   function getBarcodeType() {
@@ -486,6 +498,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     // 任何一次生成（含切换类型、非 GS1-128 类型）都推进序号，
     // 以作废仍在飞行中的旧 GS1-128 校验请求。
     const token = ++barcodeRequestSeq
+    setBarcodeInputInvalid(false)
 
     barcodeSvg.replaceChildren()
     barcodeRenderedValue = ''
@@ -506,7 +519,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
       if (rawInput.length > 0 && /[^0-9]/.test(rawInput)) {
         if (token !== barcodeRequestSeq) return false
         barcodeSpecReport.hidden = true
-        setBarcodeMessage(`${typeName} 仅支持数字，请移除字母、空格或符号。`, 'error')
+        setBarcodeContentError(`${typeName} 仅支持数字，请移除字母、空格或符号。`)
         if (notifyError) showToast('条码含非法字符')
         return false
       }
@@ -523,9 +536,8 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
       } else {
         if (token !== barcodeRequestSeq) return false
         barcodeSpecReport.hidden = true
-        setBarcodeMessage(
-          `${typeName} 位数超出：需 ${dataLen} 位数据，或 ${dataLen + 1} 位完整码（含校验位）。`,
-          'error'
+        setBarcodeContentError(
+          `${typeName} 位数超出：需 ${dataLen} 位数据，或 ${dataLen + 1} 位完整码（含校验位）。`
         )
         if (notifyError) showToast('条码位数超出限制')
         return false
@@ -538,7 +550,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
         if (token !== barcodeRequestSeq) return false // 已被更新的输入取代
         const message = error instanceof Error ? error.message : friendlyBarcodeError(typeName)
         barcodeSpecReport.hidden = true
-        setBarcodeMessage(message, 'error')
+        setBarcodeContentError(message)
         if (notifyError) showToast('GS1-128 数据无效')
         return false
       }
@@ -580,7 +592,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
           ? error.message
           : friendlyBarcodeError(typeName)
       barcodeSpecReport.hidden = true
-      setBarcodeMessage(message, 'error')
+      setBarcodeContentError(message)
       if (notifyError) showToast(message)
       return false
     }

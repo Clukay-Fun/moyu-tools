@@ -190,7 +190,7 @@ export function initDieline({ showToast }) {
       const label = document.createElement('label')
       label.textContent = entry.label
       const wrap = document.createElement('span')
-      wrap.className = 'dieline-input'
+      wrap.className = 'unit-input'
       const input = document.createElement('input')
       input.type = 'number'
       input.step = String(entry.step || 0.5)
@@ -305,7 +305,8 @@ export function initDieline({ showToast }) {
     const errorLabels = { length: '长', width: '宽', height: '高', thickness: '厚度', bleed: '出血' }
     for (const entry of template.structureParams || []) errorLabels[entry.key] = entry.label
     for (const [key, input] of Object.entries({ ...paramInputs, ...structureInputs })) {
-      input.classList.toggle('invalid', !result.ok && result.errors.some((error) => error.startsWith(errorLabels[key] || '\u0000')))
+      const invalid = !result.ok && result.errors.some((error) => error.startsWith(errorLabels[key] || '\u0000'))
+      input.setAttribute('aria-invalid', String(invalid))
     }
     updateStructurePlaceholders()
     if (!result.ok) {

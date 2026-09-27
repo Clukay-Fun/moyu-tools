@@ -271,9 +271,10 @@
       <div class="cat-item">
         <dl class="cat-meta">
           <dt>选择器</dt><dd><code>input[type=text|number|search]</code> <code>textarea</code> <code>select</code>（在应用里会被增强为 <code>.app-select-trigger</code>）</dd>
-          <dt>错误态</dt><dd>加 <code>aria-invalid="true"</code>；目前只有增强下拉读这个属性，文本框的错误态各模块各写各的——属于第一批统一项</dd>
+          <dt>错误态</dt><dd>统一加 <code>aria-invalid="true"</code>（不要再切 <code>.invalid</code> 之类的类名）：红框 + 淡红外圈，悬停和聚焦时保持；禁用时不显示。步进器的错误画在外框上。错误提示文字用 <code>aria-describedby</code> 关联到输入框，读屏会念出原因。<b>只有输入内容本身不合法才标 aria-invalid</b>；保存、复制、联动这类操作失败只在提示区显示错误，不动输入框</dd>
           <dt>焦点态</dt><dd>鼠标点进输入框：边框换成 <code>--control-border-hover</code>。<b>键盘 Tab</b> 聚焦：贴边 2px 主题色实线内圈（对浅色底约 3.6～3.9:1）+ 外层 5px 柔光（<code>--focus-ring-*</code> / <code>--focus-glow</code>），只在键盘操作时出现——在本页按 Tab 即可看到；开关的焦点画在滑轨上</dd>
-          <dt>带单位</dt><dd><code>.dieline-input</code>（单位在框内右侧）、<code>.dieline-stepper</code>（加减步进）——目前是刀模私有，候选提升为公共组件</dd>
+          <dt>带单位</dt><dd><code>&lt;span class="unit-input"&gt;&lt;input type="number"&gt;&lt;em&gt;mm&lt;/em&gt;&lt;/span&gt;</code>——单位贴在框内右侧，宽度由外层决定</dd>
+          <dt>步进器</dt><dd><code>&lt;span class="stepper"&gt;&lt;button aria-label="减小"&gt;−&lt;/button&gt;&lt;input type="number"&gt;&lt;button aria-label="增大"&gt;+&lt;/button&gt;&lt;/span&gt;</code>——加减逻辑（范围、步长）由使用方处理；输入框仍可直接键入和用方向键调整；焦点画在外框上</dd>
           <dt>现用模块</dt><dd>条码、PDF、刀模、格式工厂、设置</dd>
         </dl>
         <div class="cat-pair">
@@ -411,13 +412,19 @@
       <div class="cat-state"><select style="border-radius:var(--r-md);padding-left:10px"><option>瓦楞纸 E（三层）</option><option>白卡纸</option></select><small>原生下拉（应用内会被增强）</small></div>
     </div>
     <div class="cat-row">
-      <div class="cat-state"><button type="button" class="app-select-trigger" aria-invalid="true">选择材质</button><small>增强下拉 · 错误态（--danger）</small></div>
+      <div class="cat-state"><button type="button" class="app-select-trigger" aria-invalid="true">选择材质</button><small>增强下拉 · 错误态</small></div>
       <label class="search" style="width:260px"><svg class="ic" aria-hidden="true"><use href="#ic-search"></use></svg><input type="search" placeholder="搜索功能…" /><kbd>⌘K</kbd></label>
     </div>
     <div class="cat-row">
-      <div class="cat-state" style="width:120px"><span class="dieline-input"><input type="number" value="400" /><em>mm</em></span><small>带单位</small></div>
-      <div class="cat-state" style="width:150px"><span class="dieline-stepper"><button type="button" aria-label="减小">−</button><input type="number" value="1.5" step="0.1" /><button type="button" aria-label="增大">+</button></span><small>步进</small></div>
+      <div class="cat-state" style="width:120px"><span class="unit-input"><input type="number" value="400" /><em>mm</em></span><small>带单位 .unit-input</small></div>
+      <div class="cat-state" style="width:150px"><span class="stepper"><button type="button" aria-label="减小">−</button><input type="number" value="1.5" step="0.1" /><button type="button" aria-label="增大">+</button></span><small>步进器 .stepper</small></div>
       <div class="cat-state"><input type="color" value="#6978e6" style="width:40px;height:32px;border-radius:var(--r-sm)" /><small>颜色</small></div>
+    </div>
+    <div class="cat-row">
+      <div class="cat-state"><input type="text" value="6901234567890" aria-invalid="true" style="width:170px;height:34px;padding:0 10px;border-radius:var(--r-md)" /><small>错误态 · 文本</small></div>
+      <div class="cat-state" style="width:120px"><span class="unit-input"><input type="number" value="0" aria-invalid="true" /><em>mm</em></span><small>错误态 · 带单位</small></div>
+      <div class="cat-state" style="width:150px"><span class="stepper"><button type="button" aria-label="减小">−</button><input type="number" value="99" aria-invalid="true" /><button type="button" aria-label="增大">+</button></span><small>错误态 · 步进器</small></div>
+      <div class="cat-state"><input type="text" value="已禁用" disabled aria-invalid="true" style="width:100px;height:34px;padding:0 10px;border-radius:var(--r-md)" /><small>禁用时不显示错误</small></div>
     </div>
     <div class="cat-row">
       <div class="cat-state" style="width:220px"><input type="range" min="0" max="100" value="62" style="width:100%" /><small>滑块</small></div>
