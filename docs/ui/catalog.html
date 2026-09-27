@@ -53,6 +53,28 @@
     .cat-motion-tokens > div { display: grid; gap: 4px; font-size: 11px; color: var(--faint); }
     .cat-motion-tokens b { color: var(--foreground); font-size: 12px; }
     .cat-curve { width: 120px; height: 72px; }
+    .cat-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+    .cat-section-head h2 { margin: 0; font-size: 18px; }
+    .cat-motion-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+    .cat-motion-card { display: grid; gap: 6px; padding: 14px; border: 1px solid var(--hairline); border-radius: 14px; background: color-mix(in srgb, var(--card-solid) 50%, transparent); }
+    .cat-motion-card h3 { margin: 6px 0 0; font-size: 13px; }
+    .cat-motion-card p { margin: 0; color: var(--muted); font-size: 11.5px; line-height: 1.6; }
+    .cat-motion-card .cat-note { color: var(--faint); }
+    .cat-motion-stage { position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; min-height: 96px; padding: 14px; border-radius: 10px; background: var(--background); }
+    /* 模拟 :active / :hover —— 伪类无法用脚本触发，这里照抄应用里对应规则的取值，过渡仍由控件自身的 transition 驱动 */
+    .cat-motion-stage[data-state="on"] .cat-sim { transform: scale(var(--cat-press, 1)); }
+    [data-loop="hover"][data-state="on"] .gbtn.cat-sim { border-color: var(--control-border-hover); color: var(--accent); background: var(--control-bg-active); transform: none; }
+    [data-loop="hover"][data-state="on"] .app-menu .cat-sim { color: var(--accent); background: var(--accent-10); transform: none; }
+    .cat-drop { display: grid; width: 100%; min-height: 70px; place-items: center; color: var(--muted); font-size: 12px; }
+    [data-loop="drop"][data-state="on"] .cat-drop { border-color: color-mix(in srgb, var(--accent) 78%, transparent); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 24%, transparent); background-color: color-mix(in srgb, var(--accent) 7%, transparent); }
+    .cat-check { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
+    .cat-slogan { font-size: 20px; font-weight: 800; background: var(--slogan-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .cat-slogan.play { animation: home-slogan-enter 580ms cubic-bezier(0.22, 0.8, 0.32, 1) both; }
+    .cat-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+    .cat-table th, .cat-table td { padding: 6px 10px; border-bottom: 1px solid var(--hairline); text-align: left; white-space: nowrap; }
+    .cat-table th { position: sticky; top: 0; background: var(--card-solid); color: var(--faint); font-weight: 600; }
+    .cat-table td code { font-size: 11px; }
+    .cat-table tr.raw td:nth-child(3), .cat-table tr.raw td:nth-child(4) { color: var(--danger); }
     /* 应用里 toast 是绝对定位的浮层，目录里改成静态展示 */
     [data-demo] .toast { position: static; opacity: 1; transform: none; }
   </style>
@@ -106,56 +128,118 @@
 
     <!-- ══ 动效 ══ -->
     <section class="cat-section" id="motion">
-      <h2>动效</h2>
-      <p>动效只服务于反馈，不做装饰：按下有回弹、浮层出现有过渡、状态切换有滑动。时长与缓动一律取变量。下面每个示例都可以点，点「重放」看一遍。</p>
+      <div class="cat-section-head">
+        <h2>动效</h2>
+        <button class="gbtn" type="button" id="motion-toggle">暂停演示</button>
+      </div>
+      <p>下面每张卡片都在自动循环播放应用里的真实动效（用的是应用本身的类名和过渡，不是另画的动画）。动效只服务于反馈：按下有回弹、浮层有出现、状态切换有滑动。时长与缓动一律取变量。</p>
+
       <div class="cat-item">
         <dl class="cat-meta">
           <dt>时长</dt><dd><code>--dur-press</code> 按下、悬停、开关等即时反馈 · <code>--dur-popover</code> 菜单、气泡等浮层出现</dd>
-          <dt>缓动</dt><dd><code>--ease-out</code>——出现和位移用它；颜色、背景这类非位移变化用 <code>ease</code> 即可</dd>
-          <dt>减弱动效</dt><dd>系统开启「减少动态效果」时，位移和缩放要关掉，只保留颜色/透明度变化（<code>@media (prefers-reduced-motion: reduce)</code>）</dd>
+          <dt>缓动</dt><dd><code>--ease-out</code>——出现和位移；颜色、背景这类非位移变化用 <code>ease</code>；两个位置之间来回滑（分段指示器）现在用的是 <code>cubic-bezier(0.77, 0, 0.175, 1)</code>，还没有变量</dd>
+          <dt>减弱动效</dt><dd>系统开启「减少动态效果」时关掉位移和缩放，只保留颜色/透明度（<code>@media (prefers-reduced-motion: reduce)</code>）</dd>
         </dl>
         <div class="cat-stage"><div class="cat-motion-tokens" data-motion-tokens></div></div>
       </div>
 
-      <div class="cat-item">
-        <dl class="cat-meta"><dt>按下回弹</dt><dd>按住不放看缩放幅度。标准值是 <code>.gbtn</code> 的 <code>scale(0.98)</code>；其余控件各自写了不同的值——见下方「现状」</dd></dl>
-        <div class="cat-stage">
-          <div class="cat-row">
-            <div class="cat-state"><button class="gbtn" type="button">.gbtn</button><small>scale(0.98) · 标准</small></div>
-            <div class="cat-state"><button class="cbtn" type="button">.cbtn</button><small>scale(0.97)</small></div>
-            <div class="cat-state"><button class="tool-btn" type="button"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-crop"></use></svg>.tool-btn</button><small>scale(0.96)</small></div>
-            <div class="cat-state"><button class="nav-ic" type="button"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-home"></use></svg><span class="nav-label">导航</span></button><small>.nav-ic</small></div>
+      <div class="cat-motion-grid">
+        <article class="cat-motion-card">
+          <div class="cat-motion-stage" data-loop="press">
+            <button class="gbtn cat-sim" type="button" style="--cat-press:0.98">.gbtn</button>
+            <button class="cbtn cat-sim" type="button" style="--cat-press:0.97">.cbtn</button>
+            <button class="tool-btn cat-sim" type="button" style="--cat-press:0.96"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-crop"></use></svg>工具</button>
           </div>
-        </div>
-      </div>
+          <h3>按下回弹</h3>
+          <p><code>transform</code> · <code>--dur-press</code> · <code>--ease-out</code></p>
+          <p class="cat-note">现在各写各的：0.98 / 0.97 / 0.96；B 片统一为 0.97</p>
+        </article>
 
-      <div class="cat-item">
-        <dl class="cat-meta"><dt>浮层出现</dt><dd>菜单打开时从 <code>opacity 0 · translateY(-2px) · scale(0.98)</code> 过渡到原位（<code>@starting-style</code>）；关闭目前是瞬间消失，没有退场动画</dd></dl>
-        <div class="cat-stage">
-          <div class="cat-row">
+        <article class="cat-motion-card">
+          <div class="cat-motion-stage" data-loop="hover">
+            <button class="gbtn cat-sim" type="button">悬停按钮</button>
+            <div class="app-menu cat-static-menu" style="min-width:110px"><button type="button" class="cat-sim">菜单项</button><button type="button">菜单项</button></div>
+          </div>
+          <h3>悬停反馈</h3>
+          <p>颜色 / 背景 / 边框 · <code>--dur-press</code> · <code>ease</code></p>
+          <p class="cat-note">菜单项写死 110ms，没走变量</p>
+        </article>
+
+        <article class="cat-motion-card">
+          <div class="cat-motion-stage" data-loop="popover" style="align-items:flex-start;height:150px">
             <div class="cat-popover-host">
-              <button class="gbtn" type="button" data-toggle-menu="motion-menu">打开菜单</button>
-              <div class="app-menu" id="motion-menu" role="menu" hidden>
-                <button type="button">复制</button><button type="button">粘贴</button><button type="button">删除</button>
-              </div>
+              <button class="gbtn" type="button">更多操作 ▾</button>
+              <div class="app-menu" role="menu" hidden><button type="button">复制</button><button type="button">重命名</button><button type="button">删除</button></div>
             </div>
-            <button class="gbtn ghost" type="button" data-replay="motion-menu">重放</button>
           </div>
-        </div>
+          <h3>浮层开合</h3>
+          <p>入场 <code>opacity + translateY(-2px) + scale(0.98)</code> · <code>--dur-popover</code></p>
+          <p class="cat-note">退场目前是瞬间消失；B 片加 120ms 淡出</p>
+        </article>
+
+        <article class="cat-motion-card">
+          <div class="cat-motion-stage" data-loop="indicator">
+            <div class="barcode-mode-switch" role="tablist" style="width:230px">
+              <button class="on" type="button">单个生成</button><button type="button">批量 / CSV</button>
+            </div>
+          </div>
+          <h3>滑动指示器</h3>
+          <p><code>transform</code> · 180ms · <code>cubic-bezier(0.77, 0, 0.175, 1)</code></p>
+          <p class="cat-note">左侧子菜单同类指示器用 220ms——两处时长不一致</p>
+        </article>
+
+        <article class="cat-motion-card">
+          <div class="cat-motion-stage" data-loop="toggle">
+            <label class="toggle-wrap"><input type="checkbox" /><span class="toggle"></span>开关</label>
+            <label class="cat-check"><input type="checkbox" />复选</label>
+            <label class="cat-check"><input type="radio" name="cat-motion-radio" />单选</label>
+          </div>
+          <h3>开关与勾选</h3>
+          <p>滑块 / 勾号 <code>transform</code> · <code>--dur-press</code> · <code>--ease-out</code></p>
+          <p class="cat-note">已走变量</p>
+        </article>
+
+        <article class="cat-motion-card">
+          <div class="cat-motion-stage" data-loop="toast" style="height:90px">
+            <div class="cat-toast-host"><div class="toast">刀模 PDF 已保存</div></div>
+          </div>
+          <h3>轻提示</h3>
+          <p>从下方 8px 淡入 · 180ms · <code>--ease-out</code></p>
+          <p class="cat-note">180ms 写死；无 --dur 档位对应</p>
+        </article>
+
+        <article class="cat-motion-card">
+          <div class="cat-motion-stage" data-loop="progress" style="flex-direction:column;align-items:stretch">
+            <div class="format-progress-track"><span style="width:0%"></span></div>
+          </div>
+          <h3>进度条</h3>
+          <p><code>width</code> · 160ms · <code>ease</code></p>
+          <p class="cat-note">格式工厂、OCR 共用同一写法</p>
+        </article>
+
+        <article class="cat-motion-card">
+          <div class="cat-motion-stage" data-loop="drop">
+            <div class="glass-card file-drop-target cat-drop">拖入文件到这里</div>
+          </div>
+          <h3>拖放高亮</h3>
+          <p>边框 / 内阴影 / 背景 · 150ms · <code>ease</code></p>
+          <p class="cat-note">150ms 写死</p>
+        </article>
+
+        <article class="cat-motion-card">
+          <div class="cat-motion-stage" data-loop="slogan">
+            <span class="cat-slogan">干活快一点，摸鱼久一点</span>
+          </div>
+          <h3>首页标语入场</h3>
+          <p><code>home-slogan-enter</code> · 580ms · <code>cubic-bezier(0.22, 0.8, 0.32, 1)</code></p>
+          <p class="cat-note">应用里只在首页出现一次，之后是 14s 的渐变漂移</p>
+        </article>
       </div>
 
-      <div class="cat-item">
-        <dl class="cat-meta"><dt>状态切换</dt><dd>开关滑块走 <code>--dur-press</code> + <code>--ease-out</code>；轻提示从下方 8px 淡入，停留后淡出</dd></dl>
-        <div class="cat-stage">
-          <div class="cat-row">
-            <label class="toggle-wrap"><input type="checkbox" checked /><span class="toggle"></span>点我切换</label>
-            <div class="cat-toast-host"><div class="toast" id="motion-toast">刀模 PDF 已保存</div></div>
-            <button class="gbtn" type="button" data-show-toast="motion-toast">弹出轻提示</button>
-          </div>
-        </div>
+      <div class="cat-item" style="margin-top:22px">
+        <dl class="cat-meta"><dt>完整清单</dt><dd>由 <code>node scripts/style-report.mjs --catalog</code> 从 <code>style.css</code> 生成（<code>docs/ui/motion-inventory.js</code>），标红的是没走变量的</dd></dl>
+        <div class="cat-stage" style="padding:0;overflow:auto;max-height:420px"><table class="cat-table" id="motion-table"></table></div>
       </div>
-
-      <p class="cat-rule warn">现状（样式地图统计）：写死的时长 <code>140ms</code>×10、<code>180ms</code>×4、<code>150ms</code>×3 等，没走变量；<code>cubic-bezier(0.23, 1, 0.32, 1)</code> 抄了 8 遍（就是 <code>--ease-out</code> 的值）；按下缩放有 <b>6 种</b>取值（0.9 / 0.94 / 0.96 / 0.97 / 0.98 / 0.99）；减弱动效只覆盖 4 处。这些都是第二阶段的统一项。</p>
     </section>
 
     <!-- ══ 按钮 ══ -->
@@ -422,6 +506,7 @@
     </div>
   </template>
 
+  <script src="motion-inventory.js"></script>
   <script>
     const root = getComputedStyle(document.documentElement)
 
@@ -473,22 +558,6 @@
     document.addEventListener('click', (event) => {
       const trigger = event.target.closest('[data-toggle-menu]')
       if (trigger) { toggleMenu(trigger); return }
-      const replay = event.target.closest('[data-replay]')
-      if (replay) {
-        const menu = document.getElementById(replay.dataset.replay)
-        menu.hidden = true
-        requestAnimationFrame(() => { menu.hidden = false })
-        return
-      }
-      const toastButton = event.target.closest('[data-show-toast]')
-      if (toastButton) {
-        const toast = document.getElementById(toastButton.dataset.showToast)
-        toast.classList.remove('show')
-        requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')))
-        clearTimeout(toast._timer)
-        toast._timer = setTimeout(() => toast.classList.remove('show'), 1800)
-        return
-      }
       const option = event.target.closest('.cat-popover-host .app-menu button:not(:disabled)')
       if (option) {
         const menu = option.closest('.app-menu')
@@ -502,7 +571,7 @@
         return
       }
       if (!event.target.closest('.cat-popover-host')) {
-        document.querySelectorAll('.cat-popover-host > .app-menu').forEach((m) => { m.hidden = true })
+        document.querySelectorAll('.cat-popover-host > .app-menu').forEach((m) => { if (!m.closest('[data-loop]')) m.hidden = true })
       }
     })
     document.addEventListener('keydown', (event) => {
@@ -522,6 +591,60 @@
         <div><b>--dur-press</b><span>${read('--dur-press')}</span></div>
         <div><b>--dur-popover</b><span>${read('--dur-popover')}</span></div>
         <div>${curve}<b>--ease-out</b><span>${ease}</span></div>`
+    }
+
+    // ── 动效自动演示 ──
+    {
+      const stages = [...document.querySelectorAll('[data-loop]')]
+      const steps = {
+        press: (stage, on) => { stage.dataset.state = on ? 'on' : 'off' },
+        hover: (stage, on) => { stage.dataset.state = on ? 'on' : 'off' },
+        drop: (stage, on) => { stage.dataset.state = on ? 'on' : 'off' },
+        popover: (stage, on) => { stage.querySelector('.app-menu').hidden = !on },
+        indicator: (stage, on) => {
+          const sw = stage.querySelector('.barcode-mode-switch')
+          sw.dataset.mode = on ? 'batch' : 'single'
+          sw.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', on ? i === 1 : i === 0))
+        },
+        toggle: (stage, on) => {
+          stage.querySelectorAll('input').forEach((input) => { input.checked = on })
+        },
+        toast: (stage, on) => { stage.querySelector('.toast').classList.toggle('show', on) },
+        progress: (stage, on, tick) => {
+          const bar = stage.querySelector('.format-progress-track span')
+          bar.style.width = `${(tick % 5) * 25}%`
+        },
+        slogan: (stage, on) => {
+          const el = stage.querySelector('.cat-slogan')
+          if (!on) return
+          el.classList.remove('play'); void el.offsetWidth; el.classList.add('play')
+        }
+      }
+      let tick = 0
+      let timer = null
+      const run = () => {
+        tick += 1
+        const on = tick % 2 === 1
+        for (const stage of stages) steps[stage.dataset.loop]?.(stage, on, tick)
+      }
+      const start = () => { run(); timer = setInterval(run, 1200) }
+      const stop = () => { clearInterval(timer); timer = null }
+      start()
+      const toggleButton = document.getElementById('motion-toggle')
+      toggleButton.addEventListener('click', () => {
+        if (timer) { stop(); toggleButton.textContent = '继续演示' } else { start(); toggleButton.textContent = '暂停演示' }
+      })
+    }
+
+    // ── 动效清单表格 ──
+    {
+      const table = document.getElementById('motion-table')
+      const rows = (window.MOTION_INVENTORY || []).filter((item) => item.kind !== 'press')
+      const escape = (text) => String(text ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
+      table.innerHTML = '<thead><tr><th>选择器</th><th>属性</th><th>时长</th><th>曲线</th></tr></thead><tbody>' +
+        rows.map((row) => `<tr class="${row.tokenized ? '' : 'raw'}"><td><code>${escape(row.selector.length > 56 ? row.selector.slice(0, 56) + '…' : row.selector)}</code></td><td>${escape(row.property)}</td><td>${escape(row.duration)}</td><td>${escape(row.easing)}</td></tr>`).join('') +
+        '</tbody>'
+      if (!rows.length) table.innerHTML = '<tbody><tr><td>未找到 motion-inventory.js，先运行 node scripts/style-report.mjs --catalog</td></tr></tbody>'
     }
 
     // 分段控件在目录里可以点

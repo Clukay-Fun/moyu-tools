@@ -1,6 +1,7 @@
 // 样式地图（UI 基础设施 · 第一步）
 //
-// 用法：node scripts/style-report.mjs [--json] [--out <文件>]
+// 用法：node scripts/style-report.mjs [--json] [--out <文件>] [--catalog]
+//   --catalog  重新生成组件目录读取的动效清单 docs/ui/motion-inventory.js
 //
 // 回答三个问题：现在有多少规则、分别属于哪个模块、哪些值本该是变量却写死了。
 // 报告必须能随代码重跑——手工清单两周就过期，没人会再维护。
@@ -175,6 +176,58 @@ for (const rule of rules) {
 }
 const orphanClasses = [...declaredClasses].filter((name) => !haystack.includes(name)).sort()
 
+// ── 6. 动效清单：每条过渡拆成 属性 / 时长 / 曲线，标出是否走变量 ──
+function splitTopLevel(value) {
+  const parts = []
+  let depth = 0
+  let current = ''
+  for (const char of value) {
+    if (char === '(') depth += 1
+    if (char === ')') depth -= 1
+    if (char === ',' && depth === 0) { parts.push(current.trim()); current = ''; continue }
+    current += char
+  }
+  if (current.trim()) parts.push(current.trim())
+  return parts
+}
+const motion = []
+for (const rule of rules) {
+  if (rule.selector.startsWith('@')) continue
+  const selector = rule.selector.replace(/\s+/g, ' ')
+  for (const declaration of rule.body.split(';')) {
+    const colon = declaration.indexOf(':')
+    if (colon < 0) continue
+    const prop = declaration.slice(0, colon).trim()
+    const value = declaration.slice(colon + 1).trim().replace(/\s+/g, ' ')
+    if (prop === 'transform' && selector.includes(':active') && /scale\(/.test(value)) {
+      motion.push({ selector, kind: 'press', property: 'transform', value: value.match(/scale\([^)]*\)/)[0], media: rule.atRule })
+    }
+    if ((prop !== 'transition' && prop !== 'animation') || value === 'none') continue
+    for (const item of splitTopLevel(value)) {
+      const duration = (item.match(/var\(--dur-[\w-]+\)|\b[\d.]+m?s\b/) || [''])[0]
+      const easing = (item.match(/var\(--ease-[\w-]+\)|cubic-bezier\([^)]*\)|\b(ease-in-out|ease-in|ease-out|ease|linear)\b/) || ['ease'])[0]
+      const property = item.split(' ')[0]
+      motion.push({
+        selector,
+        kind: prop,
+        property,
+        duration,
+        easing,
+        tokenized: duration.startsWith('var(') && (easing.startsWith('var(') || easing === 'ease'),
+        media: rule.atRule
+      })
+    }
+  }
+}
+
+if (process.argv.includes('--catalog')) {
+  const target = join(root, 'docs/ui/motion-inventory.js')
+  const banner = '// 由 scripts/style-report.mjs --catalog 生成，请勿手改。组件目录的动效清单读取这里。\n'
+  writeFileSync(target, `${banner}window.MOTION_INVENTORY = ${JSON.stringify(motion, null, 2)}\n`)
+  console.log(`已写入 ${target}（${motion.length} 条）`)
+  process.exit(0)
+}
+
 // ── 输出 ──
 const top = (map, n = 12) => [...map].sort((a, b) => b[1] - a[1]).slice(0, n)
 const report = {
@@ -189,6 +242,7 @@ const report = {
     borderRadius: top(radii),
     fontSize: top(fontSizes)
   },
+  motion,
   duplicatedSelectors: duplicated.map(([key, count]) => ({ selector: key.split('|')[1], media: key.split('|')[0] || null, count })),
   orphanClasses
 }
