@@ -26,6 +26,7 @@
   --foreground: #252734;
   --muted: #707387;
   --faint: #9da0b3;
+  --danger: #d54f50;
   /* 浮层专用底色。--card 是给大面板用的，做到 0.2 才够通透；
      浮层里有文字和色块，压在棋盘格、图片、控制点上时必须**挡住**下面的东西，
      0.82 仍会透出控制点的轮廓，所以提到 0.95。模糊只是质感，挡不挡得住看 alpha。 */
@@ -147,6 +148,7 @@
   --foreground: #edf3fb;
   --muted: #a8b3c7;
   --faint: #758198;
+  --danger: #e36a6c;
   --menu-surface: rgba(19, 26, 38, 0.97);
   --control-bg: rgba(25, 34, 49, 0.82);
   --control-bg-hover: rgba(35, 46, 65, 0.92);
@@ -1089,7 +1091,7 @@ body.home-active .page-home.active h1.home-slogan {
 }
 
 .gbtn.danger {
-  color: #d54f50;
+  color: var(--danger);
 }
 
 .gbtn.danger:hover {
@@ -4092,13 +4094,6 @@ body.home-active .page-home.active h1.home-slogan {
   color: var(--faint);
 }
 
-.about .about-credit {
-  margin: 12px 0 0;
-  color: var(--faint);
-  font-size: 11px;
-  line-height: 1.7;
-}
-
 .toast {
   position: absolute;
   right: 20px;
@@ -4491,17 +4486,6 @@ body.keyboard-focus :where(
   border-radius: inherit;
 }
 
-.checkerboard {
-  background-color: rgba(255, 255, 255, 0.2);
-  background-image:
-    linear-gradient(45deg, var(--hairline) 25%, transparent 25%),
-    linear-gradient(-45deg, var(--hairline) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, var(--hairline) 75%),
-    linear-gradient(-45deg, transparent 75%, var(--hairline) 75%);
-  background-position: 0 0, 0 9px, 9px -9px, -9px 0;
-  background-size: 18px 18px;
-}
-
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
@@ -4792,10 +4776,6 @@ body.keyboard-focus :where(
   margin-top: 12px;
   padding: 10px 14px;
   font-size: var(--fs-md);
-}
-
-.gbtn.danger {
-  color: #c0392b;
 }
 
 .board-text-style {
@@ -5320,12 +5300,6 @@ body.keyboard-focus :where(
 .text-toolbar[hidden] { display: none; }
 
 /* ══ F-16 · 快捷键设置 ══ */
-.shortcut-status {
-  margin: 2px 0 0;
-  color: var(--faint);
-  font-size: var(--fs-sm);
-}
-
 .shortcut-status[hidden] { display: none; }
 
 /* 设置页的控件描边：--control-border 在浅色模式是白色，这里统一换成中性灰 */
@@ -5354,12 +5328,8 @@ body.keyboard-focus :where(
   font-size: 12px;
   color: var(--muted);
 }
-.shortcut-status.error { color: #d54f50; }
+.shortcut-status.error { color: var(--danger); }
 .shortcut-status.ok { color: var(--accent); }
-
-.update-preferences-title {
-  margin-top: 20px;
-}
 
 /* ══ S1 · 应用自己的下拉菜单 ══
    原生 <select> 的弹窗由系统绘制，透明度、圆角、模糊都控制不了，
