@@ -40,10 +40,21 @@
     .cat-scale > div { display: grid; gap: 6px; justify-items: center; font-size: 10.5px; color: var(--faint); }
     .cat-rule { margin: 8px 0 0; padding: 10px 12px; border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--accent-10); font-size: 12px; line-height: 1.6; }
     .cat-rule.warn { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
-    .cat-theme-switch { display: flex; gap: 6px; }
     @media (max-width: 860px) { .cat-pair { grid-template-columns: 1fr; } .cat-meta { grid-template-columns: 1fr; } }
+    /* 应用里菜单是 fixed 浮层（由 placePopover 定位），目录里就近挂在触发器下方 */
+    .cat-popover-host { position: relative; }
+    .cat-popover-host > .app-menu { position: absolute; top: calc(100% + 6px); left: 0; }
+    .cat-static-menu { position: static !important; }
+    /* 悬停态无法用 CSS 强制，这里照抄应用里的悬停样式做示意 */
+    .cat-force-hover { color: var(--accent) !important; background: var(--accent-10) !important; }
+    .cat-toast-host { position: relative; width: 190px; height: 44px; }
+    .cat-toast-host .toast { position: absolute; right: 0; bottom: 0; }
+    .cat-motion-tokens { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-end; }
+    .cat-motion-tokens > div { display: grid; gap: 4px; font-size: 11px; color: var(--faint); }
+    .cat-motion-tokens b { color: var(--foreground); font-size: 12px; }
+    .cat-curve { width: 120px; height: 72px; }
     /* 应用里 toast 是绝对定位的浮层，目录里改成静态展示 */
-    .cat-stage .toast { position: static; opacity: 1; transform: none; }
+    [data-demo] .toast { position: static; opacity: 1; transform: none; }
   </style>
 </head>
 <body data-theme="light">
@@ -52,6 +63,10 @@
     <symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></symbol>
     <symbol id="ic-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
     <symbol id="ic-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 8h.01"/><path d="M12 12h.01"/><path d="M14 8h.01"/><path d="M16 12h.01"/><path d="M18 8h.01"/><path d="M6 8h.01"/><path d="M7 16h10"/><path d="M8 12h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/></symbol>
+    <symbol id="ic-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+    <symbol id="ic-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></symbol>
+    <symbol id="ic-crop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></symbol>
+    <symbol id="ic-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
   </svg>
 
   <main class="cat-page">
@@ -60,14 +75,10 @@
         <h1>组件目录</h1>
         <p>直接引用 <code>src/renderer/style.css</code>，所见即应用里的样式。新功能先从这里选现成模式；确实没有合适的，再新增组件并把示例补到这里。每项左右分别是浅色和深色。</p>
       </div>
-      <div class="segments cat-theme-switch" role="group" aria-label="整页主题">
-        <button type="button" class="on" data-page-theme="light">浅色底</button>
-        <button type="button" data-page-theme="dark">深色底</button>
-      </div>
     </header>
 
     <nav class="cat-toc" aria-label="目录">
-      <a href="#tokens">设计变量</a><a href="#buttons">按钮</a><a href="#inputs">输入框</a><a href="#toggles">开关与分段</a>
+      <a href="#tokens">设计变量</a><a href="#motion">动效</a><a href="#buttons">按钮</a><a href="#inputs">输入框</a><a href="#menus">下拉菜单</a><a href="#toggles">开关与分段</a>
       <a href="#cards">卡片与设置块</a><a href="#feedback">状态提示</a><a href="#rules">使用约定</a>
     </nav>
 
@@ -93,6 +104,60 @@
       </div>
     </section>
 
+    <!-- ══ 动效 ══ -->
+    <section class="cat-section" id="motion">
+      <h2>动效</h2>
+      <p>动效只服务于反馈，不做装饰：按下有回弹、浮层出现有过渡、状态切换有滑动。时长与缓动一律取变量。下面每个示例都可以点，点「重放」看一遍。</p>
+      <div class="cat-item">
+        <dl class="cat-meta">
+          <dt>时长</dt><dd><code>--dur-press</code> 按下、悬停、开关等即时反馈 · <code>--dur-popover</code> 菜单、气泡等浮层出现</dd>
+          <dt>缓动</dt><dd><code>--ease-out</code>——出现和位移用它；颜色、背景这类非位移变化用 <code>ease</code> 即可</dd>
+          <dt>减弱动效</dt><dd>系统开启「减少动态效果」时，位移和缩放要关掉，只保留颜色/透明度变化（<code>@media (prefers-reduced-motion: reduce)</code>）</dd>
+        </dl>
+        <div class="cat-stage"><div class="cat-motion-tokens" data-motion-tokens></div></div>
+      </div>
+
+      <div class="cat-item">
+        <dl class="cat-meta"><dt>按下回弹</dt><dd>按住不放看缩放幅度。标准值是 <code>.gbtn</code> 的 <code>scale(0.98)</code>；其余控件各自写了不同的值——见下方「现状」</dd></dl>
+        <div class="cat-stage">
+          <div class="cat-row">
+            <div class="cat-state"><button class="gbtn" type="button">.gbtn</button><small>scale(0.98) · 标准</small></div>
+            <div class="cat-state"><button class="cbtn" type="button">.cbtn</button><small>scale(0.97)</small></div>
+            <div class="cat-state"><button class="tool-btn" type="button"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-crop"></use></svg>.tool-btn</button><small>scale(0.96)</small></div>
+            <div class="cat-state"><button class="nav-ic" type="button"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-home"></use></svg><span class="nav-label">导航</span></button><small>.nav-ic</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <dl class="cat-meta"><dt>浮层出现</dt><dd>菜单打开时从 <code>opacity 0 · translateY(-2px) · scale(0.98)</code> 过渡到原位（<code>@starting-style</code>）；关闭目前是瞬间消失，没有退场动画</dd></dl>
+        <div class="cat-stage">
+          <div class="cat-row">
+            <div class="cat-popover-host">
+              <button class="gbtn" type="button" data-toggle-menu="motion-menu">打开菜单</button>
+              <div class="app-menu" id="motion-menu" role="menu" hidden>
+                <button type="button">复制</button><button type="button">粘贴</button><button type="button">删除</button>
+              </div>
+            </div>
+            <button class="gbtn ghost" type="button" data-replay="motion-menu">重放</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <dl class="cat-meta"><dt>状态切换</dt><dd>开关滑块走 <code>--dur-press</code> + <code>--ease-out</code>；轻提示从下方 8px 淡入，停留后淡出</dd></dl>
+        <div class="cat-stage">
+          <div class="cat-row">
+            <label class="toggle-wrap"><input type="checkbox" checked /><span class="toggle"></span>点我切换</label>
+            <div class="cat-toast-host"><div class="toast" id="motion-toast">刀模 PDF 已保存</div></div>
+            <button class="gbtn" type="button" data-show-toast="motion-toast">弹出轻提示</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="cat-rule warn">现状（样式地图统计）：写死的时长 <code>140ms</code>×10、<code>180ms</code>×4、<code>150ms</code>×3 等，没走变量；<code>cubic-bezier(0.23, 1, 0.32, 1)</code> 抄了 8 遍（就是 <code>--ease-out</code> 的值）；按下缩放有 <b>6 种</b>取值（0.9 / 0.94 / 0.96 / 0.97 / 0.98 / 0.99）；减弱动效只覆盖 4 处。这些都是第二阶段的统一项。</p>
+    </section>
+
     <!-- ══ 按钮 ══ -->
     <section class="cat-section" id="buttons">
       <h2>按钮</h2>
@@ -104,6 +169,9 @@
           <dt>弱按钮</dt><dd><code>.gbtn.ghost</code>——清空、恢复默认、取消这类不改变结果的动作</dd>
           <dt>危险按钮</dt><dd><code>.gbtn.danger</code>——删除、覆盖；颜色取 <code>--danger</code></dd>
           <dt>现用模块</dt><dd>全部模块</dd>
+          <dt>画布按钮</dt><dd><code>.cbtn</code> / <code>.cbtn.primary</code> / <code>.cbtn.ghost</code>，只放图标时加 <code>.canvas-icon-btn</code>——画布与图片编辑器的浮动工具栏专用，比 <code>.gbtn</code> 更紧凑</dd>
+          <dt>工具按钮</dt><dd><code>.tool-btn</code>——图标在上、文字在下的竖排工具入口（图片编辑）</dd>
+          <dt>导航按钮</dt><dd><code>.nav-ic</code>，当前页加 <code>.active</code>——只用于左侧主导航</dd>
         </dl>
         <div class="cat-pair">
           <div class="cat-stage" data-theme="light" data-demo="buttons"><span class="cat-label">浅色</span></div>
@@ -120,11 +188,38 @@
         <dl class="cat-meta">
           <dt>选择器</dt><dd><code>input[type=text|number|search]</code> <code>textarea</code> <code>select</code>（在应用里会被增强为 <code>.app-select-trigger</code>）</dd>
           <dt>错误态</dt><dd>加 <code>aria-invalid="true"</code>；目前只有增强下拉读这个属性，文本框的错误态各模块各写各的——属于第一批统一项</dd>
+          <dt>焦点态</dt><dd>点进输入框看：目前只把边框换成 <code>--control-border-hover</code>，没有外发光（<code>box-shadow: none</code>）——键盘用户不易分辨，第一批统一项</dd>
+          <dt>带单位</dt><dd><code>.dieline-input</code>（单位在框内右侧）、<code>.dieline-stepper</code>（加减步进）——目前是刀模私有，候选提升为公共组件</dd>
           <dt>现用模块</dt><dd>条码、PDF、刀模、格式工厂、设置</dd>
         </dl>
         <div class="cat-pair">
           <div class="cat-stage" data-theme="light" data-demo="inputs"><span class="cat-label">浅色</span></div>
           <div class="cat-stage" data-theme="dark" data-demo="inputs"><span class="cat-label">深色</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 下拉菜单 ══ -->
+    <section class="cat-section" id="menus">
+      <h2>下拉菜单</h2>
+      <p>原生 <code>&lt;select&gt;</code> 的弹层由系统绘制，透明度、圆角、模糊都控制不了，压在画布上会露底。应用里的下拉统一由 <code>enhanceSelect()</code> 增强成自绘触发器 + 菜单；命令菜单直接用 <code>.app-menu</code>。菜单挂在 <code>#overlay-layer</code>，由 <code>placePopover()</code> 定位，不会被滚动容器裁掉。</p>
+      <div class="cat-item">
+        <dl class="cat-meta">
+          <dt>选择下拉</dt><dd><code>.app-select-trigger</code> + <code>.app-menu.app-select-menu</code>；选中项 <code>aria-selected="true"</code>（主题色填充），不可选项 <code>disabled</code></dd>
+          <dt>命令菜单</dt><dd><code>.app-menu</code> + <code>button</code>；可勾选项用 <code>aria-checked="true"</code>（右侧 ✓）</dd>
+          <dt>写法</dt><dd>业务里仍写原生 <code>&lt;select&gt;</code>，调用 <code>enhanceSelect(select)</code> 即可；不要自己再拼一套</dd>
+          <dt>现用模块</dt><dd>PDF、格式工厂、图片、画布文字工具栏、刀模</dd>
+        </dl>
+        <div class="cat-pair">
+          <div class="cat-stage" data-theme="light" data-demo="menus"><span class="cat-label">浅色 · 点触发器打开</span></div>
+          <div class="cat-stage" data-theme="dark" data-demo="menus"><span class="cat-label">深色 · 点触发器打开</span></div>
+        </div>
+      </div>
+      <div class="cat-item">
+        <dl class="cat-meta"><dt>展开态</dt><dd>静态展示，方便对比各状态</dd></dl>
+        <div class="cat-pair">
+          <div class="cat-stage" data-theme="light" data-demo="menus-static"><span class="cat-label">浅色</span></div>
+          <div class="cat-stage" data-theme="dark" data-demo="menus-static"><span class="cat-label">深色</span></div>
         </div>
       </div>
     </section>
@@ -205,6 +300,21 @@
       <div class="cat-state"><button class="gbtn" type="button" disabled>添加文件</button><small>禁用</small></div>
       <div class="cat-state"><button class="gbtn ghost" type="button" disabled>恢复默认</button><small>禁用</small></div>
     </div>
+    <div class="cat-row">
+      <div class="cat-state"><button class="gbtn" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-plus"></use></svg>添加文件</button><small>带图标</small></div>
+      <div class="cat-state"><button class="gbtn primary" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-download"></use></svg>导出</button><small>主按钮 + 图标</small></div>
+    </div>
+    <div class="cat-row">
+      <div class="cat-state"><button class="cbtn primary" type="button">完成</button><small>.cbtn.primary</small></div>
+      <div class="cat-state"><button class="cbtn" type="button">导入</button><small>.cbtn</small></div>
+      <div class="cat-state"><button class="cbtn ghost" type="button">取消</button><small>.cbtn.ghost</small></div>
+      <div class="cat-state"><button class="cbtn canvas-icon-btn" type="button" aria-label="导入图片"><svg class="ic" aria-hidden="true"><use href="#ic-plus"></use></svg></button><small>仅图标</small></div>
+    </div>
+    <div class="cat-row">
+      <div class="cat-state"><button class="tool-btn" type="button"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-crop"></use></svg>裁切</button><small>.tool-btn</small></div>
+      <div class="cat-state"><button class="nav-ic" type="button"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-home"></use></svg><span class="nav-label">主页</span></button><small>.nav-ic</small></div>
+      <div class="cat-state"><button class="nav-ic active" type="button"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-home"></use></svg><span class="nav-label">主页</span></button><small>.nav-ic.active</small></div>
+    </div>
   </template>
 
   <template id="demo-inputs">
@@ -219,6 +329,59 @@
     <div class="cat-row">
       <div class="cat-state"><button type="button" class="app-select-trigger" aria-invalid="true">选择材质</button><small>增强下拉 · 错误态（--danger）</small></div>
       <label class="search" style="width:260px"><svg class="ic" aria-hidden="true"><use href="#ic-search"></use></svg><input type="search" placeholder="搜索功能…" /><kbd>⌘K</kbd></label>
+    </div>
+    <div class="cat-row">
+      <div class="cat-state" style="width:120px"><span class="dieline-input"><input type="number" value="400" /><em>mm</em></span><small>带单位</small></div>
+      <div class="cat-state" style="width:150px"><span class="dieline-stepper"><button type="button" aria-label="减小">−</button><input type="number" value="1.5" step="0.1" /><button type="button" aria-label="增大">+</button></span><small>步进</small></div>
+      <div class="cat-state"><input type="color" value="#6978e6" style="width:40px;height:32px;border-radius:var(--r-sm)" /><small>颜色</small></div>
+    </div>
+    <div class="cat-row">
+      <div class="cat-state" style="width:220px"><input type="range" min="0" max="100" value="62" style="width:100%" /><small>滑块</small></div>
+      <div class="cat-state"><textarea rows="2" style="width:240px;padding:8px 10px;border-radius:var(--r-md);resize:vertical">批量内容，一行一个</textarea><small>多行</small></div>
+    </div>
+  </template>
+
+  <template id="demo-menus">
+    <div class="cat-row">
+      <div class="cat-popover-host">
+        <button type="button" class="app-select-trigger" style="width:170px" data-toggle-menu="select">瓦楞纸 E（三层）</button>
+        <div class="app-menu app-select-menu" role="listbox" data-menu="select" hidden style="width:170px">
+          <button type="button" aria-selected="true">瓦楞纸 E（三层）</button>
+          <button type="button">瓦楞纸 B（三层）</button>
+          <button type="button">白卡纸</button>
+          <button type="button" disabled>牛皮纸（暂不支持）</button>
+        </div>
+      </div>
+      <div class="cat-popover-host">
+        <button type="button" class="gbtn" data-toggle-menu="command">更多操作 ▾</button>
+        <div class="app-menu" role="menu" data-menu="command" hidden>
+          <button type="button" aria-checked="true">显示网格</button>
+          <button type="button">重命名</button>
+          <button type="button">导出副本</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="demo-menus-static">
+    <div class="cat-row" style="align-items:flex-start">
+      <div class="app-menu app-select-menu cat-static-menu" role="listbox" style="width:170px">
+        <button type="button" aria-selected="true">瓦楞纸 E（三层）</button>
+        <button type="button" class="cat-force-hover">瓦楞纸 B（三层）</button>
+        <button type="button">白卡纸</button>
+        <button type="button" disabled>牛皮纸（暂不支持）</button>
+      </div>
+      <div class="app-menu cat-static-menu" role="menu">
+        <button type="button" aria-checked="true">显示网格</button>
+        <button type="button">重命名</button>
+        <button type="button">导出副本</button>
+      </div>
+      <div class="cat-state" style="gap:8px">
+        <small>第 1 项：选中（aria-selected）</small>
+        <small>第 2 项：悬停（示意）</small>
+        <small>第 4 项：禁用</small>
+        <small>右侧：命令菜单，第 1 项已勾选</small>
+      </div>
     </div>
   </template>
 
@@ -260,6 +423,8 @@
   </template>
 
   <script>
+    const root = getComputedStyle(document.documentElement)
+
     // 两套主题各渲染一份示例
     document.querySelectorAll('[data-demo]').forEach((stage, index) => {
       const template = document.getElementById(`demo-${stage.dataset.demo}`)
@@ -283,7 +448,6 @@
     }
 
     // 字号、圆角、间距刻度
-    const root = getComputedStyle(document.documentElement)
     const scales = {
       fs: ['--fs-xs', '--fs-sm', '--fs-md', '--fs-lg'].map((t) => [t, `<span style="font-size:var(${t});color:var(--foreground)">摸鱼 Aa</span>`]),
       r: ['--r-sm', '--r-md', '--r-lg', '--r-full'].map((t) => [t, `<i style="display:block;width:56px;height:36px;border:1px solid var(--selection-border);background:var(--accent-10);border-radius:var(${t})"></i>`]),
@@ -298,12 +462,73 @@
       }
     }
 
+    // 菜单：点触发器开合，点外面关闭，点菜单项更新选中
+    function toggleMenu(trigger) {
+      const host = trigger.closest('.cat-popover-host')
+      const menu = host.querySelector('.app-menu')
+      const willOpen = menu.hidden
+      document.querySelectorAll('.cat-popover-host > .app-menu').forEach((m) => { m.hidden = true })
+      menu.hidden = !willOpen
+    }
+    document.addEventListener('click', (event) => {
+      const trigger = event.target.closest('[data-toggle-menu]')
+      if (trigger) { toggleMenu(trigger); return }
+      const replay = event.target.closest('[data-replay]')
+      if (replay) {
+        const menu = document.getElementById(replay.dataset.replay)
+        menu.hidden = true
+        requestAnimationFrame(() => { menu.hidden = false })
+        return
+      }
+      const toastButton = event.target.closest('[data-show-toast]')
+      if (toastButton) {
+        const toast = document.getElementById(toastButton.dataset.showToast)
+        toast.classList.remove('show')
+        requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')))
+        clearTimeout(toast._timer)
+        toast._timer = setTimeout(() => toast.classList.remove('show'), 1800)
+        return
+      }
+      const option = event.target.closest('.cat-popover-host .app-menu button:not(:disabled)')
+      if (option) {
+        const menu = option.closest('.app-menu')
+        if (menu.classList.contains('app-select-menu')) {
+          menu.querySelectorAll('button').forEach((b) => b.setAttribute('aria-selected', String(b === option)))
+          menu.closest('.cat-popover-host').querySelector('[data-toggle-menu]').textContent = option.textContent
+        } else if (option.hasAttribute('aria-checked')) {
+          option.setAttribute('aria-checked', String(option.getAttribute('aria-checked') !== 'true'))
+        }
+        menu.hidden = true
+        return
+      }
+      if (!event.target.closest('.cat-popover-host')) {
+        document.querySelectorAll('.cat-popover-host > .app-menu').forEach((m) => { m.hidden = true })
+      }
+    })
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') document.querySelectorAll('.cat-popover-host > .app-menu').forEach((m) => { m.hidden = true })
+    })
+
+    // 动效变量：时长 + 缓动曲线（按 --ease-out 的实际取值画出来）
+    {
+      const host = document.querySelector('[data-motion-tokens]')
+      const read = (t) => root.getPropertyValue(t).trim()
+      const ease = read('--ease-out')
+      const points = (ease.match(/cubic-bezier\(([^)]+)\)/) || [, '0.23, 1, 0.32, 1'])[1].split(',').map(Number)
+      const [x1, y1, x2, y2] = points
+      const W = 120, H = 72
+      const curve = `<svg class="cat-curve" viewBox="0 0 ${W} ${H}"><path d="M0 ${H} C ${x1 * W} ${H - y1 * H}, ${x2 * W} ${H - y2 * H}, ${W} 0" fill="none" stroke="var(--accent)" stroke-width="2"/><path d="M0 ${H} L${W} 0" stroke="var(--hairline)" stroke-dasharray="3 3"/></svg>`
+      host.innerHTML = `
+        <div><b>--dur-press</b><span>${read('--dur-press')}</span></div>
+        <div><b>--dur-popover</b><span>${read('--dur-popover')}</span></div>
+        <div>${curve}<b>--ease-out</b><span>${ease}</span></div>`
+    }
+
     // 分段控件在目录里可以点
     document.addEventListener('click', (event) => {
       const button = event.target.closest('.segments button')
       if (!button) return
       button.parentElement.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b === button))
-      if (button.dataset.pageTheme) document.body.dataset.theme = button.dataset.pageTheme
     })
   </script>
 </body>
