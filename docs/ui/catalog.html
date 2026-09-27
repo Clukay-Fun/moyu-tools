@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>摸鱼工具箱 · 组件目录</title>
+  <!-- 直接引用应用真实样式：目录里看到的就是应用里的样子，样式改了目录跟着变 -->
+  <link rel="stylesheet" href="../../src/renderer/style.css" />
+  <style>
+    /* 目录自身的排版，只用 cat- 前缀，不碰应用类名 */
+    body { overflow: auto; min-width: 0; min-height: 0; user-select: text; }
+    .cat-page { max-width: 1180px; margin: 0 auto; padding: 32px 28px 80px; }
+    .cat-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
+    .cat-head h1 { margin: 0 0 6px; font-size: 24px; letter-spacing: -0.02em; }
+    .cat-head p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; max-width: 640px; }
+    .cat-toc { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 30px; font-size: 12px; }
+    .cat-toc a { color: var(--accent); text-decoration: none; }
+    .cat-section { margin-bottom: 44px; scroll-margin-top: 16px; }
+    .cat-section > h2 { margin: 0 0 4px; font-size: 18px; }
+    .cat-section > p { margin: 0 0 16px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .cat-item { margin-bottom: 22px; }
+    .cat-meta { display: grid; grid-template-columns: 180px 1fr; gap: 4px 14px; margin-bottom: 10px; font-size: 12px; }
+    .cat-meta dt { color: var(--faint); }
+    .cat-meta dd { margin: 0; color: var(--foreground); }
+    .cat-meta code, .cat-page code { padding: 1px 5px; border-radius: 5px; background: var(--accent-10); color: var(--accent); font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    /* 浅色 / 深色并排：[data-theme] 可挂在任意元素上，两套变量同时生效 */
+    .cat-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .cat-stage { padding: 18px; border: 1px dashed var(--hairline); border-radius: 12px; background: var(--background); color: var(--foreground); }
+    .cat-stage > .cat-label { display: block; margin-bottom: 12px; color: var(--faint); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .cat-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .cat-row + .cat-row { margin-top: 12px; }
+    .cat-state { display: grid; gap: 5px; justify-items: start; }
+    .cat-state > small { color: var(--faint); font-size: 10px; }
+    .cat-tokens { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .cat-token { display: grid; gap: 6px; padding: 10px; border: 1px solid var(--hairline); border-radius: 10px; font-size: 11px; }
+    .cat-token i { display: block; height: 30px; border-radius: 7px; border: 1px solid var(--hairline); }
+    .cat-token b { font-weight: 600; }
+    .cat-token span { color: var(--faint); font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; word-break: break-all; }
+    .cat-scale { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px; }
+    .cat-scale > div { display: grid; gap: 6px; justify-items: center; font-size: 10.5px; color: var(--faint); }
+    .cat-rule { margin: 8px 0 0; padding: 10px 12px; border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--accent-10); font-size: 12px; line-height: 1.6; }
+    .cat-rule.warn { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
+    .cat-theme-switch { display: flex; gap: 6px; }
+    @media (max-width: 860px) { .cat-pair { grid-template-columns: 1fr; } .cat-meta { grid-template-columns: 1fr; } }
+    /* 应用里 toast 是绝对定位的浮层，目录里改成静态展示 */
+    .cat-stage .toast { position: static; opacity: 1; transform: none; }
+  </style>
+</head>
+<body data-theme="light">
+  <!-- 应用的图标 sprite 由构建插件注入，这里只内联目录用到的几个 -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></symbol>
+    <symbol id="ic-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+    <symbol id="ic-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 8h.01"/><path d="M12 12h.01"/><path d="M14 8h.01"/><path d="M16 12h.01"/><path d="M18 8h.01"/><path d="M6 8h.01"/><path d="M7 16h10"/><path d="M8 12h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/></symbol>
+  </svg>
+
+  <main class="cat-page">
+    <header class="cat-head">
+      <div>
+        <h1>组件目录</h1>
+        <p>直接引用 <code>src/renderer/style.css</code>，所见即应用里的样式。新功能先从这里选现成模式；确实没有合适的，再新增组件并把示例补到这里。每项左右分别是浅色和深色。</p>
+      </div>
+      <div class="segments cat-theme-switch" role="group" aria-label="整页主题">
+        <button type="button" class="on" data-page-theme="light">浅色底</button>
+        <button type="button" data-page-theme="dark">深色底</button>
+      </div>
+    </header>
+
+    <nav class="cat-toc" aria-label="目录">
+      <a href="#tokens">设计变量</a><a href="#buttons">按钮</a><a href="#inputs">输入框</a><a href="#toggles">开关与分段</a>
+      <a href="#cards">卡片与设置块</a><a href="#feedback">状态提示</a><a href="#rules">使用约定</a>
+    </nav>
+
+    <!-- ══ 设计变量 ══ -->
+    <section class="cat-section" id="tokens">
+      <h2>设计变量</h2>
+      <p>颜色、字号、圆角、间距一律从变量取。取值由脚本从当前页面实时读出（<code>getComputedStyle</code>），和 <code>style.css</code> 保持同步。</p>
+      <div class="cat-pair">
+        <div class="cat-stage" data-theme="light"><span class="cat-label">浅色</span><div class="cat-tokens" data-token-list="color"></div></div>
+        <div class="cat-stage" data-theme="dark"><span class="cat-label">深色</span><div class="cat-tokens" data-token-list="color"></div></div>
+      </div>
+      <div class="cat-item" style="margin-top:18px">
+        <dl class="cat-meta"><dt>字号</dt><dd><code>--fs-xs</code> <code>--fs-sm</code> <code>--fs-md</code> <code>--fs-lg</code>——正文 12px，辅助说明 11px，分节标题 15px</dd></dl>
+        <div class="cat-stage"><div class="cat-scale" data-scale="fs"></div></div>
+      </div>
+      <div class="cat-item">
+        <dl class="cat-meta"><dt>圆角</dt><dd><code>--r-sm</code> 小控件 · <code>--r-md</code> 输入框/按钮 · <code>--r-lg</code> 卡片 · <code>--r-full</code> 胶囊</dd></dl>
+        <div class="cat-stage"><div class="cat-scale" data-scale="r"></div></div>
+      </div>
+      <div class="cat-item">
+        <dl class="cat-meta"><dt>间距</dt><dd><code>--sp-1</code> 到 <code>--sp-5</code>（4 / 6 / 8 / 12 / 16）</dd></dl>
+        <div class="cat-stage"><div class="cat-scale" data-scale="sp"></div></div>
+      </div>
+    </section>
+
+    <!-- ══ 按钮 ══ -->
+    <section class="cat-section" id="buttons">
+      <h2>按钮</h2>
+      <p>悬停、按下为真实交互，把鼠标放上去看；禁用态用 <code>disabled</code> 属性，不要只加类名。</p>
+      <div class="cat-item">
+        <dl class="cat-meta">
+          <dt>主按钮</dt><dd><code>.gbtn.primary</code> / <code>.primary</code>——每个区域最多一个，承担当前任务的最终动作（导出、保存、生成）</dd>
+          <dt>次按钮</dt><dd><code>.gbtn</code>——添加文件、打开、辅助动作</dd>
+          <dt>弱按钮</dt><dd><code>.gbtn.ghost</code>——清空、恢复默认、取消这类不改变结果的动作</dd>
+          <dt>危险按钮</dt><dd><code>.gbtn.danger</code>——删除、覆盖；颜色取 <code>--danger</code></dd>
+          <dt>现用模块</dt><dd>全部模块</dd>
+        </dl>
+        <div class="cat-pair">
+          <div class="cat-stage" data-theme="light" data-demo="buttons"><span class="cat-label">浅色</span></div>
+          <div class="cat-stage" data-theme="dark" data-demo="buttons"><span class="cat-label">深色</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 输入框 ══ -->
+    <section class="cat-section" id="inputs">
+      <h2>输入框</h2>
+      <p>文本、数字、搜索、多行、下拉共用一套底色/边框/焦点（<code>style.css</code> 顶部「全应用控件基础」）。模块只决定宽度与布局。</p>
+      <div class="cat-item">
+        <dl class="cat-meta">
+          <dt>选择器</dt><dd><code>input[type=text|number|search]</code> <code>textarea</code> <code>select</code>（在应用里会被增强为 <code>.app-select-trigger</code>）</dd>
+          <dt>错误态</dt><dd>加 <code>aria-invalid="true"</code>；目前只有增强下拉读这个属性，文本框的错误态各模块各写各的——属于第一批统一项</dd>
+          <dt>现用模块</dt><dd>条码、PDF、刀模、格式工厂、设置</dd>
+        </dl>
+        <div class="cat-pair">
+          <div class="cat-stage" data-theme="light" data-demo="inputs"><span class="cat-label">浅色</span></div>
+          <div class="cat-stage" data-theme="dark" data-demo="inputs"><span class="cat-label">深色</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 开关与分段 ══ -->
+    <section class="cat-section" id="toggles">
+      <h2>开关与分段</h2>
+      <div class="cat-item">
+        <dl class="cat-meta">
+          <dt>开关</dt><dd><code>label.toggle-wrap &gt; input[type=checkbox] + span.toggle</code>；只有图标没有文字时加 <code>.icon-only-toggle</code> 并写 <code>.sr-only</code> 文案</dd>
+          <dt>分段控件</dt><dd><code>.segments &gt; button</code>，选中项加 <code>.on</code>——2～4 个互斥选项、选项短</dd>
+          <dt>等宽选项</dt><dd><code>.theme-options &gt; label.theme-option</code>——选项需要撑满一整行时用（设置页主题）</dd>
+          <dt>现用模块</dt><dd>开关：Illustrator、设置；分段：条码、图片；等宽选项：设置</dd>
+        </dl>
+        <div class="cat-pair">
+          <div class="cat-stage" data-theme="light" data-demo="toggles"><span class="cat-label">浅色</span></div>
+          <div class="cat-stage" data-theme="dark" data-demo="toggles"><span class="cat-label">深色</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 卡片与设置块 ══ -->
+    <section class="cat-section" id="cards">
+      <h2>卡片与设置块</h2>
+      <p>约定：<b>大模块不用卡片，小分组才用卡片</b>；卡片里不要再套卡片。</p>
+      <div class="cat-item">
+        <dl class="cat-meta">
+          <dt>玻璃卡片</dt><dd><code>.glass-card</code>——工作区里承载一组输入或结果（条码、刀模面板）</dd>
+          <dt>设置块</dt><dd><code>.settings-section-body</code> + <code>.setting-row</code>——「标签在左、控件在右」的键值行；质感与 <code>.glass-card</code> 相同</dd>
+          <dt>现用模块</dt><dd>玻璃卡片：条码、刀模、PDF；设置块：设置</dd>
+        </dl>
+        <div class="cat-pair">
+          <div class="cat-stage" data-theme="light" data-demo="cards"><span class="cat-label">浅色</span></div>
+          <div class="cat-stage" data-theme="dark" data-demo="cards"><span class="cat-label">深色</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 状态提示 ══ -->
+    <section class="cat-section" id="feedback">
+      <h2>状态提示</h2>
+      <div class="cat-item">
+        <dl class="cat-meta">
+          <dt>提示条</dt><dd><code>.update-notice</code>——需要用户知道、但不打断操作的状态；右侧最多放一个可执行按钮，无动作时不放按钮</dd>
+          <dt>徽标</dt><dd><code>.version-badge</code>——短标签（稳定版、测试版）</dd>
+          <dt>轻提示</dt><dd><code>.toast</code>——操作完成后的一次性反馈，调用 <code>showToast()</code>，不要自己拼</dd>
+          <dt>现用模块</dt><dd>提示条/徽标：设置；轻提示：全部模块</dd>
+        </dl>
+        <div class="cat-pair">
+          <div class="cat-stage" data-theme="light" data-demo="feedback"><span class="cat-label">浅色</span></div>
+          <div class="cat-stage" data-theme="dark" data-demo="feedback"><span class="cat-label">深色</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 使用约定 ══ -->
+    <section class="cat-section" id="rules">
+      <h2>使用约定</h2>
+      <p class="cat-rule">颜色、字号、圆角、间距从变量取；需要新值时先加变量，再在这里补示例。</p>
+      <p class="cat-rule">浅色模式下 <code>--border</code> / <code>--control-border</code> 是<b>白色半透明</b>，放在浅底上几乎看不见——需要可见描边时用 <code>color-mix(in srgb, var(--foreground) 13%, transparent)</code>。这一条是第一批统一的候选：给中性灰描边单独立一个变量。</p>
+      <p class="cat-rule">焦点态目前只改边框色（<code>box-shadow: none</code>），键盘用户不易分辨——属于第一批统一项。</p>
+      <p class="cat-rule">目录建成时顺手修掉的：深色模式下 <code>.gbtn.primary</code> 丢失主题色填充（一条多余的 <code>[data-theme="dark"] .gbtn</code> 规则特异性更高）；开关禁用态与可用态看不出区别。</p>
+      <p class="cat-rule warn">刀模画布、图片编辑器、截图覆盖层有各自的交互约束，<b>不</b>为了统一去改它们已验收的样式。</p>
+      <p class="cat-rule">盘点现状：<code>node scripts/style-report.mjs</code>（加 <code>--json</code> 输出机器可读结果）。</p>
+    </section>
+  </main>
+
+  <!-- 示例模板：两套主题各渲染一份，保证浅色/深色看到的是同一段 HTML -->
+  <template id="demo-buttons">
+    <div class="cat-row">
+      <div class="cat-state"><button class="gbtn primary" type="button">导出 PDF</button><small>主按钮</small></div>
+      <div class="cat-state"><button class="gbtn" type="button">添加文件</button><small>次按钮</small></div>
+      <div class="cat-state"><button class="gbtn ghost" type="button">恢复默认</button><small>弱按钮</small></div>
+      <div class="cat-state"><button class="gbtn danger" type="button">删除</button><small>危险</small></div>
+    </div>
+    <div class="cat-row">
+      <div class="cat-state"><button class="gbtn primary" type="button" disabled>导出 PDF</button><small>禁用</small></div>
+      <div class="cat-state"><button class="gbtn" type="button" disabled>添加文件</button><small>禁用</small></div>
+      <div class="cat-state"><button class="gbtn ghost" type="button" disabled>恢复默认</button><small>禁用</small></div>
+    </div>
+  </template>
+
+  <template id="demo-inputs">
+    <div class="cat-row">
+      <div class="cat-state"><input type="text" value="6901234567892" style="height:34px;padding:0 10px;border-radius:var(--r-md)" /><small>文本</small></div>
+      <div class="cat-state"><input type="number" value="400" style="width:90px;height:34px;padding:0 10px;border-radius:var(--r-md)" /><small>数字</small></div>
+    </div>
+    <div class="cat-row">
+      <div class="cat-state"><input type="text" value="已禁用" disabled style="height:34px;padding:0 10px;border-radius:var(--r-md)" /><small>禁用</small></div>
+      <div class="cat-state"><select style="border-radius:var(--r-md);padding-left:10px"><option>瓦楞纸 E（三层）</option><option>白卡纸</option></select><small>原生下拉（应用内会被增强）</small></div>
+    </div>
+    <div class="cat-row">
+      <div class="cat-state"><button type="button" class="app-select-trigger" aria-invalid="true">选择材质</button><small>增强下拉 · 错误态（--danger）</small></div>
+      <label class="search" style="width:260px"><svg class="ic" aria-hidden="true"><use href="#ic-search"></use></svg><input type="search" placeholder="搜索功能…" /><kbd>⌘K</kbd></label>
+    </div>
+  </template>
+
+  <template id="demo-toggles">
+    <div class="cat-row">
+      <label class="toggle-wrap"><input type="checkbox" checked /><span class="toggle"></span>输出到原文件目录</label>
+      <label class="toggle-wrap"><input type="checkbox" /><span class="toggle"></span>关闭</label>
+      <label class="toggle-wrap"><input type="checkbox" checked disabled /><span class="toggle"></span>禁用</label>
+    </div>
+    <div class="cat-row">
+      <div class="segments" style="width:260px"><button type="button" class="on">单个生成</button><button type="button">批量</button><button type="button">CSV</button></div>
+    </div>
+    <div class="cat-row" style="width:100%">
+      <div class="theme-options"><label class="theme-option"><input type="radio" name="cat-theme-x" checked /><span>浅色</span></label><label class="theme-option"><input type="radio" name="cat-theme-x" /><span>深色</span></label><label class="theme-option"><input type="radio" name="cat-theme-x" /><span>跟随系统</span></label></div>
+    </div>
+  </template>
+
+  <template id="demo-cards">
+    <div class="glass-card" style="padding:14px 16px;margin-bottom:14px">
+      <b style="font-size:var(--fs-lg)">玻璃卡片</b>
+      <p style="margin:6px 0 0;color:var(--muted);font-size:var(--fs-md)">承载一组输入或一块结果。</p>
+    </div>
+    <div class="settings-section-body">
+      <div class="setting-row"><span class="setting-label">当前版本</span><b class="setting-value">v2.1.8</b></div>
+      <div class="setting-row"><span class="setting-label">自动检查更新<small>应用启动后在后台检查新版本</small></span><label class="toggle-wrap icon-only-toggle"><input type="checkbox" checked /><span class="toggle"></span><span class="sr-only">自动检查更新</span></label></div>
+    </div>
+  </template>
+
+  <template id="demo-feedback">
+    <div class="update-notice" style="margin-bottom:12px">
+      <svg class="ic" aria-hidden="true"><use href="#ic-info"></use></svg>
+      <div class="update-notice-copy"><p>当前运行方式不支持自动更新</p></div>
+      <div class="update-actions"></div>
+    </div>
+    <div class="cat-row">
+      <span class="version-badge">稳定版</span>
+      <div class="toast show">刀模 PDF 已保存</div>
+    </div>
+  </template>
+
+  <script>
+    // 两套主题各渲染一份示例
+    document.querySelectorAll('[data-demo]').forEach((stage, index) => {
+      const template = document.getElementById(`demo-${stage.dataset.demo}`)
+      const copy = template.content.cloneNode(true)
+      copy.querySelectorAll('input[type="radio"]').forEach((radio) => { radio.name = `${radio.name}-${index}` })
+      stage.append(copy)
+    })
+
+    // 颜色变量：从挂了对应 data-theme 的容器上实时读取
+    const COLOR_TOKENS = ['--accent', '--foreground', '--muted', '--faint', '--danger', '--background', '--card', '--card-solid', '--border', '--hairline', '--control-bg', '--control-border', '--selection-bg', '--canvas-bg']
+    for (const list of document.querySelectorAll('[data-token-list="color"]')) {
+      const style = getComputedStyle(list)
+      for (const token of COLOR_TOKENS) {
+        const value = style.getPropertyValue(token).trim()
+        const cell = document.createElement('div')
+        cell.className = 'cat-token'
+        cell.innerHTML = `<i style="background:var(${token})"></i><b>${token}</b><span></span>`
+        cell.querySelector('span').textContent = value || '（未定义）'
+        list.append(cell)
+      }
+    }
+
+    // 字号、圆角、间距刻度
+    const root = getComputedStyle(document.documentElement)
+    const scales = {
+      fs: ['--fs-xs', '--fs-sm', '--fs-md', '--fs-lg'].map((t) => [t, `<span style="font-size:var(${t});color:var(--foreground)">摸鱼 Aa</span>`]),
+      r: ['--r-sm', '--r-md', '--r-lg', '--r-full'].map((t) => [t, `<i style="display:block;width:56px;height:36px;border:1px solid var(--selection-border);background:var(--accent-10);border-radius:var(${t})"></i>`]),
+      sp: ['--sp-1', '--sp-2', '--sp-3', '--sp-4', '--sp-5'].map((t) => [t, `<i style="display:block;height:14px;width:var(${t});background:var(--accent)"></i>`])
+    }
+    for (const [key, items] of Object.entries(scales)) {
+      const host = document.querySelector(`[data-scale="${key}"]`)
+      for (const [token, preview] of items) {
+        const cell = document.createElement('div')
+        cell.innerHTML = `${preview}<span>${token}</span><span>${root.getPropertyValue(token).trim()}</span>`
+        host.append(cell)
+      }
+    }
+
+    // 分段控件在目录里可以点
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('.segments button')
+      if (!button) return
+      button.parentElement.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b === button))
+      if (button.dataset.pageTheme) document.body.dataset.theme = button.dataset.pageTheme
+    })
+  </script>
+</body>
+</html>

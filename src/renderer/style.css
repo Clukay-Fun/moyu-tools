@@ -1080,10 +1080,6 @@ body.home-active .page-home.active h1.home-slogan {
   backdrop-filter: blur(16px);
 }
 
-[data-theme="dark"] .gbtn {
-  background: var(--control-bg);
-}
-
 .gbtn:hover {
   border-color: var(--control-border-hover);
   color: var(--accent);
@@ -1718,6 +1714,11 @@ body.home-active .page-home.active h1.home-slogan {
 
 .toggle-wrap input:checked + .toggle::after {
   transform: translateX(15px);
+}
+
+.toggle-wrap:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.48;
 }
 
 .file-list {
