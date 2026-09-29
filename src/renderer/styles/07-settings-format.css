@@ -107,6 +107,14 @@
 .update-notes li + li { margin-top: 4px; }
 .update-available-dialog { width: min(480px, calc(100vw - 32px)); max-height: calc(100vh - 32px); margin: auto; padding: 22px; border: 1px solid var(--hairline); border-radius: var(--r-lg); color: var(--foreground); background: var(--menu-surface); box-shadow: 0 20px 60px rgba(12, 18, 30, 0.22); }
 .update-available-dialog::backdrop { background: rgba(12, 18, 30, 0.44); }
+.update-available-dialog[open] {
+  transition: opacity var(--dur-panel) var(--ease-out), transform var(--dur-spring-land) var(--ease-spring-land);
+}
+.update-available-dialog[open]::backdrop { transition: background-color var(--dur-panel) var(--ease-out); }
+@starting-style {
+  .update-available-dialog[open] { opacity: 0; transform: translateY(8px) scale(0.97); }
+  .update-available-dialog[open]::backdrop { background-color: transparent; }
+}
 .update-available-dialog h2 { margin: 0 0 8px; font-size: 20px; }
 .update-available-dialog > p { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
 .update-available-dialog .update-notes { max-height: min(240px, 35vh); }
@@ -511,8 +519,9 @@
   font-size: var(--fs-md);
   opacity: 0;
   pointer-events: none;
-  transform: translateY(8px);
-  transition: opacity var(--dur-panel) var(--ease-out), transform var(--dur-panel) var(--ease-out);
+  transform: translateY(8px) scale(0.98);
+  /* 退场：快、不回弹 */
+  transition: opacity var(--dur-popover-exit) var(--ease-out), transform var(--dur-popover-exit) var(--ease-out);
   backdrop-filter: blur(24px);
 }
 
@@ -523,6 +532,8 @@
 .toast.show {
   opacity: 1;
   transform: translateY(0);
+  /* 进场：透明度先到位，位移用落位弹簧升上来 */
+  transition: opacity var(--dur-panel) var(--ease-out), transform var(--dur-spring-land) var(--ease-spring-land);
 }
 
 .format-runtime-state {

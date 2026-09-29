@@ -284,12 +284,8 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
 .illustrator-mode-switch {
   display: grid;
   grid-template-columns: repeat(3, minmax(94px, 1fr));
+  /* 不画外框和底槽，只保留选中格的样式；padding 留着，选中格的投影不会被裁掉 */
   padding: 3px;
-  border: 1px solid var(--control-border);
-  border-radius: var(--r-md);
-  background: var(--control-bg);
-  box-shadow: var(--glass-rim);
-  backdrop-filter: var(--glass-blur-control);
 }
 
 .illustrator-mode-switch button {
@@ -625,7 +621,7 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
   content: "";
   pointer-events: none;
   transform: translateX(0);
-  transition: transform 180ms cubic-bezier(0.77, 0, 0.175, 1);
+  transition: transform var(--dur-spring-land) var(--ease-spring-land);
 }
 
 .barcode-mode-switch[data-mode="batch"]::before {

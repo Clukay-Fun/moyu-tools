@@ -583,6 +583,53 @@ function animateEntry(element, { duration = 160, distance = 6, horizontal = fals
   animation.addEventListener('cancel', release, { once: true })
 }
 
+// 导航选中底板：独立元素，切模块时从旧按钮滑到新按钮（落位弹簧，见 .nav-indicator.ready）。
+// 首次定位和窗口尺寸变化只瞬移——那不是用户的动作，不该有「移过去」的动画。
+const navIndicator = document.querySelector('.nav-indicator')
+
+function moveNavIndicator(animate) {
+  if (!navIndicator) return
+  const active = document.querySelector('.rail .nav-ic.active')
+  navIndicator.hidden = !active
+  if (!active) return
+  // 还没定位过（transform 为空）时不做动画，否则第一次会从左上角滑进来
+  navIndicator.classList.toggle('ready', animate && navIndicator.style.transform !== '')
+  navIndicator.style.transform = `translate3d(${active.offsetLeft}px, ${active.offsetTop}px, 0)`
+}
+
+if (navIndicator) {
+  new ResizeObserver(() => moveNavIndicator(false)).observe(navIndicator.parentElement)
+}
+
+// 切模块进场：页面本身只做很短的淡入，里面的卡片按阅读顺序依次升起落位。
+// 透明度走在位移前面（前 40% 就到 1），读起来是「落下」而不是「淡入」；
+// 一次最多带 8 块，后面的直接就位——动得太多反而没有重点。
+function animatePageEntry(page) {
+  if (!page) return
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+  animateEntry(page, { duration: 120, distance: 0 })
+  if (reduced) return
+  const cards = [...page.querySelectorAll('.glass-card, .settings-section-body')]
+    .filter((card) => card.offsetParent !== null)
+    .slice(0, 8)
+  const easing = getComputedStyle(document.documentElement).getPropertyValue('--ease-spring-land').trim() || 'cubic-bezier(0.23, 1, 0.32, 1)'
+  cards.forEach((card, index) => {
+    entryAnimations.get(card)?.cancel()
+    const animation = card.animate(
+      [
+        { opacity: 0, transform: 'translateY(10px)' },
+        { opacity: 1, offset: 0.4 },
+        { opacity: 1, transform: 'translateY(0)' }
+      ],
+      { duration: 300, delay: index * 32, easing, fill: 'backwards' }
+    )
+    entryAnimations.set(card, animation)
+    const release = () => { if (entryAnimations.get(card) === animation) entryAnimations.delete(card) }
+    animation.addEventListener('finish', release, { once: true })
+    animation.addEventListener('cancel', release, { once: true })
+  })
+}
+
 function activateModule(module, action = '', animate = false) {
   const changed = state.module !== module
   document.body.classList.toggle('home-active', module === 'home')
@@ -595,6 +642,7 @@ function activateModule(module, action = '', animate = false) {
     button.classList.toggle('active', isActive)
     button.setAttribute('aria-current', isActive ? 'page' : 'false')
   })
+  moveNavIndicator(changed)
 
   let activePage = null
   document.querySelectorAll('.page').forEach((page) => {
@@ -607,7 +655,7 @@ function activateModule(module, action = '', animate = false) {
     activePage.scrollTop = 0
     activePage.querySelector('.settings-layout')?.scrollTo({ top: 0, behavior: 'instant' })
   }
-  if (animate && changed) animateEntry(activePage, { duration: 180, distance: 7 })
+  if (animate && changed) animatePageEntry(activePage)
 
   const deferredMilestone = module === 'pdf' ? deferredPdfActions.get(action) : null
 

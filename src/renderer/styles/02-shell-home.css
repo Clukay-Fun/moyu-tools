@@ -348,6 +348,7 @@
 }
 
 .rail {
+  position: relative;
   display: flex;
   width: 64px;
   flex-shrink: 0;
@@ -371,6 +372,7 @@
 
 .nav-ic {
   position: relative;
+  z-index: 1;
   display: flex;
   width: 50px;
   height: 52px;
@@ -418,17 +420,36 @@
   background: transparent;
 }
 
+/* 选中底板不画在按钮上，而是一块独立的 .nav-indicator 从旧模块滑到新模块（main.js moveNavIndicator）。
+   切模块时画面里「留下来并移动」的就是它，而不是旧高亮消失、新高亮出现。 */
 .nav-ic.active {
-  border-color: var(--border);
   color: var(--accent);
+  background: transparent;
+}
+
+.nav-indicator {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 50px;
+  height: 52px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
   background:
     linear-gradient(160deg, var(--accent-10), transparent),
     linear-gradient(160deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.1));
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.68), 0 4px 14px rgba(35, 39, 65, 0.09);
   backdrop-filter: blur(20px);
+  pointer-events: none;
+  will-change: transform;
 }
 
-[data-theme="dark"] .nav-ic.active {
+.nav-indicator.ready {
+  transition: transform var(--dur-spring-land) var(--ease-spring-land);
+}
+
+[data-theme="dark"] .nav-indicator {
   border-color: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.38);
   background: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.14);
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.08), 0 6px 18px rgba(0, 0, 0, 0.24);
@@ -437,7 +458,10 @@
 .submenu {
   position: relative;
   display: none;
-  width: 180px;
+  /* 宽度跟着本模块最长的一项走，不再固定 180px；上下限防止太窄挤压图标或太宽占掉工作区 */
+  width: max-content;
+  min-width: 140px;
+  max-width: 200px;
   flex-shrink: 0;
   flex-direction: column;
   gap: 3px;
@@ -476,7 +500,7 @@
 }
 
 .submenu-indicator.ready {
-  transition: transform 220ms cubic-bezier(0.77, 0, 0.175, 1);
+  transition: transform var(--dur-spring-land) var(--ease-spring-land);
 }
 
 .submenu-indicator[hidden] { display: none; }
@@ -541,6 +565,7 @@
 
 .submenu-item.placeholder-action::after {
   margin-left: auto;
+  flex: none;
   padding: 2px 5px;
   border-radius: 99px;
   color: var(--faint);

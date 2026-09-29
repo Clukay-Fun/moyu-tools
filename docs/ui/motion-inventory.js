@@ -145,12 +145,21 @@ window.MOTION_INVENTORY = [
     "media": null
   },
   {
+    "selector": ".nav-indicator.ready",
+    "kind": "transition",
+    "property": "transform",
+    "duration": "var(--dur-spring-land)",
+    "easing": "var(--ease-spring-land)",
+    "tokenized": true,
+    "media": null
+  },
+  {
     "selector": ".submenu-indicator.ready",
     "kind": "transition",
     "property": "transform",
-    "duration": "220ms",
-    "easing": "cubic-bezier(0.77, 0, 0.175, 1)",
-    "tokenized": false,
+    "duration": "var(--dur-spring-land)",
+    "easing": "var(--ease-spring-land)",
+    "tokenized": true,
     "media": null
   },
   {
@@ -299,9 +308,9 @@ window.MOTION_INVENTORY = [
     "selector": ".barcode-mode-switch::before",
     "kind": "transition",
     "property": "transform",
-    "duration": "180ms",
-    "easing": "cubic-bezier(0.77, 0, 0.175, 1)",
-    "tokenized": false,
+    "duration": "var(--dur-spring-land)",
+    "easing": "var(--ease-spring-land)",
+    "tokenized": true,
     "media": null
   },
   {
@@ -320,6 +329,33 @@ window.MOTION_INVENTORY = [
     "duration": "160ms",
     "easing": "ease",
     "tokenized": false,
+    "media": null
+  },
+  {
+    "selector": ".update-available-dialog[open]",
+    "kind": "transition",
+    "property": "opacity",
+    "duration": "var(--dur-panel)",
+    "easing": "var(--ease-out)",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".update-available-dialog[open]",
+    "kind": "transition",
+    "property": "transform",
+    "duration": "var(--dur-spring-land)",
+    "easing": "var(--ease-spring-land)",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".update-available-dialog[open]::backdrop",
+    "kind": "transition",
+    "property": "background-color",
+    "duration": "var(--dur-panel)",
+    "easing": "var(--ease-out)",
+    "tokenized": true,
     "media": null
   },
   {
@@ -387,7 +423,7 @@ window.MOTION_INVENTORY = [
     "selector": ".toast",
     "kind": "transition",
     "property": "opacity",
-    "duration": "var(--dur-panel)",
+    "duration": "var(--dur-popover-exit)",
     "easing": "var(--ease-out)",
     "tokenized": true,
     "media": null
@@ -396,8 +432,26 @@ window.MOTION_INVENTORY = [
     "selector": ".toast",
     "kind": "transition",
     "property": "transform",
+    "duration": "var(--dur-popover-exit)",
+    "easing": "var(--ease-out)",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".toast.show",
+    "kind": "transition",
+    "property": "opacity",
     "duration": "var(--dur-panel)",
     "easing": "var(--ease-out)",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".toast.show",
+    "kind": "transition",
+    "property": "transform",
+    "duration": "var(--dur-spring-land)",
+    "easing": "var(--ease-spring-land)",
     "tokenized": true,
     "media": null
   },
