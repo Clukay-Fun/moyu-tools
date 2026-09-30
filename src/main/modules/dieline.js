@@ -16,7 +16,14 @@ function normalizeSvg(payload) {
   }
   if (Buffer.byteLength(data, 'utf8') > MAX_SVG_BYTES) throw new Error('刀模 SVG 超过 20 MB')
   if (!/<svg[\s>]/.test(data) || !/<\/svg>\s*$/.test(data)) throw new Error('刀模 SVG 结构不完整')
-  if (/<script[\s>]|<foreignObject[\s>]|xlink:href\s*=\s*"(?!#)/i.test(data)) throw new Error('刀模 SVG 含不允许的内容')
+  // Illustrator 会解析 SVG 中的事件、外链和实体；即使当前 renderer 只生成内部图形，
+  // 主进程仍必须把 IPC 传入的 SVG 当作不可信数据处理，避免未来新增入口时扩大攻击面。
+  if (/<(?:script|foreignObject|iframe|object|embed)\b|\bon[a-z][\w-]*\s*=/i.test(data) ||
+      /<!(?:DOCTYPE|ENTITY)\b/i.test(data) ||
+      /(?:href|xlink:href)\s*=\s*(['"])(?!\s*#)[^'\"]*\1/i.test(data) ||
+      /url\(\s*(['"]?)(?!#)[^)\"']+\1\s*\)/i.test(data)) {
+    throw new Error('刀模 SVG 含不允许的内容')
+  }
   return data
 }
 

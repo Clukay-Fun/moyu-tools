@@ -12,7 +12,7 @@ git diff --check
 npm audit --omit=dev
 ```
 
-涉及打包布局、原生模块、WASM、worker、独立可执行文件或 DSH 运行闭包变化时，必须执行目标平台打包验证。
+涉及打包布局、原生模块、WASM、worker、独立可执行文件或运行闭包变化时，必须执行目标平台打包验证。
 
 ## Release 文案规范
 
@@ -47,7 +47,7 @@ Release 正文使用 `更新内容` 标题，并按有内容的类别列出要�
 
 - 日常开发继续提交并推送到 `dev`；普通分支推送不会生成 Release。
 - 确认准备发布的改动已合并到 `main` 后，使用 `npm version patch --no-git-tag-version` 或 `npm version minor --no-git-tag-version` 同步更新 `package.json` 与 `package-lock.json`，并提交版本变更。
-- 在包含该版本提交的 `main` 提交上创建并推送 `v<version>` tag，例如 `v2.1.8`。发布工作流只响应 `v*` tag，并会校验 tag、两个包文件中的版本一致，且 tag 对应的提交已进入 `main`。
+- 在包含该版本提交的 `main` 提交上创建并推送 `v<version>` tag，例如 `v2.2.0`。发布工作流只响应 `v*` tag，并会校验 tag、两个包文件中的版本一致，且 tag 对应的提交已进入 `main`。
 - 工作流从最近一个正式 Release 生成中文更新说明，构建 Windows NSIS 安装包，生成 SHA-256 校验文件，校验资产后发布。
 - 修复和小调整递增 patch（如 `2.1.7` → `2.1.8`）；新增用户功能递增 minor（如 `2.1.7` → `2.2.0`）。
 - 自动更新仅支持 Windows 安装版；开发运行和便携版需要手动获取正式 Release。

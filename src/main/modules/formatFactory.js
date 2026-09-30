@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
-import { copyFile, mkdir, readdir, stat } from 'node:fs/promises'
-import { basename, extname, join } from 'node:path'
+import { copyFile, mkdir, readdir, rm, stat } from 'node:fs/promises'
+import { basename, dirname, extname, join } from 'node:path'
 import { loadSharp } from '../lib/lazyModules.js'
 import { sanitizeFileBaseName } from '../lib/outputPath.js'
 import { runFormatProcess } from '../lib/spawnProcess.js'
@@ -26,9 +26,104 @@ const FORMAT_ACTIONS = new Map([
 const formatInputSessions = new Map()
 const formatResultSessions = new Map()
 const formatTasks = new Map()
+const FORMAT_RESULT_RETENTION_MS = 24 * 60 * 60 * 1000
 
 function getFormatResultDirectory(app) {
   return join(app.getPath('userData'), 'format-results')
+}
+
+async function removeFormatResultFile(result) {
+  await rm(result.path, { force: true })
+  if (!result.directory) return
+  try {
+    if ((await readdir(result.directory)).length === 0) {
+      await rm(result.directory, { recursive: true, force: true })
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error
+  }
+}
+
+async function purgeFormatResults(ownerId, inputIds = null) {
+  const inputSet = inputIds ? new Set(inputIds) : null
+  const removals = []
+  for (const [id, result] of formatResultSessions) {
+    if (result.ownerId !== ownerId || (inputSet && !inputSet.has(result.inputId))) continue
+    formatResultSessions.delete(id)
+    removals.push(removeFormatResultFile(result))
+  }
+  await Promise.allSettled(removals)
+}
+
+/**
+ * 回收窗口销毁后遗留的格式工厂会话和结果文件。
+ * 结果只存在 userData 临时目录，不是用户选择的导出文件，因此可以安全清理。
+ */
+export function purgeFormatSessions(ownerId) {
+  for (const [id, input] of formatInputSessions) {
+    if (input.ownerId === ownerId) formatInputSessions.delete(id)
+  }
+  for (const [id, task] of formatTasks) {
+    if (task.ownerId !== ownerId) continue
+    task.cancelled = true
+    if (task.process && !task.process.killed) task.process.kill()
+    formatTasks.delete(id)
+  }
+  for (const [id, result] of formatResultSessions) {
+    if (result.ownerId !== ownerId) continue
+    formatResultSessions.delete(id)
+    removeFormatResultFile(result).catch(() => {})
+  }
+}
+
+async function cleanupStaleFormatResults(app) {
+  const root = getFormatResultDirectory(app)
+  let entries
+  try {
+    entries = await readdir(root, { withFileTypes: true })
+  } catch (error) {
+    if (error.code !== 'ENOENT') console.warn('[format] 清理旧结果缓存失败:', error.message)
+    return
+  }
+  const cutoff = Date.now() - FORMAT_RESULT_RETENTION_MS
+  await Promise.all(entries.filter((entry) => entry.isDirectory()).map(async (entry) => {
+    const directory = join(root, entry.name)
+    try {
+      const info = await stat(directory)
+      if (info.mtimeMs < cutoff) await rm(directory, { recursive: true, force: true })
+    } catch (error) {
+      if (error.code !== 'ENOENT') console.warn('[format] 清理旧结果缓存失败:', error.message)
+    }
+  }))
+}
+
+async function cleanupOrphanFormatOutputs(directory) {
+  let entries
+  try {
+    entries = await readdir(directory, { withFileTypes: true })
+  } catch (error) {
+    if (error.code !== 'ENOENT') console.warn('[format] 清理未完成结果失败:', error.message)
+    return
+  }
+  const retained = new Set(
+    [...formatResultSessions.values()]
+      .filter((result) => result.directory === directory)
+      .map((result) => result.path)
+  )
+  await Promise.all(entries.map(async (entry) => {
+    const path = join(directory, entry.name)
+    if (retained.has(path)) return
+    try {
+      await rm(path, { recursive: entry.isDirectory(), force: true })
+    } catch (error) {
+      if (error.code !== 'ENOENT') console.warn('[format] 清理未完成结果失败:', error.message)
+    }
+  }))
+  try {
+    if ((await readdir(directory)).length === 0) await rm(directory, { recursive: true, force: true })
+  } catch (error) {
+    if (error.code !== 'ENOENT') console.warn('[format] 清理未完成结果失败:', error.message)
+  }
 }
 
 function getFormatToolPath(app, tool) {
@@ -248,6 +343,7 @@ async function registerFormatResult(event, outputPath, input, metadata = null) {
     id,
     ownerId: event.sender.id,
     path: outputPath,
+    directory: dirname(outputPath),
     name: basename(outputPath),
     size: info.size,
     inputId: input.id,
@@ -271,6 +367,8 @@ async function registerFormatResult(event, outputPath, input, metadata = null) {
  * 格式工厂代码收拢到一起。
  */
 export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, app, assertMainWindowSender }) {
+  void cleanupStaleFormatResults(app)
+
   ipcMain.handle('format:get-status', async (event) => {
     assertMainWindowSender(event)
     let ffmpegReady = false
@@ -394,7 +492,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
     }
   })
 
-  ipcMain.handle('format:remove-inputs', (event, inputIds) => {
+  ipcMain.handle('format:remove-inputs', async (event, inputIds) => {
     assertMainWindowSender(event)
     const ids = Array.isArray(inputIds) ? inputIds : []
     let removed = 0
@@ -405,6 +503,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
         removed += 1
       }
     })
+    await purgeFormatResults(event.sender.id, ids)
     return { status: 'removed', count: removed }
   })
 
@@ -425,6 +524,8 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
     if (inputs.some((input) => input.kind !== expectedKind)) {
       throw new Error('任务中包含与当前功能不匹配的文件')
     }
+    // renderer 在重新运行前会清空结果列表；同步回收对应临时文件，避免每次重跑都留下孤儿目录。
+    await purgeFormatResults(event.sender.id, inputIds)
 
     const taskId = typeof payload?.taskId === 'string' && payload.taskId.length <= 80
       ? payload.taskId
@@ -533,6 +634,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
       return { status: 'complete', taskId, results, errors }
     } finally {
       formatTasks.delete(taskId)
+      await cleanupOrphanFormatOutputs(outputDirectory)
     }
   })
 

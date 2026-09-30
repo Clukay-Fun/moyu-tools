@@ -68,6 +68,21 @@ function normalizeNotes(notes) {
   return ''
 }
 
+function normalizeUpdateError(error, fallback) {
+  const message = String(error?.message || error || '').trim()
+  const normalized = message.toLowerCase()
+  if (normalized.includes('err_proxy_connection_failed') || normalized.includes('proxy connection failed')) {
+    return '无法连接更新服务器，请检查系统代理设置或网络连接后重试'
+  }
+  if (normalized.includes('etimedout') || normalized.includes('timed out') || normalized.includes('econnrefused')) {
+    return '更新服务器连接超时，请检查网络连接后重试'
+  }
+  if (normalized.includes('status code 404') || normalized.includes('cannot find latest')) {
+    return '暂时找不到可用的更新，请稍后重试'
+  }
+  return message || fallback
+}
+
 function isUpdateable() {
   return process.platform === 'win32' && app.isPackaged && !process.env.PORTABLE_EXECUTABLE_DIR
 }
@@ -87,7 +102,7 @@ function doCheck(source = 'manual') {
   patch({ status: 'checking', message: null, promptOnAvailable: source === 'startup' })
   autoUpdater
     .checkForUpdates()
-    .catch((err) => patch({ status: 'error', message: err?.message || '检查更新失败' }))
+    .catch((err) => patch({ status: 'error', message: normalizeUpdateError(err, '检查更新失败') }))
     .finally(() => {
       checking = false
     })
@@ -137,7 +152,7 @@ export function initUpdater(window) {
   )
   autoUpdater.on('update-downloaded', () => patch({ status: 'downloaded', lastCheckedAt: Date.now(), message: null }))
   autoUpdater.on('error', (err) =>
-    patch({ status: 'error', message: err?.message || '更新过程出错', lastCheckedAt: Date.now() })
+    patch({ status: 'error', message: normalizeUpdateError(err, '更新过程出错'), lastCheckedAt: Date.now() })
   )
 
   // 主窗可交互约 5 秒后后台检查；不阻塞启动。
@@ -162,7 +177,7 @@ export const updateApi = {
     patch({ status: 'downloading', progress: { percent: 0, transferred: 0, total: 0 } })
     autoUpdater
       .downloadUpdate()
-      .catch((err) => patch({ status: 'error', message: err?.message || '下载失败' }))
+      .catch((err) => patch({ status: 'error', message: normalizeUpdateError(err, '下载失败') }))
       .finally(() => {
         downloading = false
       })

@@ -23,6 +23,9 @@ export function runFormatProcess(command, args, options = {}) {
     if (task) task.process = child
 
     const timer = setTimeout(() => {
+      if (settled) return
+      settled = true
+      if (task) task.process = null
       child.kill()
       reject(new Error('格式转换任务执行超时'))
     }, timeoutMs)

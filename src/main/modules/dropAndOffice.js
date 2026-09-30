@@ -3,7 +3,13 @@ import { lstat, mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promis
 import { basename, dirname, extname, join } from 'node:path'
 import { writeFileAtomic } from '../lib/atomicWrite.js'
 import { assertOutputFile, availableOutputPath, sanitizeFileBaseName } from '../lib/outputPath.js'
-import { FORMAT_EXTENSIONS, FORMAT_MAX_FILE_BYTES, FORMAT_MAX_FILES, registerFormatInput } from './formatFactory.js'
+import {
+  FORMAT_EXTENSIONS,
+  FORMAT_MAX_FILE_BYTES,
+  FORMAT_MAX_FILES,
+  purgeFormatSessions,
+  registerFormatInput
+} from './formatFactory.js'
 import { ILLUSTRATOR_MAX_BYTES, purgeIllustratorSessions, registerIllustratorInput } from './illustrator.js'
 import { registerComResult, runComCommand } from './comWorker.js'
 
@@ -66,6 +72,7 @@ function purgeOwnerSessions(ownerId) {
   for (const [id, entry] of officeInputSessions) {
     if (entry.ownerId === ownerId) officeInputSessions.delete(id)
   }
+  purgeFormatSessions(ownerId)
   purgeIllustratorSessions(ownerId)
 }
 

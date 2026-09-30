@@ -117,6 +117,24 @@ function createWindow() {
     }
   })
 
+  // 主窗口只允许加载本地应用页面；新窗口请求统一拒绝，外部链接必须经过
+  // app:open-external 的固定白名单，避免将任意网页带入带有桥接 API 的上下文。
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    let allowed = url.startsWith('file://')
+    if (process.env.ELECTRON_RENDERER_URL) {
+      try {
+        allowed = new URL(url).origin === new URL(process.env.ELECTRON_RENDERER_URL).origin
+      } catch {
+        allowed = false
+      }
+    }
+    if (!allowed) event.preventDefault()
+  })
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (ALLOWED_EXTERNAL_URLS.has(url)) void shell.openExternal(url)
+    return { action: 'deny' }
+  })
+
   // 窗口从最小化/隐藏恢复后通知渲染端重新激活画布（F-15）。
   // ⚠ 'restore' 与 'show' 都要接：最小化恢复走 restore，
   //   而截图流程用的是 hide/show，走的是 show，两条路都会让
