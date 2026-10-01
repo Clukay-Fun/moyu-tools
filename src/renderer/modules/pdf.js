@@ -111,8 +111,6 @@ export function initPdfTools({
   const pdfWatermarkPreviewLabel = document.querySelector('#pdf-watermark-preview-label')
   const pdfFileBody = document.querySelector('#pdf-file-body')
   const pdfEmpty = document.querySelector('#pdf-empty')
-  const pdfEmptyAddButton = document.querySelector('#pdf-empty-add')
-  const pdfEmptyAddLabel = document.querySelector('#pdf-empty-add-label')
   const pdfOptions = document.querySelector('#pdf-options')
   const pdfJpegQualityMenu = document.querySelector('#pdf-jpeg-quality-menu')
   const pdfRunButton = document.querySelector('#run-pdf-action')
@@ -678,10 +676,10 @@ export function initPdfTools({
     const hasWatermarkImage = state.pdfWatermarkMode !== 'image' || Boolean(state.pdfWatermarkImage)
     const hasDestination = Boolean(state.pdfDestination)
     pdfRunButton.disabled = state.pdfBusy || !enoughFiles || !hasWatermarkImage || !hasDestination
-    pdfRunButton.textContent = state.pdfBusy ? '处理中…' : `开始${state.selections.pdf}`
+    pdfRunButton.textContent = state.pdfBusy ? '处理中…' : '开始'
     pdfWatermarkRunButton.disabled = pdfRunButton.disabled
     const watermarkModeLabel = state.pdfWatermarkMode === 'image' ? '图片水印' : '文字水印'
-    pdfWatermarkRunButton.textContent = state.pdfBusy ? '处理中…' : `开始${watermarkModeLabel}`
+    pdfWatermarkRunButton.textContent = state.pdfBusy ? '处理中…' : '开始'
     pdfClearFilesButton.disabled = state.pdfBusy || fileCount === 0
     pdfAddFilesButton.disabled = state.pdfBusy
     pdfChooseOutputButton.disabled = state.pdfBusy || !enoughFiles
@@ -721,7 +719,6 @@ export function initPdfTools({
     pdfWatermarkWorkbench.hidden = !isPdfWatermarkAction(action)
     document.querySelector('#page-pdf').classList.toggle('watermark-mode', isPdfWatermarkAction(action))
     document.querySelector('#pdf-empty-text').textContent = `拖入 ${config.inputLabel} 文件到这里`
-    pdfEmptyAddLabel.textContent = `上传 ${config.inputLabel}`
     pdfAddFilesButton.textContent = `＋ 上传 ${config.inputLabel}`
     state.pdfLastOutput = null
     state.pdfComResult = null
@@ -1918,7 +1915,6 @@ export function initPdfTools({
       setPdfResult(`无法选择文件：${cleanIpcError(error?.message ?? error)}`, 'error')
     }
   })
-  pdfEmptyAddButton.addEventListener('click', () => pdfAddFilesButton.click())
   document.querySelector('.pdf-watermark-mode').addEventListener('click', (event) => {
     const button = event.target.closest('[data-watermark-mode]')
     if (!button || state.pdfBusy || button.dataset.watermarkMode === state.pdfWatermarkMode) return

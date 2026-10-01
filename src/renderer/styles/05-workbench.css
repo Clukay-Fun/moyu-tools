@@ -430,6 +430,9 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
   padding: 12px 16px;
 }
 
+.pdf-run-row > button { flex: none; width: auto; min-width: 0; padding-inline: 16px; }
+.pdf-run-row > #open-pdf-output { width: var(--h-lg); padding: 0; justify-content: center; }
+
 .pdf-output-row {
   border-bottom: 1px solid var(--hairline);
 }
@@ -603,11 +606,10 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
   gap: var(--sp-1);
   margin-bottom: var(--sp-4);
   padding: var(--sp-1);
-  border: 1px solid var(--border);
+  border: 0;
   border-radius: var(--r-md);
-  background: var(--card-thin);
-  box-shadow: var(--glass-rim);
-  backdrop-filter: var(--glass-blur-control);
+  background: transparent;
+  box-shadow: none;
 }
 
 .barcode-mode-switch::before {
@@ -647,6 +649,9 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
   box-shadow: none;
   font-weight: 650;
 }
+
+.barcode-mode-switch button { transition: color var(--dur-hover) ease, transform var(--dur-press) ease; }
+.barcode-mode-switch button:active { transform: scale(var(--press-scale)); }
 
 .barcode-pane {
   display: none;

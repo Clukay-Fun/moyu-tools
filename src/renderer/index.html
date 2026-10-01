@@ -87,7 +87,6 @@
                   <div class="empty" id="pdf-empty">
                     <div id="pdf-empty-text">拖入 PDF 文件到这里</div>
                     <small>支持拖入文件或文件夹，也可以手动选择</small>
-                    <button class="gbtn" id="pdf-empty-add" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-add"></use></svg><span id="pdf-empty-add-label">上传 PDF</span></button>
                   </div>
                 </div>
                 <div class="pdf-watermark-workbench" id="pdf-watermark-workbench" hidden>
@@ -199,7 +198,7 @@
                         </select>
                       </label>
                     </section>
-                    <button class="primary pdf-watermark-run" id="run-pdf-watermark-action" type="button" disabled>开始文字水印</button>
+                    <button class="primary pdf-watermark-run" id="run-pdf-watermark-action" type="button" disabled>开始</button>
                   </aside>
                 </div>
                 <div class="glass-card result pdf-result-card">
@@ -215,9 +214,9 @@
                       <span class="result-dot" id="pdf-result-dot"></span>
                       <span id="pdf-result-text">0 个文件 · 等待添加</span>
                     </div>
-                    <button class="primary" id="run-pdf-action" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>开始转 PNG</button>
+                    <button class="primary" id="run-pdf-action" type="button" disabled>开始</button>
                     <button class="gbtn format-cancel" id="pdf-cancel-action" type="button" hidden>取消任务</button>
-                    <button class="gbtn open" id="open-pdf-output" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-open"></use></svg>打开所在位置</button>
+                    <button class="gbtn open" id="open-pdf-output" type="button" aria-label="打开所在位置" disabled><svg class="ic" aria-hidden="true"><use href="#ic-open"></use></svg></button>
                   </div>
                 </div>
                 <input id="pdf-file-input" type="file" accept="application/pdf,.pdf" hidden />
@@ -587,7 +586,6 @@
                   <button class="gbtn" id="format-pick-folder" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-folder-add"></use></svg> 添加文件夹</button>
                   <button class="gbtn ghost" id="format-clear-inputs" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
                 </div>
-                <p class="format-support-hint" id="format-support-hint">支持 MP4 / MOV / MKV / AVI / WebM 等格式</p>
                 <div class="format-workspace">
                   <section class="glass-card format-file-panel file-drop-target" id="format-drop-zone">
                     <h2 class="format-section-title">文件列表</h2>
@@ -776,9 +774,9 @@
                         <div class="setting-row is-wide">
                           <span class="setting-label">主题</span>
                           <div class="theme-options" role="radiogroup" aria-label="主题">
-                            <label class="theme-option"><input type="radio" name="theme" value="light" /><span>浅色</span></label>
-                            <label class="theme-option"><input type="radio" name="theme" value="dark" /><span>深色</span></label>
-                            <label class="theme-option"><input type="radio" name="theme" value="system" checked /><span>跟随系统</span></label>
+                            <label class="theme-option"><input type="radio" name="theme" value="system" checked /><span class="theme-preview theme-preview-system" aria-hidden="true"></span><span>跟随系统</span></label>
+                            <label class="theme-option"><input type="radio" name="theme" value="light" /><span class="theme-preview theme-preview-light" aria-hidden="true"></span><span>浅色</span></label>
+                            <label class="theme-option"><input type="radio" name="theme" value="dark" /><span class="theme-preview theme-preview-dark" aria-hidden="true"></span><span>深色</span></label>
                           </div>
                         </div>
                         <div class="setting-row">
@@ -792,26 +790,28 @@
                               <button type="button" data-accent="#E58A34" style="--preset:#E58A34" aria-label="橙色"></button>
                               <button type="button" data-accent="#D65B72" style="--preset:#D65B72" aria-label="玫红色"></button>
                             </div>
-                            <button class="gbtn ghost" id="toggle-custom-accent" type="button" aria-expanded="false">自定义…</button>
+                            <button class="gbtn ghost" id="toggle-custom-accent" type="button" aria-expanded="true">收起</button>
                           </div>
                         </div>
                         <div class="setting-row">
                           <span class="setting-label">当前颜色</span>
                           <div class="setting-row-control accent-current-row">
+                            <span class="current-color-preview" id="color-current-preview" aria-hidden="true"></span>
                             <span id="color-swatch"></span>
                             <input id="color-hex" value="#6978E6" maxlength="7" aria-label="十六进制主题色" />
                             <button id="reset-accent" type="button">重置默认</button>
                           </div>
                         </div>
-                        <div class="color-picker-row" id="custom-accent-panel" hidden>
+                        <div class="color-picker-row" id="custom-accent-panel">
                           <div class="wheel-wrap">
-                            <canvas class="color-wheel" id="color-wheel" width="200" height="200"></canvas>
+                            <canvas class="color-wheel" id="color-wheel" width="400" height="380"></canvas>
                             <div class="wheel-marker" id="wheel-marker"></div>
                           </div>
+                          <div class="hue-track"><input class="hue-slider" id="color-hue" type="range" min="0" max="360" value="225" aria-label="色相" /></div>
                           <div class="color-controls">
-                            <label class="slider-row"><b class="red">R</b><input type="range" id="color-r" min="0" max="255" value="105" /><span id="color-r-value">105</span></label>
-                            <label class="slider-row"><b class="green">G</b><input type="range" id="color-g" min="0" max="255" value="120" /><span id="color-g-value">120</span></label>
-                            <label class="slider-row"><b class="blue">B</b><input type="range" id="color-b" min="0" max="255" value="230" /><span id="color-b-value">230</span></label>
+                            <label class="slider-row"><b class="red">R</b><input type="number" id="color-r" min="0" max="255" value="105" /><span id="color-r-value">105</span></label>
+                            <label class="slider-row"><b class="green">G</b><input type="number" id="color-g" min="0" max="255" value="120" /><span id="color-g-value">120</span></label>
+                            <label class="slider-row"><b class="blue">B</b><input type="number" id="color-b" min="0" max="255" value="230" /><span id="color-b-value">230</span></label>
                           </div>
                         </div>
                       </div>
@@ -829,19 +829,23 @@
                           </div>
                           <span class="version-badge">稳定版</span>
                         </div>
-                        <p class="version-hero-meta">最近检查：<span id="update-last">—</span></p>
                         <div class="update-notice" id="update-status" aria-live="polite">
                           <svg class="ic" aria-hidden="true"><use href="#ic-info"></use></svg>
                           <div class="update-notice-copy">
                             <p id="update-status-text">正在读取更新状态…</p>
+                            <p class="version-hero-meta">上次检查：<span id="update-last">—</span></p>
                             <div class="update-notes" id="update-notes" hidden></div>
                           </div>
                           <div class="update-actions">
-                            <button class="gbtn primary" id="update-primary" type="button" disabled>检查更新</button>
+                            <button class="gbtn" id="update-primary" type="button" disabled>检查更新</button>
                             <button class="gbtn ghost" id="update-secondary" type="button" hidden>稍后安装</button>
                           </div>
                         </div>
                         <div class="settings-divider"></div>
+                        <div class="setting-row">
+                          <span class="setting-label">更新频道<small>接收正式发布的稳定版本</small></span>
+                          <span class="version-badge">稳定版</span>
+                        </div>
                         <div class="setting-row">
                           <span class="setting-label">自动检查更新<small>应用启动后在后台检查新版本</small></span>
                           <label class="toggle-wrap icon-only-toggle">

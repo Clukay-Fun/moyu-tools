@@ -45,22 +45,23 @@
 }
 
 [data-theme="dark"] .orb-1 {
-  background: #294d8c;
+  background: #7452bf;
 }
 
 [data-theme="dark"] .orb-2 {
-  background: #174d4b;
+  background: #258b91;
 }
 
 [data-theme="dark"] .orb-3 {
-  background: #49306f;
+  background: #aa7545;
 }
 
 [data-theme="dark"] .orb {
-  opacity: 0.3;
+  opacity: 0.48;
 }
 
 [data-theme="dark"] .panel {
+  background: rgba(13, 19, 29, 0.58);
   backdrop-filter: blur(32px) saturate(115%);
 }
 
@@ -375,8 +376,8 @@
   z-index: 1;
   display: flex;
   width: 50px;
-  height: 52px;
-  flex: 0 0 52px;
+  height: 50px;
+  flex: 0 0 50px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -433,7 +434,7 @@
   top: 0;
   left: 0;
   width: 50px;
-  height: 52px;
+  height: 50px;
   border: 1px solid var(--border);
   border-radius: 11px;
   background:

@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 /* 画布页取消内容区内边距，让画布铺满 */
-.content:has(#canvas-surface.active-surface) { padding: 0; }
+.pages:has(#page-image.active) { padding: 0; }
 #page-image { height: 100%; }
 
 .canvas-surface {

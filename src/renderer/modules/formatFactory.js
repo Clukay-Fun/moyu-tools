@@ -232,11 +232,6 @@ export function initFormatFactory({ state, renderSubmenu, showToast, bindFileDro
       `添加${config.kind === 'video' ? '视频' : config.kind === 'audio' ? '音频' : '图片'}文件`
     document.querySelector('#format-pick-files').textContent =
       `＋ 添加${config.kind === 'video' ? '视频' : config.kind === 'audio' ? '音频' : '图片'}`
-    document.querySelector('#format-support-hint').textContent = config.kind === 'video'
-      ? '支持 MP4 / MOV / MKV / AVI / WebM 等格式'
-      : config.kind === 'audio'
-        ? '支持 MP3 / AAC / WAV / FLAC / OGG 等格式'
-        : '支持 JPG / PNG / WebP / AVIF / TIFF / GIF 等格式'
     formatRunButton.textContent = config.runLabel
     if (previousKind !== config.kind && formatState.inputs.length) clearFormatInputs()
     formatState.results = []

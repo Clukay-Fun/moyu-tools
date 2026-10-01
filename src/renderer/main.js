@@ -2134,22 +2134,18 @@ const colorMarker = document.querySelector('#wheel-marker')
 const colorContext = colorWheel.getContext('2d')
 
 function drawColorWheel() {
-  const outerRadius = 90
-  const innerRadius = 50
-
-  for (let angle = 0; angle < 360; angle += 1) {
-    const start = (angle - 1) * Math.PI / 180
-    const end = (angle + 1) * Math.PI / 180
-
-    for (let radius = innerRadius; radius <= outerRadius; radius += 2) {
-      const saturation = (radius - innerRadius) / (outerRadius - innerRadius)
-      colorContext.fillStyle = `hsl(${angle} ${Math.round(saturation * 100)}% 55%)`
-      colorContext.beginPath()
-      colorContext.arc(100, 100, radius, start, end)
-      colorContext.lineTo(100, 100)
-      colorContext.fill()
-    }
-  }
+  const width = colorWheel.width
+  const height = colorWheel.height
+  const base = colorContext.createLinearGradient(0, 0, width, 0)
+  base.addColorStop(0, '#fff')
+  base.addColorStop(1, `hsl(${colorState.h} 100% 50%)`)
+  colorContext.fillStyle = base
+  colorContext.fillRect(0, 0, width, height)
+  const shade = colorContext.createLinearGradient(0, 0, 0, height)
+  shade.addColorStop(0, 'rgba(0,0,0,0)')
+  shade.addColorStop(1, 'rgba(0,0,0,1)')
+  colorContext.fillStyle = shade
+  colorContext.fillRect(0, 0, width, height)
 }
 
 function rgbToHsl(red, green, blue) {
@@ -2214,14 +2210,15 @@ function updateColorControls() {
   })
   document.querySelector('#color-hex').value = colorHex()
   document.querySelector('#color-swatch').style.background = colorHex()
+  document.querySelector('#color-current-preview').style.background = colorHex()
+  document.querySelector('#color-hue').value = colorState.h
   document.querySelectorAll('[data-accent]').forEach((button) => {
     button.classList.toggle('active', button.dataset.accent.toUpperCase() === colorHex())
   })
 
-  const angle = colorState.h * Math.PI / 180
-  const distance = 48 + (colorState.s / 100) * 44
-  colorMarker.style.left = `${100 + Math.cos(angle) * distance}px`
-  colorMarker.style.top = `${100 + Math.sin(angle) * distance}px`
+  colorMarker.style.left = `${colorState.s}%`
+  colorMarker.style.top = `${100 - colorState.l}%`
+  drawColorWheel()
 }
 
 function setAccentFromHex(value) {
@@ -2336,15 +2333,10 @@ let colorDragging = false
 
 function pickWheelColor(event) {
   const rect = colorWheel.getBoundingClientRect()
-  const x = event.clientX - rect.left - 100
-  const y = event.clientY - rect.top - 100
-  const distance = Math.hypot(x, y)
-
-  if (distance < 48 || distance > 92) return
-
-  colorState.h = Math.round((Math.atan2(y, x) * 180 / Math.PI + 360) % 360)
-  colorState.s = Math.round(Math.min(1, Math.max(0, (distance - 48) / 44)) * 100)
-  colorState.l = 55
+  const x = Math.min(rect.width, Math.max(0, event.clientX - rect.left))
+  const y = Math.min(rect.height, Math.max(0, event.clientY - rect.top))
+  colorState.s = Math.round((x / rect.width) * 100)
+  colorState.l = Math.round(100 - (y / rect.height) * 100)
   hslToRgb(colorState.h, colorState.s, colorState.l)
   updateColorControls()
   applyAccent()
@@ -2362,6 +2354,13 @@ colorWheel.addEventListener('pointerup', () => {
   colorDragging = false
 })
 
+document.querySelector('#color-hue').addEventListener('input', (event) => {
+  colorState.h = Number(event.target.value)
+  hslToRgb(colorState.h, colorState.s, colorState.l)
+  updateColorControls()
+  applyAccent()
+})
+
 async function verifyPreloadBridge() {
   try {
     document.body.dataset.ipc = await window.api.ping()
@@ -2371,7 +2370,7 @@ async function verifyPreloadBridge() {
 }
 
 const savedAccent = localStorage.getItem('accent')
-if (/^#[0-9a-f]{6}$/i.test(savedAccent || '')) {
+if (/^#[0-9a-f]{6}$/i.test(savedAccent || '') && savedAccent.toUpperCase() !== '#FFFFFF') {
   colorState.r = Number.parseInt(savedAccent.slice(1, 3), 16)
   colorState.g = Number.parseInt(savedAccent.slice(3, 5), 16)
   colorState.b = Number.parseInt(savedAccent.slice(5, 7), 16)

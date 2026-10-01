@@ -110,6 +110,8 @@ export function initUpdatePanel({
   }
 
   function render(s) {
+    document.querySelector('#update-status').dataset.status = s.status
+    document.querySelector('#update-status > .ic use').setAttribute('href', s.status === 'up-to-date' ? '#ic-check' : '#ic-info')
     el.current.textContent = s.currentVersion ? `v${s.currentVersion}` : '—'
     el.last.textContent = fmtTime(s.lastCheckedAt)
     el.autocheck.checked = !!s.autoCheck
