@@ -946,6 +946,14 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
       setBarcodeMessage('内容已改变，请先重新生成条码。', 'error')
       return
     }
+    if (action === 'photoshop') {
+      // 公共 Photoshop 服务在启动时已检测过；明确没装就不必再走一遍 COM 超时
+      const photoshop = await window.api.photoshop.getStatus().catch(() => null)
+      if (photoshop?.state === 'ready' && !photoshop.installed) {
+        setBarcodeMessage('没有检测到 Photoshop。安装后可在「设置 › 定制」里重新检测。', 'error')
+        return
+      }
+    }
     const label = button.querySelector('span') || button
     const originalLabel = label.textContent
     setBarcodeExportEnabled(false)
