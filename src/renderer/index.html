@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws:; img-src 'self' data: blob:"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws:; img-src 'self' data: blob: moyu-file:"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>摸鱼工具箱</title>
@@ -58,6 +58,7 @@
             <button class="nav-ic" type="button" data-module="image"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-image"></use></svg><span class="nav-label">图片</span></button>
             <button class="nav-ic" type="button" data-module="video"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-video"></use></svg><span class="nav-label">视频</span></button>
             <button class="nav-ic" type="button" data-module="dieline"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-dieline"></use></svg><span class="nav-label">刀模</span></button>
+            <button class="nav-ic" type="button" data-module="erp"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-inventory"></use></svg><span class="nav-label">库存</span></button>
             <div class="rail-spacer"></div>
             <button class="nav-ic" type="button" data-module="more"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-settings"></use></svg><span class="nav-label">设置</span></button>
           </nav>
@@ -737,6 +738,9 @@
                   </div>
                 </div>
               </section>
+
+              <!-- 库存（原 ajuan-erp）：React 孤岛，首次进入模块时懒加载挂载（src/renderer/erp） -->
+              <section class="page page-erp" id="page-erp"></section>
 
               <section class="page page-settings" id="page-more">
                 <div class="settings-layout">

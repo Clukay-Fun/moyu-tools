@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "allowJs": false,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["src/shared/*"],
+      "@erp/*": ["src/renderer/erp/*"]
+    }
+  },
+  "include": ["src/main/erp/**/*.ts", "src/shared/**/*.ts", "src/renderer/erp/**/*.ts", "src/renderer/erp/**/*.tsx"]
+}

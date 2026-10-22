@@ -583,6 +583,18 @@ function animateEntry(element, { duration = 160, distance = 6, horizontal = fals
   animation.addEventListener('cancel', release, { once: true })
 }
 
+// 库存模块（React，原 ajuan-erp）首次进入时才加载，不拖慢 moyu 启动；之后只挂载一次。
+let erpInventoryMount = null
+function mountErpInventory() {
+  erpInventoryMount ??= import('./erp/inventory/mount.tsx')
+    .then(({ mountInventory }) => mountInventory(document.querySelector('#page-erp')))
+    .catch((error) => {
+      erpInventoryMount = null
+      showToast(`库存模块加载失败：${error?.message || error}`)
+    })
+  return erpInventoryMount
+}
+
 // 导航选中底板：独立元素，切模块时从旧按钮滑到新按钮（落位弹簧，见 .nav-indicator.ready）。
 // 首次定位和窗口尺寸变化只瞬移——那不是用户的动作，不该有「移过去」的动画。
 const navIndicator = document.querySelector('.nav-indicator')
@@ -678,6 +690,8 @@ function activateModule(module, action = '', animate = false) {
     formatFactoryModule.setFormatAction(state.selections.video)
   } else if (module === 'dieline') {
     dielineModule?.activate()
+  } else if (module === 'erp') {
+    void mountErpInventory()
   }
 
   // 离开画布时收起浮动工具栏，并取消待执行的跟随更新（S2）。

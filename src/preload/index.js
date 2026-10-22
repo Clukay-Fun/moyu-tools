@@ -179,6 +179,11 @@ contextBridge.exposeInMainWorld(
         ipcRenderer.on('update:state', listener)
         return () => ipcRenderer.removeListener('update:state', listener)
       }
+    },
+
+    // ── 库存 / 定制（原 ajuan-erp）。只放白名单方法，E1 起按原 preload 逐项迁入 ──
+    erp: {
+      spike: () => ipcRenderer.invoke('erp:spike')
     }
   })
 )

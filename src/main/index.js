@@ -30,6 +30,8 @@ import {
   registerScreenshotHandlers,
   terminateOcrWorker
 } from './modules/screenshot.js'
+import { handleMoyuFileProtocol, registerMoyuFileScheme } from './erp/protocol'
+import { registerErpSpikeHandlers } from './erp/spike'
 import { existsSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
@@ -56,6 +58,10 @@ function recordStartupReady() {
 ipcMain.on('startup:report-ready', () => {
   recordStartupReady()
 })
+
+// moyu-file:// 必须在 ready 之前注册为特权协议（库存 / 定制的图片与附件）
+registerMoyuFileScheme()
+registerErpSpikeHandlers()
 
 let mainWindow = null
 const hasSingleInstanceLock = app.requestSingleInstanceLock()
@@ -341,6 +347,7 @@ ipcMain.on('board:dirty', (event, dirty) => {
 if (hasSingleInstanceLock) app.whenReady().then(() => {
   // 隐藏 Electron 默认原生菜单栏（File/Edit/...），应用使用自身渲染层界面。
   Menu.setApplicationMenu(null)
+  handleMoyuFileProtocol()
   // macOS 首次截图若在点击后才编译 ScreenCaptureKit 侧车，会额外等待约一秒。
   // 启动后后台预热；失败时 promise 会自行复位，真正截图仍会重试并给出明确错误。
   if (process.platform === 'darwin') {

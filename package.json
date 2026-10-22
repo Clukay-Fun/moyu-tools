@@ -19,7 +19,8 @@
     "build:win:portable": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win portable --x64 --publish=never",
     "build:win:dir": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win dir --x64 --publish=never && node scripts/zip-win-unpacked.mjs",
     "build:win:release": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win nsis --x64 --publish always",
-    "preview": "electron-vite preview"
+    "preview": "electron-vite preview",
+    "typecheck": "tsc -p tsconfig.erp.json"
   },
   "build": {
     "appId": "com.clukay.moyutools",
@@ -122,10 +123,15 @@
     ]
   },
   "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
     "electron": "43.2.0",
     "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
     "lucide-static": "^1.30.0",
+    "typescript": "^5.9.3",
     "vite": "^7.3.6"
   },
   "dependencies": {
@@ -140,6 +146,8 @@
     "pdfjs-dist": "5.4.624",
     "polygon-clipping": "^0.15.7",
     "qpdf-run": "0.2.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "sharp": "0.35.4",
     "tesseract.js": "7.0.0",
     "three": "^0.186.0"
