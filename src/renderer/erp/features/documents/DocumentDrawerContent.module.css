@@ -1,0 +1,219 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-4);
+}
+
+.loading,
+.error {
+  margin: 0;
+  color: var(--erp-text-secondary);
+  font-size: var(--erp-font-size-sm);
+}
+.error {
+  color: var(--erp-danger);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--erp-space-3);
+  flex-wrap: wrap;
+}
+
+.headMain {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-3);
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.docNo {
+  font-family: var(--erp-font-mono);
+  font-size: var(--erp-font-size-md, 15px);
+  font-weight: var(--erp-font-weight-semibold);
+  color: var(--erp-text-primary);
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+}
+
+.voidedAt {
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-tertiary);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+}
+
+/* 信息区：两列键值对 */
+.meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--erp-space-2) var(--erp-space-6);
+  margin: 0;
+  padding: var(--erp-space-3) var(--erp-space-4);
+  background: var(--erp-bg-subtle);
+  border-radius: var(--erp-radius-md);
+}
+.meta > div {
+  display: flex;
+  gap: var(--erp-space-3);
+  min-width: 0;
+  font-size: var(--erp-font-size-sm);
+}
+.meta dt {
+  flex: 0 0 72px;
+  color: var(--erp-text-secondary);
+}
+.meta dd {
+  margin: 0;
+  min-width: 0;
+  color: var(--erp-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.tableWrap {
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-md);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--erp-font-size-sm);
+}
+.table th {
+  height: 32px;
+  padding: 0 var(--erp-space-3);
+  background: var(--erp-bg-subtle);
+  border-bottom: 1px solid var(--erp-border-subtle);
+  color: var(--erp-text-tertiary);
+  font-size: var(--erp-font-size-xs);
+  font-weight: var(--erp-font-weight-medium);
+  text-align: left;
+}
+.table td {
+  height: 38px;
+  padding: 0 var(--erp-space-3);
+  border-bottom: 1px solid var(--erp-border-subtle);
+}
+.table tfoot td {
+  border-bottom: 0;
+  background: var(--erp-bg-subtle);
+  font-weight: var(--erp-font-weight-semibold);
+}
+
+.idx {
+  width: 32px;
+  color: var(--erp-text-tertiary);
+}
+
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.total {
+  color: var(--erp-accent-text);
+}
+
+.productLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--erp-accent-text);
+  font: inherit;
+  font-weight: var(--erp-font-weight-medium);
+  cursor: pointer;
+}
+.productLink:hover {
+  text-decoration: underline;
+}
+
+.sku {
+  margin-left: var(--erp-space-2);
+  font-family: var(--erp-font-mono);
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-tertiary);
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--erp-space-2);
+  margin: calc(-1 * var(--erp-space-1)) 0 0;
+  padding: var(--erp-space-3);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-md);
+  background: var(--erp-bg-subtle);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 120px;
+  padding-right: var(--erp-space-4);
+}
+
+.summaryLabel {
+  font-size: 11px;
+  color: var(--erp-text-tertiary);
+}
+
+.summaryValue {
+  font-size: var(--erp-font-size-md, 15px);
+  font-weight: var(--erp-font-weight-semibold);
+  color: var(--erp-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.profit {
+  margin: calc(-1 * var(--erp-space-2)) 0 0;
+  font-size: var(--erp-font-size-sm);
+  color: var(--erp-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.profitValue {
+  color: var(--erp-accent-text);
+  font-weight: var(--erp-font-weight-semibold);
+}
+.negative {
+  color: var(--erp-danger);
+  font-weight: var(--erp-font-weight-semibold);
+}
+.hint {
+  margin-left: var(--erp-space-1);
+  color: var(--erp-text-tertiary);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-2);
+}
+.sectionTitle {
+  margin: 0;
+  font-size: var(--erp-font-size-sm);
+  font-weight: var(--erp-font-weight-semibold);
+  color: var(--erp-text-primary);
+}
+
+.voidLabel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-1);
+  margin-top: var(--erp-space-3);
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-secondary);
+}

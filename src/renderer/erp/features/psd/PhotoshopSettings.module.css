@@ -1,0 +1,110 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-4);
+}
+
+.statusCard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--erp-space-3);
+  padding: var(--erp-space-3) var(--erp-space-4);
+  background: var(--erp-bg-subtle);
+  border-radius: var(--erp-radius-md);
+}
+.statusItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.label {
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-tertiary);
+}
+.ok {
+  color: var(--erp-accent-text);
+}
+.warn {
+  color: var(--erp-warning-text);
+}
+
+.note {
+  margin: 0;
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-tertiary);
+}
+.hint {
+  margin: 0;
+  font-size: var(--erp-font-size-sm);
+  color: var(--erp-text-secondary);
+}
+
+.disclosure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-3);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-md);
+  padding: var(--erp-space-3) var(--erp-space-4);
+}
+.disclosure > summary {
+  cursor: pointer;
+  font-size: var(--erp-font-size-sm);
+  font-weight: var(--erp-font-weight-medium);
+  color: var(--erp-text-primary);
+}
+
+.steps {
+  margin: 0;
+  padding-left: 20px;
+  font-size: var(--erp-font-size-sm);
+  color: var(--erp-text-secondary);
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--erp-space-2);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-2);
+}
+.sectionTitle {
+  margin: 0;
+  font-size: var(--erp-font-size-sm);
+  font-weight: var(--erp-font-weight-semibold);
+  color: var(--erp-text-primary);
+}
+
+.dirRow {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  padding: var(--erp-space-2) 0;
+  border-bottom: 1px solid var(--erp-border-subtle);
+}
+.dirText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dirLabel {
+  font-size: var(--erp-font-size-sm);
+  color: var(--erp-text-primary);
+}
+
+.mono {
+  margin: 0;
+  font-family: var(--erp-font-mono);
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-secondary);
+  overflow-wrap: anywhere;
+  user-select: text;
+}

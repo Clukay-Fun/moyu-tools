@@ -1,0 +1,85 @@
+.iconButton {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: var(--erp-radius-control);
+  border: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition:
+    background-color var(--erp-transition-fast),
+    border-color var(--erp-transition-fast),
+    color var(--erp-transition-fast),
+    opacity var(--erp-transition-fast);
+}
+
+.iconButton:focus-visible {
+  box-shadow: var(--erp-focus-ring);
+}
+
+.sm {
+  width: 28px;
+  height: 28px;
+  font-size: var(--erp-font-size-sm);
+}
+
+.md {
+  width: 32px;
+  height: 32px;
+  font-size: var(--erp-font-size-base);
+}
+
+.ghost {
+  background-color: transparent;
+  color: var(--erp-text-secondary);
+  border-color: transparent;
+}
+
+.ghost:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: var(--erp-bg-subtle);
+  color: var(--erp-text-primary);
+}
+
+.secondary {
+  background-color: var(--erp-bg-surface);
+  color: var(--erp-text-primary);
+  border-color: var(--erp-border-default);
+}
+
+.secondary:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: var(--erp-bg-subtle);
+}
+
+.danger {
+  background-color: transparent;
+  color: var(--erp-danger);
+  border-color: transparent;
+}
+
+.danger:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: var(--erp-danger-bg);
+}
+
+.iconButton:disabled,
+.iconButton[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 600ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

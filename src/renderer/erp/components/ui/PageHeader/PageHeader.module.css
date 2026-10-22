@@ -1,0 +1,42 @@
+.header {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  min-height: 56px;
+  padding: 0 var(--erp-space-4);
+  background-color: var(--erp-bg-app);
+  border-bottom: 1px solid var(--erp-border-subtle);
+  flex-shrink: 0;
+}
+
+.left {
+  display: flex;
+  align-items: baseline;
+  gap: var(--erp-space-2);
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: var(--erp-font-weight-semibold);
+  color: var(--erp-accent-text);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.count {
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-tertiary);
+  font-family: var(--erp-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  flex-shrink: 0;
+}

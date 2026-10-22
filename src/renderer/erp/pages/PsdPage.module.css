@@ -1,0 +1,107 @@
+.container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-3);
+  min-height: 100%;
+  width: 100%;
+  max-width: 1680px;
+}
+
+.header {
+  position: sticky;
+  top: calc(-1 * var(--erp-space-3));
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--erp-space-3);
+  min-height: 40px;
+  padding: var(--erp-space-1) 0;
+  background: var(--erp-bg-app);
+}
+.viewTitle {
+  margin: 0;
+  font-size: var(--erp-font-size-lg);
+  font-weight: var(--erp-font-weight-semibold);
+  color: var(--erp-text-primary);
+}
+
+.headLeft,
+.headRight {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-3);
+}
+.psPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 var(--erp-space-3);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: 999px;
+  background: var(--erp-bg-surface);
+  font: inherit;
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-secondary);
+  cursor: pointer;
+}
+.psPill:hover {
+  border-color: var(--erp-border-default);
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--erp-warning);
+}
+.psPill[data-ready] .dot {
+  background: var(--erp-accent);
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.pane[hidden] {
+  display: none;
+}
+
+.jobsButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 var(--erp-space-3);
+  border: 1px solid var(--erp-border-default);
+  border-radius: var(--erp-radius-control);
+  background: var(--erp-bg-surface);
+  font: inherit;
+  font-size: var(--erp-font-size-sm);
+  color: var(--erp-text-primary);
+  cursor: pointer;
+}
+.jobsButton:hover {
+  background: var(--erp-bg-subtle);
+}
+.jobsCount {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--erp-accent);
+  color: var(--erp-accent-fg);
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

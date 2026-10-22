@@ -1,0 +1,122 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-3);
+}
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--erp-space-3);
+}
+.thumb {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: var(--erp-radius-md);
+  overflow: hidden;
+  border: 1px solid var(--erp-border-subtle);
+  background: var(--erp-bg-subtle);
+  cursor: zoom-in;
+  transition: border-color var(--erp-dur-fast) ease;
+}
+.thumb:hover {
+  border-color: var(--erp-border-default);
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--erp-bg-overlay);
+  color: var(--erp-accent-fg);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.thumb:hover .remove {
+  display: inline-flex;
+}
+.name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--erp-accent-fg);
+  background: linear-gradient(transparent, var(--erp-bg-overlay));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 120px;
+  height: 120px;
+  border: 1px dashed var(--erp-border-subtle);
+  border-radius: var(--erp-radius-md);
+  color: var(--erp-text-tertiary);
+  font-size: 12px;
+  cursor: pointer;
+  background: var(--erp-bg-surface);
+  text-align: center;
+  padding: 8px;
+}
+.drop {
+  transition:
+    border-color var(--erp-dur-fast) ease,
+    color var(--erp-dur-fast) ease,
+    background var(--erp-dur-fast) ease;
+}
+.drop:hover,
+.dropActive {
+  border-color: var(--erp-accent);
+  color: var(--erp-accent);
+  background: var(--erp-accent-subtle);
+}
+.hint {
+  font-size: 12px;
+  color: var(--erp-text-tertiary);
+}
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: var(--erp-bg-overlay-strong);
+  opacity: 1;
+  transition: opacity var(--erp-dur-base) ease;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+.lightbox img {
+  max-width: 92vw;
+  max-height: 90vh;
+  border-radius: var(--erp-radius-sm);
+  box-shadow: var(--erp-shadow-lg);
+  transform: scale(1);
+  transition: transform var(--erp-dur-base) var(--erp-ease-out);
+}
+@starting-style {
+  .lightbox {
+    opacity: 0;
+  }
+  .lightbox img {
+    transform: scale(calc(1 - 0.03 * var(--erp-motion)));
+  }
+}

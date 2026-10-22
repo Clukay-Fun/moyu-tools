@@ -1,0 +1,161 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-4);
+  margin-bottom: var(--erp-space-2);
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-secondary);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendLine {
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.inLine {
+  background-color: var(--erp-chart-in);
+}
+
+.outLine {
+  background-color: var(--erp-chart-out);
+}
+
+.unit {
+  margin-left: auto;
+  color: var(--erp-text-tertiary);
+  font-size: 11px;
+}
+
+.plot {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.grid {
+  stroke: var(--erp-border-subtle);
+  stroke-dasharray: 2 3;
+  stroke-width: 1;
+}
+
+.tick {
+  fill: var(--erp-text-tertiary);
+  font-size: 10px;
+  font-family: var(--erp-font-mono);
+}
+
+.hoverZone {
+  fill: transparent;
+}
+
+.hoverLine {
+  stroke: var(--erp-border-default);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+}
+
+.inPath {
+  fill: none;
+  stroke: var(--erp-chart-in);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.outPath {
+  fill: none;
+  stroke: var(--erp-chart-out);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.inDot,
+.outDot {
+  stroke: var(--erp-bg-surface);
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+
+.inDot {
+  fill: var(--erp-chart-in);
+}
+
+.outDot {
+  fill: var(--erp-chart-out);
+}
+
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  background-color: var(--erp-bg-surface);
+  border: 1px solid var(--erp-border-default);
+  border-radius: var(--erp-radius-md, 6px);
+  padding: var(--erp-space-2) var(--erp-space-3);
+  font-size: var(--erp-font-size-xs);
+  z-index: 10;
+  min-width: 132px;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tooltipTitle {
+  font-weight: var(--erp-font-weight-semibold);
+  color: var(--erp-text-primary);
+  border-bottom: 1px solid var(--erp-border-subtle);
+  padding-bottom: 2px;
+  margin-bottom: 2px;
+  font-family: var(--erp-font-mono);
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--erp-space-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.inRow {
+  color: var(--erp-status-in);
+}
+
+.outRow {
+  color: var(--erp-status-out);
+}
+
+.emptyText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--erp-text-tertiary);
+  font-size: var(--erp-font-size-xs);
+  pointer-events: none;
+}

@@ -1,0 +1,123 @@
+.button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--erp-space-1);
+  font-family: inherit;
+  font-weight: var(--erp-font-weight-medium);
+  border-radius: var(--erp-radius-control);
+  border: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  white-space: nowrap;
+  outline: none;
+  transition:
+    background-color var(--erp-transition-fast),
+    border-color var(--erp-transition-fast),
+    color var(--erp-transition-fast),
+    opacity var(--erp-transition-fast);
+}
+
+.button:focus-visible {
+  box-shadow: var(--erp-focus-ring);
+}
+
+/* 尺寸规范 */
+.sm {
+  height: 28px;
+  padding: 0 var(--erp-space-2);
+  font-size: var(--erp-font-size-xs);
+}
+
+.md {
+  height: 32px;
+  padding: 0 var(--erp-space-3);
+  font-size: var(--erp-font-size-sm);
+}
+
+/* 变体：主要按钮（墨绿实心） */
+.primary {
+  background-color: var(--erp-accent);
+  color: var(--erp-accent-fg);
+  border-color: var(--erp-accent);
+}
+
+.primary:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: var(--erp-accent-hover);
+  border-color: var(--erp-accent-hover);
+}
+
+.primary:active:not(:disabled):not([aria-disabled='true']) {
+  background-color: var(--erp-accent-active);
+  border-color: var(--erp-accent-active);
+}
+
+/* 变体：次要按钮（线框） */
+.secondary {
+  background-color: var(--erp-bg-surface);
+  color: var(--erp-text-primary);
+  border-color: var(--erp-border-default);
+}
+
+.secondary:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: var(--erp-bg-subtle);
+  border-color: var(--erp-border-default);
+}
+
+/* 变体：幽灵态按钮（无边框） */
+.ghost {
+  background-color: transparent;
+  color: var(--erp-text-secondary);
+  border-color: transparent;
+}
+
+.ghost:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: var(--erp-bg-subtle);
+  color: var(--erp-text-primary);
+}
+
+/* 变体：危险操作按钮（默认红色线框，solid 模式下实心） */
+.danger {
+  background-color: var(--erp-bg-surface);
+  color: var(--erp-danger);
+  border-color: var(--erp-danger);
+}
+
+.danger:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: var(--erp-danger-bg);
+}
+
+.dangerSolid {
+  background-color: var(--erp-danger);
+  color: var(--erp-accent-fg);
+  border-color: var(--erp-danger);
+}
+
+.dangerSolid:hover:not(:disabled):not([aria-disabled='true']) {
+  opacity: 0.9;
+}
+
+/* 禁用与只读态 */
+.button:disabled,
+.button[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* 加载动画 */
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 600ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,93 @@
+/* 商品抽屉 › 库存流水：抽屉只有 600px，列不换行，渠道列省略 */
+.tableWrap {
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-md);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--erp-font-size-xs);
+}
+
+.table th {
+  height: 32px;
+  padding: 0 var(--erp-space-2);
+  background: var(--erp-bg-subtle);
+  border-bottom: 1px solid var(--erp-border-subtle);
+  color: var(--erp-text-tertiary);
+  font-weight: var(--erp-font-weight-medium);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table th:nth-child(1) {
+  width: 96px;
+}
+.table th:nth-child(2) {
+  width: 64px;
+}
+.table th:nth-child(3) {
+  width: 150px;
+}
+.table th:nth-child(5),
+.table th:nth-child(6),
+.table th:nth-child(7) {
+  width: 64px;
+}
+
+.table td {
+  height: 36px;
+  padding: 0 var(--erp-space-2);
+  border-bottom: 1px solid var(--erp-border-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--erp-text-primary);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table tr[data-clickable] {
+  cursor: pointer;
+}
+
+.table tr[data-clickable]:hover td {
+  background: var(--erp-bg-subtle);
+}
+
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.time {
+  color: var(--erp-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.docNo {
+  font-family: var(--erp-font-mono);
+  color: var(--erp-accent-text) !important;
+}
+
+.channel {
+  color: var(--erp-text-secondary) !important;
+}
+
+.qty {
+  font-weight: var(--erp-font-weight-semibold);
+}
+
+.muted {
+  color: var(--erp-text-tertiary) !important;
+}
+
+/* 作废冲回行整体置灰 */
+.voidRow td {
+  color: var(--erp-text-tertiary) !important;
+}

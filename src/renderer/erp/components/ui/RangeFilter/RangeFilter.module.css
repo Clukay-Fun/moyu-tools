@@ -1,0 +1,23 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  flex-wrap: wrap;
+}
+
+.custom {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--erp-space-1-5);
+  flex-wrap: wrap;
+}
+
+.sep {
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-tertiary);
+}
+
+.error {
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-danger);
+}

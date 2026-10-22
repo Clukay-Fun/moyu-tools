@@ -1,0 +1,101 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-3);
+  background-color: var(--erp-bg-surface);
+  border-radius: var(--erp-radius-md, 6px);
+  padding: var(--erp-space-3);
+  border: 1px solid var(--erp-border-subtle);
+}
+
+.notice {
+  background-color: var(--erp-warning-bg);
+  border: 1px solid var(--erp-warning-border);
+  border-radius: var(--erp-radius-sm, 4px);
+  padding: var(--erp-space-2) var(--erp-space-3);
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-warning-text);
+  line-height: 1.4;
+}
+
+.modeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--erp-space-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-secondary);
+  font-weight: var(--erp-font-weight-medium);
+}
+
+.readOnlyVal {
+  font-size: var(--erp-font-size-xs);
+  font-family: var(--erp-font-mono);
+  color: var(--erp-text-primary);
+  background-color: var(--erp-bg-subtle);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-sm, 4px);
+  padding: 6px var(--erp-space-2);
+  line-height: 1.2;
+}
+
+.diffSummary {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  padding: var(--erp-space-2) var(--erp-space-3);
+  background-color: var(--erp-bg-subtle);
+  border-radius: var(--erp-radius-sm, 4px);
+  font-size: var(--erp-font-size-xs);
+}
+
+.diffText {
+  font-weight: var(--erp-font-weight-semibold);
+  font-family: var(--erp-font-mono);
+}
+
+.diffText.decrease {
+  color: var(--erp-status-critical);
+}
+
+.diffText.increase {
+  color: var(--erp-status-in);
+}
+
+.diffText.zero {
+  color: var(--erp-text-tertiary);
+}
+
+.errorText {
+  font-size: 11px;
+  color: var(--erp-status-critical);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--erp-space-2);
+  margin-top: var(--erp-space-2);
+}
+
+/* 独立调整抽屉：商品选择 + 表单 */
+.drawerBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-3);
+}

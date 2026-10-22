@@ -1,0 +1,62 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.label {
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-secondary);
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  min-width: 0;
+  padding: var(--erp-space-2) var(--erp-space-3);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-md);
+  background: var(--erp-bg-subtle);
+}
+
+.fileIcon {
+  color: var(--erp-text-tertiary);
+  flex-shrink: 0;
+}
+
+.filePath {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--erp-font-mono);
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note {
+  margin: 0;
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-tertiary);
+  line-height: 1.6;
+}
+
+.error {
+  margin: 0;
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-danger);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--erp-space-2);
+}

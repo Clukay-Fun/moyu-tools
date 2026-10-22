@@ -1,0 +1,112 @@
+.positioner {
+  z-index: var(--erp-z-popover);
+}
+
+.popup {
+  box-sizing: border-box;
+  min-width: 160px;
+  max-width: 280px;
+  padding: var(--erp-space-1);
+  background-color: var(--erp-bg-surface);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-md);
+  box-shadow: var(--erp-shadow-overlay);
+  outline: none;
+  animation: fadeIn 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--erp-space-3);
+  min-height: 30px;
+  padding: 0 var(--erp-space-2);
+  border-radius: var(--erp-radius-sm);
+  color: var(--erp-text-primary);
+  font-size: var(--erp-font-size-sm);
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition:
+    background-color var(--erp-transition-fast),
+    color var(--erp-transition-fast);
+}
+
+.itemLeft {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  min-width: 0;
+}
+
+.itemIcon {
+  display: inline-flex;
+  color: var(--erp-text-secondary);
+  font-size: var(--erp-font-size-sm);
+}
+
+.itemLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemShortcut {
+  font-size: var(--erp-font-size-xs);
+  font-family: var(--erp-font-mono);
+  color: var(--erp-text-tertiary);
+  margin-left: auto;
+  padding-left: var(--erp-space-2);
+}
+
+.item:hover,
+.item[data-highlighted] {
+  background-color: var(--erp-bg-subtle);
+}
+
+.item.danger {
+  color: var(--erp-danger);
+}
+
+.item.danger .itemIcon {
+  color: var(--erp-danger);
+}
+
+.item.danger:hover,
+.item.danger[data-highlighted] {
+  background-color: var(--erp-danger-bg);
+}
+
+.item:disabled,
+.item[data-disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.separator {
+  height: 1px;
+  background-color: var(--erp-border-subtle);
+  margin: var(--erp-space-1) 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

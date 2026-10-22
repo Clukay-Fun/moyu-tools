@@ -1,0 +1,91 @@
+.badge {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--erp-space-1);
+  height: 20px;
+  padding: 0 var(--erp-space-1-5);
+  border-radius: var(--erp-radius-sm);
+  font-size: var(--erp-font-size-xs);
+  font-weight: var(--erp-font-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* 单据类型 (DocTypeBadge) */
+.inbound {
+  background-color: var(--erp-status-in-bg);
+  color: var(--erp-status-in);
+  border: 1px solid transparent;
+}
+
+.outbound {
+  background-color: var(--erp-status-out-bg);
+  color: var(--erp-status-out);
+  border: 1px solid transparent;
+}
+
+.adjustment {
+  background-color: var(--erp-status-adjust-bg);
+  color: var(--erp-status-adjust);
+  border: 1px solid transparent;
+}
+
+.opening {
+  background-color: var(--erp-status-opening-bg);
+  color: var(--erp-status-opening);
+  border: 1px solid transparent;
+}
+
+/* 单据状态 (DocStatusBadge) */
+.draft {
+  background-color: transparent;
+  color: var(--erp-text-secondary);
+  border: 1px solid var(--erp-border-default);
+}
+
+.confirmed {
+  background-color: var(--erp-bg-subtle);
+  color: var(--erp-text-primary);
+  border: 1px solid var(--erp-border-subtle);
+}
+
+.voided {
+  background-color: transparent;
+  color: var(--erp-text-tertiary);
+  text-decoration: line-through;
+  border: 1px solid transparent;
+}
+
+/* 库存状态 (StockBadge) */
+.stockCritical {
+  background-color: var(--erp-danger-bg);
+  color: var(--erp-danger);
+  border: 1px solid transparent;
+}
+
+.stockWarning {
+  background-color: var(--erp-warning-bg);
+  color: var(--erp-warning);
+  border: 1px solid transparent;
+}
+
+.stockInactive {
+  background-color: var(--erp-bg-subtle);
+  color: var(--erp-text-tertiary);
+  border: 1px solid var(--erp-border-subtle);
+}
+
+.stockNormal {
+  background-color: var(--erp-bg-subtle);
+  color: var(--erp-text-secondary);
+  border: 1px solid transparent;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}

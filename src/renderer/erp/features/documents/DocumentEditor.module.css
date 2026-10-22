@@ -1,0 +1,269 @@
+/* 开单弹窗：内容区自己滚动，吸底栏固定在弹窗底部 */
+.editor {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% + 2 * var(--erp-space-4));
+  margin: calc(-1 * var(--erp-space-4));
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--erp-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-3);
+}
+
+.loading,
+.error {
+  margin: 0;
+  font-size: var(--erp-font-size-sm);
+  color: var(--erp-text-secondary);
+}
+.error {
+  color: var(--erp-danger);
+}
+
+.docNo {
+  margin: calc(-1 * var(--erp-space-1)) 0 0;
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-tertiary);
+}
+
+/* 表头字段一行 */
+.fields {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: var(--erp-space-3);
+}
+.fields4 {
+  grid-template-columns: 160px 160px minmax(0, 1fr) minmax(0, 1fr);
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-1);
+  min-width: 0;
+}
+.field > span {
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-secondary);
+}
+
+.dup {
+  margin: 0;
+  padding: var(--erp-space-2) var(--erp-space-3);
+  border-radius: var(--erp-radius-sm);
+  background: var(--erp-warning-bg);
+  color: var(--erp-warning);
+  font-size: var(--erp-font-size-xs);
+}
+
+/* 明细表 */
+.tableWrap {
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-md);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--erp-font-size-sm);
+}
+.table th {
+  height: 32px;
+  padding: 0 var(--erp-space-2);
+  background: var(--erp-bg-subtle);
+  border-bottom: 1px solid var(--erp-border-subtle);
+  color: var(--erp-text-tertiary);
+  font-size: var(--erp-font-size-xs);
+  font-weight: var(--erp-font-weight-medium);
+  text-align: left;
+  white-space: nowrap;
+}
+.table th:first-child {
+  border-top-left-radius: var(--erp-radius-md);
+}
+.table th:last-child {
+  border-top-right-radius: var(--erp-radius-md);
+}
+.table th:nth-child(2) {
+  width: 84px;
+}
+.table th:nth-child(3) {
+  width: 120px;
+}
+.table th:nth-child(4) {
+  width: 130px;
+}
+.table th:nth-child(5) {
+  width: 110px;
+}
+.table th:nth-child(6) {
+  width: 40px;
+}
+.table td {
+  padding: var(--erp-space-2);
+  border-bottom: 1px solid var(--erp-border-subtle);
+  vertical-align: top;
+}
+
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+.table td.num {
+  padding-top: 15px;
+}
+
+.productCell {
+  min-width: 220px;
+}
+
+.cellInput {
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  margin-top: -7px;
+  padding: 0 var(--erp-space-2);
+  border: 1px solid var(--erp-border-default);
+  border-radius: var(--erp-radius-control);
+  background: var(--erp-bg-surface);
+  color: var(--erp-text-primary);
+  font: inherit;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  transition: border-color var(--erp-transition-fast);
+}
+.cellInput:focus {
+  border-color: var(--erp-accent);
+  box-shadow: 0 0 0 2px var(--erp-focus-ring);
+}
+.cellInvalid {
+  border-color: var(--erp-danger);
+}
+
+.short,
+.priceSource {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.short {
+  color: var(--erp-danger);
+}
+.priceSource {
+  color: var(--erp-text-tertiary);
+}
+
+.subtotal {
+  color: var(--erp-accent-text);
+  font-weight: var(--erp-font-weight-medium);
+}
+
+.removeCell {
+  text-align: center;
+}
+.remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-top: -5px;
+  border: 0;
+  border-radius: var(--erp-radius-sm);
+  background: none;
+  color: var(--erp-text-tertiary);
+  cursor: pointer;
+}
+.remove:hover:not(:disabled) {
+  background: var(--erp-danger-bg);
+  color: var(--erp-danger);
+}
+.remove:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.addLine {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-1);
+  width: 100%;
+  height: 34px;
+  padding: 0 var(--erp-space-3);
+  border: 0;
+  background: none;
+  color: var(--erp-accent-text);
+  font: inherit;
+  font-size: var(--erp-font-size-sm);
+  cursor: pointer;
+}
+.addLine:hover {
+  background: var(--erp-bg-subtle);
+}
+
+/* 附件：默认折叠成一行 */
+.attach {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-2);
+}
+.attachToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-1);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--erp-text-secondary);
+  font: inherit;
+  font-size: var(--erp-font-size-sm);
+  cursor: pointer;
+}
+.attachHint {
+  margin-left: var(--erp-space-2);
+  color: var(--erp-text-tertiary);
+  font-size: var(--erp-font-size-xs);
+}
+
+/* 吸底栏 */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--erp-space-3);
+  padding: var(--erp-space-3) var(--erp-space-4);
+  border-top: 1px solid var(--erp-border-subtle);
+  background: var(--erp-bg-surface);
+}
+.totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--erp-space-4);
+  font-size: var(--erp-font-size-sm);
+  color: var(--erp-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.totals strong {
+  color: var(--erp-accent-text);
+  font-weight: var(--erp-font-weight-semibold);
+}
+.totals strong.negative {
+  color: var(--erp-danger);
+}
+.buttons {
+  display: flex;
+  gap: var(--erp-space-2);
+}
+
+@media (max-width: 900px) {
+  .fields4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

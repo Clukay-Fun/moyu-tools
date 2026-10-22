@@ -1,0 +1,62 @@
+.host {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+  padding: 10px 16px;
+  border-radius: var(--erp-radius-md);
+  background: var(--erp-text-primary);
+  color: var(--erp-bg-app);
+  box-shadow: var(--erp-shadow-md);
+  font-size: 13px;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--erp-dur-slow) var(--erp-ease-out),
+    transform var(--erp-dur-slow) var(--erp-ease-out);
+}
+@starting-style {
+  .toast {
+    opacity: 0;
+    transform: translateY(calc(8px * var(--erp-motion)));
+  }
+}
+.error {
+  background: var(--erp-danger);
+  color: var(--erp-accent-fg);
+}
+.success {
+  background: var(--erp-accent);
+  color: var(--erp-accent-fg);
+}
+
+.toast[data-leaving] {
+  opacity: 0;
+  transform: translateY(calc(4px * var(--erp-motion)));
+  transition:
+    opacity var(--erp-dur-exit) ease,
+    transform var(--erp-dur-exit) ease;
+}
+
+.action {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: var(--erp-font-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}

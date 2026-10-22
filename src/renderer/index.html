@@ -59,6 +59,7 @@
             <button class="nav-ic" type="button" data-module="video"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-video"></use></svg><span class="nav-label">视频</span></button>
             <button class="nav-ic" type="button" data-module="dieline"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-dieline"></use></svg><span class="nav-label">刀模</span></button>
             <button class="nav-ic" type="button" data-module="erp"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-inventory"></use></svg><span class="nav-label">库存</span></button>
+            <button class="nav-ic" type="button" data-module="custom"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-custom"></use></svg><span class="nav-label">定制</span></button>
             <div class="rail-spacer"></div>
             <button class="nav-ic" type="button" data-module="more"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-settings"></use></svg><span class="nav-label">设置</span></button>
           </nav>
@@ -739,8 +740,9 @@
                 </div>
               </section>
 
-              <!-- 库存（原 ajuan-erp）：React 孤岛，首次进入模块时懒加载挂载（src/renderer/erp） -->
+              <!-- 库存 / 定制（原 ajuan-erp）：同一个 React 根经 portal 渲染进这两页，首次进入时懒加载（src/renderer/erp） -->
               <section class="page page-erp" id="page-erp"></section>
+              <section class="page page-custom" id="page-custom"></section>
 
               <section class="page page-settings" id="page-more">
                 <div class="settings-layout">

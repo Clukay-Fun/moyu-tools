@@ -78,7 +78,7 @@ export const erpApi: ErpApi = {
     remove: (id) => ipcRenderer.invoke(IPC.attachmentsRemove, id)
   },
   backup: {
-    create: (preferences) => ipcRenderer.invoke(IPC.backupCreate, preferences),
+    create: () => ipcRenderer.invoke(IPC.backupCreate),
     pick: () => ipcRenderer.invoke(IPC.backupPick),
     inspect: (path) => ipcRenderer.invoke(IPC.backupInspect, path),
     restore: (path) => ipcRenderer.invoke(IPC.backupRestore, path),

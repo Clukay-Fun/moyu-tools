@@ -1,0 +1,60 @@
+.panel {
+  box-sizing: border-box;
+  background-color: var(--erp-bg-surface);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-lg, 10px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 var(--erp-space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--erp-border-subtle);
+  background-color: var(--erp-bg-surface);
+  gap: var(--erp-space-3);
+}
+
+.titleArea {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  min-width: 0;
+}
+
+.title {
+  font-size: 13.5px;
+  font-weight: var(--erp-font-weight-semibold);
+  color: var(--erp-text-primary);
+  margin: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.count {
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-tertiary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+}
+
+.body {
+  box-sizing: border-box;
+  padding: var(--erp-space-4);
+  flex: 1;
+}
+
+.body.flush {
+  padding: 0;
+}

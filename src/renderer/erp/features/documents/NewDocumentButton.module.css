@@ -1,0 +1,36 @@
+.split {
+  display: inline-flex;
+  height: 32px;
+  border-radius: var(--erp-radius-control);
+  overflow: hidden;
+}
+
+.main,
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--erp-space-1);
+  border: 0;
+  background: var(--erp-accent);
+  color: var(--erp-accent-fg);
+  font: inherit;
+  font-size: var(--erp-font-size-sm);
+  font-weight: var(--erp-font-weight-medium);
+  cursor: pointer;
+  transition: background-color var(--erp-transition-fast);
+}
+.main {
+  padding: 0 var(--erp-space-3);
+}
+.arrow {
+  padding: 0 var(--erp-space-2);
+  border-left: 1px solid color-mix(in srgb, var(--erp-accent-fg) 25%, transparent);
+}
+.main:hover,
+.arrow:hover {
+  background: var(--erp-accent-hover);
+}
+.main:active,
+.arrow:active {
+  background: var(--erp-accent-active);
+}

@@ -1,0 +1,181 @@
+/*
+ * 库存 / 定制的样式桥：组件里只用 --erp-* 变量，这里把它们映射到摸鱼的 token。
+ * ERP 原来的 --accent / --danger / --z-popover 等与摸鱼同名，所以全部加了 erp- 前缀，
+ * 避免两套定义互相覆盖。挂在 body 上：Base UI 的弹层 portal 到 body，同样能继承。
+ * 主题跟随摸鱼（body[data-theme]），不再有独立的外观设置。
+ */
+body {
+  /* 间距 */
+  --erp-space-1: 4px;
+  --erp-space-1-5: 6px;
+  --erp-space-2: 8px;
+  --erp-space-2-5: 10px;
+  --erp-space-3: 12px;
+  --erp-space-4: 16px;
+  --erp-space-5: 20px;
+  --erp-space-6: 24px;
+  --erp-space-8: 32px;
+
+  /* 字体与字号：摸鱼正文 13px，标题与 KPI 稍大 */
+  --erp-font-sans: var(--font);
+  --erp-font-mono: 'SF Mono', Menlo, Consolas, monospace;
+  --erp-font-size-xs: 11px;
+  --erp-font-size-sm: 12px;
+  --erp-font-size-base: 13px;
+  --erp-font-size-md: 15px;
+  --erp-font-size-lg: 18px;
+  --erp-font-size-xl: 26px;
+  --erp-font-weight-normal: 400;
+  --erp-font-weight-medium: 500;
+  --erp-font-weight-semibold: 600;
+  --erp-font-weight-bold: 600;
+  --erp-line-height-tight: 1.25;
+  --erp-line-height-normal: 1.5;
+
+  /* 圆角：与摸鱼控件 / 卡片一致 */
+  --erp-radius-xs: 6px;
+  --erp-radius-sm: var(--r-sm);
+  --erp-radius-control: var(--r-sm);
+  --erp-radius-md: var(--r-md);
+  --erp-radius-lg: var(--radius);
+  --erp-radius-full: var(--r-full);
+
+  /* 动效：沿用摸鱼的时长与缓动 */
+  --erp-dur-fast: var(--dur-hover);
+  --erp-dur-base: var(--dur-panel);
+  --erp-dur-slow: var(--dur-spring-land);
+  --erp-dur-exit: var(--dur-popover-exit);
+  --erp-ease-out: var(--ease-out);
+  --erp-transition-fast: var(--dur-hover) var(--ease-out);
+  --erp-motion: 1;
+
+  /* 表面与文字 */
+  --erp-bg-app: transparent;
+  --erp-bg-surface: var(--card-solid);
+  --erp-bg-subtle: color-mix(in srgb, var(--foreground) 4%, transparent);
+  --erp-bg-overlay: rgba(20, 22, 40, 0.28);
+  --erp-bg-overlay-strong: rgba(10, 12, 20, 0.86);
+  --erp-text-primary: var(--foreground);
+  --erp-text-secondary: var(--muted);
+  --erp-text-tertiary: var(--faint);
+  --erp-border-subtle: var(--hairline);
+  --erp-border-default: var(--border-neutral);
+  --erp-border-bold: var(--border-neutral-hover);
+
+  /* 强调色：摸鱼的主题强调色 */
+  --erp-accent: var(--accent);
+  --erp-accent-hover: color-mix(in srgb, var(--accent) 88%, #000);
+  --erp-accent-active: color-mix(in srgb, var(--accent) 78%, #000);
+  --erp-accent-subtle: var(--selection-bg);
+  --erp-accent-fg: #fff;
+  --erp-accent-text: var(--accent);
+  --erp-focus-ring: var(--focus-ring-color);
+
+  /* 业务状态色：入库蓝 / 出库琥珀 / 调整青 / 期初灰蓝（含义固定，不随强调色变） */
+  --erp-status-in: #2f6fb5;
+  --erp-status-in-bg: rgba(47, 111, 181, 0.1);
+  --erp-status-out: #9a5a0c;
+  --erp-status-out-bg: rgba(224, 164, 88, 0.16);
+  --erp-status-adjust: #1b7a8c;
+  --erp-status-adjust-bg: rgba(27, 122, 140, 0.1);
+  --erp-status-opening: #4f6475;
+  --erp-status-opening-bg: rgba(79, 100, 117, 0.1);
+  --erp-danger: var(--danger);
+  --erp-danger-bg: color-mix(in srgb, var(--danger) 12%, transparent);
+  --erp-warning: #9a5a0c;
+  --erp-warning-bg: rgba(224, 164, 88, 0.16);
+  --erp-warning-text: var(--erp-warning);
+  --erp-warning-border: color-mix(in srgb, var(--erp-warning) 45%, transparent);
+  --erp-status-critical: var(--erp-danger);
+  --erp-chart-in: var(--erp-status-in);
+  --erp-chart-out: var(--erp-status-out);
+
+  /* 表格 */
+  --erp-table-header: transparent;
+  --erp-table-row: transparent;
+  --erp-table-hover: color-mix(in srgb, var(--foreground) 4%, transparent);
+  --erp-table-divider: var(--hairline);
+  --erp-table-selected: var(--selection-bg);
+
+  /* 阴影 */
+  --erp-shadow-card: none;
+  --erp-shadow-overlay: var(--shadow-panel);
+  --erp-shadow-sm: var(--shadow-small);
+  --erp-shadow-md: var(--shadow-panel);
+  --erp-shadow-lg: var(--shadow-panel);
+
+  /* 透明棋盘格（素材预览） */
+  --erp-checker-bg: #ffffff;
+  --erp-checker-pattern: #e5e7eb;
+  --erp-checker-light-bg: #ffffff;
+  --erp-checker-light-fg: #e6e9ec;
+  --erp-checker-dark-bg: #22262b;
+  --erp-checker-dark-fg: #343a41;
+
+  /* 层级：排在摸鱼的弹层之上（库存抽屉 / 对话框是模态的） */
+  --erp-z-drawer: 82;
+  --erp-z-popover: 88;
+  --erp-z-modal: 90;
+  --erp-z-toast: 100;
+}
+
+body[data-theme='dark'] {
+  --erp-bg-overlay: rgba(0, 0, 0, 0.5);
+  --erp-bg-overlay-strong: rgba(0, 0, 0, 0.92);
+  --erp-accent-hover: color-mix(in srgb, var(--accent) 88%, #fff);
+  --erp-accent-active: color-mix(in srgb, var(--accent) 78%, #fff);
+
+  --erp-status-in: #7eb0e8;
+  --erp-status-in-bg: rgba(126, 176, 232, 0.14);
+  --erp-status-out: #e0a458;
+  --erp-status-out-bg: rgba(224, 164, 88, 0.14);
+  --erp-status-adjust: #5cc4d6;
+  --erp-status-adjust-bg: rgba(92, 196, 214, 0.14);
+  --erp-status-opening: #93a8b8;
+  --erp-status-opening-bg: rgba(147, 168, 184, 0.14);
+  --erp-warning: #e0a458;
+  --erp-warning-bg: rgba(224, 164, 88, 0.14);
+
+  --erp-checker-bg: #25272a;
+  --erp-checker-pattern: #34373b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    --erp-motion: 0;
+  }
+}
+
+/* 原 ERP 全局工具类，只在库存 / 定制内容与它们的弹层里生效 */
+:is(#page-erp, #page-custom, [data-erp-layer]) .srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:is(#page-erp, #page-custom, [data-erp-layer]) .selectable {
+  user-select: text;
+}
+
+:is(#page-erp, #page-custom, [data-erp-layer]) :is(.num, table) {
+  font-variant-numeric: tabular-nums;
+}
+
+:is(#page-erp, #page-custom, [data-erp-layer]) .mono {
+  font-family: var(--erp-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 页面容器：摸鱼的 .page / .active 负责显隐；React 页面各自管理滚动 */
+#page-erp,
+#page-custom {
+  position: relative;
+  overflow: hidden;
+  font-size: var(--erp-font-size-base);
+}

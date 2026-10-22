@@ -1,0 +1,96 @@
+.wrap {
+  background: var(--erp-bg-surface);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-lg);
+  box-shadow: var(--erp-shadow-card);
+  overflow: hidden;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+/* 固定列宽：切换筛选时列不随内容抖动；配合 <col> 指定宽度 */
+.fixed {
+  table-layout: fixed;
+}
+.fixed td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.table th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--erp-text-secondary);
+  height: 40px;
+  padding: 0 14px;
+  background: var(--erp-table-header);
+  border-bottom: 1px solid var(--erp-table-divider);
+  white-space: nowrap;
+}
+.table td {
+  height: 44px;
+  padding: 0 14px;
+  background: var(--erp-table-row);
+  border-bottom: 1px solid var(--erp-table-divider);
+  vertical-align: middle;
+}
+.table tr:last-child td {
+  border-bottom: 0;
+}
+.clickable tbody tr {
+  cursor: pointer;
+}
+.clickable tbody tr td {
+  transition: background var(--erp-dur-fast) ease;
+}
+.clickable tbody tr:hover td {
+  background: var(--erp-table-hover);
+}
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+.mono {
+  font-family: var(--erp-font-mono);
+  font-size: 12.5px;
+}
+.muted {
+  color: var(--erp-text-tertiary);
+}
+/* 表格内空状态：保留表头，让用户知道这里以后是什么 */
+.emptyRow td {
+  height: auto;
+  padding: 0;
+}
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 176px;
+  text-align: center;
+}
+.emptyTitle {
+  font-weight: 500;
+  color: var(--erp-text-primary);
+}
+.emptyDesc {
+  font-size: 13px;
+  color: var(--erp-text-tertiary);
+}
+
+.selected td {
+  background: var(--erp-table-selected) !important;
+}
+.clickable tbody tr.selected td {
+  background: var(--erp-table-selected);
+}
+
+/* 带缩略图的两行单元格 */
+.tall td {
+  height: 56px;
+}

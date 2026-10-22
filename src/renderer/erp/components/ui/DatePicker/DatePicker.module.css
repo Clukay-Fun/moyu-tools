@@ -1,0 +1,155 @@
+.dateInput {
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  padding: 0 var(--erp-space-2);
+  background-color: var(--erp-bg-surface);
+  border: 1px solid var(--erp-border-default);
+  border-radius: var(--erp-radius-control);
+  color: var(--erp-text-primary);
+  font-family: var(--erp-font-mono);
+  font-size: var(--erp-font-size-sm);
+  outline: none;
+  transition:
+    border-color var(--erp-transition-fast),
+    box-shadow var(--erp-transition-fast);
+}
+
+.dateInput:focus {
+  border-color: var(--erp-accent);
+  box-shadow: var(--erp-focus-ring);
+}
+
+.dateInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--erp-bg-subtle);
+}
+
+/* 范围选择器触发按钮 */
+.rangeTrigger {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  height: 32px;
+  padding: 0 var(--erp-space-3);
+  background-color: var(--erp-bg-surface);
+  border: 1px solid var(--erp-border-default);
+  border-radius: var(--erp-radius-control);
+  color: var(--erp-text-primary);
+  font-family: inherit;
+  font-size: var(--erp-font-size-sm);
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition:
+    background-color var(--erp-transition-fast),
+    border-color var(--erp-transition-fast),
+    box-shadow var(--erp-transition-fast);
+}
+
+.rangeTrigger:hover {
+  background-color: var(--erp-bg-subtle);
+}
+
+.rangeTrigger:focus-visible,
+.rangeTrigger[data-popup-open] {
+  border-color: var(--erp-accent);
+  box-shadow: var(--erp-focus-ring);
+}
+
+.rangeIcon {
+  color: var(--erp-text-secondary);
+  display: inline-flex;
+}
+
+.rangeText {
+  font-family: var(--erp-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--erp-font-size-xs);
+}
+
+/* Popover 弹层 */
+.popup {
+  box-sizing: border-box;
+  width: 320px;
+  padding: var(--erp-space-3);
+  background-color: var(--erp-bg-surface);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-md);
+  box-shadow: var(--erp-shadow-overlay);
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-3);
+  z-index: var(--erp-z-popover);
+  outline: none;
+}
+
+.presetGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--erp-space-1-5);
+}
+
+.presetButton {
+  box-sizing: border-box;
+  padding: var(--erp-space-1) var(--erp-space-2);
+  font-size: var(--erp-font-size-xs);
+  font-family: inherit;
+  background-color: var(--erp-bg-subtle);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-sm);
+  color: var(--erp-text-primary);
+  cursor: pointer;
+  text-align: center;
+  transition:
+    background-color var(--erp-transition-fast),
+    border-color var(--erp-transition-fast),
+    color var(--erp-transition-fast);
+}
+
+.presetButton:hover {
+  background-color: var(--erp-accent-subtle);
+  color: var(--erp-accent-text);
+  border-color: var(--erp-accent);
+}
+
+.presetButton.active {
+  background-color: var(--erp-accent);
+  color: var(--erp-accent-fg);
+  border-color: var(--erp-accent);
+}
+
+.customSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-2);
+  padding-top: var(--erp-space-2);
+  border-top: 1px solid var(--erp-border-subtle);
+}
+
+.customLabel {
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-secondary);
+  font-weight: var(--erp-font-weight-medium);
+}
+
+.customInputs {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-1-5);
+}
+
+.customSeparator {
+  color: var(--erp-text-tertiary);
+  font-size: var(--erp-font-size-xs);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--erp-space-2);
+  padding-top: var(--erp-space-2);
+  border-top: 1px solid var(--erp-border-subtle);
+}

@@ -1,0 +1,120 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-3);
+  min-height: 0;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--erp-space-3);
+}
+
+.count {
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-tertiary);
+}
+
+.loading {
+  padding: var(--erp-space-6);
+  text-align: center;
+  color: var(--erp-text-tertiary);
+  font-size: var(--erp-font-size-sm);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: var(--erp-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: var(--erp-space-2);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-md);
+  background: var(--erp-bg-surface);
+}
+
+.thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-sm);
+  overflow: hidden;
+  background-color: var(--erp-checker-bg);
+  background-image: var(--erp-checker-pattern);
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.badge {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  padding: 1px 6px;
+  border-radius: var(--erp-radius-sm);
+  background: var(--erp-bg-surface);
+  font-size: 11px;
+  color: var(--erp-text-secondary);
+}
+.badge[data-status='ready'] {
+  background: var(--erp-warning-bg);
+  color: var(--erp-warning-text);
+}
+.badge[data-status='failed'] {
+  background: var(--erp-danger-bg);
+  color: var(--erp-danger);
+}
+
+.name {
+  margin-top: 2px;
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  font-size: 11px;
+  color: var(--erp-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.error {
+  font-size: 11px;
+  color: var(--erp-danger);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

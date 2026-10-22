@@ -19,6 +19,7 @@ export const ICON_MAP = {
   'nav-video': 'clapperboard',
   'nav-dieline': 'package',
   'nav-inventory': 'warehouse',
+  'nav-custom': 'layers',
   'nav-settings': 'settings',
 
   // ── V2 第一批：高风险字符与彩色 emoji ──

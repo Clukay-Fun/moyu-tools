@@ -228,13 +228,45 @@ const submenuData = {
         ['图片压缩', 'MIN', '#d35f79']
       ]
     }
+  ],
+  erp: [
+    {
+      heading: '库存',
+      items: [
+        ['概览', '概', '#6978e6'],
+        ['商品', '品', '#3c9a5e'],
+        ['单据', '单', '#e88c32']
+      ]
+    }
+  ],
+  custom: [
+    {
+      heading: '定制',
+      items: [
+        ['生产', '产', '#8678d9'],
+        ['模板', '模', '#59a6ae'],
+        ['素材库', '素', '#d35f79']
+      ]
+    }
   ]
+}
+
+// 库存 / 定制子菜单 ↔ React 页面（src/renderer/erp/app/routes.ts）
+const erpRoutesByLabel = {
+  erp: { 概览: { key: 'overview' }, 商品: { key: 'products' }, 单据: { key: 'documents' } },
+  custom: {
+    生产: { key: 'psd', params: { psd: { view: 'production' } } },
+    模板: { key: 'psd', params: { psd: { view: 'templates' } } },
+    素材库: { key: 'psd', params: { psd: { view: 'assets' } } }
+  }
 }
 
 const defaultSelections = {
   pdf: '转 PNG',
   bc: 'EAN-13',
-  video: '视频转换'
+  video: '视频转换',
+  erp: '概览',
+  custom: '生产'
 }
 
 const deferredPdfActions = new Map([
@@ -249,6 +281,8 @@ const moduleLabels = {
   bc: '条码',
   image: '图片',
   video: '格式工厂',
+  erp: '库存',
+  custom: '定制',
   more: '设置'
 }
 
@@ -300,6 +334,18 @@ const searchFeatures = [
   ['音频转换', '格式工厂', 'video', '音频转换', 'MP3 AAC WAV FLAC'],
   ['图片转换', '格式工厂', 'video', '图片转换', 'sharp JPG PNG WebP AVIF TIFF GIF'],
   ['图片压缩', '格式工厂', 'video', '图片压缩', 'sharp 批量 质量'],
+  ['库存概览', '库存', 'erp', '概览', 'ERP 库存 KPI 汇总 销售 毛利'],
+  ['商品与库存', '库存', 'erp', '商品', 'SKU 商品 库存 流水 期初'],
+  ['单据', '库存', 'erp', '单据', '出库 入库 订单 草稿 作废'],
+  ['新建出库单', '库存', 'erp', 'cmd:new-outbound', '开单 出库 销售 ⌘N'],
+  ['新建入库单', '库存', 'erp', 'cmd:new-inbound', '开单 入库 采购 ⇧⌘N'],
+  ['库存调整', '库存', 'erp', 'cmd:new-adjustment', '盘点 盘盈 盘亏 调整'],
+  ['新建商品', '库存', 'erp', 'cmd:new-product', 'SKU 商品'],
+  ['导入 CSV', '库存', 'erp', 'cmd:import-csv', '批量 导入 商品 期初 单据'],
+  ['导出库存流水', '库存', 'erp', 'cmd:export-movements', 'CSV 导出 流水'],
+  ['定制生产', '定制', 'custom', '生产', 'Photoshop PSD 批量 生成 狗牌'],
+  ['PSD 模板', '定制', 'custom', '模板', 'Photoshop 模板 槽位'],
+  ['定制素材库', '定制', 'custom', '素材库', '狗图 名字图 抠图 白底'],
   ['主题与强调色', '设置', 'more', '', '外观 深色 浅色 颜色'],
   ['关于摸鱼工具箱', '设置', 'more', '', '版本 作者']
 ].map(([name, group, module, action, keywords]) => {
@@ -583,16 +629,73 @@ function animateEntry(element, { duration = 160, distance = 6, horizontal = fals
   animation.addEventListener('cancel', release, { once: true })
 }
 
-// 库存模块（React，原 ajuan-erp）首次进入时才加载，不拖慢 moyu 启动；之后只挂载一次。
-let erpInventoryMount = null
-function mountErpInventory() {
-  erpInventoryMount ??= import('./erp/inventory/mount.tsx')
-    .then(({ mountInventory }) => mountInventory(document.querySelector('#page-erp')))
-    .catch((error) => {
-      erpInventoryMount = null
-      showToast(`库存模块加载失败：${error?.message || error}`)
+// 库存 / 定制（React，原 ajuan-erp）首次进入时才加载，不拖慢摸鱼启动；之后只挂载一次。
+// 两个模块共用一个 React 根：子菜单点击 → navigate；React 内部跳转 → onRoute 回来同步外壳。
+let erpController = null
+let erpControllerLoad = null
+let erpRoute = null
+
+function erpTargetFor(module, label) {
+  return erpRoutesByLabel[module]?.[label] ?? null
+}
+
+function sameErpRoute(target) {
+  return Boolean(erpRoute && target && erpRoute.key === target.key
+    && (target.key !== 'psd' || erpRoute.view === target.params?.psd?.view))
+}
+
+function handleErpRoute(key, params) {
+  erpRoute = { key, view: key === 'psd' ? params?.psd?.view ?? 'production' : null }
+  const module = key === 'psd' ? 'custom' : 'erp'
+  const label = Object.entries(erpRoutesByLabel[module])
+    .find(([, target]) => sameErpRoute(target))?.[0]
+  if (!label) return
+  if (state.module !== module) {
+    // 页面内部跨模块跳转（目前没有，保留对称性）：切过去，selection 已经对得上不会再回调
+    activateModule(module, label)
+    return
+  }
+  if (state.selections[module] === label) return
+  const previousTop = submenu.querySelector('.submenu-item.on')?.offsetTop ?? null
+  state.selections[module] = label
+  renderSubmenu(module, previousTop)
+}
+
+function loadErp() {
+  erpControllerLoad ??= import('./erp/mount.tsx')
+    .then(({ mountErp }) => {
+      const module = state.module === 'custom' ? 'custom' : 'erp'
+      const initial = erpTargetFor(module, state.selections[module]) ?? { key: 'overview' }
+      erpRoute = { key: initial.key, view: initial.params?.psd?.view ?? null }
+      erpController = mountErp(
+        { inventory: document.querySelector('#page-erp'), custom: document.querySelector('#page-custom') },
+        { onRoute: handleErpRoute, openSettings: openErpSettings },
+        initial
+      )
+      return erpController
     })
-  return erpInventoryMount
+    .catch((error) => {
+      erpControllerLoad = null
+      showToast(`库存模块加载失败：${error?.message || error}`)
+      return null
+    })
+  return erpControllerLoad
+}
+
+/** 进入库存 / 定制：确保挂载，再把 React 拨到当前子菜单对应的页面 */
+async function showErp(module, command = '') {
+  const controller = await loadErp()
+  if (!controller || state.module !== module) return
+  controller.setVisible(true)
+  const target = erpTargetFor(module, state.selections[module])
+  if (target && !sameErpRoute(target)) controller.navigate(target.key, target.params)
+  if (command) controller.run(command)
+}
+
+function openErpSettings(target) {
+  activateModule('more')
+  document.querySelector(`#settings-${target === 'custom' ? 'custom' : 'inventory'}`)
+    ?.scrollIntoView({ block: 'start', behavior: 'smooth' })
 }
 
 // 导航选中底板：独立元素，切模块时从旧按钮滑到新按钮（落位弹簧，见 .nav-indicator.ready）。
@@ -671,7 +774,8 @@ function activateModule(module, action = '', animate = false) {
 
   const deferredMilestone = module === 'pdf' ? deferredPdfActions.get(action) : null
 
-  if (action && submenuData[module] && !deferredMilestone) {
+  const erpCommand = action.startsWith('cmd:') ? action.slice(4) : ''
+  if (action && submenuData[module] && !deferredMilestone && !erpCommand) {
     state.selections[module] = action
   }
 
@@ -690,9 +794,10 @@ function activateModule(module, action = '', animate = false) {
     formatFactoryModule.setFormatAction(state.selections.video)
   } else if (module === 'dieline') {
     dielineModule?.activate()
-  } else if (module === 'erp') {
-    void mountErpInventory()
+  } else if (module === 'erp' || module === 'custom') {
+    void showErp(module, erpCommand)
   }
+  if (module !== 'erp' && module !== 'custom') erpController?.setVisible(false)
 
   // 离开画布时收起浮动工具栏，并取消待执行的跟随更新（S2）。
   // 不收的话，切回来会先看到它停在旧位置再跳走。
@@ -712,6 +817,11 @@ function chooseSubmenu(module, action, animate = false) {
   state.selections[module] = action
   renderSubmenu(module, previousTop)
 
+  if (module === 'erp' || module === 'custom') {
+    const target = erpTargetFor(module, action)
+    if (target && !sameErpRoute(target)) erpController?.navigate(target.key, target.params)
+    return
+  }
   if (module === 'pdf') {
     pdfModule.updatePdfState(action)
   } else if (module === 'bc') {
@@ -1970,6 +2080,8 @@ for (const [module, groups] of Object.entries(submenuData)) {
 
 const moduleSearchIcons = {
   ai: { icon: 'Ai', color: '#31a766' },
+  erp: { icon: '库', color: '#e88c32' },
+  custom: { icon: 'PS', color: '#2f6fb5' },
   image: { icon: 'IMG', color: '#6978e6' },
   more: { icon: 'SET', color: '#737789' }
 }
@@ -2105,6 +2217,14 @@ document.addEventListener('keydown', (event) => {
     searchInput.focus()
     searchInput.select()
   }
+})
+
+// 库存 / 定制里：⌘N 新建出库单，⇧⌘N 新建入库单（沿用原 ERP 的习惯）
+document.addEventListener('keydown', (event) => {
+  if (state.module !== 'erp' && state.module !== 'custom') return
+  if (!(event.metaKey || event.ctrlKey) || event.altKey || event.key.toLowerCase() !== 'n') return
+  event.preventDefault()
+  void showErp(state.module, event.shiftKey ? 'new-inbound' : 'new-outbound')
 })
 
 const timerStartedAt = Date.now()

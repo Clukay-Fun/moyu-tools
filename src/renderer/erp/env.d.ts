@@ -1,17 +1,18 @@
-// moyu preload 暴露给库存 / 定制的接口（只声明 erp 部分；其余 window.api 由 moyu 的 JS 使用）
-export interface ErpSpikeResult {
-  count: number
-  sqlite: string
-  dbPath: string
-  imageUrl: string
-}
+import type { ErpApi } from '@shared/erp/ipc'
+import type { PhotoshopStatus } from '@shared/photoshop'
 
+// window.api 由 src/preload/index.js 暴露；这里只声明库存 / 定制用到的部分
 declare global {
   interface Window {
     api: {
-      erp: {
-        spike: () => Promise<ErpSpikeResult>
+      erp: ErpApi
+      photoshop: {
+        getStatus(): Promise<PhotoshopStatus>
+        redetect(): Promise<PhotoshopStatus>
+        onStatus(handler: (status: PhotoshopStatus) => void): () => void
       }
     }
   }
 }
+
+export {}

@@ -1,0 +1,233 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-3);
+  height: 100%;
+  width: 100%;
+  max-width: 1680px;
+  box-sizing: border-box;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--erp-space-3);
+  flex-shrink: 0;
+  min-height: 40px;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  margin-left: auto;
+}
+
+/* 主面板撑满视口高度，卡片区内部滚动 */
+.mainPanel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--erp-bg-surface);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-lg, 10px);
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--erp-space-2) var(--erp-space-4);
+  border-bottom: 1px solid var(--erp-border-subtle);
+  background-color: var(--erp-bg-surface);
+  gap: var(--erp-space-3);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  width: 280px;
+  max-width: 100%;
+}
+
+.toolRight {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-4);
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-secondary);
+}
+
+.countText {
+  color: var(--erp-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.switchLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.loadError {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--erp-space-3);
+  padding: var(--erp-space-3) var(--erp-space-4);
+  border-bottom: 1px solid var(--erp-border-subtle);
+  background: var(--erp-danger-bg);
+  color: var(--erp-danger);
+  font-size: var(--erp-font-size-sm);
+}
+
+.gridWrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--erp-space-4);
+}
+
+.gridState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  color: var(--erp-text-tertiary);
+  font-size: var(--erp-font-size-sm);
+}
+
+/* 卡片网格：容器限宽内最多三列，窄窗口自动降到两列 / 一列 */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--erp-space-4);
+  max-width: 1100px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-lg, 10px);
+  background: var(--erp-bg-surface);
+  color: var(--erp-text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    border-color var(--erp-transition-fast),
+    background-color var(--erp-transition-fast),
+    transform var(--erp-transition-fast);
+}
+.card:hover {
+  border-color: var(--erp-border-default);
+  background: var(--erp-bg-surface);
+}
+.card:active {
+  transform: scale(0.995);
+}
+.card:focus-visible {
+  outline-offset: 2px;
+}
+.inactive {
+  opacity: 0.65;
+}
+
+/* 1:1 大图，完整显示产品主体 */
+.imageWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--erp-bg-subtle);
+  border-bottom: 1px solid var(--erp-border-subtle);
+  overflow: hidden;
+}
+.imageWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.imagePlaceholder {
+  color: var(--erp-text-tertiary);
+}
+.badgeSlot {
+  position: absolute;
+  top: var(--erp-space-2);
+  right: var(--erp-space-2);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--erp-space-3) var(--erp-space-4) var(--erp-space-4);
+  min-width: 0;
+}
+
+.productName {
+  font-size: var(--erp-font-size-md, 15px);
+  font-weight: var(--erp-font-weight-semibold);
+  color: var(--erp-accent-text);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.productMeta {
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--erp-space-2);
+  margin-top: 2px;
+  padding-top: var(--erp-space-2);
+  border-top: 1px solid var(--erp-border-subtle);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.metricLabel {
+  font-size: 11px;
+  color: var(--erp-text-tertiary);
+  white-space: nowrap;
+}
+
+.metricValue {
+  font-size: var(--erp-font-size-sm);
+  color: var(--erp-text-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.threshold {
+  font-size: 11px;
+  color: var(--erp-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}

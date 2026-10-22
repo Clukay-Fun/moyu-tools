@@ -14,11 +14,7 @@ function stamp(): string {
   return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`
 }
 
-export async function createBackupInteractive(preferences?: unknown): Promise<string | null> {
-  const prefs =
-    preferences && typeof preferences === 'object' && !Array.isArray(preferences)
-      ? (preferences as Record<string, unknown>)
-      : null
+export async function createBackupInteractive(): Promise<string | null> {
   const r = await dialog.showSaveDialog(owner()!, {
     title: '保存备份',
     defaultPath: join(app.getPath('documents'), `摸鱼库存备份-${stamp()}.zip`),
@@ -30,7 +26,7 @@ export async function createBackupInteractive(preferences?: unknown): Promise<st
     { dbPath: state.dbPath, attachmentsDir: state.attachmentsDir },
     app.getVersion(),
     r.filePath,
-    prefs
+    null
   )
   return r.filePath
 }
