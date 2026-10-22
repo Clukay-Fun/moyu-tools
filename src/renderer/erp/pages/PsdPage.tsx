@@ -184,9 +184,8 @@ export function PsdPage(): ReactElement {
       <h1 className="srOnly">定制</h1>
 
       <header className={styles.header}>
-        <div className={styles.headLeft}>
-          <h2 className={styles.viewTitle}>{VIEW_TITLES[view]}</h2>
-        </div>
+        {/* 视图名由摸鱼子菜单显示，这里只给读屏 */}
+        <h2 className="srOnly">{VIEW_TITLES[view]}</h2>
         <div className={styles.headRight}>
           <button
             type="button"

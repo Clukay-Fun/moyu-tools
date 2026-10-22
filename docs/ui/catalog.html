@@ -108,7 +108,7 @@
 
     <nav class="cat-toc" aria-label="目录">
       <a href="#tokens">设计变量</a><a href="#motion">动效</a><a href="#buttons">按钮</a><a href="#inputs">输入框</a><a href="#menus">下拉菜单</a><a href="#toggles">开关与分段</a>
-      <a href="#cards">卡片与设置块</a><a href="#feedback">状态提示</a><a href="#rules">使用约定</a>
+      <a href="#cards">卡片与设置块</a><a href="#feedback">状态提示</a><a href="#erp">库存 / 定制</a><a href="#rules">使用约定</a>
     </nav>
 
     <!-- ══ 设计变量 ══ -->
@@ -384,6 +384,22 @@
           <div class="cat-stage" data-theme="light" data-demo="feedback"><span class="cat-label">浅色</span></div>
           <div class="cat-stage" data-theme="dark" data-demo="feedback"><span class="cat-label">深色</span></div>
         </div>
+      </div>
+    </section>
+
+    <!-- ══ 库存 / 定制 ══ -->
+    <section class="cat-section" id="erp">
+      <h2>库存 / 定制</h2>
+      <p>库存与定制（原 ajuan-erp）是 React + CSS Modules，组件在 <code>src/renderer/erp/components/ui</code>，这里只记约定，不放静态示例；看实际效果请进应用的「库存」「定制」。</p>
+      <div class="cat-item">
+        <dl class="cat-meta">
+          <dt>变量</dt><dd>组件只用 <code>--erp-*</code>，在 <code>src/renderer/erp/styles/erp.css</code> 映射到摸鱼变量（文字 <code>--foreground</code> / <code>--muted</code> / <code>--faint</code>、描边 <code>--hairline</code> / <code>--border-neutral</code>、强调色 <code>--accent</code>、圆角 <code>--r-sm</code> / <code>--r-md</code> / <code>--radius</code>、阴影 <code>--shadow-small</code> / <code>--shadow-panel</code>）。不要在组件里直接写摸鱼变量，也不要定义无前缀的同名变量（<code>--accent</code>、<code>--danger</code>、<code>--z-popover</code> 曾经撞名）。</dd>
+          <dt>状态色</dt><dd>入库蓝、出库琥珀、调整青、期初灰蓝、告急红是业务含义，固定取值、不随强调色变化；浅色 / 深色各一套。</dd>
+          <dt>弹层</dt><dd>抽屉、对话框、下拉由 Base UI portal 到 <code>body</code>（<code>[data-base-ui-portal]</code>），层级 <code>--erp-z-*</code> 排在摸鱼弹层之上。</dd>
+          <dt>输入框</dt><dd>外层容器画边框、内层 <code>input</code> 透明；摸鱼全局的 <code>input[type=text]</code> 边框在库存 / 定制范围内被复位。新写的输入框沿用这个结构。</dd>
+          <dt>现有组件</dt><dd>Badge、Button、Card、Combobox、ConfirmDialog、DatePicker、Drawer、EmptyState、IconButton、Input、Menu、NumberInput、PageHeader、Panel、RangeFilter、SegmentedControl、Select、Table、Toast、Tooltip</dd>
+          <dt>现用模块</dt><dd>库存（概览 · 商品 · 单据）、定制（生产 · 模板 · 素材库）、设置里的「库存」「定制」分节</dd>
+        </dl>
       </div>
     </section>
 

@@ -140,7 +140,7 @@
 }
 .cellInput:focus {
   border-color: var(--erp-accent);
-  box-shadow: 0 0 0 2px var(--erp-focus-ring);
+  box-shadow: var(--erp-focus-ring);
 }
 .cellInvalid {
   border-color: var(--erp-danger);

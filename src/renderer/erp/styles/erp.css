@@ -1,7 +1,7 @@
 /*
  * 库存 / 定制的样式桥：组件里只用 --erp-* 变量，这里把它们映射到摸鱼的 token。
  * ERP 原来的 --accent / --danger / --z-popover 等与摸鱼同名，所以全部加了 erp- 前缀，
- * 避免两套定义互相覆盖。挂在 body 上：Base UI 的弹层 portal 到 body，同样能继承。
+ * 避免两套定义互相覆盖。挂在 body 上：Base UI 的弹层 portal 到 body（[data-base-ui-portal]），同样能继承。
  * 主题跟随摸鱼（body[data-theme]），不再有独立的外观设置。
  */
 body {
@@ -69,7 +69,8 @@ body {
   --erp-accent-subtle: var(--selection-bg);
   --erp-accent-fg: #fff;
   --erp-accent-text: var(--accent);
-  --erp-focus-ring: var(--focus-ring-color);
+  /* 控件聚焦外发光（box-shadow 值），与摸鱼输入框的强调色一致 */
+  --erp-focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
 
   /* 业务状态色：入库蓝 / 出库琥珀 / 调整青 / 期初灰蓝（含义固定，不随强调色变） */
   --erp-status-in: #2f6fb5;
@@ -147,7 +148,7 @@ body[data-theme='dark'] {
 }
 
 /* 原 ERP 全局工具类，只在库存 / 定制内容与它们的弹层里生效 */
-:is(#page-erp, #page-custom, .erp-settings, [data-erp-layer]) .srOnly {
+:is(#page-erp, #page-custom, .erp-settings, [data-base-ui-portal]) .srOnly {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -159,15 +160,15 @@ body[data-theme='dark'] {
   border: 0;
 }
 
-:is(#page-erp, #page-custom, .erp-settings, [data-erp-layer]) .selectable {
+:is(#page-erp, #page-custom, .erp-settings, [data-base-ui-portal]) .selectable {
   user-select: text;
 }
 
-:is(#page-erp, #page-custom, .erp-settings, [data-erp-layer]) :is(.num, table) {
+:is(#page-erp, #page-custom, .erp-settings, [data-base-ui-portal]) :is(.num, table) {
   font-variant-numeric: tabular-nums;
 }
 
-:is(#page-erp, #page-custom, .erp-settings, [data-erp-layer]) .mono {
+:is(#page-erp, #page-custom, .erp-settings, [data-base-ui-portal]) .mono {
   font-family: var(--erp-font-mono);
   font-variant-numeric: tabular-nums;
 }
@@ -178,4 +179,19 @@ body[data-theme='dark'] {
   position: relative;
   overflow: hidden;
   font-size: var(--erp-font-size-base);
+}
+
+/*
+ * 摸鱼全局给 input[type=text] 等画了边框与底色（01-controls.css）。ERP 的输入框都是
+ * 「外层容器画边框、内层 input 透明」，全局规则会在容器里再叠一层框，这里在库存 / 定制范围内复位。
+ */
+:is(#page-erp, #page-custom, .erp-settings, [data-base-ui-portal])
+  :is(input[type='text'], input[type='number'], input[type='search'], textarea) {
+  &,
+  &:hover:not(:disabled),
+  &:focus {
+    border: 0;
+    background-color: transparent;
+    box-shadow: none;
+  }
 }

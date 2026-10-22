@@ -14,20 +14,12 @@
   z-index: 5;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: var(--erp-space-3);
   min-height: 40px;
   padding: var(--erp-space-1) 0;
   background: var(--erp-bg-app);
 }
-.viewTitle {
-  margin: 0;
-  font-size: var(--erp-font-size-lg);
-  font-weight: var(--erp-font-weight-semibold);
-  color: var(--erp-text-primary);
-}
-
-.headLeft,
 .headRight {
   display: flex;
   align-items: center;
