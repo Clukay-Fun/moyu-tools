@@ -25,3 +25,10 @@
     padding: var(--erp-space-3) var(--erp-space-4) var(--erp-space-4);
   }
 }
+
+/* 摸鱼设置页里的库存 / 定制分节：卡片纵向排列 */
+.settingsStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--erp-space-4);
+}

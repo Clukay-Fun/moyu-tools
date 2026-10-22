@@ -114,8 +114,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 960,
     height: 640,
-    minWidth: 720,
-    minHeight: 480,
+    minWidth: 960,
+    minHeight: 640,
     show: false,
     icon: resolveWindowIcon(),
     webPreferences: {

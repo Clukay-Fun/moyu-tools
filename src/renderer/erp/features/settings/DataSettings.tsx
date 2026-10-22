@@ -16,7 +16,7 @@ import { Button, ConfirmDialog } from '@erp/components/ui'
 import { useToast } from '@erp/components/Toast'
 import { useNav } from '@erp/app/navigation'
 import { unwrap, errorMessage } from '@erp/lib/api'
-import { emitDataChanged } from '@erp/lib/dataEvents'
+import { emitDataChanged, useDataChanged } from '@erp/lib/dataEvents'
 import { TrashSettings } from './TrashSettings'
 import styles from './SettingsCard.module.css'
 
@@ -38,6 +38,8 @@ export function DataSettings(): ReactElement {
   useEffect(() => {
     void loadHasData()
   }, [loadHasData])
+  // 设置分节常驻在摸鱼设置页里：单据增删、恢复备份之后都要重新判断是否空库
+  useDataChanged(() => void loadHasData())
 
   async function run(kind: NonNullable<typeof busy>, fn: () => Promise<void>): Promise<void> {
     setBusy(kind)
@@ -112,7 +114,7 @@ export function DataSettings(): ReactElement {
       <section className={styles.card}>
         <h2 className={styles.title}>备份</h2>
         <p className={styles.hint}>
-          备份包含数据库、全部图片附件和外观设置，是一个 zip 文件。建议定期备份到其他磁盘或网盘。
+          备份包含库存数据库和全部图片附件，是一个 zip 文件。建议定期备份到其他磁盘或网盘。
         </p>
         <div className={styles.row}>
           <div>
@@ -227,7 +229,7 @@ export function DataSettings(): ReactElement {
         <div className={styles.row}>
           <div>
             <div className={styles.label}>清空全部单据、流水和附件</div>
-            <div className={styles.desc}>商品资料、渠道、外观设置会保留。不可撤销，建议先备份。</div>
+            <div className={styles.desc}>商品资料、渠道和 Photoshop 设置会保留。不可撤销，建议先备份。</div>
           </div>
           <Button
             variant="danger"
@@ -246,7 +248,7 @@ export function DataSettings(): ReactElement {
         onOpenChange={(o) => !o && setConfirm(null)}
         danger
         title="恢复备份？"
-        description="将用备份替换全部数据；备份里有外观设置时也会一并恢复。当前数据会先移入回收目录，恢复后应用会重新加载。"
+        description="将用备份替换全部库存 / 定制数据。当前数据会先移入回收目录，恢复后各页面会重新读取。"
         confirmText="恢复备份"
         loading={busy === 'restore'}
         onConfirm={restore}
@@ -284,7 +286,7 @@ export function DataSettings(): ReactElement {
             <ul>
               <li>商品资料与图片</li>
               <li>销售渠道</li>
-              <li>外观、更新和 Photoshop 设置</li>
+              <li>Photoshop 设置</li>
             </ul>
           </div>
         </div>

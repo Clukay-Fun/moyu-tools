@@ -668,10 +668,17 @@ function loadErp() {
       const initial = erpTargetFor(module, state.selections[module]) ?? { key: 'overview' }
       erpRoute = { key: initial.key, view: initial.params?.psd?.view ?? null }
       erpController = mountErp(
-        { inventory: document.querySelector('#page-erp'), custom: document.querySelector('#page-custom') },
+        {
+          inventory: document.querySelector('#page-erp'),
+          custom: document.querySelector('#page-custom'),
+          settingsInventory: document.querySelector('#erp-settings-inventory'),
+          settingsCustom: document.querySelector('#erp-settings-custom')
+        },
         { onRoute: handleErpRoute, openSettings: openErpSettings },
         initial
       )
+      // 从设置页首次加载时，库存 / 定制页面在后台：不要按前台频率轮询
+      if (state.module !== 'erp' && state.module !== 'custom') erpController.setVisible(false)
       return erpController
     })
     .catch((error) => {
@@ -694,8 +701,14 @@ async function showErp(module, command = '') {
 
 function openErpSettings(target) {
   activateModule('more')
-  document.querySelector(`#settings-${target === 'custom' ? 'custom' : 'inventory'}`)
-    ?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+  const layout = document.querySelector('.settings-layout')
+  const section = document.querySelector(`#settings-${target === 'custom' ? 'custom' : 'inventory'}`)
+  if (!layout || !section) return
+  // activateModule 刚把设置页滚回顶部；等它显示出来再滚到对应分节
+  requestAnimationFrame(() => {
+    const offset = section.getBoundingClientRect().top - layout.getBoundingClientRect().top
+    layout.scrollTo({ top: layout.scrollTop + offset, behavior: 'smooth' })
+  })
 }
 
 // 导航选中底板：独立元素，切模块时从旧按钮滑到新按钮（落位弹簧，见 .nav-indicator.ready）。
@@ -797,6 +810,8 @@ function activateModule(module, action = '', animate = false) {
   } else if (module === 'erp' || module === 'custom') {
     void showErp(module, erpCommand)
   }
+  // 设置页里的库存 / 定制分节也由同一个 React 根渲染
+  if (module === 'more') void loadErp()
   if (module !== 'erp' && module !== 'custom') erpController?.setVisible(false)
 
   // 离开画布时收起浮动工具栏，并取消待执行的跟随更新（S2）。

@@ -23,6 +23,9 @@ import { OverviewPage } from '@erp/pages/OverviewPage'
 import { ProductsPage } from '@erp/pages/ProductsPage'
 import { DocumentsPage } from '@erp/pages/DocumentsPage'
 import { PsdPage } from '@erp/pages/PsdPage'
+import { ChannelSettings } from '@erp/features/settings/ChannelSettings'
+import { DataSettings } from '@erp/features/settings/DataSettings'
+import { PhotoshopSettings } from '@erp/features/psd/PhotoshopSettings'
 import styles from './App.module.css'
 
 const PAGES: Record<(typeof INVENTORY_ROUTES)[number], () => ReactElement> = {
@@ -44,6 +47,9 @@ export type ErpAction =
 export interface ErpContainers {
   inventory: HTMLElement
   custom: HTMLElement
+  /** 摸鱼设置页「库存」「定制」分节的内容区 */
+  settingsInventory: HTMLElement | null
+  settingsCustom: HTMLElement | null
 }
 
 function Routed({
@@ -114,6 +120,21 @@ function Routed({
             </div>
           </div>,
           containers.custom
+        )}
+      {containers.settingsInventory &&
+        createPortal(
+          <div className={styles.settingsStack}>
+            <ChannelSettings />
+            <DataSettings />
+          </div>,
+          containers.settingsInventory
+        )}
+      {containers.settingsCustom &&
+        createPortal(
+          <div className={styles.settingsStack}>
+            <PhotoshopSettings />
+          </div>,
+          containers.settingsCustom
         )}
     </>
   )

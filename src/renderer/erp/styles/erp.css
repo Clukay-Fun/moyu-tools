@@ -147,7 +147,7 @@ body[data-theme='dark'] {
 }
 
 /* 原 ERP 全局工具类，只在库存 / 定制内容与它们的弹层里生效 */
-:is(#page-erp, #page-custom, [data-erp-layer]) .srOnly {
+:is(#page-erp, #page-custom, .erp-settings, [data-erp-layer]) .srOnly {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -159,15 +159,15 @@ body[data-theme='dark'] {
   border: 0;
 }
 
-:is(#page-erp, #page-custom, [data-erp-layer]) .selectable {
+:is(#page-erp, #page-custom, .erp-settings, [data-erp-layer]) .selectable {
   user-select: text;
 }
 
-:is(#page-erp, #page-custom, [data-erp-layer]) :is(.num, table) {
+:is(#page-erp, #page-custom, .erp-settings, [data-erp-layer]) :is(.num, table) {
   font-variant-numeric: tabular-nums;
 }
 
-:is(#page-erp, #page-custom, [data-erp-layer]) .mono {
+:is(#page-erp, #page-custom, .erp-settings, [data-erp-layer]) .mono {
   font-family: var(--erp-font-mono);
   font-variant-numeric: tabular-nums;
 }
