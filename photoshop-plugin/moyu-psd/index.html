@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 14px;
+        color: #e7e7e7;
+        background: #292929;
+        font:
+          13px/1.5 -apple-system,
+          'Segoe UI',
+          sans-serif;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+      p {
+        margin: 0 0 12px;
+        color: #b8b8b8;
+        overflow-wrap: anywhere;
+      }
+      button {
+        padding: 7px 12px;
+        color: #fff;
+        background: #1473e6;
+        border: 0;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      pre {
+        min-height: 130px;
+        max-height: 260px;
+        overflow: auto;
+        white-space: pre-wrap;
+        background: #1d1d1d;
+        border-radius: 6px;
+        padding: 9px;
+      }
+      .label {
+        color: #888;
+        margin-top: 10px;
+        margin-bottom: 2px;
+      }
+      #status {
+        padding: 7px 9px;
+        border-radius: 5px;
+        background: #353535;
+        color: #d8d8d8;
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>摸鱼 PSD · CEP 1.0.7</h1>
+    <p id="status">插件界面正在启动…</p>
+    <p class="label">当前加载目录</p>
+    <p id="extension-root">读取中…</p>
+    <p>面板已通过 CEP 安装。后台扩展会随 Photoshop 启动并自动处理任务。</p>
+    <button id="run" type="button">立即检查队列</button>
+    <p class="label">桥接目录</p>
+    <p id="bridge">读取中…</p>
+    <p class="label">导出目录</p>
+    <p id="output">读取中…</p>
+    <pre id="log">等待 Photoshop 后台扩展启动…</pre>
+    <script src="index.js"></script>
+  </body>
+</html>

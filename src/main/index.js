@@ -31,7 +31,11 @@ import {
   terminateOcrWorker
 } from './modules/screenshot.js'
 import { handleMoyuFileProtocol, registerMoyuFileScheme } from './erp/protocol'
-import { registerErpSpikeHandlers } from './erp/spike'
+import { state as erpState } from './erp/appState'
+import { registerErpIpc } from './erp/ipc'
+import { syncPsdPluginSettings } from './erp/psdIo'
+import { setErpMainWindowGetter } from './erp/window'
+import { refreshPhotoshopStatus, registerPhotoshopHandlers } from './photoshop'
 import { existsSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
@@ -61,7 +65,6 @@ ipcMain.on('startup:report-ready', () => {
 
 // moyu-file:// 必须在 ready 之前注册为特权协议（库存 / 定制的图片与附件）
 registerMoyuFileScheme()
-registerErpSpikeHandlers()
 
 let mainWindow = null
 const hasSingleInstanceLock = app.requestSingleInstanceLock()
@@ -272,6 +275,13 @@ registerComWorkerHandlers({ ipcMain, shell, app, utilityProcess, assertMainWindo
 // 条码/图片文件保存 IPC（barcode:* / image:save-file）已拆到 ./modules/barcode.js。
 registerBarcodeHandlers({ ipcMain, dialog, BrowserWindow, clipboard, app, utilityProcess, assertMainWindowSender })
 
+// 公共 Photoshop 服务（photoshop:*）：条码与「定制」共用，启动后后台检测一次。
+registerPhotoshopHandlers(assertMainWindowSender)
+
+// 库存 / 定制（erp:*，原 ajuan-erp）：只服务主窗口，数据在 userData/erp。
+setErpMainWindowGetter(() => mainWindow)
+registerErpIpc()
+
 // Illustrator 批处理 IPC（illustrator:*）已拆到 ./modules/illustrator.js。
 registerIllustratorHandlers({
   ipcMain, dialog, BrowserWindow, app, utilityProcess, assertMainWindowSender, bindOwnerSessionCleanup
@@ -347,7 +357,21 @@ ipcMain.on('board:dirty', (event, dirty) => {
 if (hasSingleInstanceLock) app.whenReady().then(() => {
   // 隐藏 Electron 默认原生菜单栏（File/Edit/...），应用使用自身渲染层界面。
   Menu.setApplicationMenu(null)
+  try {
+    erpState.open()
+  } catch (error) {
+    // 库存库打不开不影响其他工具；库存 / 定制的请求会各自报错
+    console.error('库存数据库打开失败：', error?.message || error)
+  }
   handleMoyuFileProtocol()
+  // 只检测、不启动 Photoshop；结果通过 photoshop:status 广播
+  void refreshPhotoshopStatus().then(() => {
+    try {
+      syncPsdPluginSettings()
+    } catch (error) {
+      console.warn('Photoshop 插件目录设置写入失败：', error?.message || error)
+    }
+  })
   // macOS 首次截图若在点击后才编译 ScreenCaptureKit 侧车，会额外等待约一秒。
   // 启动后后台预热；失败时 promise 会自行复位，真正截图仍会重试并给出明确错误。
   if (process.platform === 'darwin') {
@@ -388,6 +412,7 @@ app.on('window-all-closed', () => {
 // 是 Electron 文档指定的注销时机。
 app.on('will-quit', () => {
   globalShortcut.unregisterAll()
+  erpState.close()
 })
 
 app.on('before-quit', () => {

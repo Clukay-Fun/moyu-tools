@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
+import { erpApi } from './erp'
 
 // 按业务分组排列，方法名本身保持不变（renderer 侧已有大量 window.api.xxx()
 // 直接调用，包括 screenshot.js / pin.js 这两个独立渲染入口——重命名成嵌套
@@ -181,9 +182,18 @@ contextBridge.exposeInMainWorld(
       }
     },
 
-    // ── 库存 / 定制（原 ajuan-erp）。只放白名单方法，E1 起按原 preload 逐项迁入 ──
-    erp: {
-      spike: () => ipcRenderer.invoke('erp:spike')
-    }
+    // ── 公共 Photoshop 服务（photoshop:*）：条码与「定制」共用的检测结果 ──
+    photoshop: {
+      getStatus: () => ipcRenderer.invoke('photoshop:get-status'),
+      redetect: () => ipcRenderer.invoke('photoshop:redetect'),
+      onStatus: (handler) => {
+        const listener = (_event, payload) => handler(payload)
+        ipcRenderer.on('photoshop:status', listener)
+        return () => ipcRenderer.removeListener('photoshop:status', listener)
+      }
+    },
+
+    // ── 库存 / 定制（erp:*，原 ajuan-erp）：白名单见 ./erp.ts ──
+    erp: erpApi
   })
 )

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 12px;
+        font:
+          12px/1.45 -apple-system,
+          'Segoe UI',
+          sans-serif;
+        color: #1d1d1f;
+      }
+      h1 {
+        font-size: 14px;
+        margin: 0 0 8px;
+      }
+      p {
+        margin: 0 0 10px;
+      }
+      button {
+        margin: 0 8px 8px 0;
+        padding: 6px 10px;
+      }
+      #log {
+        white-space: pre-wrap;
+        background: #f4f4f5;
+        border-radius: 6px;
+        padding: 8px;
+        min-height: 120px;
+      }
+      .muted {
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>摸鱼 PSD</h1>
+    <p id="folder" class="muted">正在读取授权…</p>
+    <button id="auth" type="button">授权桥接目录</button>
+    <button id="run" type="button">执行队列</button>
+    <pre id="log">首次使用请授权 psd-bridge。之后生成任务会自动执行；“执行队列”仅用于手动补跑。</pre>
+    <script src="index.js"></script>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "manifestVersion": 5,
+  "id": "com.clukay.moyu.psd",
+  "name": "摸鱼 PSD",
+  "version": "0.1.0",
+  "main": "index.html",
+  "host": {
+    "app": "PS",
+    "minVersion": "24.0.0",
+    "data": {
+      "loadEvent": "startup"
+    }
+  },
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "moyuPsd",
+      "label": { "default": "摸鱼 PSD" },
+      "minimumSize": { "width": 280, "height": 360 },
+      "maximumSize": { "width": 640, "height": 2000 },
+      "preferredDockedSize": { "width": 300, "height": 480 },
+      "preferredFloatingSize": { "width": 320, "height": 520 }
+    },
+    {
+      "type": "command",
+      "id": "moyuRunQueue",
+      "label": { "default": "处理队列" }
+    }
+  ],
+  "requiredPermissions": {
+    "localFileSystem": "request"
+  }
+}

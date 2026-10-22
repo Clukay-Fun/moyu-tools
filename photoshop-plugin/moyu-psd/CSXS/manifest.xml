@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ExtensionManifest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="7.0" ExtensionBundleId="com.clukay.moyu.psd" ExtensionBundleVersion="1.0.7" ExtensionBundleName="摸鱼 PSD">
+  <ExtensionList>
+    <Extension Id="com.clukay.moyu.psd.worker" Version="1.0.7" />
+    <Extension Id="com.clukay.moyu.psd.panel" Version="1.0.7" />
+  </ExtensionList>
+  <ExecutionEnvironment>
+    <HostList>
+      <Host Name="PHXS" Version="[21.0,99.9]" />
+      <Host Name="PHSP" Version="[21.0,99.9]" />
+    </HostList>
+    <LocaleList>
+      <Locale Code="All" />
+    </LocaleList>
+    <RequiredRuntimeList>
+      <RequiredRuntime Name="CSXS" Version="12.0" />
+    </RequiredRuntimeList>
+  </ExecutionEnvironment>
+  <DispatchInfoList>
+    <Extension Id="com.clukay.moyu.psd.worker">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>./worker.html</MainPath>
+          <ScriptPath>./host.jsx</ScriptPath>
+          <CEFCommandLine>
+            <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--mixed-context</Parameter>
+          </CEFCommandLine>
+        </Resources>
+        <Lifecycle>
+          <AutoVisible>false</AutoVisible>
+          <StartOn>
+            <Event>applicationActivate</Event>
+          </StartOn>
+        </Lifecycle>
+        <UI>
+          <Type>Custom</Type>
+          <Geometry>
+            <Size>
+              <Height>1</Height>
+              <Width>1</Width>
+            </Size>
+          </Geometry>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+    <Extension Id="com.clukay.moyu.psd.panel">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>./index.html</MainPath>
+        </Resources>
+        <Lifecycle>
+          <AutoVisible>true</AutoVisible>
+        </Lifecycle>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>摸鱼 PSD</Menu>
+          <Geometry>
+            <Size>
+              <Height>420</Height>
+              <Width>320</Width>
+            </Size>
+            <MinSize>
+              <Height>240</Height>
+              <Width>260</Width>
+            </MinSize>
+            <MaxSize>
+              <Height>1400</Height>
+              <Width>1000</Width>
+            </MaxSize>
+          </Geometry>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+  </DispatchInfoList>
+</ExtensionManifest>
