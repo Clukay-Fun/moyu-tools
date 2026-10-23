@@ -166,14 +166,12 @@
 }
 
 /* 标题在框外，设置项包进带边框的块里 */
-/* 与条码模块的 .glass-card 同一套质感：毛玻璃 + 内高光 */
+/* 与工作区里的 .glass-card 同一套规则：浅描边 + 内层半透明底，不加阴影 */
 .settings-section-body {
   padding: 4px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  background: var(--card);
-  box-shadow: var(--shadow-small), var(--glass);
-  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--frame-border);
+  border-radius: var(--frame-radius);
+  background: var(--surface-inner);
 }
 
 .theme-options {

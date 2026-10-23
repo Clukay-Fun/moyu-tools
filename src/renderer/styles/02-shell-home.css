@@ -664,11 +664,16 @@ body[data-fullscreen="true"] .topbar {
   flex-direction: column;
   margin: 12px;
   overflow: hidden;
-  /* 工作区和外层壳是两块实色；用可见的中性描边把「白色圆角面板」画清楚，
-     避免只靠色差让人以为是内容区还有一层没铺满的背景 */
-  border: 1px solid var(--border-neutral);
+  /* 全应用唯一一层「卡片阴影」：轻描边 + 柔和外阴影。内部内容框不再各自带阴影 */
+  border: 1px solid var(--frame-border);
   border-radius: var(--workspace-radius);
   background: var(--workspace-bg);
+  box-shadow: var(--workspace-shadow);
+}
+
+/* 非默认背景（渐变 / 纯色）时两个主容器才做背景模糊：默认浅灰背后没有可模糊的东西 */
+body:not([data-bg="default"]) :is(.content, .rail) {
+  backdrop-filter: blur(var(--glass-blur-px)) saturate(140%);
 }
 
 /* 有二级栏时，它右侧 12px 的内边距已经是间隔，工作区不再重复留左外边距 */

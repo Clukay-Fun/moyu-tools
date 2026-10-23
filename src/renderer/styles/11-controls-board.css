@@ -43,7 +43,8 @@
   border: 1px solid var(--border);
   border-radius: var(--r-md);
   background: var(--menu-surface);
-  box-shadow: var(--shadow-panel), var(--glass-rim);
+  /* 下拉菜单只要轻量阴影；重阴影留给弹窗 */
+  box-shadow: var(--shadow-small), var(--glass-rim);
   backdrop-filter: var(--glass-blur);
   transform-origin: top left;
   transition: opacity var(--dur-popover) var(--ease-out),

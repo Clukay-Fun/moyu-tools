@@ -1,29 +1,15 @@
+/* 工作区里的内容框（文件列表、输出设置、工具面板、设置分组）：
+   V3 起只用浅描边 + 比工作区略白一点的半透明底，不加阴影、不做背景模糊；
+   阴影只留给工作区本身、弹窗和下拉菜单。 */
 .glass-card {
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  background: var(--card);
-  box-shadow: var(--shadow-small), var(--glass);
-  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--frame-border);
+  border-radius: var(--frame-radius);
+  background: var(--surface-inner);
 }
 
-/* 折射边：遮罩只留 1px 边框环，渐变叠在原边框上 */
 .glass-card,
 .settings-section-body {
   position: relative;
-}
-
-.glass-card::before,
-.settings-section-body::before {
-  position: absolute;
-  inset: -1px;
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--glass-edge);
-  content: "";
-  pointer-events: none;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
 }
 
 .gbtn,
