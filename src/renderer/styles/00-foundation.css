@@ -68,7 +68,8 @@
   --control-bg: rgba(255, 255, 255, 0.2);
   --control-bg-hover: rgba(255, 255, 255, 0.36);
   --control-bg-active: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.12);
-  --control-border: rgba(255, 255, 255, 0.58);
+  /* V3：内容区是半透明白底，白色描边会看不见；改用和 --frame-border 同一色系、稍重一点的中性描边 */
+  --control-border: rgba(140, 150, 170, 0.36);
   /* 浅色按钮不画边线（边框透明占位，尺寸不变），靠更白的底色 + 轻投影区分；深色沿用控件边框和底色 */
   --button-border: transparent;
   --button-bg: rgba(255, 255, 255, 0.62);

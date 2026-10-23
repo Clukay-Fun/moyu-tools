@@ -3,7 +3,28 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: var(--shell-bg);
+  background: var(--app-bg);
+}
+
+/* ══ 背景模式（设置 › 外观 › 背景与毛玻璃，modules/background.js 写 body[data-bg] 与 --bg-*）══
+   深色主题下自定义颜色只混入 22%，不把浅色直接铺满；比例与 background.js 的 DARK_MIX 一致。 */
+body {
+  --app-bg: var(--shell-bg);
+  --bg-tone-1: var(--bg-c1);
+  --bg-tone-2: var(--bg-c2);
+}
+
+body[data-theme="dark"] {
+  --bg-tone-1: color-mix(in srgb, var(--bg-c1) 22%, #0b1018);
+  --bg-tone-2: color-mix(in srgb, var(--bg-c2) 22%, #0b1018);
+}
+
+body[data-bg="gradient"] {
+  --app-bg: linear-gradient(var(--bg-angle), var(--bg-tone-1), var(--bg-tone-2));
+}
+
+body[data-bg="solid"] {
+  --app-bg: var(--bg-tone-1);
 }
 
 .panel {

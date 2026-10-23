@@ -124,7 +124,9 @@ const unusedTokens = [...defined.keys()].filter((token) => !used.has(token))
 // come from renderer JS, while palette swatches are inline HTML custom properties.
 const dynamicTokens = new Set([
   '--home-shine-x', '--home-shine-y', '--home-shine-core', '--home-shine-edge',
-  '--home-title-x', '--home-title-y', '--preset', '--swatch'
+  '--home-title-x', '--home-title-y', '--preset', '--swatch',
+  // 背景与毛玻璃：modules/background.js 写到 <html> 上
+  '--bg-c1', '--bg-c2', '--bg-angle'
 ])
 const undefinedTokens = [...used.keys()].filter((token) => !defined.has(token) && !dynamicTokens.has(token))
 

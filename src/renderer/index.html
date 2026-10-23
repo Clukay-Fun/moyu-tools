@@ -852,6 +852,58 @@
                             <label class="slider-row"><b class="blue">B</b><input type="number" id="color-b" min="0" max="255" value="230" /><span id="color-b-value">230</span></label>
                           </div>
                         </div>
+                        <div class="setting-row is-wide bg-settings-row">
+                          <span class="setting-label">背景与毛玻璃</span>
+                          <div class="bg-settings" id="bg-settings">
+                            <div class="bg-mode-options" role="radiogroup" aria-label="背景样式">
+                              <span class="bg-settings-title">背景样式</span>
+                              <label><input type="radio" name="bg-mode" value="default" checked />默认浅灰色背景</label>
+                              <label><input type="radio" name="bg-mode" value="gradient" />自定义渐变背景（预设为旧版紫蓝渐变）</label>
+                              <label><input type="radio" name="bg-mode" value="solid" />自定义纯色背景</label>
+                            </div>
+                            <div class="bg-colors" id="bg-colors">
+                              <label class="bg-color-field">
+                                <span>主颜色</span>
+                                <span class="bg-color-input">
+                                  <input type="color" id="bg-color1" value="#dccaff" aria-label="主颜色" />
+                                  <input type="text" id="bg-color1-hex" value="#DCCAFF" maxlength="7" spellcheck="false" aria-label="主颜色十六进制" />
+                                </span>
+                              </label>
+                              <label class="bg-color-field" id="bg-color2-field">
+                                <span>渐变颜色</span>
+                                <span class="bg-color-input">
+                                  <input type="color" id="bg-color2" value="#c8f0e8" aria-label="渐变颜色" />
+                                  <input type="text" id="bg-color2-hex" value="#C8F0E8" maxlength="7" spellcheck="false" aria-label="渐变颜色十六进制" />
+                                </span>
+                              </label>
+                            </div>
+                            <label class="bg-slider" id="bg-angle-field">
+                              <span>渐变方向</span><output id="bg-angle-value" for="bg-angle">135°</output>
+                              <input type="range" id="bg-angle" min="0" max="360" step="5" value="135" />
+                            </label>
+                            <hr class="bg-divider" />
+                            <label class="bg-slider">
+                              <span>毛玻璃不透明度</span><output id="bg-alpha-value" for="bg-alpha">82%</output>
+                              <input type="range" id="bg-alpha" min="50" max="100" value="82" />
+                            </label>
+                            <label class="bg-slider">
+                              <span>背景模糊程度</span><output id="bg-blur-value" for="bg-blur">14px</output>
+                              <input type="range" id="bg-blur" min="0" max="30" value="14" />
+                            </label>
+                            <div class="bg-preview-head">
+                              <span class="bg-settings-title">实时效果预览</span>
+                              <button class="gbtn ghost" id="bg-reset" type="button">恢复默认</button>
+                            </div>
+                            <!-- 预览直接用全局的背景与毛玻璃变量，和应用里看到的是同一套规则 -->
+                            <div class="bg-preview" aria-hidden="true">
+                              <div class="bg-preview-card">
+                                <b>PDF 转 PNG</b>
+                                <div class="bg-preview-inner">文件列表 · 毛玻璃预览</div>
+                                <div class="bg-preview-foot"><span>0 个文件</span><span class="bg-preview-btn">开始转换</span></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </section>
 

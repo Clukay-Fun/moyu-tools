@@ -9,6 +9,7 @@ import { initPdfTools } from './modules/pdf.js'
 import { initFormatFactory } from './modules/formatFactory.js'
 import { initUpdatePanel } from './modules/updatePanel.js'
 import { initDieline } from './modules/dieline.js'
+import { initBackgroundSettings } from './modules/background.js'
 import { ImageEditorModal } from './board/editor/modal.js'
 import { RecoveryScheduler } from './board/recovery.js'
 import { cleanIpcError, illustratorFailureHint, isComCancelled } from './comErrors.js'
@@ -2486,10 +2487,21 @@ function applyTheme(theme) {
   document.body.dataset.theme = resolved
   document.body.dataset.themePreference = theme
   localStorage.setItem('theme', theme)
-  // Windows 的系统窗口按钮不归 CSS 管：切换深浅时要同步 titleBarOverlay 底色。
-  // 其他平台该 IPC 直接返回，失败也不该打断主题切换。
-  window.api?.setTitleBarTheme?.(resolved)?.catch?.(() => {})
+  syncTitleBar()
 }
+
+// Windows 的系统窗口按钮不归 CSS 管：切换深浅、换背景时要同步 titleBarOverlay 底色。
+// 其他平台该 IPC 直接返回，失败也不该打断主题切换。
+function syncTitleBar() {
+  const theme = document.body.dataset.theme === 'dark' ? 'dark' : 'light'
+  const color = backgroundSettings?.titleBarColor(theme) ?? undefined
+  window.api?.setTitleBarTheme?.({ theme, color })?.catch?.(() => {})
+}
+
+// 背景与毛玻璃要在主题之前恢复：首帧就是用户选好的背景，不闪一下默认灰。
+// 先声明再赋值：初始化时就会回调 syncTitleBar，那时还拿不到返回值。
+let backgroundSettings = null
+backgroundSettings = initBackgroundSettings({ onChange: () => syncTitleBar() })
 
 document.querySelectorAll('input[name="theme"]').forEach((input) => {
   input.addEventListener('change', () => applyTheme(input.value))

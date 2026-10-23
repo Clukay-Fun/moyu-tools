@@ -947,3 +947,175 @@
   color: var(--faint);
   font-size: var(--fs-sm);
 }
+
+/* ══ 外观 › 背景与毛玻璃 ══ */
+.bg-settings-row {
+  align-items: start;
+}
+
+.bg-settings-row > .setting-label {
+  padding-top: 12px;
+}
+
+.bg-settings {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+  padding: 10px 0 14px;
+}
+
+.bg-settings-title {
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 600;
+}
+
+.bg-mode-options {
+  display: grid;
+  gap: 10px;
+}
+
+.bg-mode-options label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  cursor: pointer;
+}
+
+.bg-colors {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px 20px;
+}
+
+.bg-colors[data-disabled] {
+  opacity: 0.5;
+}
+
+.bg-color-field {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.bg-color-field[hidden] {
+  display: none;
+}
+
+.bg-color-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bg-color-input input[type="color"] {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--frame-border);
+  border-radius: var(--r-sm);
+  background: none;
+  cursor: pointer;
+}
+
+.bg-color-input input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.bg-color-input input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 7px; }
+
+.bg-color-input input[type="text"] {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--r-sm);
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  text-transform: uppercase;
+}
+
+.bg-slider {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 12px;
+  color: var(--foreground);
+  font-size: var(--fs-md);
+}
+
+.bg-slider[hidden] {
+  display: none;
+}
+
+.bg-slider output {
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.bg-slider input[type="range"] {
+  grid-column: 1 / -1;
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.bg-divider {
+  height: 1px;
+  margin: 2px 0;
+  border: 0;
+  background: var(--frame-border);
+}
+
+.bg-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* 预览：底是 --app-bg，卡片和内层走与工作区相同的毛玻璃变量 */
+.bg-preview {
+  padding: 18px;
+  border: 1px solid var(--frame-border);
+  border-radius: var(--frame-radius);
+  background: var(--app-bg);
+}
+
+.bg-preview-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--frame-border);
+  border-radius: var(--frame-radius);
+  background: var(--workspace-bg);
+  box-shadow: var(--workspace-shadow);
+  backdrop-filter: blur(var(--glass-blur-px)) saturate(140%);
+}
+
+.bg-preview-card b {
+  color: var(--foreground);
+  font-size: var(--fs-lg);
+}
+
+.bg-preview-inner {
+  padding: 12px 14px;
+  border: 1px solid var(--frame-border);
+  border-radius: 10px;
+  color: var(--muted);
+  background: var(--surface-inner);
+}
+
+.bg-preview-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+}
+
+.bg-preview-btn {
+  padding: 6px 14px;
+  border-radius: var(--r-sm);
+  color: var(--on-accent);
+  background: var(--accent);
+}

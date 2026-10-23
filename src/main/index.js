@@ -252,14 +252,21 @@ ipcMain.handle('app:info', (event) => {
 })
 
 /**
- * 深浅主题切换时同步 Windows 系统窗口按钮的底色。
- * 只接受主窗口、只接受 light | dark；其他平台没有 overlay，直接确认即可。
+ * 深浅主题切换、换背景时同步 Windows 系统窗口按钮的底色。
+ * 只接受主窗口；主题只认 light | dark，颜色只认 #rrggbb；其他平台没有 overlay，直接确认即可。
  */
-ipcMain.handle('window:set-titlebar-theme', (event, theme) => {
+ipcMain.handle('window:set-titlebar-theme', (event, value) => {
   assertMainWindowSender(event)
+  // 兼容旧调用：直接传 'light' | 'dark'；新调用传 { theme, color }，color 是背景在右上角的颜色
+  const { theme, color } = typeof value === 'string' ? { theme: value } : (value || {})
   if (theme !== 'light' && theme !== 'dark') throw new Error('不支持的主题')
+  if (color !== undefined && !/^#[0-9a-f]{6}$/i.test(String(color))) throw new Error('不支持的颜色')
   if (process.platform === 'win32' && mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.setTitleBarOverlay({ ...TITLEBAR_THEMES[theme], height: TITLEBAR_HEIGHT })
+    mainWindow.setTitleBarOverlay({
+      ...TITLEBAR_THEMES[theme],
+      ...(color ? { color } : {}),
+      height: TITLEBAR_HEIGHT
+    })
   }
   return { status: 'ok', theme }
 })
