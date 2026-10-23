@@ -3,19 +3,33 @@
 // 为什么必须先拍：改造后只有 After 的话，无法判断"变好了"还是"只是变了"。
 // 有了同尺寸同 DPR 的 Before，逐图对比才有意义。
 //
-// 用法：node scripts/capture-ui-baseline.mjs [输出目录]
-// 默认输出到 scope/ui-baseline/（scope 不入 Git）
+// 用法：node scripts/capture-ui-baseline.mjs [输出目录] [选项]
+//   --width=960 --height=640 --dpr=2   锁定视口（默认 1440×900 / DPR 2）
+//   --shell                            只拍外壳：各模块默认态、一级栏悬停、
+//                                      搜索弹层、头像菜单；跳过画布和独立窗口
+// 默认输出到 scope/ui-baseline/<宽>x<高>/（scope 不入 Git）
 //
-// ⚠ 窗口尺寸与 DPR 固定写死并记进 manifest：After 必须用同一组参数重拍，
+// ⚠ 窗口尺寸与 DPR 固定并记进 manifest：After 必须用同一组参数重拍，
 //   否则两张图尺寸不同，差异里混着布局重排，看不出真正的视觉变化。
 import { spawn } from 'node:child_process'
 import { mkdir, writeFile, rm } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 
-const OUT = resolve(process.argv[2] || 'scope/ui-baseline')
+const args = process.argv.slice(2)
+const positional = args.filter((arg) => !arg.startsWith('--'))
+const flag = (name, fallback) => {
+  const hit = args.find((arg) => arg.startsWith(`--${name}=`))
+  return hit ? hit.slice(name.length + 3) : fallback
+}
+const hasFlag = (name) => args.includes(`--${name}`)
+const WINDOW = {
+  width: Number(flag('width', 1440)),
+  height: Number(flag('height', 900)),
+  dpr: Number(flag('dpr', 2))
+}
+const SHELL_ONLY = hasFlag('shell')
+const OUT = resolve(positional[0] || `scope/ui-baseline/${WINDOW.width}x${WINDOW.height}`)
 const PORT = 9411
-/** 固定窗口尺寸。改这个值就等于作废已有基线，务必与 manifest 一起改。 */
-const WINDOW = { width: 1440, height: 900, dpr: 2 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 let shots = 0
@@ -116,9 +130,70 @@ try {
   await sleep(1200)
 
   const MODULES = [
-    ['pdf', 'PDF'], ['ai', 'Adobe'], ['bc', '条码'],
-    ['image', '图片画布'], ['video', '格式工厂'], ['dieline', '刀模'], ['more', '设置']
+    ['home', '主页'], ['pdf', 'PDF'], ['ai', 'Adobe'], ['bc', '条码'],
+    ['image', '图片画布'], ['video', '格式工厂'], ['dieline', '刀模'],
+    ['erp', '库存'], ['custom', '定制'], ['more', '设置']
   ]
+
+  /** 切模块：优先点一级栏；「设置」在一级栏移除后改走头像菜单。 */
+  async function openModule(module) {
+    const route = await P.ev(`(() => {
+      const nav = document.querySelector('.nav-ic[data-module="${module}"]')
+      if (nav) { nav.click(); return 'nav' }
+      if ('${module}' === 'more') {
+        const avatar = document.querySelector('.profile-avatar, #profile-avatar')
+        if (!avatar) return null
+        avatar.click()
+        const item = document.querySelector('#profile-menu [data-profile-action="settings"]')
+        if (!item) return null
+        item.click()
+        return 'profile-menu'
+      }
+      return null
+    })()`)
+    if (!route) console.log(`  ⚠ 找不到进入「${module}」的入口`)
+    return route
+  }
+
+  function moduleSettleTime(module) {
+    if (module === 'image') return 1400
+    if (module === 'dieline') return 2200
+    if (module === 'erp' || module === 'custom') return 1600
+    return 700
+  }
+
+  /** 搜索：S6 前是顶栏常驻输入框，S6 后是顶栏图标 + 居中弹窗。 */
+  async function openSearch() {
+    return P.ev(`(() => {
+      const trigger = document.querySelector('.topbar-search-btn')
+      if (trigger) { trigger.click(); return 'trigger' }
+      const input = document.querySelector('#feature-search')
+      if (input) { input.focus(); return 'input' }
+      return null
+    })()`)
+  }
+
+  async function typeSearchQuery(query) {
+    return P.ev(`(() => {
+      const input = document.querySelector('#search-dialog input, #feature-search')
+      if (!input) return false
+      input.value = ${JSON.stringify(query)}
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+      return true
+    })()`)
+  }
+
+  async function closeTransientLayer() {
+    await P.ev(`(() => {
+      document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+      document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+      document.body.click()
+      const input = document.querySelector('#search-dialog input, #feature-search')
+      if (input) { input.value = ''; input.dispatchEvent(new Event('input', { bubbles: true })) }
+      return true
+    })()`).catch(() => {})
+    await sleep(250)
+  }
 
   for (const theme of ['light', 'dark']) {
     console.log(`\n── ${theme === 'light' ? '亮色' : '暗色'}主题 ─────────────`)
@@ -126,14 +201,55 @@ try {
     await sleep(400)
 
     for (const [mod, label] of MODULES) {
-      await P.ev(`document.querySelector('.nav-ic[data-module="${mod}"]').click(); true`)
-      await sleep(mod === 'image' ? 1400 : mod === 'dieline' ? 2200 : 700)
+      await openModule(mod)
+      await sleep(moduleSettleTime(mod))
       lastPx = await shot(P, `${theme}-${mod}-默认`)
       record(`${theme}-${mod}-默认`, `${label} 模块 · 默认状态`)
     }
 
+    if (SHELL_ONLY) {
+      // 一级栏悬停：先回条码页，再真实移动指针
+      await openModule('bc')
+      await sleep(500)
+      const navBox = await P.ev(`(() => {
+        const b = document.querySelector('.nav-ic[data-module="bc"]').getBoundingClientRect()
+        return { x: Math.round(b.left + b.width / 2), y: Math.round(b.top + b.height / 2) } })()`)
+      await P.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: navBox.x, y: navBox.y })
+      await sleep(800)
+      lastPx = await shot(P, `${theme}-悬停-一级栏`)
+      record(`${theme}-悬停-一级栏`, '一级栏悬停 Tooltip')
+      await P.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 700, y: 500 })
+      await sleep(250)
+
+      const searchOpened = await openSearch()
+      if (searchOpened) {
+        await sleep(350)
+        await typeSearchQuery('水印')
+        await sleep(400)
+        lastPx = await shot(P, `${theme}-搜索-水印`)
+        record(`${theme}-搜索-水印`, '搜索「水印」结果')
+        await closeTransientLayer()
+      } else {
+        console.log('  ⚠ 未找到搜索入口')
+        manifest.缺失 = [...(manifest.缺失 || []), `${theme}-搜索`]
+      }
+
+      const hasProfile = await P.ev(`Boolean(document.querySelector('.profile-avatar, #profile-avatar'))`)
+      if (hasProfile) {
+        await P.ev(`document.querySelector('.profile-avatar, #profile-avatar').click(); true`)
+        await sleep(400)
+        lastPx = await shot(P, `${theme}-头像菜单`)
+        record(`${theme}-头像菜单`, '头像菜单打开态')
+        await closeTransientLayer()
+      } else {
+        console.log('  ⚠ 未找到头像入口（S4 之前属预期）')
+        manifest.缺失 = [...(manifest.缺失 || []), `${theme}-头像菜单`]
+      }
+      continue
+    }
+
     // ── 关键状态：只在最有代表性的模块上拍，避免 24 张里一半是重复 ──
-    await P.ev(`document.querySelector('.nav-ic[data-module="image"]').click(); true`)
+    await openModule('image')
     await sleep(1200)
 
     // 弹层打开
@@ -169,45 +285,47 @@ try {
       await new Promise(r => setTimeout(r, 1000)); return true })()`)
   }
 
-  // ── 独立窗口：截图覆盖层 ──────────────────────────────────
-  console.log('\n── 独立窗口 ─────────────────────')
-  await P.ev(`document.body.dataset.theme = 'light'; true`)
-  await P.ev(`window.api.startScreenshot(); true`).catch(() => {})
-  const overlay = await connect((x) => x.url.includes('screenshot.html'))
-  if (overlay) {
-    await sleep(900)
-    lastPx = await shot(overlay, 'screenshot-覆盖层')
-    record('screenshot-覆盖层', '区域截图覆盖层（独立窗口）')
-    await overlay.ev(`window.api.cancelScreenshot(new URLSearchParams(location.search).get('session'))`)
-      .catch(() => {})
-    overlay.ws.close()
-  } else {
-    console.log('  ⚠ 未能打开截图覆盖层（可能缺少录屏权限），该项基线缺失')
-    manifest.缺失 = [...(manifest.缺失 || []), 'screenshot.html']
-  }
-  await sleep(1200)
+  if (!SHELL_ONLY) {
+    // ── 独立窗口：截图覆盖层 ──────────────────────────────────
+    console.log('\n── 独立窗口 ─────────────────────')
+    await P.ev(`document.body.dataset.theme = 'light'; true`)
+    await P.ev(`window.api.startScreenshot(); true`).catch(() => {})
+    const overlay = await connect((x) => x.url.includes('screenshot.html'))
+    if (overlay) {
+      await sleep(900)
+      lastPx = await shot(overlay, 'screenshot-覆盖层')
+      record('screenshot-覆盖层', '区域截图覆盖层（独立窗口）')
+      await overlay.ev(`window.api.cancelScreenshot(new URLSearchParams(location.search).get('session'))`)
+        .catch(() => {})
+      overlay.ws.close()
+    } else {
+      console.log('  ⚠ 未能打开截图覆盖层（可能缺少录屏权限），该项基线缺失')
+      manifest.缺失 = [...(manifest.缺失 || []), 'screenshot.html']
+    }
+    await sleep(1200)
 
-  // ── 独立窗口：钉图 ───────────────────────────────────────
-  await P.ev(`(async () => {
-    const c = document.createElement('canvas'); c.width = 420; c.height = 280
-    const g = c.getContext('2d')
-    g.fillStyle = '#6978e6'; g.fillRect(0, 0, 420, 280)
-    g.fillStyle = '#fff'; g.font = '24px sans-serif'; g.fillText('钉图基线', 130, 150)
-    const blob = await new Promise(r => c.toBlob(r, 'image/png'))
-    await window.api.pinScreenshot(new Uint8Array(await blob.arrayBuffer()))
-    return true
-  })()`).catch((e) => console.log('  ⚠ 钉图失败：' + e.message))
-  const pin = await connect((x) => x.url.includes('pin.html'))
-  if (pin) {
-    await sleep(800)
-    lastPx = await shot(pin, 'pin-钉图窗口')
-    record('pin-钉图窗口', '桌面钉图（独立窗口）')
-    await pin.ev(`window.api.closePinnedScreenshot(new URLSearchParams(location.search).get('pin'))`)
-      .catch(() => {})
-    pin.ws.close()
-  } else {
-    console.log('  ⚠ 未能打开钉图窗口，该项基线缺失')
-    manifest.缺失 = [...(manifest.缺失 || []), 'pin.html']
+    // ── 独立窗口：钉图 ───────────────────────────────────────
+    await P.ev(`(async () => {
+      const c = document.createElement('canvas'); c.width = 420; c.height = 280
+      const g = c.getContext('2d')
+      g.fillStyle = '#6978e6'; g.fillRect(0, 0, 420, 280)
+      g.fillStyle = '#fff'; g.font = '24px sans-serif'; g.fillText('钉图基线', 130, 150)
+      const blob = await new Promise(r => c.toBlob(r, 'image/png'))
+      await window.api.pinScreenshot(new Uint8Array(await blob.arrayBuffer()))
+      return true
+    })()`).catch((e) => console.log('  ⚠ 钉图失败：' + e.message))
+    const pin = await connect((x) => x.url.includes('pin.html'))
+    if (pin) {
+      await sleep(800)
+      lastPx = await shot(pin, 'pin-钉图窗口')
+      record('pin-钉图窗口', '桌面钉图（独立窗口）')
+      await pin.ev(`window.api.closePinnedScreenshot(new URLSearchParams(location.search).get('pin'))`)
+        .catch(() => {})
+      pin.ws.close()
+    } else {
+      console.log('  ⚠ 未能打开钉图窗口，该项基线缺失')
+      manifest.缺失 = [...(manifest.缺失 || []), 'pin.html']
+    }
   }
 
   await writeFile(join(OUT, 'manifest.json'), JSON.stringify(manifest, null, 2), 'utf8')
