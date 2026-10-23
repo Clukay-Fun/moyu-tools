@@ -137,7 +137,6 @@
 .dieline-legend .crease-swatch { background: repeating-linear-gradient(90deg, var(--dieline-crease) 0 4px, transparent 4px 7px); }
 
 .dieline-canvas-actions { display: flex; align-items: center; gap: 6px; }
-.dieline-canvas-actions .gbtn { min-width: 30px; height: 28px; padding: 0 9px; }
 .dieline-zoom-input { position: relative; display: inline-flex; }
 .dieline-zoom-input input {
   width: 58px;
@@ -235,15 +234,10 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  font-size: 14px;
   opacity: 0.75;
 }
 .dieline-3d-reset:hover { opacity: 1; }
 .dieline-3d-card .dieline-stage-error { inset: 44px 12px auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.dieline-3d-card .dieline-stage-error .gbtn { height: 24px; padding: 0 8px; }
 
 .dieline-3d-controls {
   position: absolute;

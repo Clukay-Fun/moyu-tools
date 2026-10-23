@@ -39,81 +39,6 @@
   background: var(--hairline);
 }
 
-.canvas-command-bar .cbtn {
-  min-height: 36px;
-  border-color: transparent;
-  background: transparent;
-}
-
-.canvas-icon-btn {
-  width: 36px;
-  min-width: 36px;
-  padding: 0;
-}
-
-.canvas-icon-btn .ic {
-  width: 18px;
-  height: 18px;
-}
-
-.canvas-command-bar .cbtn[aria-pressed="true"],
-.canvas-command-bar .cbtn.is-active {
-  color: var(--accent);
-  background: var(--accent-10);
-}
-
-.cbtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-2);
-  padding: 7px 13px;
-  border: 1px solid var(--button-border);
-  border-radius: var(--radius-small);
-  color: var(--foreground);
-  background: var(--button-bg);
-  box-shadow: var(--button-shadow);
-  font: 13px var(--font);
-  cursor: pointer;
-  transition:
-    color var(--dur-hover) ease,
-    background-color var(--dur-hover) ease,
-    border-color var(--dur-hover) ease,
-    transform 160ms var(--ease-out);
-}
-@media (hover: hover) and (pointer: fine) {
-  .cbtn:hover { border-color: var(--control-border-hover); color: var(--accent); background: var(--control-bg-hover); }
-}
-.cbtn:active { transform: scale(var(--press-scale)); }
-.cbtn.primary {
-  border-color: transparent;
-  color: var(--on-accent);
-  background: var(--accent);
-}
-@media (hover: hover) and (pointer: fine) {
-  .cbtn.primary:hover { color: var(--on-accent); background: var(--accent); filter: brightness(1.06); }
-}
-.cbtn.ghost {
-  padding: 5px 10px;
-  font-size: var(--fs-md);
-  background: var(--button-bg);
-  box-shadow: var(--button-shadow);
-  backdrop-filter: var(--glass-blur-control);
-}
-
-/* 截图分裂按钮：视觉是一个整体 */
-.split-button { position: relative; display: flex; }
-.split-button .cbtn:first-child {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-.split-button .split-arrow {
-  padding: 7px 8px;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-left: 1px solid rgba(255, 255, 255, 0.28);
-}
-
 .menu-wrap { position: relative; }
 
 .cmd-menu {
@@ -200,15 +125,7 @@
   gap: var(--sp-2);
 }
 
-.canvas-actions .cbtn {
-  min-height: 36px;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  box-shadow: var(--shadow-small);
-}
-
 .canvas-view-trigger {
-  min-width: 36px;
   font-size: 17px;
   letter-spacing: 1px;
 }

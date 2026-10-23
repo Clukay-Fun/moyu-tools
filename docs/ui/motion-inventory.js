@@ -91,19 +91,89 @@ window.MOTION_INVENTORY = [
     "media": null
   },
   {
-    "selector": ".search-results",
+    "selector": ".m-btn",
     "kind": "transition",
-    "property": "opacity",
-    "duration": "var(--dur-popover)",
+    "property": "transform",
+    "duration": "var(--dur-press)",
     "easing": "var(--ease-out)",
     "tokenized": true,
     "media": null
   },
   {
-    "selector": ".search-results",
+    "selector": ".m-btn",
+    "kind": "transition",
+    "property": "color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-btn",
+    "kind": "transition",
+    "property": "border-color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-btn",
+    "kind": "transition",
+    "property": "background-color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-btn",
+    "kind": "transition",
+    "property": "filter",
+    "duration": "var(--dur-press)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-btn:active",
+    "kind": "press",
+    "property": "transform",
+    "value": "scale(var(--press-scale))",
+    "media": null
+  },
+  {
+    "selector": ".topbar-search-btn",
+    "kind": "transition",
+    "property": "color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".topbar-search-btn",
+    "kind": "transition",
+    "property": "background-color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".profile-avatar",
+    "kind": "transition",
+    "property": "background-color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".profile-avatar",
     "kind": "transition",
     "property": "transform",
-    "duration": "var(--dur-popover)",
+    "duration": "var(--dur-press)",
     "easing": "var(--ease-out)",
     "tokenized": true,
     "media": null
@@ -183,15 +253,6 @@ window.MOTION_INVENTORY = [
   {
     "selector": ".submenu-item",
     "kind": "transition",
-    "property": "border-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".submenu-item",
-    "kind": "transition",
     "property": "background-color",
     "duration": "var(--dur-hover)",
     "easing": "ease",
@@ -214,58 +275,6 @@ window.MOTION_INVENTORY = [
     "duration": "14s",
     "easing": "ease-in-out",
     "tokenized": false,
-    "media": null
-  },
-  {
-    "selector": ".gbtn, .primary",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "var(--dur-press)",
-    "easing": "var(--ease-out)",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".gbtn, .primary",
-    "kind": "transition",
-    "property": "color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".gbtn, .primary",
-    "kind": "transition",
-    "property": "border-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".gbtn, .primary",
-    "kind": "transition",
-    "property": "background-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".gbtn, .primary",
-    "kind": "transition",
-    "property": "filter",
-    "duration": "var(--dur-press)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".gbtn:active, .primary:active",
-    "kind": "press",
-    "property": "transform",
-    "value": "scale(var(--press-scale))",
     "media": null
   },
   {
@@ -311,6 +320,31 @@ window.MOTION_INVENTORY = [
     "duration": "var(--dur-spring-land)",
     "easing": "var(--ease-spring-land)",
     "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".barcode-mode-switch button",
+    "kind": "transition",
+    "property": "color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".barcode-mode-switch button",
+    "kind": "transition",
+    "property": "transform",
+    "duration": "var(--dur-press)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".barcode-mode-switch button:active",
+    "kind": "press",
+    "property": "transform",
+    "value": "scale(var(--press-scale))",
     "media": null
   },
   {
@@ -465,49 +499,6 @@ window.MOTION_INVENTORY = [
     "media": null
   },
   {
-    "selector": ".cbtn",
-    "kind": "transition",
-    "property": "color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".cbtn",
-    "kind": "transition",
-    "property": "background-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".cbtn",
-    "kind": "transition",
-    "property": "border-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".cbtn",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "160ms",
-    "easing": "var(--ease-out)",
-    "tokenized": false,
-    "media": null
-  },
-  {
-    "selector": ".cbtn:active",
-    "kind": "press",
-    "property": "transform",
-    "value": "scale(var(--press-scale))",
-    "media": null
-  },
-  {
     "selector": ".cmd-menu",
     "kind": "transition",
     "property": "opacity",
@@ -580,74 +571,6 @@ window.MOTION_INVENTORY = [
     "media": null
   },
   {
-    "selector": ".txt-btn",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "var(--dur-press)",
-    "easing": "var(--ease-out)",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".txt-btn",
-    "kind": "transition",
-    "property": "color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".txt-btn",
-    "kind": "transition",
-    "property": "background-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".txt-btn:active:not(:disabled)",
-    "kind": "press",
-    "property": "transform",
-    "value": "scale(var(--press-scale))",
-    "media": null
-  },
-  {
-    "selector": ".obj-btn",
-    "kind": "transition",
-    "property": "color",
-    "duration": "130ms",
-    "easing": "ease",
-    "tokenized": false,
-    "media": null
-  },
-  {
-    "selector": ".obj-btn",
-    "kind": "transition",
-    "property": "background-color",
-    "duration": "130ms",
-    "easing": "ease",
-    "tokenized": false,
-    "media": null
-  },
-  {
-    "selector": ".obj-btn",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "160ms",
-    "easing": "var(--ease-out)",
-    "tokenized": false,
-    "media": null
-  },
-  {
-    "selector": ".obj-btn:active",
-    "kind": "press",
-    "property": "transform",
-    "value": "scale(0.94)",
-    "media": null
-  },
-  {
     "selector": ".img-editor",
     "kind": "transition",
     "property": "opacity",
@@ -663,49 +586,6 @@ window.MOTION_INVENTORY = [
     "duration": "var(--dur-panel)",
     "easing": "var(--ease-out)",
     "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".tool-btn",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "var(--dur-press)",
-    "easing": "var(--ease-out)",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".tool-btn",
-    "kind": "transition",
-    "property": "background-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".tool-btn",
-    "kind": "transition",
-    "property": "color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".tool-btn",
-    "kind": "transition",
-    "property": "border-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".tool-btn:active",
-    "kind": "press",
-    "property": "transform",
-    "value": "scale(0.96)",
     "media": null
   },
   {

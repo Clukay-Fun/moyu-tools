@@ -78,35 +78,13 @@
   gap: var(--sp-2);
 }
 
-.format-grid button,
-.app-button {
-  padding: 8px 4px;
-  border: 1px solid var(--button-border);
-  border-radius: var(--r-sm);
-  color: var(--muted);
-  background: var(--button-bg);
-  box-shadow: var(--button-shadow);
-  cursor: pointer;
-}
-
-.format-grid button:hover,
-.app-button:hover {
-  border-color: var(--control-border-hover);
-  color: var(--accent);
-  background: var(--control-bg-active);
-}
-
 .app-grid {
   display: flex;
   gap: var(--sp-3);
 }
 
 .app-button {
-  display: flex;
   flex: 1;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-1);
 }
 
 .app-button b {
@@ -514,7 +492,7 @@
   font-size: var(--fs-sm);
 }
 
-.image-empty .gbtn {
+.image-empty .m-btn {
   margin-top: 4px;
 }
 
@@ -654,7 +632,7 @@
   line-height: 1.65;
 }
 
-.image-side .gbtn {
+.image-side .m-btn {
   width: 100%;
 }
 
@@ -909,6 +887,6 @@
   font-size: 17px;
 }
 
-.center-hint .gbtn {
+.center-hint .m-btn {
   margin-top: 4px;
 }

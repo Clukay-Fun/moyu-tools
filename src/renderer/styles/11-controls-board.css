@@ -213,34 +213,6 @@
 /* 触发钮：外观与工具栏其他按钮一致，右侧带一个下拉标记 */
 .txt-trigger::after { content: " ▾"; color: var(--faint); font-size: var(--fs-xs); }
 
-.txt-btn {
-  padding: 5px 9px;
-  border: 1px solid transparent;
-  border-radius: var(--r-sm);
-  background: transparent;
-  color: var(--foreground);
-  font: inherit;
-  font-size: var(--fs-md);
-  cursor: pointer;
-  transition: transform var(--dur-press) var(--ease-out),
-              color var(--dur-hover) ease, background-color var(--dur-hover) ease;
-}
-.txt-btn.icon-only {
-  display: inline-grid;
-  width: var(--icon-btn-sm);
-  height: var(--icon-btn-sm);
-  place-items: center;
-  padding: 0;
-}
-@media (hover: hover) and (pointer: fine) {
-  .txt-btn:hover:not(:disabled) { color: var(--accent); background: var(--accent-10); }
-}
-.txt-btn:active:not(:disabled) { transform: scale(var(--press-scale)); }
-.txt-btn[aria-pressed="true"] { color: var(--accent); background: var(--accent-18); }
-.txt-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.txt-btn.txt-danger { color: var(--danger); }
-.txt-btn.txt-danger:disabled { color: var(--muted); }
-
 .txt-select {
   height: var(--control-height);
   max-width: 104px;
@@ -312,78 +284,10 @@
   pointer-events: auto;
 }
 
-.obj-btn {
-  /* 图标 + 短标签横排；整个矩形都是点击区，不依赖单个字符 */
-  display: grid;
-  grid-template-columns: 18px;
-  align-items: center;
-  justify-content: center;
-  justify-items: center;
-  gap: var(--sp-2);
-  width: auto;
-  min-width: 0;
-  min-height: var(--h-md);
-  width: 36px;
-  padding: 0;
-  border: 0;
-  border-radius: var(--r-sm);
-  color: var(--muted);
-  background: transparent;
-  font: inherit;
-  font-size: var(--fs-md);
-  text-align: left;
-  cursor: pointer;
-  transition:
-    color 130ms ease,
-    background-color 130ms ease,
-    transform 160ms var(--ease-out);
-}
-@media (hover: hover) and (pointer: fine) {
-  .obj-btn:hover { color: var(--accent); background: var(--accent-10); }
-}
-.obj-btn:active { transform: scale(0.94); }
-.obj-btn[hidden] { display: none; }
-
-.obj-ic {
-  /* 尺寸由 .ic 的 token 给（16px），这里只负责在 18px 栅格里居中。
-     font-size 已无意义——里面是 svg 不是字符了（V2）。 */
-  width: 18px;
-}
 .obj-label {
   display: none;
 }
 
-/* 收起按钮只有箭头，不占标签宽度 */
-.obj-collapse {
-  grid-template-columns: 1fr;
-  justify-items: center;
-  min-width: 22px;
-  width: 22px;
-  padding: 0;
-}
-
-/* 锁定态：按钮高亮；文案由 JS 在「锁定 / 已锁定」间切换 */
-.obj-lock[aria-pressed="true"] {
-  color: var(--accent);
-  background: var(--accent-18);
-  font-weight: 600;
-}
-
-.obj-danger { color: var(--danger); }
-@media (hover: hover) and (pointer: fine) {
-  .obj-danger:hover { color: var(--on-accent); background: var(--danger); }
-}
-.obj-btn[aria-pressed="true"] { color: var(--accent); background: var(--accent-10); }
-
-.object-toolbar > .obj-btn[data-obj="collapse"] {
-  width: 18px;
-  height: var(--h-sm);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  background: var(--card);
-  backdrop-filter: blur(20px);
-  font-size: var(--fs-sm);
-}
 /* 翻到左侧时收起箭头方向反转 */
 .object-toolbar.flipped { flex-direction: row; }
 

@@ -1,6 +1,7 @@
 @import url('./styles/00-foundation.css');
 @import url('./styles/01-tokens.css');
 @import url('./styles/01-controls.css');
+@import url('./styles/components/button.css');
 @import url('./styles/02-shell-home.css');
 @import url('./styles/03-shared-pdf.css');
 @import url('./styles/04-pdf.css');

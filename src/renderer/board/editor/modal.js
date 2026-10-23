@@ -466,7 +466,7 @@ export class ImageEditorModal {
 
     const reset = document.createElement('button')
     reset.type = 'button'
-    reset.className = 'gbtn'
+    reset.className = 'm-btn'
     reset.textContent = '重置调色'
     reset.addEventListener('click', () => {
       this.#applyOperation('adjust', Object.fromEntries(ADJUSTMENT_KEYS.map((k) => [k, 0])))

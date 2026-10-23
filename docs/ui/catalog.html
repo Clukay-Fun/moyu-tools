@@ -63,7 +63,7 @@
     .cat-motion-stage { position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; min-height: 96px; padding: 14px; border-radius: 10px; background: var(--background); }
     /* 模拟 :active / :hover —— 伪类无法用脚本触发，这里照抄应用里对应规则的取值，过渡仍由控件自身的 transition 驱动 */
     .cat-motion-stage[data-state="on"] .cat-sim { transform: scale(var(--cat-press, 1)); }
-    [data-loop="hover"][data-state="on"] .gbtn.cat-sim { border-color: var(--control-border-hover); color: var(--accent); background: var(--control-bg-active); transform: none; }
+    [data-loop="hover"][data-state="on"] .m-btn.cat-sim { border-color: var(--control-border-hover); color: var(--accent); background: var(--control-bg-active); transform: none; }
     [data-loop="hover"][data-state="on"] .app-menu .cat-sim { color: var(--accent); background: var(--accent-10); transform: none; }
     .cat-drop { display: grid; width: 100%; min-height: 70px; place-items: center; color: var(--muted); font-size: 12px; }
     [data-loop="drop"][data-state="on"] .cat-drop { border-color: color-mix(in srgb, var(--accent) 78%, transparent); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 24%, transparent); background-color: color-mix(in srgb, var(--accent) 7%, transparent); }
@@ -161,14 +161,14 @@
         <div class="cat-stage cat-glass-stage" data-theme="light"><span class="cat-label">浅色</span>
           <div class="glass-card cat-glass-demo">
             <div class="segments"><button type="button" class="on">单个</button><button type="button">批量</button></div>
-            <div style="display:flex;gap:8px"><button class="gbtn" type="button">次要按钮</button><button class="cbtn ghost" type="button">画布按钮</button></div>
+            <div style="display:flex;gap:8px"><button class="m-btn" type="button">次要按钮</button><button class="m-btn m-btn--sm" type="button">小按钮</button></div>
           </div>
           <div class="app-menu cat-glass-menu"><button type="button">打开项目</button><button type="button">保存项目</button><button type="button">导出 PNG</button></div>
         </div>
         <div class="cat-stage cat-glass-stage" data-theme="dark"><span class="cat-label">深色</span>
           <div class="glass-card cat-glass-demo">
             <div class="segments"><button type="button" class="on">单个</button><button type="button">批量</button></div>
-            <div style="display:flex;gap:8px"><button class="gbtn" type="button">次要按钮</button><button class="cbtn ghost" type="button">画布按钮</button></div>
+            <div style="display:flex;gap:8px"><button class="m-btn" type="button">次要按钮</button><button class="m-btn m-btn--sm" type="button">小按钮</button></div>
           </div>
           <div class="app-menu cat-glass-menu"><button type="button">打开项目</button><button type="button">保存项目</button><button type="button">导出 PNG</button></div>
         </div>
@@ -180,7 +180,7 @@
     <section class="cat-section" id="motion">
       <div class="cat-section-head">
         <h2>动效</h2>
-        <button class="gbtn" type="button" id="motion-toggle">暂停演示</button>
+        <button class="m-btn" type="button" id="motion-toggle">暂停演示</button>
       </div>
       <p>下面每张卡片都在自动循环播放应用里的真实动效（用的是应用本身的类名和过渡，不是另画的动画）。动效只服务于反馈：按下有回弹、浮层有出现、状态切换有滑动。时长与缓动一律取变量。</p>
 
@@ -196,9 +196,9 @@
       <div class="cat-motion-grid">
         <article class="cat-motion-card">
           <div class="cat-motion-stage" data-loop="press">
-            <button class="gbtn cat-sim" type="button" style="--cat-press:var(--press-scale)">.gbtn</button>
-            <button class="gbtn primary cat-sim" type="button" style="--cat-press:var(--press-scale)">.primary</button>
-            <button class="cbtn cat-sim" type="button" style="--cat-press:var(--press-scale)">.cbtn</button>
+            <button class="m-btn cat-sim" type="button" style="--cat-press:var(--press-scale)">.m-btn</button>
+            <button class="m-btn m-btn--primary cat-sim" type="button" style="--cat-press:var(--press-scale)">--primary</button>
+            <button class="m-btn m-btn--quiet cat-sim" type="button" style="--cat-press:var(--press-scale)">--quiet</button>
           </div>
           <h3>按下回弹</h3>
           <p><code>scale(var(--press-scale))</code>（0.97）· <code>--dur-press</code> · <code>--ease-out</code></p>
@@ -207,7 +207,7 @@
 
         <article class="cat-motion-card">
           <div class="cat-motion-stage" data-loop="hover">
-            <button class="gbtn cat-sim" type="button">悬停按钮</button>
+            <button class="m-btn cat-sim" type="button">悬停按钮</button>
             <div class="app-menu cat-static-menu" style="min-width:110px"><button type="button" class="cat-sim">菜单项</button><button type="button">菜单项</button></div>
           </div>
           <h3>悬停反馈</h3>
@@ -218,7 +218,7 @@
         <article class="cat-motion-card">
           <div class="cat-motion-stage" data-loop="popover" style="align-items:flex-start;height:150px">
             <div class="cat-popover-host">
-              <button class="gbtn" type="button">更多操作 ▾</button>
+              <button class="m-btn" type="button">更多操作 ▾</button>
               <div class="app-menu" role="menu" hidden><button type="button">复制</button><button type="button">重命名</button><button type="button">删除</button></div>
             </div>
           </div>
@@ -434,14 +434,16 @@
       <p>悬停、按下为真实交互，把鼠标放上去看；禁用态用 <code>disabled</code> 属性，不要只加类名。</p>
       <div class="cat-item">
         <dl class="cat-meta">
-          <dt>主按钮</dt><dd><code>.gbtn.primary</code> / <code>.primary</code>——每个区域最多一个，承担当前任务的最终动作（导出、保存、生成）</dd>
-          <dt>次按钮</dt><dd><code>.gbtn</code>——添加文件、打开、辅助动作</dd>
-          <dt>按钮外观</dt><dd>边框、底色、阴影取 <code>--button-border</code> / <code>--button-bg</code> / <code>--button-shadow</code>：浅色<b>不画边线</b>（边框透明占位），靠更白的底色 + 轻投影区分，也不加顶部白高光；深色沿用控件边框与玻璃高光</dd>
-          <dt>弱按钮</dt><dd><code>.gbtn.ghost</code>——清空、恢复默认、取消这类不改变结果的动作</dd>
-          <dt>危险按钮</dt><dd><code>.gbtn.danger</code>——删除、覆盖；颜色取 <code>--danger</code></dd>
+          <dt>组件</dt><dd><code>.m-btn</code>（<code>styles/components/button.css</code>）——全应用只有这一种按钮，数值来自 <code>01-tokens.css</code> 的 <code>--btn-*</code>；页面 CSS 只写宽度、位置</dd>
+          <dt>主按钮</dt><dd><code>.m-btn--primary</code>——每个区域最多一个，承担当前任务的最终动作（导出、保存、生成）</dd>
+          <dt>次按钮</dt><dd><code>.m-btn</code>——添加文件、打开、清空、取消等辅助动作</dd>
+          <dt>危险按钮</dt><dd><code>.m-btn--danger</code>——删除、覆盖；颜色取 <code>--danger</code></dd>
+          <dt>透明按钮</dt><dd><code>.m-btn--quiet</code>——工具条里的按钮：平时无底无边，悬停淡强调色；选中用 <code>aria-pressed="true"</code> 或 <code>.is-active</code></dd>
+          <dt>尺寸</dt><dd>默认 36 · <code>--md</code> 32 · <code>--sm</code> 28</dd>
+          <dt>形状</dt><dd><code>--icon</code> 正方形图标按钮（36 配 18 图标，32/28 配 16）· <code>--tile</code> 上图标下小字的方块 · <code>--stack</code> 竖排工具（图片编辑）</dd>
+          <dt>按钮外观</dt><dd>边框、底色、阴影取 <code>--button-border</code> / <code>--button-bg</code> / <code>--button-shadow</code>：浅色<b>不画边线</b>（边框透明占位），靠更白的底色 + 轻投影区分；深色沿用控件边框与玻璃高光</dd>
+          <dt>隐藏</dt><dd><code>hidden</code> 属性始终生效（<code>.m-btn[hidden]</code>）</dd>
           <dt>现用模块</dt><dd>全部模块</dd>
-          <dt>画布按钮</dt><dd><code>.cbtn</code> / <code>.cbtn.primary</code> / <code>.cbtn.ghost</code>，只放图标时加 <code>.canvas-icon-btn</code>——画布与图片编辑器的浮动工具栏专用，比 <code>.gbtn</code> 更紧凑</dd>
-          <dt>工具按钮</dt><dd><code>.tool-btn</code>——图标在上、文字在下的竖排工具入口（图片编辑）</dd>
           <dt>导航按钮</dt><dd><code>.nav-ic</code>，当前页加 <code>.active</code>——只用于左侧主导航</dd>
         </dl>
         <div class="cat-pair">
@@ -578,28 +580,29 @@
   <!-- 示例模板：两套主题各渲染一份，保证浅色/深色看到的是同一段 HTML -->
   <template id="demo-buttons">
     <div class="cat-row">
-      <div class="cat-state"><button class="gbtn primary" type="button">导出 PDF</button><small>主按钮</small></div>
-      <div class="cat-state"><button class="gbtn" type="button">添加文件</button><small>次按钮</small></div>
-      <div class="cat-state"><button class="gbtn ghost" type="button">恢复默认</button><small>弱按钮</small></div>
-      <div class="cat-state"><button class="gbtn danger" type="button">删除</button><small>危险</small></div>
+      <div class="cat-state"><button class="m-btn m-btn--primary" type="button">导出 PDF</button><small>--primary</small></div>
+      <div class="cat-state"><button class="m-btn" type="button">添加文件</button><small>.m-btn</small></div>
+      <div class="cat-state"><button class="m-btn m-btn--danger" type="button">删除</button><small>--danger</small></div>
+      <div class="cat-state"><button class="m-btn m-btn--quiet" type="button">透明</button><small>--quiet</small></div>
     </div>
     <div class="cat-row">
-      <div class="cat-state"><button class="gbtn primary" type="button" disabled>导出 PDF</button><small>禁用</small></div>
-      <div class="cat-state"><button class="gbtn" type="button" disabled>添加文件</button><small>禁用</small></div>
-      <div class="cat-state"><button class="gbtn ghost" type="button" disabled>恢复默认</button><small>禁用</small></div>
+      <div class="cat-state"><button class="m-btn m-btn--primary" type="button" disabled>导出 PDF</button><small>禁用</small></div>
+      <div class="cat-state"><button class="m-btn" type="button" disabled>添加文件</button><small>禁用</small></div>
+      <div class="cat-state"><button class="m-btn m-btn--quiet" type="button" aria-pressed="true">已选中</button><small>quiet 选中</small></div>
     </div>
     <div class="cat-row">
-      <div class="cat-state"><button class="gbtn" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-plus"></use></svg>添加文件</button><small>带图标</small></div>
-      <div class="cat-state"><button class="gbtn primary" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-download"></use></svg>导出</button><small>主按钮 + 图标</small></div>
+      <div class="cat-state"><button class="m-btn" type="button">36</button><small>默认</small></div>
+      <div class="cat-state"><button class="m-btn m-btn--md" type="button">32</button><small>--md</small></div>
+      <div class="cat-state"><button class="m-btn m-btn--sm" type="button">28</button><small>--sm</small></div>
+      <div class="cat-state"><button class="m-btn" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-plus"></use></svg>添加文件</button><small>带图标</small></div>
     </div>
     <div class="cat-row">
-      <div class="cat-state"><button class="cbtn primary" type="button">完成</button><small>.cbtn.primary</small></div>
-      <div class="cat-state"><button class="cbtn" type="button">导入</button><small>.cbtn</small></div>
-      <div class="cat-state"><button class="cbtn ghost" type="button">取消</button><small>.cbtn.ghost</small></div>
-      <div class="cat-state"><button class="cbtn canvas-icon-btn" type="button" aria-label="导入图片"><svg class="ic" aria-hidden="true"><use href="#ic-plus"></use></svg></button><small>仅图标</small></div>
+      <div class="cat-state"><button class="m-btn m-btn--icon" type="button" aria-label="导入"><svg class="ic" aria-hidden="true"><use href="#ic-plus"></use></svg></button><small>--icon</small></div>
+      <div class="cat-state"><button class="m-btn m-btn--quiet m-btn--icon" type="button" aria-label="导入"><svg class="ic" aria-hidden="true"><use href="#ic-plus"></use></svg></button><small>--quiet --icon</small></div>
+      <div class="cat-state"><button class="m-btn m-btn--quiet m-btn--sm m-btn--icon" type="button" aria-label="导入"><svg class="ic" aria-hidden="true"><use href="#ic-plus"></use></svg></button><small>--sm --icon</small></div>
+      <div class="cat-state"><button class="m-btn m-btn--quiet m-btn--stack" type="button"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-crop"></use></svg>裁切</button><small>--stack</small></div>
     </div>
     <div class="cat-row">
-      <div class="cat-state"><button class="tool-btn" type="button"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-crop"></use></svg>裁切</button><small>.tool-btn</small></div>
       <div class="cat-state"><button class="nav-ic" type="button" aria-label="主页"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-home"></use></svg></button><small>.nav-ic · 名称走 aria-label / data-tip</small></div>
       <div class="cat-state"><button class="nav-ic active" type="button" aria-label="主页"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-home"></use></svg></button><small>.nav-ic.active</small></div>
     </div>
@@ -647,7 +650,7 @@
         </div>
       </div>
       <div class="cat-popover-host">
-        <button type="button" class="gbtn" data-toggle-menu="command">更多操作 ▾</button>
+        <button type="button" class="m-btn" data-toggle-menu="command">更多操作 ▾</button>
         <div class="app-menu" role="menu" data-menu="command" hidden>
           <button type="button" aria-checked="true">显示网格</button>
           <button type="button">重命名</button>

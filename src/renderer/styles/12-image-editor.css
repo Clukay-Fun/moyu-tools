@@ -57,29 +57,7 @@
   border-right: 1px solid var(--hairline);
 }
 
-.tool-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-1);
-  padding: 9px 4px;
-  border: 1px solid transparent;
-  border-radius: var(--r-md);
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-size: var(--fs-sm);
-  cursor: pointer;
-  /* 只过渡具体属性，不用 all */
-  transition: transform var(--dur-press) var(--ease-out),
-              background-color var(--dur-hover) ease,
-              color var(--dur-hover) ease,
-              border-color var(--dur-hover) ease;
-}
-
 .tool-btn span { font-size: 17px; line-height: 1; }
-/* 图标与文字混排时，图标要跟着基线走 */
-.gbtn > .ic, .cbtn > .ic { vertical-align: -3px; margin-right: 2px; }
 
 /* 工具与动作之间的分隔。动作不是模式——点了立刻执行完、没有按下态，
    视觉上必须和上面那组分开，否则用户会以为点了"钉住"就进入了钉住模式。 */
@@ -93,28 +71,7 @@
 
 /* 动作按钮：比工具再淡一档，且永远不会有 aria-pressed 的高亮态 */
 .tool-btn.action-btn { color: var(--faint); }
-.tool-btn.action-btn[hidden] { display: none; }
-@media (hover: hover) and (pointer: fine) {
-  .tool-btn.action-btn:hover:not(:disabled) { color: var(--accent); background: var(--accent-10); }
-}
-.tool-btn.action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* 只读（图片被锁定）时，被禁用的工具要一眼看出来 */
-.img-editor.read-only .tool-btn:disabled { opacity: 0.35; }
-
-@media (hover: hover) {
-  .tool-btn:hover { color: var(--accent); background: var(--accent-10); }
-}
-
-.tool-btn:active { transform: scale(0.96); }
-
-.tool-btn[aria-pressed="true"] {
-  color: var(--accent);
-  background: var(--accent-18);
-  border-color: var(--accent);
-  font-weight: 600;
-  box-shadow: inset 2px 0 0 var(--accent);
-}
+.tool-btn.action-btn:hover:not(:disabled) { color: var(--btn-hover-fg); }
 
 /* ── 画布区 ── */
 .img-editor-stage {
@@ -230,7 +187,7 @@
 /* 尊重系统的减少动态偏好 */
 @media (prefers-reduced-motion: reduce) {
   .img-editor,
-  .tool-btn,
+  .m-btn,
   .img-editor-swatch {
     transition-duration: 1ms;
   }
@@ -245,7 +202,7 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
-  :where(button, a, .txt-btn, .tool-btn, .obj-btn, .cbtn, .gbtn, .nav-ic):active {
+  :where(button, a, .m-btn, .nav-ic):active {
     transform: none !important;
   }
   .cmd-menu, .app-menu, .img-editor, .toast {

@@ -1,0 +1,175 @@
+/* ══ 按钮 m-btn ══════════════════════════════════════════════
+   全应用只有这一种按钮，外观差异全用修饰类表达；页面 CSS 只管宽度、位置这类布局。
+   外观以原 .gbtn（使用最多）为基准；数值全部来自 01-tokens.css 的 --btn-*。
+
+   <button class="m-btn">次要</button>
+   <button class="m-btn m-btn--primary">主要</button>
+   <button class="m-btn m-btn--danger">删除</button>
+   <button class="m-btn m-btn--quiet">工具条里的透明按钮</button>
+   <button class="m-btn m-btn--quiet m-btn--icon" aria-label="…"><svg class="ic">…</svg></button>
+
+   尺寸：默认 36（lg）· m-btn--md 32 · m-btn--sm 28
+   形状：m-btn--icon 正方形图标按钮 · m-btn--tile 上图标下文字的方块 · m-btn--stack 竖排（图标在上）
+   状态：:hover · :active · :disabled · [aria-pressed="true"] / .is-active（选中，只对 quiet 有意义） */
+.m-btn {
+  --_h: var(--btn-h-lg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--btn-gap);
+  height: var(--_h);
+  padding: 0 var(--btn-pad-x);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--btn-radius);
+  color: var(--btn-fg);
+  background: var(--btn-bg);
+  box-shadow: var(--btn-shadow);
+  font: inherit;
+  font-size: var(--btn-font-size);
+  white-space: nowrap;
+  cursor: pointer;
+  backdrop-filter: var(--glass-blur-control);
+  transition: transform var(--dur-press) var(--ease-out),
+              color var(--dur-hover) ease,
+              border-color var(--dur-hover) ease,
+              background-color var(--dur-hover) ease,
+              filter var(--dur-press) ease;
+}
+
+.m-btn > .ic {
+  flex: none;
+}
+
+.m-btn:hover {
+  border-color: var(--btn-hover-border);
+  color: var(--btn-hover-fg);
+  background: var(--btn-hover-bg);
+}
+
+.m-btn:active {
+  transform: scale(var(--press-scale));
+}
+
+.m-btn:disabled,
+.m-btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  filter: none;
+  opacity: var(--btn-disabled-opacity);
+  transform: none;
+}
+
+.m-btn:disabled:hover {
+  border-color: var(--btn-border);
+  color: var(--btn-fg);
+  background: var(--btn-bg);
+}
+
+.m-btn[hidden] {
+  display: none;
+}
+
+/* ── 变体 ── */
+.m-btn--primary,
+.m-btn--primary:hover,
+.m-btn--primary:disabled:hover {
+  border-color: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  background: var(--btn-primary-bg);
+}
+
+.m-btn--primary {
+  box-shadow: var(--btn-primary-shadow);
+  font-weight: 650;
+}
+
+.m-btn--primary:hover {
+  filter: brightness(1.06);
+}
+
+.m-btn--danger {
+  color: var(--danger);
+}
+
+.m-btn--danger:hover {
+  border-color: color-mix(in srgb, var(--danger) 34%, transparent);
+  color: color-mix(in srgb, var(--danger) 88%, var(--foreground));
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+/* 透明按钮：工具条、图标按钮。平时没有底和边，悬停淡强调色，选中更深一档 */
+.m-btn--quiet {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.m-btn--quiet:hover {
+  border-color: transparent;
+  background: var(--btn-quiet-hover-bg);
+}
+
+.m-btn--quiet:disabled:hover {
+  border-color: transparent;
+  background: transparent;
+}
+
+.m-btn--quiet[aria-pressed="true"],
+.m-btn--quiet.is-active {
+  color: var(--btn-hover-fg);
+  background: var(--btn-quiet-pressed-bg);
+  font-weight: 600;
+}
+
+.m-btn--quiet.m-btn--danger:hover {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+/* ── 尺寸 ── */
+.m-btn--md {
+  --_h: var(--btn-h-md);
+}
+
+.m-btn--sm {
+  --_h: var(--btn-h-sm);
+  padding: 0 var(--btn-pad-x-sm);
+  border-radius: var(--btn-radius-sm);
+  font-size: var(--fs-md);
+}
+
+/* ── 形状 ── */
+.m-btn--icon {
+  width: var(--_h);
+  min-width: var(--_h);
+  padding: 0;
+}
+
+/* 图标随按钮尺寸：36 配 18，32 和 28 配 16 */
+.m-btn--icon > .ic {
+  width: var(--btn-icon-lg);
+  height: var(--btn-icon-lg);
+}
+
+:is(.m-btn--md, .m-btn--sm).m-btn--icon > .ic {
+  width: var(--ic-md);
+  height: var(--ic-md);
+}
+
+/* 方块：上面图标、下面小字（发送到 Illustrator / Photoshop） */
+.m-btn--tile {
+  height: auto;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-1);
+  border-radius: var(--btn-radius-sm);
+}
+
+/* 竖排：图片编辑器左侧工具栏（图标在上、名称在下） */
+.m-btn--stack {
+  height: auto;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: 9px var(--sp-1);
+  font-size: var(--fs-sm);
+}

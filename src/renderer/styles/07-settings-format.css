@@ -99,7 +99,6 @@
 .update-notice-copy .version-hero-meta { margin-top: 6px; color: var(--faint); font-size: var(--fs-sm); }
 #update-status[data-status="up-to-date"] > .ic { color: var(--success); }
 .update-notice .update-actions { flex: none; }
-.update-notice .gbtn[hidden] { display: none; }
 
 .update-notes { margin-top: 8px; padding: 10px 12px; background: rgba(127, 127, 127, 0.12); border-radius: 10px; font-size: var(--fs-body); line-height: 1.5; max-height: 160px; overflow: auto; }
 .update-notes.is-plain { white-space: pre-wrap; }
@@ -1122,11 +1121,4 @@ body[data-bg="classic"] .bg-preview {
   align-items: center;
   justify-content: space-between;
   color: var(--muted);
-}
-
-.bg-preview-btn {
-  padding: 6px 14px;
-  border-radius: var(--r-sm);
-  color: var(--on-accent);
-  background: var(--accent);
 }

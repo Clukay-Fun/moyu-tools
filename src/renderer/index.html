@@ -94,8 +94,8 @@
 
               <section class="page" id="page-pdf">
                 <div class="toolbar toolbar-wrap">
-                  <button class="gbtn" id="pdf-add-files" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 上传 PDF</button>
-                  <button class="gbtn ghost" id="pdf-clear-files" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
+                  <button class="m-btn" id="pdf-add-files" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 上传 PDF</button>
+                  <button class="m-btn" id="pdf-clear-files" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
                   <div class="pdf-options" id="pdf-options"></div>
                 </div>
                 <div class="glass-card file-list pdf-drop-zone" id="pdf-drop-zone">
@@ -129,9 +129,9 @@
                         <div class="empty" id="pdf-watermark-preview-empty">添加 PDF 后显示预览</div>
                       </div>
                       <footer class="pdf-watermark-preview-nav">
-                        <button class="gbtn" id="pdf-watermark-previous-page" type="button">上一页</button>
+                        <button class="m-btn" id="pdf-watermark-previous-page" type="button">上一页</button>
                         <span id="pdf-watermark-page-status">第 0 / 0 页</span>
-                        <button class="gbtn" id="pdf-watermark-next-page" type="button">下一页</button>
+                        <button class="m-btn" id="pdf-watermark-next-page" type="button">下一页</button>
                       </footer>
                     </section>
                   </div>
@@ -159,7 +159,7 @@
                       <label>字号
                         <input id="pdf-watermark-font-size" type="number" min="12" max="160" value="42" />
                       </label>
-                      <button class="gbtn" id="pdf-watermark-image-button" type="button" hidden>选择水印图片</button>
+                      <button class="m-btn" id="pdf-watermark-image-button" type="button" hidden>选择水印图片</button>
                       <input id="pdf-watermark-image-input" type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" hidden />
                       <span class="pdf-option-status" id="pdf-watermark-image-name" hidden>尚未选择图片</span>
                     </section>
@@ -220,7 +220,7 @@
                         </select>
                       </label>
                     </section>
-                    <button class="primary pdf-watermark-run" id="run-pdf-watermark-action" type="button" disabled>开始</button>
+                    <button class="m-btn m-btn--primary pdf-watermark-run" id="run-pdf-watermark-action" type="button" disabled>开始</button>
                   </aside>
                 </div>
                 <div class="glass-card result pdf-result-card">
@@ -229,16 +229,16 @@
                       <b>输出位置</b>
                       <span class="pdf-output-path" id="pdf-output-path">添加文件后自动设置</span>
                     </div>
-                    <button class="gbtn pdf-output-picker" id="choose-pdf-output" type="button">更改</button>
+                    <button class="m-btn pdf-output-picker" id="choose-pdf-output" type="button">更改</button>
                   </div>
                   <div class="pdf-run-row">
                     <div class="pdf-result-summary">
                       <span class="result-dot" id="pdf-result-dot"></span>
                       <span id="pdf-result-text">0 个文件 · 等待添加</span>
                     </div>
-                    <button class="primary" id="run-pdf-action" type="button" disabled>开始</button>
-                    <button class="gbtn format-cancel" id="pdf-cancel-action" type="button" hidden>取消任务</button>
-                    <button class="gbtn open" id="open-pdf-output" type="button" aria-label="打开所在位置" disabled><svg class="ic" aria-hidden="true"><use href="#ic-open"></use></svg></button>
+                    <button class="m-btn m-btn--primary" id="run-pdf-action" type="button" disabled>开始</button>
+                    <button class="m-btn format-cancel" id="pdf-cancel-action" type="button" hidden>取消任务</button>
+                    <button class="m-btn open" id="open-pdf-output" type="button" aria-label="打开所在位置" disabled><svg class="ic" aria-hidden="true"><use href="#ic-open"></use></svg></button>
                   </div>
                 </div>
                 <input id="pdf-file-input" type="file" accept="application/pdf,.pdf" hidden />
@@ -247,9 +247,9 @@
 
               <section class="page" id="page-ai">
                 <div class="toolbar toolbar-wrap">
-                  <button class="gbtn" id="illustrator-add-files" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 添加文件</button>
-                  <button class="gbtn" id="illustrator-add-folder" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-folder-add"></use></svg> 添加文件夹</button>
-                  <button class="gbtn ghost" id="illustrator-clear" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
+                  <button class="m-btn" id="illustrator-add-files" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 添加文件</button>
+                  <button class="m-btn" id="illustrator-add-folder" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-folder-add"></use></svg> 添加文件夹</button>
+                  <button class="m-btn" id="illustrator-clear" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
                 </div>
                 <div class="glass-card illustrator-config">
                   <div class="illustrator-config-group">
@@ -262,8 +262,8 @@
                   </div>
                   <label class="toggle-wrap"><input id="illustrator-same-directory" type="checkbox" checked /><span class="toggle"></span>输出到原文件目录</label>
                   <span class="toolbar-space"></span>
-                  <button class="primary" id="illustrator-run" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>开始处理</button>
-                  <button class="gbtn danger" id="illustrator-stop" type="button" hidden><svg class="ic" aria-hidden="true"><use href="#ic-stop"></use></svg>停止任务</button>
+                  <button class="m-btn m-btn--primary" id="illustrator-run" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>开始处理</button>
+                  <button class="m-btn m-btn--danger" id="illustrator-stop" type="button" hidden><svg class="ic" aria-hidden="true"><use href="#ic-stop"></use></svg>停止任务</button>
                 </div>
                 <div class="glass-card file-list file-drop-target" id="illustrator-drop-zone">
                   <div class="pdf-list-title">文件列表</div>
@@ -276,15 +276,15 @@
                     <div>拖入 Illustrator 文件或文件夹</div>
                     <small>支持 .ai 文件 · 需要 Windows 与已安装的 Adobe Illustrator</small>
                     <div class="illustrator-empty-actions">
-                      <button class="gbtn" id="illustrator-empty-add-files" type="button">添加文件</button>
-                      <button class="gbtn" id="illustrator-empty-add-folder" type="button">添加文件夹</button>
+                      <button class="m-btn" id="illustrator-empty-add-files" type="button">添加文件</button>
+                      <button class="m-btn" id="illustrator-empty-add-folder" type="button">添加文件夹</button>
                     </div>
                   </div>
                 </div>
                 <div class="glass-card illustrator-progress-card">
                   <div class="illustrator-section-head">
                     <div><b>批处理进度</b><span id="illustrator-progress-summary">0 个文件 · 等待任务</span></div>
-                    <button class="gbtn open" id="illustrator-open-output" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-open"></use></svg>打开输出目录</button>
+                    <button class="m-btn open" id="illustrator-open-output" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-open"></use></svg>打开输出目录</button>
                   </div>
                   <div class="illustrator-progress-row">
                     <div class="progress-track"><div class="progress-fill" id="illustrator-progress-fill"></div></div>
@@ -333,15 +333,15 @@
                           <small>支持每行一个编码；粘贴 CSV 时读取第一列；最多 500 条。</small>
                         </label>
                         <div class="batch-generate-row">
-                          <button class="primary" id="generate-barcode-batch" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>批量生成</button>
+                          <button class="m-btn m-btn--primary" id="generate-barcode-batch" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>批量生成</button>
                         </div>
                       </div>
                       <div class="glass-card barcode-batch-section barcode-batch-result-section">
                         <div class="batch-result-head"><b>批量结果</b><span class="batch-summary" id="barcode-batch-summary">等待输入，最多 500 条。</span></div>
                         <div class="batch-list" id="barcode-batch-list"></div>
                         <div class="batch-export-actions">
-                          <button class="gbtn" id="save-barcode-batch-svg" type="button" disabled>导出全部 SVG</button>
-                          <button class="gbtn" id="save-barcode-batch-png" type="button" disabled>导出全部 PNG</button>
+                          <button class="m-btn" id="save-barcode-batch-svg" type="button" disabled>导出全部 SVG</button>
+                          <button class="m-btn" id="save-barcode-batch-png" type="button" disabled>导出全部 PNG</button>
                         </div>
                       </div>
                     </div>
@@ -388,20 +388,20 @@
                       <div class="barcode-export-section">
                         <span class="label">导出</span>
                         <div class="format-grid">
-                          <button id="save-barcode-svg" type="button">保存 SVG</button>
-                          <button id="save-barcode-png" type="button">保存 PNG</button>
-                          <button id="save-barcode-eps" type="button">保存 EPS</button>
-                          <button id="copy-barcode-vector" type="button">复制矢量图</button>
+                          <button class="m-btn m-btn--md" id="save-barcode-svg" type="button">保存 SVG</button>
+                          <button class="m-btn m-btn--md" id="save-barcode-png" type="button">保存 PNG</button>
+                          <button class="m-btn m-btn--md" id="save-barcode-eps" type="button">保存 EPS</button>
+                          <button class="m-btn m-btn--md" id="copy-barcode-vector" type="button">复制矢量图</button>
                         </div>
                       </div>
                     </div>
                     <div class="glass-card control-card">
                       <span class="label">发送到</span>
                       <div class="app-grid">
-                        <button class="app-button" id="open-barcode-illustrator" type="button"><b class="ai-icon">Ai</b><span>Illustrator</span></button>
-                        <button class="app-button" id="open-barcode-photoshop" type="button"><b class="ps-icon">Ps</b><span>Photoshop</span></button>
+                        <button class="m-btn m-btn--tile app-button" id="open-barcode-illustrator" type="button"><b class="ai-icon">Ai</b><span>Illustrator</span></button>
+                        <button class="m-btn m-btn--tile app-button" id="open-barcode-photoshop" type="button"><b class="ps-icon">Ps</b><span>Photoshop</span></button>
                       </div>
-                      <button class="gbtn board-wide-button" id="copy-barcode-ungrouped" type="button" disabled>
+                      <button class="m-btn board-wide-button" id="copy-barcode-ungrouped" type="button" disabled>
                         复制到 Illustrator（未编组）
                       </button>
                     </div>
@@ -415,12 +415,12 @@
                   <div class="canvas-command-bar" role="toolbar" aria-label="画布工具">
                     <!-- 删除滚动截图后只剩一种截图方式，分裂按钮的下拉不再有内容，
                          整体收敛为单按钮。 -->
-                    <button class="cbtn canvas-icon-btn" id="cmd-capture" type="button" aria-label="区域截图" data-tip="区域截图"><svg class="ic" aria-hidden="true"><use href="#ic-capture"></use></svg></button>
-                    <button class="cbtn canvas-icon-btn" id="cmd-import" type="button" aria-label="导入图片" data-tip="导入图片"><svg class="ic" aria-hidden="true"><use href="#ic-import"></use></svg></button>
-                    <button class="cbtn canvas-icon-btn" id="cmd-text" type="button" aria-label="添加文本" data-tip="添加文本"><svg class="ic" aria-hidden="true"><use href="#ic-textbox"></use></svg></button>
+                    <button class="m-btn m-btn--quiet m-btn--icon" id="cmd-capture" type="button" aria-label="区域截图" data-tip="区域截图"><svg class="ic" aria-hidden="true"><use href="#ic-capture"></use></svg></button>
+                    <button class="m-btn m-btn--quiet m-btn--icon" id="cmd-import" type="button" aria-label="导入图片" data-tip="导入图片"><svg class="ic" aria-hidden="true"><use href="#ic-import"></use></svg></button>
+                    <button class="m-btn m-btn--quiet m-btn--icon" id="cmd-text" type="button" aria-label="添加文本" data-tip="添加文本"><svg class="ic" aria-hidden="true"><use href="#ic-textbox"></use></svg></button>
                     <span class="canvas-toolbar-separator" aria-hidden="true"></span>
                     <div class="menu-wrap">
-                      <button class="cbtn canvas-icon-btn" id="cmd-project" type="button"
+                      <button class="m-btn m-btn--quiet m-btn--icon" id="cmd-project" type="button"
                               aria-label="项目" data-tip="项目" aria-haspopup="true" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#ic-project"></use></svg></button>
                       <div class="cmd-menu" id="project-menu" role="menu" hidden>
                         <button type="button" role="menuitem" data-project="new">新建</button>
@@ -437,9 +437,9 @@
                   <div class="canvas-shell checkerboard" id="board-stage">
                     <canvas id="board-canvas-element"></canvas>
                     <div class="canvas-actions">
-                      <button class="cbtn ghost canvas-icon-btn" id="cmd-background" type="button"
+                      <button class="m-btn m-btn--icon" id="cmd-background" type="button"
                               aria-label="背景" data-tip="背景" aria-haspopup="true" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#ic-background"></use></svg></button>
-                      <button class="cbtn ghost canvas-icon-btn canvas-view-trigger" id="cmd-view" type="button"
+                      <button class="m-btn m-btn--icon canvas-view-trigger" id="cmd-view" type="button"
                               aria-label="视图" data-tip="视图" aria-haspopup="true" aria-expanded="false">···</button>
                       <div class="cmd-menu canvas-popover align-right" id="background-menu" role="menu" hidden>
                         <div class="canvas-popover-title">背景</div>
@@ -476,22 +476,22 @@
               <div class="object-toolbar" id="object-toolbar" hidden>
                 <div class="obj-group" id="obj-actions">
                   <!-- 主操作：图标 + 短标签。整个矩形可点，不依赖单个字符。 -->
-                  <button class="obj-btn" data-obj="edit" type="button" aria-label="编辑" data-tip="编辑">
+                  <button class="m-btn m-btn--quiet m-btn--md m-btn--icon obj-btn" data-obj="edit" type="button" aria-label="编辑" data-tip="编辑">
                     <svg class="ic obj-ic" aria-hidden="true" focusable="false"><use href="#ic-edit"></use></svg><span class="obj-label">编辑</span>
                   </button>
-                  <button class="obj-btn" data-obj="copy" type="button" aria-label="复制" data-tip="复制">
+                  <button class="m-btn m-btn--quiet m-btn--md m-btn--icon obj-btn" data-obj="copy" type="button" aria-label="复制" data-tip="复制">
                     <svg class="ic obj-ic" aria-hidden="true" focusable="false"><use href="#ic-copy"></use></svg><span class="obj-label">复制</span>
                   </button>
-                  <button class="obj-btn obj-lock" data-obj="lock" type="button" aria-label="锁定" data-tip="锁定" aria-pressed="false">
+                  <button class="m-btn m-btn--quiet m-btn--md m-btn--icon obj-btn obj-lock" data-obj="lock" type="button" aria-label="锁定" data-tip="锁定" aria-pressed="false">
                     <svg class="ic obj-ic" aria-hidden="true" focusable="false"><use href="#ic-unlock"></use></svg><span class="obj-label">锁定</span>
                   </button>
-                  <button class="obj-btn" data-obj="front" type="button" aria-label="置于顶层" data-tip="置于顶层">
+                  <button class="m-btn m-btn--quiet m-btn--md m-btn--icon obj-btn" data-obj="front" type="button" aria-label="置于顶层" data-tip="置于顶层">
                     <svg class="ic obj-ic" aria-hidden="true" focusable="false"><use href="#ic-bring-front"></use></svg><span class="obj-label">置顶</span>
                   </button>
-                  <button class="obj-btn" data-obj="back" type="button" aria-label="置于底层" data-tip="置于底层">
+                  <button class="m-btn m-btn--quiet m-btn--md m-btn--icon obj-btn" data-obj="back" type="button" aria-label="置于底层" data-tip="置于底层">
                     <svg class="ic obj-ic" aria-hidden="true" focusable="false"><use href="#ic-send-back"></use></svg><span class="obj-label">置底</span>
                   </button>
-                  <button class="obj-btn obj-danger" data-obj="delete" type="button" aria-label="删除" data-tip="删除">
+                  <button class="m-btn m-btn--quiet m-btn--md m-btn--icon m-btn--danger obj-btn" data-obj="delete" type="button" aria-label="删除" data-tip="删除">
                     <svg class="ic obj-ic" aria-hidden="true" focusable="false"><use href="#ic-delete"></use></svg><span class="obj-label">删除</span>
                   </button>
                 </div>
@@ -507,29 +507,29 @@
                      避免和"置底"挨着误点。
                      ⚠ 没有"编辑文字"——双击文本框是唯一的文字编辑入口，
                      两个入口会让"当前是不是在编辑"变得不确定。 -->
-                <button class="txt-btn icon-only" data-text="copy" type="button" aria-label="复制" data-tip="复制"><svg class="ic" aria-hidden="true"><use href="#ic-copy"></use></svg></button>
-                <button class="txt-btn txt-lock icon-only" data-text="lock" type="button" aria-pressed="false" aria-label="锁定" data-tip="锁定"><svg class="ic" aria-hidden="true"><use href="#ic-unlock"></use></svg></button>
-                <button class="txt-btn icon-only" data-text="front" type="button" aria-label="置顶" data-tip="置顶"><svg class="ic" aria-hidden="true"><use href="#ic-bring-front"></use></svg></button>
-                <button class="txt-btn icon-only" data-text="back" type="button" aria-label="置底" data-tip="置底"><svg class="ic" aria-hidden="true"><use href="#ic-send-back"></use></svg></button>
+                <button class="m-btn m-btn--quiet m-btn--sm m-btn--icon txt-btn" data-text="copy" type="button" aria-label="复制" data-tip="复制"><svg class="ic" aria-hidden="true"><use href="#ic-copy"></use></svg></button>
+                <button class="m-btn m-btn--quiet m-btn--sm m-btn--icon txt-btn txt-lock" data-text="lock" type="button" aria-pressed="false" aria-label="锁定" data-tip="锁定"><svg class="ic" aria-hidden="true"><use href="#ic-unlock"></use></svg></button>
+                <button class="m-btn m-btn--quiet m-btn--sm m-btn--icon txt-btn" data-text="front" type="button" aria-label="置顶" data-tip="置顶"><svg class="ic" aria-hidden="true"><use href="#ic-bring-front"></use></svg></button>
+                <button class="m-btn m-btn--quiet m-btn--sm m-btn--icon txt-btn" data-text="back" type="button" aria-label="置底" data-tip="置底"><svg class="ic" aria-hidden="true"><use href="#ic-send-back"></use></svg></button>
                 <span class="txt-sep"></span>
                 <!-- 字体与对齐改用应用自己的菜单：原生 <select> 的弹窗由系统绘制，
                      透明度与圆角控制不了，压在画布上会露出下面的内容。 -->
-                <button class="txt-btn txt-trigger" id="text-font-trigger" type="button"
+                <button class="m-btn m-btn--quiet m-btn--sm txt-btn txt-trigger" id="text-font-trigger" type="button"
                         aria-haspopup="true" aria-expanded="false" data-tip="字体">字体</button>
                 <input class="txt-color" type="color" id="text-fill" aria-label="文字颜色" data-tip="文字颜色" />
-                <button class="txt-btn icon-only" data-text="bold" type="button" aria-pressed="false" aria-label="粗体" data-tip="粗体"><svg class="ic" aria-hidden="true"><use href="#ic-bold"></use></svg></button>
-                <button class="txt-btn txt-trigger" id="text-align-trigger" type="button"
+                <button class="m-btn m-btn--quiet m-btn--sm m-btn--icon txt-btn" data-text="bold" type="button" aria-pressed="false" aria-label="粗体" data-tip="粗体"><svg class="ic" aria-hidden="true"><use href="#ic-bold"></use></svg></button>
+                <button class="m-btn m-btn--quiet m-btn--sm txt-btn txt-trigger" id="text-align-trigger" type="button"
                         aria-haspopup="true" aria-expanded="false" data-tip="对齐">对齐</button>
                 <!-- 缩放比例是可输入框（S3）：拖控制点时实时回显，也可手输 -->
                 <input class="txt-scale" id="text-scale" type="text" inputmode="numeric"
                        value="100%" aria-label="缩放比例" data-tip="缩放比例（10%～1000%）" />
                 <span class="txt-sep"></span>
-                <button class="txt-btn txt-danger icon-only" data-text="delete" type="button" aria-label="删除" data-tip="删除"><svg class="ic" aria-hidden="true"><use href="#ic-delete"></use></svg></button>
+                <button class="m-btn m-btn--quiet m-btn--sm m-btn--icon m-btn--danger txt-btn" data-text="delete" type="button" aria-label="删除" data-tip="删除"><svg class="ic" aria-hidden="true"><use href="#ic-delete"></use></svg></button>
               </div>
 
               <div class="canvas-empty" id="board-empty">
                       <div>拖入、粘贴或导入图片开始创作</div>
-                      <button class="cbtn canvas-empty-import" id="board-empty-import" type="button">导入图片</button>
+                      <button class="m-btn canvas-empty-import" id="board-empty-import" type="button">导入图片</button>
                       <small>支持 Ctrl / ⌘ + V 直接粘贴</small>
                     </div>
                     <div class="canvas-zoom-controls" role="toolbar" aria-label="画布缩放">
@@ -552,21 +552,21 @@
                      两者合并属于独立重构，不在本轮范围。 -->
                 <div id="board-controls" hidden aria-hidden="true">
                   <div class="board-toolbar">
-                    <button class="gbtn" id="board-open" type="button">打开</button>
-                    <button class="gbtn" id="board-save" type="button">保存</button>
-                    <button class="gbtn" id="board-save-as" type="button">另存为</button>
+                    <button class="m-btn" id="board-open" type="button">打开</button>
+                    <button class="m-btn" id="board-save" type="button">保存</button>
+                    <button class="m-btn" id="board-save-as" type="button">另存为</button>
                     <span class="toolbar-space"></span>
-                    <button class="primary" id="board-add-capture" type="button">添加截图</button>
-                    <button class="gbtn" id="board-add-file" type="button">添加图片文件</button>
-                    <button class="gbtn" id="board-add-text" type="button">插入文字</button>
-                    <button class="gbtn" id="board-add-textbox" type="button">插入文本框</button>
-                    <button class="gbtn" id="board-connect" type="button" aria-pressed="false" disabled hidden>连接</button>
+                    <button class="m-btn m-btn--primary" id="board-add-capture" type="button">添加截图</button>
+                    <button class="m-btn" id="board-add-file" type="button">添加图片文件</button>
+                    <button class="m-btn" id="board-add-text" type="button">插入文字</button>
+                    <button class="m-btn" id="board-add-textbox" type="button">插入文本框</button>
+                    <button class="m-btn" id="board-connect" type="button" aria-pressed="false" disabled hidden>连接</button>
                     <span class="toolbar-space"></span>
                     <div class="board-layer-group">
-                      <button class="gbtn" id="board-front" type="button" disabled>置顶</button>
-                      <button class="gbtn" id="board-forward" type="button" disabled>上移</button>
-                      <button class="gbtn" id="board-backward" type="button" disabled>下移</button>
-                      <button class="gbtn" id="board-back" type="button" disabled>置底</button>
+                      <button class="m-btn" id="board-front" type="button" disabled>置顶</button>
+                      <button class="m-btn" id="board-forward" type="button" disabled>上移</button>
+                      <button class="m-btn" id="board-backward" type="button" disabled>下移</button>
+                      <button class="m-btn" id="board-back" type="button" disabled>置底</button>
                     </div>
                     <div class="board-edge-style" id="board-edge-style" hidden>
                       <select id="board-edge-shape" aria-label="连线形状">
@@ -580,21 +580,21 @@
                       </select>
                       <label>线宽<input type="number" id="board-edge-width" min="1" max="12" step="1" /></label>
                       <label>颜色<input type="color" id="board-edge-color" /></label>
-                      <button class="gbtn danger" id="board-edge-delete" type="button">删除连线</button>
+                      <button class="m-btn m-btn--danger" id="board-edge-delete" type="button">删除连线</button>
                     </div>
-                    <button class="gbtn danger" id="board-delete" type="button" disabled>删除</button>
+                    <button class="m-btn m-btn--danger" id="board-delete" type="button" disabled>删除</button>
                     <!-- 导出只有 PNG / JPG，范围只有全部/选中；不提供视口与倍率（规格 8.2） -->
                     <div class="board-export-group">
                       <select id="board-export-range" aria-label="导出范围">
                         <option value="content">全部内容</option>
                         <option value="selection">选中对象</option>
                       </select>
-                      <button class="gbtn" id="board-export-png" type="button">导出 PNG</button>
-                      <button class="gbtn" id="board-export-jpg" type="button">导出 JPG</button>
+                      <button class="m-btn" id="board-export-png" type="button">导出 PNG</button>
+                      <button class="m-btn" id="board-export-jpg" type="button">导出 JPG</button>
                     </div>
                     <div class="board-view-group">
-                      <button class="gbtn" id="board-undo" type="button" disabled>撤销</button>
-                      <button class="gbtn" id="board-redo" type="button" disabled>重做</button>
+                      <button class="m-btn" id="board-undo" type="button" disabled>撤销</button>
+                      <button class="m-btn" id="board-redo" type="button" disabled>重做</button>
                     </div>
                   </div>
                   <input type="file" id="board-file-input" accept="image/png,image/jpeg,image/webp" multiple hidden />
@@ -604,9 +604,9 @@
 
               <section class="page" id="page-video">
                 <div class="toolbar toolbar-wrap">
-                  <button class="gbtn" id="format-pick-files" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 添加视频</button>
-                  <button class="gbtn" id="format-pick-folder" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-folder-add"></use></svg> 添加文件夹</button>
-                  <button class="gbtn ghost" id="format-clear-inputs" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
+                  <button class="m-btn" id="format-pick-files" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 添加视频</button>
+                  <button class="m-btn" id="format-pick-folder" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-folder-add"></use></svg> 添加文件夹</button>
+                  <button class="m-btn" id="format-clear-inputs" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
                 </div>
                 <div class="format-workspace">
                   <section class="glass-card format-file-panel file-drop-target" id="format-drop-zone">
@@ -636,8 +636,8 @@
                       <button class="format-engine-detail" id="format-engine-detail" type="button" hidden>查看详情</button>
                     </div>
                     <div class="format-control-actions">
-                      <button class="primary format-run" id="format-run-task" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>视频转换</button>
-                      <button class="gbtn format-cancel" id="format-cancel-task" type="button" hidden>取消任务</button>
+                      <button class="m-btn m-btn--primary format-run" id="format-run-task" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>视频转换</button>
+                      <button class="m-btn format-cancel" id="format-cancel-task" type="button" hidden>取消任务</button>
                     </div>
                   </aside>
                 </div>
@@ -647,7 +647,7 @@
                     <span id="format-status-text">0 个文件 · 等待添加</span>
                   </div>
                   <div class="format-progress-track"><span id="format-progress-fill"></span></div>
-                  <button class="gbtn" id="format-save-results" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-save"></use></svg>保存到文件夹</button>
+                  <button class="m-btn" id="format-save-results" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-save"></use></svg>保存到文件夹</button>
                 </div>
               </section>
 
@@ -669,10 +669,10 @@
                       </div>
                       <div class="dieline-canvas-actions">
                         <label class="dieline-check"><input id="dieline-show-annotations" type="checkbox" checked />标注</label>
-                        <button class="gbtn ghost" id="dieline-zoom-out" type="button" aria-label="缩小" title="缩小">−</button>
+                        <button class="m-btn m-btn--sm" id="dieline-zoom-out" type="button" aria-label="缩小" title="缩小">−</button>
                         <span class="dieline-zoom-input"><input id="dieline-zoom-label" type="number" min="15" max="800" step="5" value="100" aria-label="缩放百分比" /><em>%</em></span>
-                        <button class="gbtn ghost" id="dieline-zoom-in" type="button" aria-label="放大" title="放大">+</button>
-                        <button class="gbtn ghost" id="dieline-fit" type="button">适配</button>
+                        <button class="m-btn m-btn--sm" id="dieline-zoom-in" type="button" aria-label="放大" title="放大">+</button>
+                        <button class="m-btn m-btn--sm" id="dieline-fit" type="button">适配</button>
                       </div>
                     </header>
                     <div class="dieline-stage" id="dieline-stage">
@@ -685,10 +685,10 @@
                   <div class="dieline-side">
                     <section class="glass-card dieline-3d-card" aria-label="3D 预览">
                       <div class="dieline-3d-stage" id="dieline-3d-stage"></div>
-                      <button class="gbtn ghost dieline-3d-reset" id="dieline-3d-reset" type="button" title="复位视角" aria-label="复位视角">⌂</button>
+                      <button class="m-btn m-btn--sm m-btn--icon dieline-3d-reset" id="dieline-3d-reset" type="button" title="复位视角" aria-label="复位视角">⌂</button>
                       <div class="dieline-stage-error" id="dieline-stage-error" hidden>
                         <span id="dieline-stage-error-text"></span>
-                        <button class="gbtn ghost" id="dieline-3d-retry" type="button">重试</button>
+                        <button class="m-btn m-btn--sm" id="dieline-3d-retry" type="button">重试</button>
                       </div>
                       <div class="dieline-3d-controls">
                         <div class="dieline-fold-control" id="dieline-fold-control">
@@ -751,8 +751,8 @@
                     <section class="glass-card dieline-export" aria-label="导出与发送">
                       <label class="dieline-check"><input id="dieline-export-annotations" type="checkbox" checked />包含尺寸标注</label>
                       <div class="dieline-export-actions">
-                        <button class="primary" id="dieline-export-pdf" type="button">导出 PDF</button>
-                        <button class="gbtn" id="dieline-export-ai" type="button" disabled title="在 Illustrator 中打开刀模，不自动保存文件">发送到 AI</button>
+                        <button class="m-btn m-btn--primary" id="dieline-export-pdf" type="button">导出 PDF</button>
+                        <button class="m-btn" id="dieline-export-ai" type="button" disabled title="在 Illustrator 中打开刀模，不自动保存文件">发送到 AI</button>
                       </div>
                       <p class="dieline-export-status" id="dieline-export-status" aria-live="polite">1:1 矢量刀模 · 页面按展开尺寸生成</p>
                     </section>
@@ -779,8 +779,8 @@
                               <svg class="profile-avatar-default" focusable="false"><use href="#ic-default-avatar"></use></svg>
                               <img class="profile-avatar-image" id="settings-avatar-image" alt="" hidden />
                             </span>
-                            <button class="gbtn" id="profile-choose-avatar" type="button">更换头像</button>
-                            <button class="gbtn ghost" id="profile-clear-avatar" type="button">恢复默认</button>
+                            <button class="m-btn" id="profile-choose-avatar" type="button">更换头像</button>
+                            <button class="m-btn" id="profile-clear-avatar" type="button">恢复默认</button>
                           </div>
                         </div>
                       </div>
@@ -797,9 +797,9 @@
                         <div class="setting-row">
                           <span class="setting-label">区域截图</span>
                           <div class="setting-row-control shortcut-controls">
-                            <button class="gbtn shortcut-input" id="shortcut-capture" type="button"
+                            <button class="m-btn shortcut-input" id="shortcut-capture" type="button"
                                     aria-describedby="shortcut-status">Control+Shift+A</button>
-                            <button class="gbtn ghost" id="shortcut-reset" type="button">恢复默认</button>
+                            <button class="m-btn" id="shortcut-reset" type="button">恢复默认</button>
                             <label class="toggle-wrap icon-only-toggle" data-tip="启用全局截图快捷键">
                               <input type="checkbox" id="shortcut-enabled" checked />
                               <span class="toggle" aria-hidden="true"></span>
@@ -835,7 +835,7 @@
                               <button type="button" data-accent="#E58A34" style="--preset:#E58A34" aria-label="橙色"></button>
                               <button type="button" data-accent="#D65B72" style="--preset:#D65B72" aria-label="玫红色"></button>
                             </div>
-                            <button class="gbtn ghost" id="toggle-custom-accent" type="button" aria-expanded="true">收起</button>
+                            <button class="m-btn" id="toggle-custom-accent" type="button" aria-expanded="true">收起</button>
                           </div>
                         </div>
                         <div class="setting-row">
@@ -900,14 +900,14 @@
                             </label>
                             <div class="bg-preview-head">
                               <span class="bg-settings-title">实时效果预览</span>
-                              <button class="gbtn ghost" id="bg-reset" type="button">恢复默认</button>
+                              <button class="m-btn" id="bg-reset" type="button">恢复默认</button>
                             </div>
                             <!-- 预览直接用全局的背景与毛玻璃变量，和应用里看到的是同一套规则 -->
                             <div class="bg-preview" aria-hidden="true">
                               <div class="bg-preview-card">
                                 <b>PDF 转 PNG</b>
                                 <div class="bg-preview-inner">文件列表 · 毛玻璃预览</div>
-                                <div class="bg-preview-foot"><span>0 个文件</span><span class="bg-preview-btn">开始转换</span></div>
+                                <div class="bg-preview-foot"><span>0 个文件</span><span class="m-btn m-btn--primary m-btn--sm">开始转换</span></div>
                               </div>
                             </div>
                           </div>
@@ -950,8 +950,8 @@
                             <div class="update-notes" id="update-notes" hidden></div>
                           </div>
                           <div class="update-actions">
-                            <button class="gbtn" id="update-primary" type="button" disabled>检查更新</button>
-                            <button class="gbtn ghost" id="update-secondary" type="button" hidden>稍后安装</button>
+                            <button class="m-btn" id="update-primary" type="button" disabled>检查更新</button>
+                            <button class="m-btn" id="update-secondary" type="button" hidden>稍后安装</button>
                           </div>
                         </div>
                         <div class="settings-divider"></div>
@@ -1009,28 +1009,28 @@
               <b id="img-editor-title">编辑图片</b>
               <span class="img-editor-size" id="img-editor-size"></span>
               <span class="toolbar-space"></span>
-              <button class="gbtn" id="img-editor-undo" type="button" data-tip="撤销 (Ctrl+Z)" disabled><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-undo"></use></svg> 撤销</button>
-              <button class="gbtn" id="img-editor-redo" type="button" data-tip="重做 (Ctrl+Shift+Z)" disabled><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-redo"></use></svg> 重做</button>
-              <button class="gbtn ghost" id="img-editor-cancel" type="button">取消</button>
-              <button class="primary" id="img-editor-commit" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-check"></use></svg>完成</button>
+              <button class="m-btn" id="img-editor-undo" type="button" data-tip="撤销 (Ctrl+Z)" disabled><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-undo"></use></svg> 撤销</button>
+              <button class="m-btn" id="img-editor-redo" type="button" data-tip="重做 (Ctrl+Shift+Z)" disabled><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-redo"></use></svg> 重做</button>
+              <button class="m-btn" id="img-editor-cancel" type="button">取消</button>
+              <button class="m-btn m-btn--primary" id="img-editor-commit" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-check"></use></svg>完成</button>
             </div>
 
             <div class="img-editor-body">
               <div class="img-editor-rail" id="img-editor-rail" role="toolbar" aria-label="编辑工具">
-                <button class="tool-btn" data-tool="crop" type="button" data-tip="裁切"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-crop"></use></svg>裁切</button>
-                <button class="tool-btn" data-tool="adjust" type="button" data-tip="调色"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-adjust"></use></svg>调色</button>
-                <button class="tool-btn" data-tool="mosaic" type="button" data-tip="马赛克"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-mosaic"></use></svg>马赛克</button>
-                <button class="tool-btn" data-tool="doodle" type="button" data-tip="涂鸦"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-doodle"></use></svg>涂鸦</button>
-                <button class="tool-btn" data-tool="rect" type="button" data-tip="矩形"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-rect"></use></svg>矩形</button>
-                <button class="tool-btn" data-tool="arrow" type="button" data-tip="箭头"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-arrow"></use></svg>箭头</button>
-                <button class="tool-btn" data-tool="text" type="button" data-tip="文字"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-text"></use></svg>文字</button>
+                <button class="m-btn m-btn--quiet m-btn--stack tool-btn" data-tool="crop" type="button" data-tip="裁切"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-crop"></use></svg>裁切</button>
+                <button class="m-btn m-btn--quiet m-btn--stack tool-btn" data-tool="adjust" type="button" data-tip="调色"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-adjust"></use></svg>调色</button>
+                <button class="m-btn m-btn--quiet m-btn--stack tool-btn" data-tool="mosaic" type="button" data-tip="马赛克"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-mosaic"></use></svg>马赛克</button>
+                <button class="m-btn m-btn--quiet m-btn--stack tool-btn" data-tool="doodle" type="button" data-tip="涂鸦"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-doodle"></use></svg>涂鸦</button>
+                <button class="m-btn m-btn--quiet m-btn--stack tool-btn" data-tool="rect" type="button" data-tip="矩形"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-rect"></use></svg>矩形</button>
+                <button class="m-btn m-btn--quiet m-btn--stack tool-btn" data-tool="arrow" type="button" data-tip="箭头"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-arrow"></use></svg>箭头</button>
+                <button class="m-btn m-btn--quiet m-btn--stack tool-btn" data-tool="text" type="button" data-tip="文字"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-tool-text"></use></svg>文字</button>
 
                 <!-- ⚠ 分隔线以下是**动作**不是工具：点了立刻执行完，
                      没有按下态，也不进撤销栈（见 session.js 的 EDITOR_ACTIONS）。 -->
                 <hr class="rail-split" />
-                <button class="tool-btn action-btn" data-action="restore" type="button"
+                <button class="m-btn m-btn--quiet m-btn--stack tool-btn action-btn" data-action="restore" type="button"
                         data-tip="恢复到最初导入的原图" hidden><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-action-restore"></use></svg>恢复原图</button>
-                <button class="tool-btn action-btn" data-action="ocr" type="button"
+                <button class="m-btn m-btn--quiet m-btn--stack tool-btn action-btn" data-action="ocr" type="button"
                         data-tip="识别当前编辑结果中的文字"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-action-ocr"></use></svg>文字提取</button>
               </div>
 
@@ -1057,21 +1057,21 @@
               <span id="pdf-page-summary">载入 PDF 后可拖拽调序、删除或插入页面</span>
             </div>
             <div class="pdf-page-dialog-actions">
-              <button class="gbtn" id="pdf-insert-pages" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 插入 PDF</button>
-              <button class="gbtn" id="pdf-select-all-pages" type="button">全选</button>
-              <button class="gbtn" id="pdf-delete-selected-pages" type="button">删除所选</button>
-              <button class="gbtn" id="pdf-reset-pages" type="button">恢复</button>
+              <button class="m-btn" id="pdf-insert-pages" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 插入 PDF</button>
+              <button class="m-btn" id="pdf-select-all-pages" type="button">全选</button>
+              <button class="m-btn" id="pdf-delete-selected-pages" type="button">删除所选</button>
+              <button class="m-btn" id="pdf-reset-pages" type="button">恢复</button>
             </div>
           </header>
           <div class="pdf-page-grid" id="pdf-page-grid"></div>
           <footer class="pdf-page-dialog-footer">
             <div class="pdf-page-output">
-              <button class="gbtn" id="pdf-page-choose-output" type="button">选择保存位置</button>
+              <button class="m-btn" id="pdf-page-choose-output" type="button">选择保存位置</button>
               <span id="pdf-page-output-path">尚未选择</span>
             </div>
             <div class="pdf-page-dialog-actions">
-              <button class="gbtn ghost" id="pdf-cancel-page-organizer" type="button">取消</button>
-              <button class="primary" id="pdf-save-page-organizer" type="button">保存新 PDF</button>
+              <button class="m-btn" id="pdf-cancel-page-organizer" type="button">取消</button>
+              <button class="m-btn m-btn--primary" id="pdf-save-page-organizer" type="button">保存新 PDF</button>
             </div>
           </footer>
         </section>
@@ -1082,8 +1082,8 @@
         <p id="update-dialog-description"></p>
         <div class="update-notes" id="update-dialog-notes" hidden></div>
         <div class="update-dialog-actions">
-          <button class="gbtn ghost" id="update-dialog-later" type="button">稍后</button>
-          <button class="gbtn primary" id="update-dialog-download" type="button">下载更新</button>
+          <button class="m-btn" id="update-dialog-later" type="button">稍后</button>
+          <button class="m-btn m-btn--primary" id="update-dialog-download" type="button">下载更新</button>
         </div>
       </dialog>
       <div class="toast" id="toast" role="status" aria-live="polite"></div>

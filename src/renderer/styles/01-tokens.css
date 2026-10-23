@@ -29,7 +29,8 @@ body {
   /* 透明按钮（工具条、图标按钮）：平时无底，悬停淡强调色，按下 / 选中更深一档 */
   --btn-quiet-hover-bg: var(--accent-10);
   --btn-quiet-pressed-bg: var(--accent-18);
-  --btn-disabled-opacity: 0.45;
+  --btn-disabled-opacity: 0.48;
+  --btn-icon-lg: 18px;
 
   /* 输入框、下拉、步进器 */
   --field-h: var(--control-height);

@@ -296,7 +296,7 @@ export function initPdfTools({
       `
     } else if (action === '页重排') {
       pdfOptions.innerHTML = `
-        <button class="gbtn compact" id="pdf-open-page-organizer" type="button">编辑页面顺序</button>
+        <button class="m-btn m-btn--md" id="pdf-open-page-organizer" type="button">编辑页面顺序</button>
         <span class="pdf-option-status" id="pdf-page-option-status">上传 PDF 后载入页面</span>
       `
       pdfOptions.querySelector('#pdf-open-page-organizer').addEventListener('click', openPdfPageOrganizer)

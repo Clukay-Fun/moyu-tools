@@ -28,73 +28,6 @@
   mask-composite: exclude;
 }
 
-.gbtn,
-.primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-2);
-  height: var(--h-lg);
-  padding: 0 var(--sp-4);
-  border-radius: var(--r-md);
-  cursor: pointer;
-  transition: transform var(--dur-press) var(--ease-out),
-              color var(--dur-hover) ease,
-              border-color var(--dur-hover) ease,
-              background-color var(--dur-hover) ease,
-              filter var(--dur-press) ease;
-}
-
-.gbtn {
-  border: 1px solid var(--button-border);
-  color: var(--muted);
-  background: var(--button-bg);
-  box-shadow: var(--button-shadow);
-  backdrop-filter: var(--glass-blur-control);
-}
-
-.gbtn:hover {
-  border-color: var(--control-border-hover);
-  color: var(--accent);
-  background: var(--control-bg-active);
-}
-
-.gbtn.danger {
-  color: var(--danger);
-}
-
-.gbtn.danger:hover {
-  border-color: color-mix(in srgb, var(--danger) 34%, transparent);
-  color: color-mix(in srgb, var(--danger) 88%, #000);
-  background: color-mix(in srgb, var(--danger) 10%, transparent);
-}
-
-.gbtn:active,
-.primary:active {
-  transform: scale(var(--press-scale));
-}
-
-.gbtn:disabled,
-.primary:disabled,
-.format-grid button:disabled {
-  cursor: not-allowed;
-  filter: none;
-  opacity: 0.48;
-  transform: none;
-}
-
-.primary {
-  border: 1px solid var(--accent);
-  color: var(--on-accent);
-  background: var(--accent);
-  box-shadow: 0 4px 12px var(--accent-28);
-  font-weight: 650;
-}
-
-.primary:hover {
-  filter: brightness(1.06);
-}
-
 .toolbar {
   display: flex;
   flex: none;
@@ -168,11 +101,6 @@
 .pdf-options input {
   width: 116px;
   user-select: text;
-}
-
-.pdf-options .compact {
-  min-height: 34px;
-  padding: 6px 10px;
 }
 
 .pdf-option-status {
