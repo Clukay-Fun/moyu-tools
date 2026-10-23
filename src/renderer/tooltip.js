@@ -66,6 +66,8 @@ export function installTooltips(root = document) {
 
   function show(target, instant, keyboard) {
     if (!target?.isConnected || !target.dataset.tip) return
+    // 触发钮的菜单已展开（如头像菜单）：提示会和菜单叠在同一处，不再显示
+    if (target.getAttribute('aria-expanded') === 'true') return
     if (active && active !== target) active.removeAttribute('aria-describedby')
     active = target
     tooltip.textContent = target.dataset.tip
@@ -104,6 +106,8 @@ export function installTooltips(root = document) {
     const target = targetFor(event.target)
     if (target && !target.contains(event.relatedTarget)) hideSoon(target)
   })
+  // 按下即收起：点开菜单、切换模块时提示不该继续挂在原处
+  root.addEventListener('pointerdown', () => active && hideSoon(active))
   root.addEventListener('focusin', (event) => schedule(targetFor(event.target), true))
   root.addEventListener('focusout', (event) => hideSoon(targetFor(event.target)))
   window.addEventListener('blur', () => hideSoon(active))

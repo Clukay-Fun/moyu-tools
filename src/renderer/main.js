@@ -1500,7 +1500,7 @@ function closeTopPopover() {
 }
 
 /** 把浮层定位到触发钮下方；越界时钳制回窗口内。position: fixed，用视口坐标。 */
-function placePopover(menu, trigger, { align = 'left', gap = 6, matchWidth = false, offsetX = 0 } = {}) {
+function placePopover(menu, trigger, { align = 'left', gap = 6, matchWidth = false, offsetX = 0, side = 'bottom', edge = null } = {}) {
   menu.hidden = false // 先显形才量得到尺寸
   const t = trigger.getBoundingClientRect()
   if (matchWidth) {
@@ -1510,6 +1510,16 @@ function placePopover(menu, trigger, { align = 'left', gap = 6, matchWidth = fal
     menu.style.maxWidth = triggerWidth
   }
   const m = menu.getBoundingClientRect()
+  if (side === 'right') {
+    // 竖排窄栏里的触发钮（如一级栏头像）：菜单出现在整条栏的右侧、底边与触发钮对齐，
+    // 不盖住栏内其他图标。edge 指定以哪个祖先的右缘为准，默认触发钮自身。
+    const right = (edge && trigger.closest(edge) || trigger).getBoundingClientRect().right
+    const left = Math.max(8, Math.min(right + gap, window.innerWidth - m.width - 8))
+    const top = Math.max(8, Math.min(t.bottom - m.height, window.innerHeight - m.height - 8))
+    menu.style.left = `${Math.round(left)}px`
+    menu.style.top = `${Math.round(top)}px`
+    return
+  }
   let left = (align === 'right' ? t.right - m.width : t.left) + offsetX
   left = Math.max(8, Math.min(left, window.innerWidth - m.width - 8))
   // 下方放不下就翻到上方
@@ -1634,7 +1644,7 @@ for (const image of [profileAvatarImage, settingsAvatarImage]) {
 }
 
 // 一级栏宽 64：菜单左缘落在 14px，菜单项图标中心正好和头像中心对齐
-registerPopover(profileMenu, profileAvatar, { align: 'left', gap: 8, offsetX: 4 })
+registerPopover(profileMenu, profileAvatar, { side: 'right', edge: '.rail', gap: 8 })
 
 profileAvatar?.addEventListener('click', (event) => {
   event.stopPropagation()
