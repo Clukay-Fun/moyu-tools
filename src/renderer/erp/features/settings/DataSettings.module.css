@@ -1,51 +1,6 @@
-/* 设置页各分类共用的卡片与行样式 */
-.card {
-  background: var(--erp-bg-surface);
-  border: 1px solid var(--erp-border-subtle);
-  border-radius: var(--erp-radius-lg);
-  padding: var(--erp-space-4) var(--erp-space-5);
-}
-.card + .card {
-  margin-top: var(--erp-space-3);
-}
-.dangerCard {
-  border-color: color-mix(in srgb, var(--erp-danger) 35%, var(--erp-border-subtle));
-}
-.title {
-  margin: 0 0 4px;
-  font-size: var(--erp-font-size-md);
-  font-weight: var(--erp-font-weight-semibold);
-  color: var(--erp-text-primary);
-}
-.hint {
-  margin: 0 0 var(--erp-space-3);
-  font-size: var(--erp-font-size-sm);
-  color: var(--erp-text-tertiary);
-}
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--erp-space-4);
-  padding: var(--erp-space-3) 0;
-  border-top: 1px solid var(--erp-border-subtle);
-}
-.title + .row {
-  border-top: 0;
-}
-.label {
-  font-size: var(--erp-font-size-sm);
-  font-weight: var(--erp-font-weight-medium);
-  color: var(--erp-text-primary);
-}
-.desc {
-  margin-top: 2px;
-  max-width: 480px;
-  font-size: var(--erp-font-size-xs);
-  color: var(--erp-text-secondary);
-}
+/* 数据管理：备份校验报告与清空确认清单。分组和行的外观在 styles/07-settings-format.css */
 .report {
-  margin-top: var(--erp-space-3);
+  margin: 0 0 var(--erp-space-3);
   padding: var(--erp-space-3) var(--erp-space-4);
   border-radius: var(--erp-radius-md);
   font-size: var(--erp-font-size-sm);

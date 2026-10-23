@@ -1,11 +1,11 @@
 /**
- * 描述: 设置 › 数据 (DataSettings)
+ * 描述: 设置 › 数据管理 (DataSettings)
  * 主要功能:
- *   - 备份：创建备份
- *   - 恢复：选择备份文件 → 校验报告 → 确认后恢复（当前数据先移入回收目录）
- *   - 示例数据：只在没有业务数据时可载入，载入前确认
- *   - 清空业务数据：确认框列出删除 / 保留的内容，附「先创建备份」
- *   - 下载 CSV 模板；回收目录（恢复前的旧数据）
+ *   - 备份与恢复：创建备份；选择备份文件 → 校验报告 → 确认后恢复（当前数据先移入回收目录）
+ *   - 销售渠道（ChannelSettings）
+ *   - 示例数据与模板：示例数据只在没有业务数据时可载入，载入前确认；下载 CSV 模板
+ *   - 危险操作：清空业务数据，确认框列出删除 / 保留的内容，附「先创建备份」
+ * 回收目录（恢复前的旧数据）在「存储」分类里。
  */
 
 import type { ReactElement } from 'react'
@@ -17,8 +17,9 @@ import { useToast } from '@erp/components/Toast'
 import { useNav } from '@erp/app/navigation'
 import { unwrap, errorMessage } from '@erp/lib/api'
 import { emitDataChanged, useDataChanged } from '@erp/lib/dataEvents'
-import { TrashSettings } from './TrashSettings'
-import styles from './SettingsCard.module.css'
+import { ChannelSettings } from './ChannelSettings'
+import { SettingRow, SettingsGroup } from './SettingsLayout'
+import styles from './DataSettings.module.css'
 
 export function DataSettings(): ReactElement {
   const toast = useToast()
@@ -111,16 +112,8 @@ export function DataSettings(): ReactElement {
 
   return (
     <>
-      <section className={styles.card}>
-        <h2 className={styles.title}>备份</h2>
-        <p className={styles.hint}>
-          备份包含库存数据库和全部图片附件，是一个 zip 文件。建议定期备份到其他磁盘或网盘。
-        </p>
-        <div className={styles.row}>
-          <div>
-            <div className={styles.label}>创建备份</div>
-            <div className={styles.desc}>把当前全部数据打包保存到你选择的位置。</div>
-          </div>
+      <SettingsGroup title="备份与恢复">
+        <SettingRow label="创建备份" desc="把库存数据库和全部图片附件打包成一个 zip，建议定期备份到其他磁盘或网盘。">
           <Button
             variant="primary"
             icon={<DatabaseBackup size={16} />}
@@ -129,19 +122,8 @@ export function DataSettings(): ReactElement {
           >
             创建备份
           </Button>
-        </div>
-      </section>
-
-      <section className={styles.card}>
-        <h2 className={styles.title}>恢复</h2>
-        <p className={styles.hint}>
-          用备份文件替换当前全部数据。恢复前会校验备份；当前数据会先移入回收目录，不会直接删除。
-        </p>
-        <div className={styles.row}>
-          <div>
-            <div className={styles.label}>从备份恢复</div>
-            <div className={styles.desc}>选择之前创建的 zip 备份文件。</div>
-          </div>
+        </SettingRow>
+        <SettingRow label="从备份恢复" desc="用备份替换当前全部数据。恢复前会先校验；当前数据先移入回收目录，不会直接删除。">
           <Button
             variant="secondary"
             icon={<FolderOpen size={16} />}
@@ -151,7 +133,7 @@ export function DataSettings(): ReactElement {
           >
             选择备份文件
           </Button>
-        </div>
+        </SettingRow>
         {inspection && m && (
           <div className={`${styles.report} ${inspectionOk ? styles.reportOk : styles.reportBad}`}>
             <div className={styles.reportHead}>
@@ -188,17 +170,15 @@ export function DataSettings(): ReactElement {
             )}
           </div>
         )}
-        <TrashSettings />
-      </section>
+      </SettingsGroup>
 
-      <section className={styles.card}>
-        <h2 className={styles.title}>示例数据</h2>
-        <p className={styles.hint}>用一套两周的出入库记录快速看效果。示例单据备注都带「示例：」前缀。</p>
-        <div className={styles.row}>
-          <div>
-            <div className={styles.label}>载入示例数据</div>
-            <div className={styles.desc}>期初 300 件、两周内 12 张出入库单、1 张作废、1 张草稿、1 张盘点调整。</div>
-          </div>
+      <ChannelSettings />
+
+      <SettingsGroup title="示例数据与模板">
+        <SettingRow
+          label="载入示例数据"
+          desc="期初 300 件、两周内 12 张出入库单、1 张作废、1 张草稿、1 张盘点调整，备注都带「示例：」前缀。"
+        >
           <Button
             variant="secondary"
             icon={<Sparkles size={16} />}
@@ -208,29 +188,19 @@ export function DataSettings(): ReactElement {
           >
             载入
           </Button>
-        </div>
-      </section>
-
-      <section className={styles.card}>
-        <h2 className={styles.title}>CSV 模板</h2>
-        <div className={styles.row}>
-          <div>
-            <div className={styles.label}>下载 CSV 模板</div>
-            <div className={styles.desc}>批量导入单据时按这个格式填写，在「单据 › 更多 › 导入 CSV」里导入。</div>
-          </div>
+        </SettingRow>
+        <SettingRow label="下载 CSV 模板" desc="批量导入单据时按这个格式填写，在「单据 › 更多 › 导入 CSV」里导入。">
           <Button variant="secondary" icon={<FileDown size={16} />} loading={busy === 'csv'} onClick={saveCsvTemplate}>
             下载模板
           </Button>
-        </div>
-      </section>
+        </SettingRow>
+      </SettingsGroup>
 
-      <section className={`${styles.card} ${styles.dangerCard}`}>
-        <h2 className={styles.title}>清空业务数据</h2>
-        <div className={styles.row}>
-          <div>
-            <div className={styles.label}>清空全部单据、流水和附件</div>
-            <div className={styles.desc}>商品资料、渠道和 Photoshop 设置会保留。不可撤销，建议先备份。</div>
-          </div>
+      <SettingsGroup title="危险操作" danger>
+        <SettingRow
+          label="清空全部单据、流水和附件"
+          desc="商品资料、渠道和 Photoshop 设置会保留。不可撤销，建议先备份。"
+        >
           <Button
             variant="danger"
             icon={<Eraser size={16} />}
@@ -240,8 +210,8 @@ export function DataSettings(): ReactElement {
           >
             清空
           </Button>
-        </div>
-      </section>
+        </SettingRow>
+      </SettingsGroup>
 
       <ConfirmDialog
         open={confirm === 'restore'}

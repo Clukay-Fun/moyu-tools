@@ -90,7 +90,6 @@
   /* 可见的中性描边：--border / --control-border 在浅色下是白色半透明，浅底上看不见 */
   --border-neutral: color-mix(in srgb, var(--foreground) 13%, transparent);
   --border-neutral-hover: color-mix(in srgb, var(--foreground) 22%, transparent);
-  --hairline-strong: var(--border-neutral);
   /* 浮层专用底色。--card 是给大面板用的，做到 0.2 才够通透；
      浮层里有文字和色块，压在棋盘格、图片、控制点上时必须**挡住**下面的东西，
      0.82 仍会透出控制点的轮廓，所以提到 0.95。模糊只是质感，挡不挡得住看 alpha。 */
@@ -223,6 +222,7 @@
   --radius: 16px;
   --radius-small: 10px;
   --font: "Segoe UI", "PingFang SC", "Microsoft YaHei UI", system-ui, sans-serif;
+  --font-mono: "SF Mono", Menlo, Consolas, monospace;
 }
 
 [data-theme="dark"] {

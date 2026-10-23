@@ -507,9 +507,9 @@
         <dl class="cat-meta">
           <dt>开关</dt><dd><code>label.m-switch &gt; input[type=checkbox] + span.m-switch-track</code>（<code>components/switch.css</code>）；只有图标没有文字时加 <code>.icon-only-toggle</code> 并写 <code>.sr-only</code> 文案。菜单里的勾选项（<code>menuitemcheckbox</code>）只用 <code>.m-switch-track.m-switch-track--sm</code>，状态读外层 <code>aria-checked</code></dd>
           <dt>分段控件</dt><dd><code>.m-segmented &gt; button</code>（<code>components/segmented.css</code>），选中项用 <code>aria-selected</code> / <code>aria-checked</code> / <code>aria-pressed="true"</code> 或 <code>.is-active</code>；选中块自动滑到位，不需要脚本。默认 32 高，<code>--sm</code> 28；2～5 个等宽选项</dd>
-          <dt>等宽选项</dt><dd><code>.theme-options &gt; label.theme-option</code>——选项需要撑满一整行时用（设置页主题）</dd>
+          <dt>模式缩略图</dt><dd><code>.theme-options &gt; label.theme-option</code> + <code>.theme-preview</code>（<code>-system</code> / <code>-light</code> / <code>-dark</code>）——76×48 的小窗口示意，选中项描强调色边（设置 › 外观 › 模式）</dd>
           <dt>滑块</dt><dd>原生 <code>input[type=range]</code> 按元素绘制（<code>components/slider.css</code>），页面只管宽度</dd>
-          <dt>现用模块</dt><dd>开关：Illustrator、设置、画板菜单；分段：条码、Illustrator、PDF 水印、刀模；等宽选项：设置</dd>
+          <dt>现用模块</dt><dd>开关：Illustrator、设置、画板菜单；分段：条码、Illustrator、PDF 水印、刀模；模式缩略图：设置</dd>
         </dl>
         <div class="cat-pair">
           <div class="cat-stage" data-theme="light" data-demo="toggles"><span class="cat-label">浅色</span></div>
@@ -525,9 +525,10 @@
       <div class="cat-item">
         <dl class="cat-meta">
           <dt>卡片</dt><dd><code>.m-card</code>（<code>components/card.css</code>，数值来自 <code>--card-*</code>）——工作区里承载一组输入或结果；内边距由页面加的布局类决定（<code>control-card</code>、<code>log-card</code>……）</dd>
-          <dt>设置块</dt><dd><code>.m-card.settings-section-body</code> + <code>.setting-row</code>——「标签在左、控件在右」的键值行；<code>.settings-section-body</code> 只管内边距</dd>
+          <dt>设置分组</dt><dd><code>h2.settings-group-title</code>（框外）+ <code>.m-card.settings-group</code> + 若干 <code>.setting-row</code>——名称和说明在左（<code>.setting-label</code>，说明写在 <code>&lt;small&gt;</code>，目录用 <code>.setting-path</code> 单行省略），控件在右（<code>.setting-row-control</code>；只读值 <code>.setting-value</code>，键位 <code>kbd.setting-keys</code>），同组行之间自动画分隔线。行下面的展开区用 <code>.settings-expand</code>；默认收起的分组用 <code>details.settings-disclosure</code>（<code>summary</code> 本身是一行）；危险操作分组加 <code>.is-danger</code>。控件统一 32 高（<code>m-btn--md</code>）。库存 / 定制的 React 分类用 <code>erp/features/settings/SettingsLayout.tsx</code> 输出同一套类名</dd>
+          <dt>设置导航</dt><dd><code>nav.settings-nav</code>（<code>02-shell-home.css</code>）：进入设置时 <code>body.settings-mode</code> 把一级栏和二级栏换成它，和二级栏同一种书签抽屉表面；<code>.settings-nav-item.active</code> 是当前分类</dd>
           <dt>空状态</dt><dd><code>.m-empty</code>（<code>components/empty.css</code>）：一行说明 + <code>&lt;small&gt;</code> 小字，可再跟按钮；在父容器里撑满居中，盖在内容上时由页面加定位</dd>
-          <dt>现用模块</dt><dd>卡片：条码、刀模、PDF、Illustrator、格式工厂；设置块：设置；空状态：PDF、Illustrator、格式工厂、画板</dd>
+          <dt>现用模块</dt><dd>卡片：条码、刀模、PDF、Illustrator、格式工厂；设置分组：设置；空状态：PDF、Illustrator、格式工厂、画板</dd>
         </dl>
         <div class="cat-pair">
           <div class="cat-stage" data-theme="light" data-demo="cards"><span class="cat-label">浅色</span></div>
@@ -565,7 +566,7 @@
           <dt>弹层</dt><dd>抽屉、对话框、下拉由 Base UI portal 到 <code>body</code>（<code>[data-base-ui-portal]</code>），层级 <code>--erp-z-*</code> 排在摸鱼弹层之上。</dd>
           <dt>输入框</dt><dd>外层容器画边框、内层 <code>input</code> 透明；摸鱼全局的 <code>input[type=text]</code> 边框在库存 / 定制范围内被复位。新写的输入框沿用这个结构。</dd>
           <dt>现有组件</dt><dd>Badge、Button、Card、Combobox、ConfirmDialog、DatePicker、Drawer、EmptyState、IconButton、Input、Menu、NumberInput、PageHeader、Panel、RangeFilter、SegmentedControl、Select、Table、Toast、Tooltip</dd>
-          <dt>现用模块</dt><dd>库存（概览 · 商品 · 单据）、定制（生产 · 模板 · 素材库）、设置里的「库存」「定制」分节</dd>
+          <dt>现用模块</dt><dd>库存（概览 · 商品 · 单据）、定制（生产 · 模板 · 素材库）、设置里的「存储」「数据管理」「Photoshop 连接」</dd>
         </dl>
       </div>
     </section>
@@ -698,7 +699,7 @@
       <div class="m-segmented" style="width:260px"><button type="button" aria-pressed="true">单个生成</button><button type="button" aria-pressed="false">批量</button><button type="button" aria-pressed="false">CSV</button></div>
     </div>
     <div class="cat-row" style="width:100%">
-      <div class="theme-options"><label class="theme-option"><input type="radio" name="cat-theme-x" checked /><span>浅色</span></label><label class="theme-option"><input type="radio" name="cat-theme-x" /><span>深色</span></label><label class="theme-option"><input type="radio" name="cat-theme-x" /><span>跟随系统</span></label></div>
+      <div class="theme-options"><label class="theme-option"><input type="radio" name="cat-theme-x" /><span class="theme-preview theme-preview-system"></span><span>跟随系统</span></label><label class="theme-option"><input type="radio" name="cat-theme-x" checked /><span class="theme-preview theme-preview-light"></span><span>浅色</span></label><label class="theme-option"><input type="radio" name="cat-theme-x" /><span class="theme-preview theme-preview-dark"></span><span>深色</span></label></div>
     </div>
   </template>
 
@@ -707,9 +708,11 @@
       <b style="font-size:var(--fs-lg)">玻璃卡片</b>
       <p style="margin:6px 0 0;color:var(--muted);font-size:var(--fs-md)">承载一组输入或一块结果。</p>
     </div>
-    <div class="m-card settings-section-body">
+    <h2 class="settings-group-title">软件更新</h2>
+    <div class="m-card settings-group">
       <div class="setting-row"><span class="setting-label">当前版本</span><b class="setting-value">v2.2.0</b></div>
-      <div class="setting-row"><span class="setting-label">自动检查更新<small>应用启动后在后台检查新版本</small></span><label class="m-switch icon-only-toggle"><input type="checkbox" checked /><span class="m-switch-track"></span><span class="sr-only">自动检查更新</span></label></div>
+      <div class="setting-row"><span class="setting-label">启动时自动检查<small>应用启动后在后台检查新版本</small></span><label class="m-switch icon-only-toggle"><input type="checkbox" checked /><span class="m-switch-track"></span><span class="sr-only">启动时自动检查</span></label></div>
+      <div class="setting-row"><span class="setting-label">导出目录<small>生成的文件存在这里</small><span class="setting-path" title="/Users/me/Downloads/摸鱼工具箱">/Users/me/Downloads/摸鱼工具箱</span></span><div class="setting-row-control"><button class="m-btn m-btn--md" type="button">打开</button><button class="m-btn m-btn--md" type="button">修改</button></div></div>
     </div>
   </template>
 

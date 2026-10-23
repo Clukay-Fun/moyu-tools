@@ -5,7 +5,8 @@ import type { TrashEntry } from '@shared/erp/types'
 import { Button, ConfirmDialog } from '@erp/components/ui'
 import { useToast } from '@erp/components/Toast'
 import { unwrap, errorMessage } from '@erp/lib/api'
-import styles from './SettingsCard.module.css'
+import { useDataChanged } from '@erp/lib/dataEvents'
+import { SettingRow } from './SettingsLayout'
 
 function fmtSize(b: number): string {
   if (b < 1024) return `${b} B`
@@ -14,7 +15,7 @@ function fmtSize(b: number): string {
 }
 
 /** 恢复备份时被替换掉的旧数据，保留在回收目录里直到用户清空。 */
-export function TrashSettings(): ReactElement | null {
+export function TrashSettings(): ReactElement {
   const toast = useToast()
   const [items, setItems] = useState<TrashEntry[]>([])
   const [confirm, setConfirm] = useState(false)
@@ -29,21 +30,25 @@ export function TrashSettings(): ReactElement | null {
   useEffect(() => {
     void load()
   }, [load])
-  if (items.length === 0) return null
+  // 恢复备份后会多出一份旧数据（主进程广播 erp:data:replaced → emitDataChanged）
+  useDataChanged(() => void load())
   const total = items.reduce((a, i) => a + i.sizeBytes, 0)
   return (
-    <div className={styles.row}>
-      <div>
-        <div className={styles.label}>
-          恢复前的旧数据（{items.length} 份 · {fmtSize(total)}）
-        </div>
-        <div className={styles.desc}>
-          每次恢复备份时，被替换的数据会先放进回收目录。确认新数据没问题后可以清空。最近一份：
-          {new Date(items[0].createdAt).toLocaleString('zh-CN')}
-        </div>
-      </div>
-      <Button onClick={() => setConfirm(true)} disabled={busy}>
-        <Trash2 size={16} /> 清空
+    <SettingRow
+      label={items.length ? `恢复前的旧数据（${items.length} 份 · ${fmtSize(total)}）` : '恢复前的旧数据'}
+      desc={
+        items.length
+          ? `恢复备份时被替换的数据会先放进回收目录，确认新数据没问题后可以清空。最近一份：${new Date(items[0].createdAt).toLocaleString('zh-CN')}`
+          : '恢复备份时被替换的数据会先放进回收目录。目前没有。'
+      }
+    >
+      <Button
+        icon={<Trash2 size={16} />}
+        onClick={() => setConfirm(true)}
+        disabled={busy || items.length === 0}
+        disabledReason={items.length === 0 ? '回收目录是空的' : undefined}
+      >
+        清空
       </Button>
       <ConfirmDialog
         open={confirm}
@@ -68,6 +73,6 @@ export function TrashSettings(): ReactElement | null {
           }
         }}
       />
-    </div>
+    </SettingRow>
   )
 }

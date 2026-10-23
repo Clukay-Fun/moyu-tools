@@ -36,6 +36,7 @@
 - 同类元素只用一种写法，组件在 `styles/components/`（前缀 `m-`）：按钮 `m-btn`、输入 `m-field-unit` / `m-stepper` / `m-select`、分段 `m-segmented`、开关 `m-switch`、卡片 `m-card`、空状态 `m-empty`、菜单 `m-menu`、对话框 `m-dialog` + `m-backdrop`。尺寸和变体用修饰类（`m-btn--primary`、`--sm`），状态用属性（`aria-pressed`、`aria-selected`、`aria-invalid`、`:disabled`）。
 - 模块文件（`02-*`–`13-*`）只写布局：宽度、位置、网格、间距组合；不再为某个按钮或输入框补外观。`components/` 里禁止写死颜色、圆角、字号（Stylelint 会拦）。
 - 库存 / 定制的 React 组件在 `.module.css` 里直接引用同一组语义变量，不另起一套外观。
+- 设置页：一类设置一页（`[data-settings-page]`，导航 `#settings-nav`）；分组用 `h2.settings-group-title` + `.m-card.settings-group` + `.setting-row`（名称说明在左、控件在右）。React 分类用 `erp/features/settings/SettingsLayout.tsx`，不另写卡片样式。新增设置项只接已有能力，不放占位按钮。
 - 新组件或新变体要同步进 `docs/ui/catalog.html`。
 
 ## 发布与交付

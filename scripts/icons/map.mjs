@@ -93,5 +93,11 @@ export const ICON_MAP = {
   'opacity-down': 'sun-dim',
   'opacity-up': 'sun',
   download: 'download',
-  update: 'refresh-cw'
+  update: 'refresh-cw',
+
+  // ── 设置导航 ──
+  back: 'arrow-left',
+  storage: 'hard-drive',
+  data: 'database',
+  photoshop: 'plug'
 }

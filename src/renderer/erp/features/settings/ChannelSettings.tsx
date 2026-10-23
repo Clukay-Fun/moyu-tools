@@ -3,7 +3,7 @@
  * 主要功能:
  *   - 顶部添加：输入为空时按钮禁用并说明原因
  *   - 点击名称就地改名（Enter 保存、Esc 取消、失焦保存）
- *   - 行尾小号按钮停用 / 启用；已停用的排在最后并置灰
+ *   - 行尾按钮停用 / 启用；已停用的排在最后并置灰
  */
 
 import type { FormEvent, ReactElement } from 'react'
@@ -13,7 +13,7 @@ import type { SalesChannel } from '@shared/erp/types'
 import { Button, Input } from '@erp/components/ui'
 import { useToast } from '@erp/components/Toast'
 import { unwrap, errorMessage } from '@erp/lib/api'
-import card from './SettingsCard.module.css'
+import { SettingRow, SettingsGroup } from './SettingsLayout'
 import styles from './ChannelSettings.module.css'
 
 export function ChannelSettings(): ReactElement {
@@ -68,24 +68,24 @@ export function ChannelSettings(): ReactElement {
   const sorted = [...channels].sort((a, b) => Number(b.isActive) - Number(a.isActive))
 
   return (
-    <section className={card.card}>
-      <h2 className={card.title}>销售渠道</h2>
-      <p className={card.hint}>出库单可选择的渠道。停用后不再出现在新单据中，历史单据不受影响。点名称可以改名。</p>
-      <form className={styles.add} onSubmit={handleAdd}>
-        <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="新渠道名称" maxLength={32} />
-        <Button
-          variant="primary"
-          type="submit"
-          icon={<Plus size={16} />}
-          disabled={busy || !newName.trim()}
-          disabledReason={!newName.trim() ? '先输入渠道名称' : undefined}
-        >
-          添加
-        </Button>
-      </form>
-      <ul className={styles.list}>
-        {sorted.map((c) => (
-          <li key={c.id} className={styles.row} data-inactive={!c.isActive || undefined}>
+    <SettingsGroup title="销售渠道">
+      <SettingRow label="添加渠道" desc="出库单可选择的渠道。停用后不再出现在新单据中，历史单据不受影响。点名称可以改名。">
+        <form className={styles.add} onSubmit={handleAdd}>
+          <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="新渠道名称" maxLength={32} />
+          <Button
+            variant="primary"
+            type="submit"
+            icon={<Plus size={16} />}
+            disabled={busy || !newName.trim()}
+            disabledReason={!newName.trim() ? '先输入渠道名称' : undefined}
+          >
+            添加
+          </Button>
+        </form>
+      </SettingRow>
+      {sorted.map((c) => (
+        <div key={c.id} className={`setting-row ${styles.row}`} data-inactive={!c.isActive || undefined}>
+          <span className={styles.nameCell}>
             {editingId === c.id ? (
               <Input
                 className={styles.editInput}
@@ -115,10 +115,10 @@ export function ChannelSettings(): ReactElement {
               </button>
             )}
             {!c.isActive && <span className={styles.inactiveTag}>已停用</span>}
-            <span className={styles.spacer} />
+          </span>
+          <div className="setting-row-control">
             <Button
               variant="secondary"
-              size="sm"
               disabled={busy}
               onClick={() =>
                 act(
@@ -129,9 +129,9 @@ export function ChannelSettings(): ReactElement {
             >
               {c.isActive ? '停用' : '启用'}
             </Button>
-          </li>
-        ))}
-      </ul>
-    </section>
+          </div>
+        </div>
+      ))}
+    </SettingsGroup>
   )
 }

@@ -1,10 +1,10 @@
 /**
  * 描述: 设置 › Photoshop 连接 (PhotoshopSettings)
  * 主要功能:
- *   - 状态卡：Photoshop 版本、插件状态（人话说明）
- *   - 安装说明（本机 / Mac / Windows 页签，可准备或安装插件）
- *   - 目录：桥接目录与导出目录，打开 / 修改
- *   - 高级：插件目录、UXP Developer Tools、放回中断任务
+ *   - 连接状态：Photoshop 检测结果、插件状态（软件找到 ≠ 插件连通），重新检测
+ *   - 插件安装（默认收起）：本机 / Mac / Windows 页签，可准备或安装插件
+ *   - 目录与授权：桥接目录与导出目录，打开 / 修改
+ *   - 高级工具（默认收起）：插件目录、UXP Developer Tools、放回中断任务
  * 原「定制 › 设置」抽屉的全部内容搬到这里，底层调用不变。
  */
 
@@ -15,7 +15,8 @@ import type { AppInfo } from '@shared/erp/ipc'
 import { Button, SegmentedControl } from '@erp/components/ui'
 import { useToast } from '@erp/components/Toast'
 import { unwrap, errorMessage } from '@erp/lib/api'
-import { fileName, middleEllipsis } from './psdLabels'
+import { SettingRow, SettingsDisclosure, SettingsGroup } from '@erp/features/settings/SettingsLayout'
+import { fileName } from './psdLabels'
 import styles from './PhotoshopSettings.module.css'
 
 type PlatformTab = 'actual' | 'darwin' | 'win32'
@@ -92,40 +93,36 @@ export function PhotoshopSettings(): ReactElement {
   const psName = ps?.installed ? psLabel(ps) : null
   const checking = !ps || ps.state === 'checking'
 
+  const psStatus = checking ? '检测中…' : (psName ?? '没找到')
+  const psNote = checking
+    ? '应用启动时会在后台检测一次。'
+    : psName
+      ? ps?.supported === false
+        ? `版本低于 ${PHOTOSHOP_MIN_VERSION}，插件可能无法加载。`
+        : '已在本机找到，生成时会按需打开。'
+      : '没有在常见位置找到 Photoshop，生成任务会一直排队。'
+
   return (
-    <div className={styles.root}>
-      <div className={styles.statusCard}>
-        <div className={styles.statusItem}>
-          <span className={styles.label}>Photoshop</span>
-          <strong className={psName ? styles.ok : checking ? undefined : styles.warn}>
-            {checking ? '检测中…' : (psName ?? '没找到')}
-          </strong>
-          <span className={styles.note}>
-            {checking
-              ? '应用启动时会在后台检测一次。'
-              : psName
-                ? ps?.supported === false
-                  ? `版本低于 ${PHOTOSHOP_MIN_VERSION}，插件可能无法加载。`
-                  : '已在本机找到，生成时会按需打开。'
-                : '没有在常见位置找到 Photoshop，生成任务会一直排队。'}
-          </span>
-        </div>
-        <div className={styles.statusItem}>
-          <span className={styles.label}>插件</span>
-          <strong className={ps?.pluginInstalled ? styles.ok : undefined}>
+    <>
+      <SettingsGroup title="连接状态">
+        <SettingRow label="Photoshop" desc={psNote}>
+          <strong className={`${styles.status} ${psName ? styles.ok : checking ? '' : styles.warn}`}>{psStatus}</strong>
+          <Button disabled={detecting} onClick={() => void redetect()}>
+            {detecting ? '检测中…' : '重新检测'}
+          </Button>
+        </SettingRow>
+        <SettingRow label="插件" desc="装好不等于连通：插件收到任务才会处理。如果任务一直排队，按下面的说明重新安装。">
+          <strong className={`${styles.status} ${ps?.pluginInstalled ? styles.ok : ''}`}>
             {activeJobs.length ? '正在处理任务' : ps?.pluginInstalled ? '已安装' : '未安装'}
           </strong>
-          <span className={styles.note}>插件收到任务就会处理；如果任务一直排队，按下面的说明重新安装。</span>
-        </div>
-      </div>
-      <div className={styles.actions}>
-        <Button variant="secondary" size="sm" disabled={detecting} onClick={() => void redetect()}>
-          {detecting ? '检测中…' : '重新检测'}
-        </Button>
-      </div>
+        </SettingRow>
+      </SettingsGroup>
 
-      <details className={styles.disclosure}>
-        <summary>安装说明</summary>
+      <SettingsDisclosure
+        title="插件安装"
+        label="安装说明"
+        desc={platform === 'win32' ? 'Windows 使用 CEP 扩展面板' : 'Mac 使用 UXP 插件'}
+      >
         <SegmentedControl
           options={[
             { value: 'actual', label: '本机' },
@@ -161,7 +158,6 @@ export function PhotoshopSettings(): ReactElement {
         <div className={styles.actions}>
           <Button
             variant="primary"
-            size="sm"
             disabled={disabled}
             onClick={() =>
               void act(
@@ -177,7 +173,6 @@ export function PhotoshopSettings(): ReactElement {
           {!isMac && (
             <Button
               variant="secondary"
-              size="sm"
               disabled={disabled}
               onClick={() =>
                 void act(
@@ -190,10 +185,9 @@ export function PhotoshopSettings(): ReactElement {
             </Button>
           )}
         </div>
-      </details>
+      </SettingsDisclosure>
 
-      <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>目录</h3>
+      <SettingsGroup title="目录与授权">
         <DirRow
           label="桥接目录"
           note="摸鱼工具箱和 Photoshop 插件在这里交换任务"
@@ -210,19 +204,17 @@ export function PhotoshopSettings(): ReactElement {
           onOpen={() => void act(() => unwrap(window.api.erp.psd.openOutputDir()).then(() => null))}
           onPick={() => void act(() => unwrap(window.api.erp.psd.pickOutputDir()), '导出目录已更新')}
         />
-        <p className={styles.note}>
+        <p className="settings-group-note">
           {platform === 'darwin'
             ? '修改目录后，请在 Photoshop 插件面板中重新授权。'
             : '修改目录后，摸鱼工具箱会自动同步给 Photoshop 后台扩展。'}
         </p>
-      </section>
+      </SettingsGroup>
 
-      <details className={styles.disclosure}>
-        <summary>高级</summary>
+      <SettingsDisclosure title="高级工具" label="插件目录与调试工具" desc="排查插件加载问题时使用">
         <div className={styles.actions}>
           <Button
             variant="secondary"
-            size="sm"
             disabled={disabled}
             onClick={() => void act(() => unwrap(window.api.erp.psd.openPlugin()).then(() => null))}
           >
@@ -231,7 +223,6 @@ export function PhotoshopSettings(): ReactElement {
           {isMac && (
             <Button
               variant="secondary"
-              size="sm"
               disabled={disabled}
               onClick={() => void act(() => unwrap(window.api.erp.psd.openUxpDeveloperTool()).then(() => null))}
             >
@@ -241,7 +232,6 @@ export function PhotoshopSettings(): ReactElement {
           {hasRunningExport && (
             <Button
               variant="secondary"
-              size="sm"
               disabled={disabled}
               onClick={() =>
                 void act(async () => (await unwrap(window.api.erp.psd.requeueStuck())).board, '已检查中断任务')
@@ -260,8 +250,8 @@ export function PhotoshopSettings(): ReactElement {
         </p>
         <p className={styles.note}>Photoshop 路径：</p>
         <p className={styles.mono}>{board?.photoshopPath ?? '未找到'}</p>
-      </details>
-    </div>
+      </SettingsDisclosure>
+    </>
   )
 }
 
@@ -281,20 +271,13 @@ function DirRow({
   onPick: () => void
 }): ReactElement {
   return (
-    <div className={styles.dirRow}>
-      <div className={styles.dirText}>
-        <span className={styles.dirLabel}>{label}</span>
-        <span className={styles.mono} title={path}>
-          {path ? middleEllipsis(path, 56) : '加载中…'}
-        </span>
-        <span className={styles.note}>{note}</span>
-      </div>
-      <Button variant="secondary" size="sm" disabled={disabled} onClick={onOpen}>
+    <SettingRow label={label} desc={note} path={path ?? null}>
+      <Button variant="secondary" disabled={disabled} onClick={onOpen}>
         打开
       </Button>
-      <Button variant="ghost" size="sm" disabled={disabled} onClick={onPick}>
+      <Button variant="secondary" disabled={disabled} onClick={onPick}>
         修改
       </Button>
-    </div>
+    </SettingRow>
   )
 }

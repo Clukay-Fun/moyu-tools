@@ -1,11 +1,6 @@
 /* ══ F-16 · 快捷键设置 ══ */
 .shortcut-status[hidden] { display: none; }
 
-/* 设置页的输入框描边：--control-border 在浅色模式是白色，这里换成中性灰（按钮已统一走 --button-border） */
-.page-settings .accent-current-row #color-hex {
-  border-color: var(--border-neutral);
-}
-
 .shortcut-input {
   min-width: 164px;
   font-variant-numeric: tabular-nums;
@@ -18,7 +13,8 @@
   background: var(--accent-10);
 }
 .shortcut-status {
-  margin: 2px 0 0;
+  margin: 0;
+  padding: 0 0 12px;
   font-size: var(--fs-md);
   color: var(--muted);
 }

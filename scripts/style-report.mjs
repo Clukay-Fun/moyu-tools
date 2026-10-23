@@ -188,7 +188,7 @@ const walk = (dir) => {
   for (const entry of readdirSync(join(root, dir), { withFileTypes: true })) {
     const path = `${dir}/${entry.name}`
     if (entry.isDirectory()) walk(path)
-    else if (/\.(js|mjs)$/.test(entry.name)) scripts.push(readFileSync(join(root, path), 'utf8'))
+    else if (/\.(js|mjs|ts|tsx)$/.test(entry.name)) scripts.push(readFileSync(join(root, path), 'utf8'))
   }
 }
 import { readdirSync } from 'node:fs'

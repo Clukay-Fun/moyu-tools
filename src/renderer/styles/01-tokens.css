@@ -82,4 +82,10 @@ body {
   --dialog-shadow: var(--shadow-panel);
   --backdrop: rgba(10, 14, 22, 0.36);
   --backdrop-blur: blur(3px);
+
+  /* 设置页 */
+  --settings-nav-w: 220px;
+  --settings-content-w: 860px;
+  --settings-title-fs: 24px;
+  --setting-label-fs: 14px;
 }

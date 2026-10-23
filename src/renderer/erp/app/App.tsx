@@ -23,8 +23,8 @@ import { OverviewPage } from '@erp/pages/OverviewPage'
 import { ProductsPage } from '@erp/pages/ProductsPage'
 import { DocumentsPage } from '@erp/pages/DocumentsPage'
 import { PsdPage } from '@erp/pages/PsdPage'
-import { ChannelSettings } from '@erp/features/settings/ChannelSettings'
 import { DataSettings } from '@erp/features/settings/DataSettings'
+import { StorageSettings } from '@erp/features/settings/StorageSettings'
 import { PhotoshopSettings } from '@erp/features/psd/PhotoshopSettings'
 import styles from './App.module.css'
 
@@ -47,9 +47,10 @@ export type ErpAction =
 export interface ErpContainers {
   inventory: HTMLElement
   custom: HTMLElement
-  /** 摸鱼设置页「库存」「定制」分节的内容区 */
-  settingsInventory: HTMLElement | null
-  settingsCustom: HTMLElement | null
+  /** 摸鱼设置页「存储」「数据管理」「Photoshop 连接」分类的内容区 */
+  settingsStorage: HTMLElement | null
+  settingsData: HTMLElement | null
+  settingsPhotoshop: HTMLElement | null
 }
 
 function Routed({
@@ -121,21 +122,9 @@ function Routed({
           </div>,
           containers.custom
         )}
-      {containers.settingsInventory &&
-        createPortal(
-          <div className={styles.settingsStack}>
-            <ChannelSettings />
-            <DataSettings />
-          </div>,
-          containers.settingsInventory
-        )}
-      {containers.settingsCustom &&
-        createPortal(
-          <div className={styles.settingsStack}>
-            <PhotoshopSettings />
-          </div>,
-          containers.settingsCustom
-        )}
+      {containers.settingsStorage && createPortal(<StorageSettings />, containers.settingsStorage)}
+      {containers.settingsData && createPortal(<DataSettings />, containers.settingsData)}
+      {containers.settingsPhotoshop && createPortal(<PhotoshopSettings />, containers.settingsPhotoshop)}
     </>
   )
 }

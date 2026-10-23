@@ -492,12 +492,6 @@ body[data-fullscreen="true"] .topbar {
   overflow: hidden;
 }
 
-.profile-settings-control {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .profile-avatar-preview {
   display: grid;
   width: 36px;
@@ -754,7 +748,7 @@ body[data-fullscreen="true"] .topbar {
 }
 
 /* 两个主容器做背景模糊；浅灰背景背后没有可模糊的东西，不做 */
-body:not([data-bg="plain"]) :is(.content, .submenu) {
+body:not([data-bg="plain"]) :is(.content, .submenu, .settings-nav) {
   backdrop-filter: blur(var(--glass-blur-px)) saturate(140%);
 }
 
@@ -768,10 +762,104 @@ body.home-active .content {
 
 /* 有二级栏时工作区是抽屉的主体：左侧直角，和书签接成一个面，左边保留一条描边作为书签和内容的分隔线；
    阴影只往右下走（负扩散抵掉左侧），不压到书签上 */
+body.settings-mode .content,
 .submenu.show + .content {
   border-left-color: var(--drawer-divider);
   border-radius: 0 var(--workspace-radius) var(--workspace-radius) 0;
   box-shadow: var(--drawer-body-shadow), var(--glass-highlight);
+}
+
+/* ══ 设置导航 ══
+   进入设置时一级栏和二级栏都让位（body.settings-mode），设置导航占它们的位置：
+   和二级栏同一种书签抽屉表面，和工作区接成一个面。 */
+body.settings-mode :is(.rail, .submenu) {
+  display: none;
+}
+
+.settings-nav {
+  display: flex;
+  width: var(--settings-nav-w);
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  margin: 0 0 8px 8px;
+  padding: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--glass-border);
+  border-right: 0;
+  border-radius: var(--drawer-radius) 0 0 var(--drawer-radius);
+  background: var(--workspace-bg);
+  box-shadow: var(--drawer-shadow), var(--glass-highlight);
+}
+
+.settings-nav[hidden] {
+  display: none;
+}
+
+.settings-nav-back,
+.settings-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 36px;
+  flex: none;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--r-sm);
+  color: var(--muted);
+  background: transparent;
+  font: var(--fs-body) var(--font);
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--dur-hover) ease, background-color var(--dur-hover) ease;
+}
+
+.settings-nav-back {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.settings-nav-back:hover,
+.settings-nav-item:hover {
+  color: var(--accent);
+  background: var(--accent-10);
+}
+
+.settings-nav-item.active {
+  color: var(--accent);
+  background: var(--accent-10);
+  box-shadow: inset 0 0 0 1px var(--accent-18);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .settings-nav-item.active {
+  background: var(--accent-18);
+  box-shadow: inset 0 0 0 1px var(--accent-28);
+}
+
+.settings-nav-item span,
+.settings-nav-back span {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-nav-heading {
+  padding: 14px 10px 4px;
+  color: var(--faint);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  line-height: 22px;
+  letter-spacing: 0.08em;
+}
+
+.settings-nav-list {
+  display: grid;
+  gap: 2px;
 }
 
 .pages {
@@ -873,6 +961,12 @@ body.home-active .page-home.active h1.home-slogan {
 @media (prefers-reduced-motion: reduce) {
   body.home-active .page-home.active h1.home-slogan {
     animation: none;
+  }
+}
+
+@media (max-width: 1080px) {
+  .settings-nav {
+    width: 184px;
   }
 }
 

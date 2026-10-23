@@ -350,8 +350,14 @@ const searchFeatures = [
   ['定制生产', '定制', 'custom', '生产', 'Photoshop PSD 批量 生成 狗牌'],
   ['PSD 模板', '定制', 'custom', '模板', 'Photoshop 模板 槽位'],
   ['定制素材库', '定制', 'custom', '素材库', '狗图 名字图 抠图 白底'],
-  ['主题与强调色', '设置', 'more', '', '外观 深色 浅色 颜色'],
-  ['关于摸鱼工具箱', '设置', 'more', '', '版本 作者']
+  ['头像', '设置', 'more', 'general', '通用 个人 头像'],
+  ['截图快捷键', '设置', 'more', 'shortcut', '快捷键 热键 区域截图'],
+  ['主题与强调色', '设置', 'more', 'appearance', '外观 深色 浅色 颜色'],
+  ['背景与毛玻璃', '设置', 'more', 'appearance', '外观 背景 渐变 透明度 模糊'],
+  ['数据目录', '设置', 'more', 'storage', '存储 数据库 回收目录'],
+  ['备份与恢复', '设置', 'more', 'data', '数据管理 备份 恢复 销售渠道 示例数据 CSV 模板 清空'],
+  ['Photoshop 连接', '设置', 'more', 'photoshop', 'PS 插件 UXP CEP 桥接目录 导出目录'],
+  ['检查更新', '设置', 'more', 'about', '更新 版本 关于 作者 GitHub']
 ].map(([name, group, module, action, keywords]) => {
   // 守卫：搜索项引用了不存在的模块时，渲染期 moduleLabels[module] 会是 undefined，
   // .slice() 抛错后既不显示结果也不显示"无匹配"——症状极具迷惑性。
@@ -423,6 +429,7 @@ const state = {
 const formatFactoryModule = initFormatFactory({ state, renderSubmenu, showToast, bindFileDropZone, droppedFilePaths })
 
 const submenu = document.querySelector('#submenu')
+const settingsNav = document.querySelector('#settings-nav')
 const searchInput = document.querySelector('#feature-search')
 const searchResults = document.querySelector('#search-results')
 const searchTrigger = document.querySelector('#search-trigger')
@@ -721,8 +728,9 @@ function loadErp() {
         {
           inventory: document.querySelector('#page-erp'),
           custom: document.querySelector('#page-custom'),
-          settingsInventory: document.querySelector('#erp-settings-inventory'),
-          settingsCustom: document.querySelector('#erp-settings-custom')
+          settingsStorage: document.querySelector('#erp-settings-storage'),
+          settingsData: document.querySelector('#erp-settings-data'),
+          settingsPhotoshop: document.querySelector('#erp-settings-photoshop')
         },
         { onRoute: handleErpRoute, openSettings: openErpSettings },
         initial
@@ -750,15 +758,48 @@ async function showErp(module, command = '') {
 }
 
 function openErpSettings(target) {
-  activateModule('more')
-  const layout = document.querySelector('.settings-layout')
-  const section = document.querySelector(`#settings-${target === 'custom' ? 'custom' : 'inventory'}`)
-  if (!layout || !section) return
-  // activateModule 刚把设置页滚回顶部；等它显示出来再滚到对应分节
-  requestAnimationFrame(() => {
-    const offset = section.getBoundingClientRect().top - layout.getBoundingClientRect().top
-    layout.scrollTo({ top: layout.scrollTop + offset, behavior: 'smooth' })
+  activateModule('more', target === 'custom' ? 'photoshop' : 'data')
+}
+
+// ══ 设置模式 ══
+// 进入设置时一级栏和二级栏让位给设置导航（body.settings-mode），右侧一次只显示一个分类。
+// 「返回应用」切回进入前的模块：各工具页面的 DOM 一直在，只切 .active，上传队列和输入都不会丢。
+const SETTINGS_PAGES = ['general', 'shortcut', 'appearance', 'storage', 'data', 'photoshop', 'about']
+const SETTINGS_PAGE_KEY = 'moyu.settingsPage'
+let settingsReturnModule = 'home'
+
+function savedSettingsPage() {
+  try {
+    const page = localStorage.getItem(SETTINGS_PAGE_KEY)
+    return SETTINGS_PAGES.includes(page) ? page : 'general'
+  } catch {
+    return 'general'
+  }
+}
+
+function showSettingsPage(page, animate = false) {
+  if (!SETTINGS_PAGES.includes(page)) page = 'general'
+  let shown = null
+  document.querySelectorAll('[data-settings-page]').forEach((section) => {
+    section.hidden = section.dataset.settingsPage !== page
+    if (!section.hidden) shown = section
   })
+  document.querySelectorAll('[data-settings-target]').forEach((item) => {
+    const active = item.dataset.settingsTarget === page
+    item.classList.toggle('active', active)
+    item.setAttribute('aria-current', active ? 'page' : 'false')
+  })
+  document.querySelector('#settings-scroll')?.scrollTo({ top: 0, behavior: 'instant' })
+  try {
+    localStorage.setItem(SETTINGS_PAGE_KEY, page)
+  } catch {
+    // 记不住上次的分类也不影响使用
+  }
+  if (animate) animatePageEntry(shown)
+}
+
+function leaveSettings() {
+  activateModule(settingsReturnModule, '', true)
 }
 
 // 导航选中底板：独立元素，切模块时从旧按钮滑到新按钮（落位弹簧，见 .nav-indicator.ready）。
@@ -810,7 +851,10 @@ function animatePageEntry(page) {
 
 function activateModule(module, action = '', animate = false) {
   const changed = state.module !== module
+  if (module === 'more' && changed) settingsReturnModule = state.module
   document.body.classList.toggle('home-active', module === 'home')
+  document.body.classList.toggle('settings-mode', module === 'more')
+  settingsNav.hidden = module !== 'more'
   if (module !== 'home') resetHomeParallax()
   if (module !== 'dieline') dielineModule?.deactivate()
   state.module = module
@@ -827,12 +871,8 @@ function activateModule(module, action = '', animate = false) {
     if (page.id === `page-${module}`) activePage = page
     page.classList.toggle('active', page.id === `page-${module}`)
   })
-  if (module === 'more' && changed && activePage) {
-    // 设置内容有自己的滚动容器。重新进入设置页时必须复位外层 page，
-    // 否则之前由锚点导航带出的 scrollTop 会把“设置”标题卷出视口。
-    activePage.scrollTop = 0
-    activePage.querySelector('.settings-layout')?.scrollTo({ top: 0, behavior: 'instant' })
-  }
+  // 设置：进入时回到上次看的分类；搜索、定制页带着分类名进来时直接切过去
+  if (module === 'more' && (changed || action)) showSettingsPage(action || savedSettingsPage())
   if (animate && changed) animatePageEntry(activePage)
 
   const erpCommand = action.startsWith('cmd:') ? action.slice(4) : ''
@@ -2518,7 +2558,26 @@ function syncTitleBar() {
 // 背景与毛玻璃要在主题之前恢复：首帧就是用户选好的背景，不闪一下默认灰。
 // 先声明再赋值：初始化时就会回调 syncTitleBar，那时还拿不到返回值。
 let backgroundSettings = null
-backgroundSettings = initBackgroundSettings({ onChange: () => syncTitleBar() })
+backgroundSettings = initBackgroundSettings({
+  onChange: () => {
+    syncTitleBar()
+    syncBackgroundSummary()
+  }
+})
+
+// 外观 › 背景样式：平时只显示当前样式名，点「调整」再展开单选和颜色
+function syncBackgroundSummary() {
+  const summary = document.querySelector('#bg-mode-summary')
+  const option = document.querySelector(`input[name="bg-mode"][value="${document.body.dataset.bg}"]`)
+  if (summary && option) summary.textContent = option.parentElement.textContent.trim()
+}
+
+document.querySelector('#toggle-bg-detail')?.addEventListener('click', (event) => {
+  const panel = document.querySelector('#bg-detail')
+  panel.hidden = !panel.hidden
+  event.currentTarget.setAttribute('aria-expanded', String(!panel.hidden))
+  event.currentTarget.textContent = panel.hidden ? '调整' : '收起'
+})
 
 document.querySelectorAll('input[name="theme"]').forEach((input) => {
   input.addEventListener('change', () => applyTheme(input.value))
@@ -2675,39 +2734,27 @@ document.querySelector('#reset-accent').addEventListener('click', () => {
   applyAccent()
 })
 
-const settingsLayout = document.querySelector('.settings-layout')
-const settingsNavItems = [...document.querySelectorAll('[data-settings-target]')]
-const settingsSections = [...document.querySelectorAll('[data-settings-section]')]
-
-function syncSettingsNavigation() {
-  if (!settingsLayout || !settingsSections.length) return
-  const top = settingsLayout.getBoundingClientRect().top + 18
-  const current = settingsSections.reduce((closest, section) => {
-    const distance = Math.abs(section.getBoundingClientRect().top - top)
-    return distance < closest.distance ? { id: section.id, distance } : closest
-  }, { id: settingsSections[0].id, distance: Infinity })
-  settingsNavItems.forEach((item) => {
-    const active = item.dataset.settingsTarget === current.id
-    item.classList.toggle('active', active)
-    item.setAttribute('aria-current', active ? 'page' : 'false')
-  })
-}
-
-settingsNavItems.forEach((item) => {
-  item.addEventListener('click', (event) => {
-    event.preventDefault()
-    const section = document.getElementById(item.dataset.settingsTarget)
-    if (!settingsLayout || !section) return
-    const offset = section.getBoundingClientRect().top - settingsLayout.getBoundingClientRect().top
-    settingsLayout.scrollTo({
-      top: settingsLayout.scrollTop + offset,
-      behavior: 'smooth'
-    })
-  })
+document.querySelector('#settings-nav')?.addEventListener('click', (event) => {
+  if (event.target.closest('#settings-back')) {
+    leaveSettings()
+    return
+  }
+  const item = event.target.closest('[data-settings-target]')
+  if (item) showSettingsPage(item.dataset.settingsTarget, event.detail > 0)
 })
 
-settingsLayout?.addEventListener('scroll', syncSettingsNavigation, { passive: true })
-syncSettingsNavigation()
+// 快捷键页的只读键位按平台显示：macOS 用 ⌘ ⇧，其他平台写成 Ctrl+Shift+
+document.querySelectorAll('.setting-keys[data-keys]').forEach((kbd) => {
+  const parts = kbd.dataset.keys.split('+')
+  kbd.textContent = document.body.dataset.platform === 'darwin'
+    ? parts.map((key) => ({ Mod: '⌘', Shift: '⇧' })[key] ?? key).join('')
+    : parts.map((key) => ({ Mod: 'Ctrl' })[key] ?? key).join('+')
+})
+
+const aboutPlatform = document.querySelector('#about-platform')
+if (aboutPlatform) {
+  aboutPlatform.textContent = ({ darwin: 'macOS', win32: 'Windows', linux: 'Linux' })[document.body.dataset.platform] ?? '—'
+}
 
 window.api.getAppInfo().then((info) => {
   document.title = `摸鱼工具箱 v${info.version}`
