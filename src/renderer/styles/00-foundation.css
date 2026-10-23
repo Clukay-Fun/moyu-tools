@@ -16,6 +16,14 @@
   --accent-18: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.18);
   --accent-28: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.28);
   --background: #e7e9ee;
+  /* ══ 外壳配色（V1 桌面外壳）══
+     外层壳、左右两级导航、中央工作区三层底色。
+     不沿用 --panel / --card 的半透明：工作区需要一块真正的实色底，
+     深色模式必须各自有值，不能在深色下强制白底。 */
+  --shell-bg: #eff0f4;
+  --shell-nav-bg: #e8eaf1;
+  --workspace-bg: #ffffff;
+  --workspace-radius: 20px;
   --panel: rgba(255, 255, 255, 0.27);
   --card: rgba(255, 255, 255, 0.14);
   --card-thin: rgba(255, 255, 255, 0.13);
@@ -178,6 +186,9 @@
   --accent-g: 145;
   --accent-b: 255;
   --background: #0b1018;
+  --shell-bg: #0b1018;
+  --shell-nav-bg: #0e151f;
+  --workspace-bg: #131b27;
   --panel: rgba(13, 19, 29, 0.88);
   --card: rgba(28, 37, 52, 0.62);
   --card-thin: rgba(24, 32, 46, 0.62);
