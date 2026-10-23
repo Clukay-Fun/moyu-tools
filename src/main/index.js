@@ -112,7 +112,7 @@ function resolveWindowIcon() {
 }
 
 /** 顶栏高度与外壳顶栏 CSS 保持一致；Windows 系统按钮的覆盖层也按它对齐。 */
-const TITLEBAR_HEIGHT = 56
+const TITLEBAR_HEIGHT = 50
 const TITLEBAR_THEMES = {
   // 顶栏透明、显露外层底色（--shell-bg），系统按钮的底色取同一个值
   light: { color: '#EFF0F5', symbolColor: '#252734' },
@@ -124,7 +124,7 @@ function platformTitleBarOptions() {
   if (process.platform === 'darwin') {
     return {
       titleBarStyle: 'hiddenInset',
-      trafficLightPosition: { x: 18, y: 22 }
+      trafficLightPosition: { x: 18, y: 18 }
     }
   }
   if (process.platform === 'win32') {

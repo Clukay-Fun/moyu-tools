@@ -19,36 +19,37 @@
   position: relative;
   z-index: var(--z-chrome);
   display: flex;
-  height: 56px;
+  height: 50px;
   flex: none;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 0 16px;
+  padding: 0 20px;
   -webkit-app-region: drag;
 }
 
 /* 拖拽区不认层级：盖在顶栏上的弹层（抽屉、对话框、菜单、遮罩）若不声明 no-drag，
-   落在顶栏 56px 内的部分点不动，只会拖动窗口。 */
+   落在顶栏 50px 内的部分点不动，只会拖动窗口。 */
 :is(.modal-layer, .ocr-overlay, .app-menu, #overlay-layer, .toast, [data-base-ui-portal]) {
   -webkit-app-region: no-drag;
 }
 
 /* 窗口按钮由系统绘制，顶栏只负责留位：
-   macOS 红黄绿在左上，Windows 最小化/最大化/关闭在右上。 */
+   macOS 红黄绿在左上（x 18，约 54px 宽，到 72px 为止），搜索按钮从 96px 起，
+   图标与按钮组之间留出约 32px 的空隙；Windows 最小化/最大化/关闭在右上。 */
 body[data-platform="darwin"] .topbar {
-  padding-left: 72px;
+  padding-left: 96px;
 }
 
 body[data-platform="win32"] .topbar {
   padding-right: 148px;
-  padding-left: 14px;
+  padding-left: 18px;
 }
 
 /* 全屏时系统窗口按钮隐藏，搜索不再需要给红黄绿/三键让位 */
 body[data-fullscreen="true"] .topbar {
-  padding-right: 14px;
-  padding-left: 14px;
+  padding-right: 20px;
+  padding-left: 20px;
 }
 
 .topbar-left,
@@ -70,12 +71,12 @@ body[data-fullscreen="true"] .topbar {
 
 .topbar-search-btn {
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   flex: none;
   place-items: center;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: 10px;
   color: var(--muted);
   background: transparent;
   cursor: pointer;
@@ -101,7 +102,7 @@ body[data-fullscreen="true"] .topbar {
   inset: 0;
   display: none;
   place-items: start center;
-  padding: max(10vh, 56px) 24px 24px;
+  padding: max(10vh, 50px) 24px 24px;
   background: rgba(10, 14, 22, 0.36);
   backdrop-filter: blur(3px);
   -webkit-app-region: no-drag;
