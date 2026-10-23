@@ -418,7 +418,8 @@ body[data-fullscreen="true"] .topbar {
   align-items: center;
   min-height: 0;
   margin: 0 0 12px 12px;
-  padding: 10px 0;
+  /* 上下也留 5px，和左右一致：顶部 2 + .rail-list 的 3 = 5 到第一个按钮；底部 5 到头像 */
+  padding: 2px 0 5px;
   overflow: hidden;
   border: 1px solid var(--glass-border);
   border-radius: 12px;
