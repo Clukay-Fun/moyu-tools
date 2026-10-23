@@ -17,13 +17,13 @@
   --accent-28: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.28);
   --background: #e7e9ee;
   /* ══ 外壳配色（V1 桌面外壳）══
-     外层壳、一级栏、二级栏、中央工作区四层底色。
+     只有三块大面积底色：外层（含顶栏、二级工具区）→ 独立的一级导航条 → 中央工作区。
+     顶栏和二级区不另铺底色，直接显露外层；选中高亮是局部状态，不算一层。
      不沿用 --panel / --card 的半透明：工作区需要一块真正的实色底，
      深色模式必须各自有值，不能在深色下强制白底。 */
-  --shell-bg: #eff0f4;
-  --shell-nav-bg: #e8eaf1;
-  /* 一级栏单独一层底色：和二级栏拉开，避免两栏同色糊成一片 */
-  --rail-bg: #f4f5f9;
+  --shell-bg: #eff0f5;
+  /* 一级导航条比外层略深，做成独立圆角条 */
+  --rail-bg: #e5e8f0;
   --workspace-bg: #ffffff;
   --workspace-radius: 20px;
   --panel: rgba(255, 255, 255, 0.27);
@@ -189,8 +189,7 @@
   --accent-b: 255;
   --background: #0b1018;
   --shell-bg: #0b1018;
-  --shell-nav-bg: #0e151f;
-  --rail-bg: #101823;
+  --rail-bg: #111924;
   --workspace-bg: #131b27;
   --panel: rgba(13, 19, 29, 0.88);
   --card: rgba(28, 37, 52, 0.62);

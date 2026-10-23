@@ -12,7 +12,7 @@
 外壳只负责窗口与导航层，不碰各工具页面的业务结构和流程。改外壳时先看这一节，别在页面里重复造顶栏或导航。
 
 - **顶栏**：`.topbar` 固定 56px，整条 `-webkit-app-region: drag`；搜索按钮、计时胶囊 `.mochi` 是 `no-drag`。平台由 `body[data-platform]` 决定让位：`darwin` 左留 72px 给红黄绿，`win32` 右留 148px 给系统最小化/最大化/关闭。进入全屏后 `body[data-fullscreen="true"]` 会把左右让位都收成 14px，搜索跟随窗口左移。平台值来自 preload 的 `process.platform`。
-- **颜色**：外层 `--shell-bg`、一级栏 `--rail-bg`、二级栏 `--shell-nav-bg`、工作区 `--workspace-bg`、圆角 `--workspace-radius`（20px）。深色在 `[data-theme="dark"]` 有独立值，工作区不是强制白底。
+- **颜色**：三层底色：外层 `--shell-bg`（顶栏与二级栏透明，直接显露外层）、一级导航条 `--rail-bg`、工作区 `--workspace-bg`、圆角 `--workspace-radius`（20px）。深色在 `[data-theme="dark"]` 有独立值，工作区不是强制白底。
 - **一级栏**：`.rail` 宽 64px；`.nav-ic` 只放图标，名称走 `aria-label` + `data-tip`（`data-tip-side="right"`），由 `installTooltips()` 统一显示，键盘聚焦也会出现。选中底板是独立的 `.nav-indicator`。
 - **二级栏**：`.submenu` 宽 `clamp(184px, 18vw, 208px)`，行高 40px、独立滚动；普通行无边框，选中态由 `.submenu-indicator` 画淡色圆角底板。主页没有二级栏。
 - **工作区**：`.content` 是白色/深色实色圆角容器，外边距 12px，`overflow: hidden`；`.pages` 不滚，`.page` 自己滚。页面内部结构不用改。
