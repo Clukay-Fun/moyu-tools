@@ -47,23 +47,27 @@
 
         <div class="app-body">
           <nav class="rail" aria-label="工具模块">
-            <span class="nav-indicator" aria-hidden="true"></span>
-            <button class="nav-ic active" type="button" data-module="home" aria-label="主页" data-tip="主页" data-tip-side="right" aria-current="page"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-home"></use></svg></button>
-            <button class="nav-ic" type="button" data-module="pdf" aria-label="PDF" data-tip="PDF" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-pdf"></use></svg></button>
-            <button class="nav-ic" type="button" data-module="ai" aria-label="AI" data-tip="AI" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-adobe"></use></svg></button>
-            <button class="nav-ic" type="button" data-module="bc" aria-label="条码" data-tip="条码" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-barcode"></use></svg></button>
-            <button class="nav-ic" type="button" data-module="image" aria-label="图片" data-tip="图片" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-image"></use></svg></button>
-            <button class="nav-ic" type="button" data-module="video" aria-label="视频" data-tip="视频" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-video"></use></svg></button>
-            <button class="nav-ic" type="button" data-module="dieline" aria-label="刀模" data-tip="刀模" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-dieline"></use></svg></button>
-            <button class="nav-ic" type="button" data-module="erp" aria-label="库存" data-tip="库存" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-inventory"></use></svg></button>
-            <button class="nav-ic" type="button" data-module="custom" aria-label="定制" data-tip="定制" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-custom"></use></svg></button>
-            <div class="rail-spacer"></div>
+            <!-- 模块列表单独滚动；选中块和按钮同在这个定位容器里，滚动时一起走 -->
+            <div class="rail-list">
+              <span class="nav-indicator" aria-hidden="true"></span>
+              <button class="nav-ic active" type="button" data-module="home" aria-label="主页" data-tip="主页" data-tip-side="right" aria-current="page"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-home"></use></svg></button>
+              <button class="nav-ic" type="button" data-module="pdf" aria-label="PDF" data-tip="PDF" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-pdf"></use></svg></button>
+              <button class="nav-ic" type="button" data-module="ai" aria-label="AI" data-tip="AI" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-adobe"></use></svg></button>
+              <button class="nav-ic" type="button" data-module="bc" aria-label="条码" data-tip="条码" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-barcode"></use></svg></button>
+              <button class="nav-ic" type="button" data-module="image" aria-label="图片" data-tip="图片" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-image"></use></svg></button>
+              <button class="nav-ic" type="button" data-module="video" aria-label="视频" data-tip="视频" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-video"></use></svg></button>
+              <button class="nav-ic" type="button" data-module="dieline" aria-label="刀模" data-tip="刀模" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-dieline"></use></svg></button>
+              <button class="nav-ic" type="button" data-module="erp" aria-label="库存" data-tip="库存" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-inventory"></use></svg></button>
+              <button class="nav-ic" type="button" data-module="custom" aria-label="定制" data-tip="定制" data-tip-side="right"><svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-nav-custom"></use></svg></button>
+            </div>
             <div class="rail-footer">
               <button
                 class="profile-avatar"
                 id="profile-avatar"
                 type="button"
                 aria-label="个人头像"
+                data-tip="设置与反馈"
+                data-tip-side="right"
                 aria-haspopup="menu"
                 aria-expanded="false"
               >
