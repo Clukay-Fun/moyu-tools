@@ -609,7 +609,7 @@ body[data-fullscreen="true"] .topbar {
 .submenu {
   position: relative;
   display: none;
-  /* 宽度由 main.js fitSubmenuWidth 按本模块最长的一行写成像素（160–240），切模块才变；这里只是兜底。
+  /* 宽度由 main.js fitSubmenuWidth 按本模块最长的一行写成像素（120–240），切模块才变；这里只是兜底。
      不铺底色，直接显露外层；左右 12px 内边距就是它和导航条、工作区之间的间隔 */
   width: 180px;
   min-height: 0;

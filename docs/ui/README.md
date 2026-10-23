@@ -14,7 +14,7 @@
 - **顶栏**：`.topbar` 固定 48px（Windows `TITLEBAR_HEIGHT` 同为 48，macOS 红黄绿 `y: 17`），整条 `-webkit-app-region: drag`；搜索按钮、计时胶囊 `.mochi` 是 `no-drag`。平台由 `body[data-platform]` 决定让位：`darwin` 左留 96px（红黄绿后再空约 32px 才到搜索），`win32` 右留 148px 给系统最小化/最大化/关闭。进入全屏后 `body[data-fullscreen="true"]` 会把左右让位都收成 20px，搜索跟随窗口左移。平台值来自 preload 的 `process.platform`。
 - **颜色**：三层：外层背景 `--app-bg`（顶栏与二级栏透明，直接显露外层）、一级导航条 `--rail-bg`、工作区 `--workspace-bg`、圆角 `--workspace-radius`（18px）。深色在 `[data-theme="dark"]` 有独立值，工作区不是强制白底。
 - **一级栏**：`.rail` 是独立圆角导航条（宽 60、圆角 14、紧贴顶栏、左下离外框 12px、描边 `--glass-border`），模块按钮放在可滚动的 `.rail-list` 里，头像 `.rail-footer` 固定在底部；`.nav-ic` 40px（选中块圆角 10），只放图标，名称走 `aria-label` + `data-tip`（`data-tip-side="right"`），由 `installTooltips()` 统一显示，键盘聚焦也会出现。选中底板是独立的 `.nav-indicator`，和按钮同在 `.rail-list` 里，滚动时一起走。
-- **二级栏**：`.submenu` 宽度由 `fitSubmenuWidth()` 按当前模块最长的一行（按粗体量）算一次，限制 160–240px，按模块缓存，悬停和选中不会改变宽度；不铺底色，左右 12px 内边距就是它和导航条、工作区的间隔；行高 36px、行间 2px，分组标题行高 22px、到首个工具 6px、组间 12px；独立滚动；名称 `.submenu-label` 单行省略，被截断的行由 `renderSubmenu()` 补 `data-tip` 显示全名；普通行无边框，选中态由 `.submenu-indicator` 画淡色圆角底板。主页没有二级栏。
+- **二级栏**：`.submenu` 宽度由 `fitSubmenuWidth()` 按当前模块最长的一行（按粗体量）算一次，限制 120–240px，按模块缓存，悬停和选中不会改变宽度；不铺底色，左右 12px 内边距就是它和导航条、工作区的间隔；行高 36px、行间 2px，分组标题行高 22px、到首个工具 6px、组间 12px；独立滚动；名称 `.submenu-label` 单行省略，被截断的行由 `renderSubmenu()` 补 `data-tip` 显示全名；普通行无边框，选中态由 `.submenu-indicator` 画淡色圆角底板。主页没有二级栏。
 - **工作区**：`.content` 是半透明毛玻璃圆角容器，上外边距 0（顶栏 48px 里的胶囊上下各空 7px）、其余 12px（有二级栏时左外边距为 0）；首页（`body.home-active`）去掉底色、描边、阴影，标语直接压在背景上，`overflow: hidden`；`.pages` 不滚，`.page` 自己滚。页面内部结构不用改。
 - **搜索**：`#search-wrap` 是居中模态（遮罩 + `#search-dialog`），内部仍复用 `#feature-search`、`#search-results`、`.search-result`。⌘K / Ctrl+K、Esc、点击遮罩；关闭后焦点回到打开前的元素。结果按模块相关度分组，组标题就是分类名（`renderSearchResults()`）。
 - **头像**：左下 `.profile-avatar`（按钮 38px、图片 32px，悬停提示「设置与反馈」），无自定义图片时用内置 SVG `#ic-default-avatar`；菜单 `#profile-menu` 挂在 `#overlay-layer`，用 `placePopover` 的 `side: 'right'` 出现在导航条右侧、底边对齐头像；菜单展开时头像不再显示悬停提示；只有「设置」「意见反馈」两项。换头像入口在「设置 › 通用」。
@@ -41,7 +41,7 @@
 - [x] **D 拆分 style.css**：保留唯一 `@import` 入口，按原级联顺序拆入 `styles/`；989 条业务规则不变。全量 290 状态比较中的 6 处指针状态差异经固定指针复核，34 个常规与交互状态零差异；OCR-B 在开发版、构建版及 `file://` 组件目录均加载成功。
 
 - [x] **E 库存 / 定制并入**：原 ajuan-erp 组件的变量统一改为 `--erp-*` 并映射到摸鱼变量（`src/renderer/erp/styles/erp.css`），主题跟随摸鱼；摸鱼全局输入框边框在 ERP 范围内复位。约定见组件目录「库存 / 定制」。
-- [x] **V4 精修**：默认主题还原旧版光斑 + 白纱 + 毛玻璃；首页去底板；顶栏 48px、下方不再留间距；二级栏按模块自适应 160–240px、行高 36px；PDF 菜单去掉转 DOCX / XLSX / PPTX；变量改名为 `--app-bg-*`、`--glass-opacity`、`--glass-border`、`--glass-shadow`。
+- [x] **V4 精修**：默认主题还原旧版光斑 + 白纱 + 毛玻璃；首页去底板；顶栏 48px、下方不再留间距；二级栏按模块内容自适应 120–240px、行高 36px；PDF 菜单去掉转 DOCX / XLSX / PPTX；变量改名为 `--app-bg-*`、`--glass-opacity`、`--glass-border`、`--glass-shadow`。
 - [x] **V3 视觉系统**：导航条圆角 14、二级栏 180–190px；阴影只留工作区一层；毛玻璃变量（`--glass-alpha` / `--glass-blur-px` / `--surface-inner`）；外观设置新增「背景与毛玻璃」，旧版紫蓝渐变作为预设；浅色控件描边改中性色。
 - [x] **V2 外壳精修**：三层底色（删 `--shell-nav-bg`）、顶栏 50px、独立圆角一级导航条、图标底板 40px、头像 32px、二级栏收窄并透明、长名称省略加提示。
 - [x] **V1 桌面外壳**：外层底色 + 两级导航 + 白色工作区容器；顶栏改 56px 无边框（macOS 红黄绿 / Windows `titleBarOverlay`），一级栏只留图标与 Tooltip，二级栏固定宽度，搜索改居中弹窗，左下加入头像与两项菜单。约定见上面「外壳（V1 桌面改版）」。

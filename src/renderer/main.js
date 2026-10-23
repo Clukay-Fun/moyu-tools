@@ -549,10 +549,10 @@ document.addEventListener('pointerdown', () => {
   document.body.classList.remove('keyboard-focus')
 }, true)
 
-// 二级栏宽度按本模块最长的一行定，限制在 160–240px。每个模块只量一次并缓存：
+// 二级栏宽度按本模块最长的一行定，限制在 120–240px。每个模块只量一次并缓存：
 // 同一模块里悬停、选中、重新渲染都不会让宽度跳动。量的时候整列按选中态的粗体排，
 // 这样选中项变粗也不会超出。
-const SUBMENU_MIN_WIDTH = 160
+const SUBMENU_MIN_WIDTH = 120
 const SUBMENU_MAX_WIDTH = 240
 const submenuWidths = new Map()
 
