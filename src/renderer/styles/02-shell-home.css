@@ -738,12 +738,6 @@ body[data-fullscreen="true"] .topbar {
   font-weight: 800;
 }
 
-.submenu-soon {
-  padding: 9px;
-  color: var(--faint);
-  font-size: var(--fs-md);
-}
-
 .content {
   position: relative;
   display: flex;
@@ -879,5 +873,17 @@ body.home-active .page-home.active h1.home-slogan {
 @media (prefers-reduced-motion: reduce) {
   body.home-active .page-home.active h1.home-slogan {
     animation: none;
+  }
+}
+
+@media (max-width: 940px) {
+  .slogan {
+    display: none;
+  }
+}
+
+@media (max-height: 560px) {
+  .pages {
+    padding-bottom: 22px;
   }
 }

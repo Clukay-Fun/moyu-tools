@@ -420,24 +420,6 @@ window.MOTION_INVENTORY = [
     "media": null
   },
   {
-    "selector": ".image-stage",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "120ms",
-    "easing": "ease",
-    "tokenized": false,
-    "media": null
-  },
-  {
-    "selector": ".ocr-progress > div span",
-    "kind": "transition",
-    "property": "width",
-    "duration": "160ms",
-    "easing": "ease",
-    "tokenized": false,
-    "media": null
-  },
-  {
     "selector": ".update-available-dialog[open]",
     "kind": "transition",
     "property": "opacity",

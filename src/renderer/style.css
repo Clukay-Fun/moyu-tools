@@ -1,6 +1,7 @@
 @import url('./styles/00-foundation.css');
 @import url('./styles/01-tokens.css');
 @import url('./styles/01-controls.css');
+@import url('./styles/components/icon.css');
 @import url('./styles/components/button.css');
 @import url('./styles/components/field.css');
 @import url('./styles/components/segmented.css');
@@ -16,9 +17,9 @@
 @import url('./styles/05-workbench.css');
 @import url('./styles/06-barcode-image.css');
 @import url('./styles/07-settings-format.css');
-@import url('./styles/08-global-overrides.css');
 @import url('./styles/09-barcode-screenshot.css');
 @import url('./styles/10-board.css');
 @import url('./styles/11-controls-board.css');
 @import url('./styles/12-image-editor.css');
 @import url('./styles/13-dieline.css');
+@import url('./styles/15-a11y.css');

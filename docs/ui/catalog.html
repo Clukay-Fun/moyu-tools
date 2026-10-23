@@ -188,7 +188,7 @@
         <dl class="cat-meta">
           <dt>时长</dt><dd>按用途命名，同用途才共用：<code>--dur-hover</code> 悬停的颜色/背景/边框 · <code>--dur-press</code> 按下与开关 · <code>--dur-popover</code> 浮层入场 · <code>--dur-popover-exit</code> 浮层退场 · <code>--dur-panel</code> 面板（轻提示、图片编辑面板）。取值不同的旧写法（进度条 160ms、拖放高亮 150ms 等）保持原值，不为统一改变节奏</dd>
           <dt>缓动</dt><dd><code>--ease-out</code>——出现和位移；颜色、背景这类非位移变化用 <code>ease</code>；两个位置之间来回滑（分段指示器）现在用的是 <code>cubic-bezier(0.77, 0, 0.175, 1)</code>，还没有变量</dd>
-          <dt>减弱动效</dt><dd>系统开启「减少动态效果」时，全局兜底只保留颜色/透明度过渡，位移、缩放、按下回弹一律不动（<code>styles/08-global-overrides.css</code>「减弱动效兜底」）</dd>
+          <dt>减弱动效</dt><dd>系统开启「减少动态效果」时，全局兜底只保留颜色/透明度过渡，位移、缩放、按下回弹一律不动（<code>styles/15-a11y.css</code>「减弱动效兜底」）</dd>
         </dl>
         <div class="cat-stage"><div class="cat-motion-tokens" data-motion-tokens></div></div>
       </div>
@@ -305,7 +305,7 @@
           <dt>顶栏</dt><dd><code>.topbar</code> 56px（<code>--shell-bar</code>），不铺底色，整条可拖动；搜索按钮与 <code>.mochi</code> 是 <code>no-drag</code></dd>
           <dt>一级栏</dt><dd><code>.rail</code> 无框：不铺底色、不描边，宽 56（与顶栏同高）；<code>.rail-list</code> 滚动、头像固定在底部；<code>.nav-ic</code> 40px（选中块圆角 10） 只放图标，名称走 <code>aria-label</code> + <code>data-tip</code>；头像 32px</dd>
           <dt>二级栏</dt><dd><code>.submenu</code> 宽按所有模块里最长一行统一（120–240px）、书签抽屉（同工作区表面，只描左上下三边，左圆角 16、右侧开放接工作区）、行高 36px、组间 12px，独立滚动；名称 <code>.submenu-label</code> 单行省略，被截断时挂 <code>data-tip</code>；主页不显示</dd>
-          <dt>阴影与毛玻璃</dt><dd>书签带 <code>--drawer-shadow</code>（往左），接书签的工作区带更轻的 <code>--drawer-body-shadow</code>（往右下），独立的工作区带 <code>--glass-shadow</code>；三者都带、<code>--glass-border</code>、<code>--glass-highlight</code>；内容框 <code>.glass-card</code> 用描边 + <code>--surface-inner</code> + 高光 + 折射边 <code>--glass-edge</code>、圆角 12、无外阴影；透明度 <code>--glass-opacity</code>（默认 0.3），模糊 <code>--glass-blur-px</code>（默认 26px，浅灰背景不开）</dd>
+          <dt>阴影与毛玻璃</dt><dd>书签带 <code>--drawer-shadow</code>（往左），接书签的工作区带更轻的 <code>--drawer-body-shadow</code>（往右下），独立的工作区带 <code>--glass-shadow</code>；三者都带、<code>--glass-border</code>、<code>--glass-highlight</code>；内容框 <code>.m-card</code> 用描边 + <code>--surface-inner</code> + 高光 + 折射边 <code>--glass-edge</code>、圆角 12、无外阴影；透明度 <code>--glass-opacity</code>（默认 0.3），模糊 <code>--glass-blur-px</code>（默认 26px，浅灰背景不开）</dd>
           <dt>背景</dt><dd><code>body[data-bg]</code> classic（默认：旧版光斑 <code>.orbs</code> + 白纱 <code>--veil</code>）/ plain / gradient / solid，颜色 <code>--app-bg-start</code> <code>--app-bg-end</code> <code>--app-bg-angle</code>，由设置 › 外观 › 背景与毛玻璃写入</dd>
           <dt>工作区</dt><dd><code>.content</code> 18px 圆角、外边距 12px（有二级栏时左外边距为 0）、内部滚动；<code>.page</code> 自己滚</dd>
           <dt>现用模块</dt><dd>全部模块</dd>

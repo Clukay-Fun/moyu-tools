@@ -9,13 +9,6 @@
   flex-wrap: wrap;
 }
 
-.toolbar-hint {
-  margin-left: auto;
-  color: var(--faint);
-  font-size: var(--fs-md);
-  text-align: right;
-}
-
 .toolbar-space {
   flex: 1;
 }
@@ -179,8 +172,7 @@
   font-size: var(--fs-xs);
 }
 
-.pdf-watermark-file,
-.pdf-watermark-file-item {
+.pdf-watermark-file {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;

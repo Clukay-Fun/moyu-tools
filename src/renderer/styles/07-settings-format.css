@@ -1111,3 +1111,76 @@ body[data-bg="classic"] .bg-preview {
   justify-content: space-between;
   color: var(--muted);
 }
+
+@media (max-width: 1100px) {
+  .format-workspace {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+
+  .format-file-head,
+  .format-file-item {
+    grid-template-columns: minmax(120px, 1fr) minmax(64px, 0.45fr) minmax(74px, 0.55fr) 28px;
+  }
+
+  .format-file-head .cell-detail,
+  .format-file-head .cell-meta,
+  .format-file-item .format-detail,
+  .format-file-item .format-size {
+    display: none;
+  }
+}
+
+@media (max-width: 780px) {
+  .format-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .format-run {
+    margin-top: 0;
+  }
+
+  .format-file-head,
+  .format-file-item {
+    grid-template-columns: minmax(0, 1fr) minmax(84px, auto) 28px;
+  }
+
+  .format-file-head .cell-detail,
+  .format-file-head .cell-meta,
+  .format-file-head .cell-target,
+  .format-file-item .format-detail,
+  .format-file-item .format-size,
+  .format-file-item .format-target {
+    display: none;
+  }
+
+  .format-result-bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .format-progress-track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@media (max-height: 560px) {
+  .format-file-panel {
+    min-height: 0;
+  }
+
+  .format-control-panel {
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .format-action-copy,
+  .format-engine-card {
+    display: none;
+  }
+
+  .format-control-actions {
+    margin: 0 -10px -10px;
+    padding: 8px 10px 10px;
+  }
+}

@@ -187,3 +187,17 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+@media (max-width: 780px) {
+  .pdf-watermark-workbench {
+    grid-template-columns: 1fr;
+  }
+
+  .pdf-watermark-left {
+    min-height: 460px;
+  }
+
+  .pdf-watermark-controls {
+    max-height: 320px;
+  }
+}

@@ -103,13 +103,6 @@
 .dieline-preset b { display: block; font-size: var(--fs-md); }
 .dieline-preset span { display: block; color: var(--muted); font-size: var(--fs-xs); line-height: 1.35; }
 
-.dieline-help {
-  margin: 0;
-  color: var(--muted);
-  font-size: 10.5px;
-  line-height: 1.45;
-}
-
 .dieline-canvas-card {
   display: flex;
   flex-direction: column;

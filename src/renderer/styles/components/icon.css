@@ -1,0 +1,24 @@
+/* ══ 图标 .ic ══════════════════════════════════════════════
+   <svg class="ic" aria-hidden="true"><use href="#ic-plus"></use></svg>
+   尺寸：默认 --ic-md · .ic-sm · .ic-lg；按钮里的图标尺寸由 m-btn 决定。 */
+.ic {
+  width: var(--ic-md);
+  height: var(--ic-md);
+  stroke-width: var(--ic-stroke);
+  flex: none;
+  /* 图标是装饰，可读名称由按钮的 aria-label 提供，不让读屏重复念 */
+  pointer-events: none;
+}
+.ic-lg { width: var(--ic-lg); height: var(--ic-lg); }
+
+/* ══ 图标 sprite 容器 ══
+   ⚠ 必须脱离文档流。sprite 默认是 display:inline，即使 width/height 都是 0，
+   它所在的**行盒**照样占位——实测把整个界面下推了 20px，
+   而 svg 自身的 getBoundingClientRect().height 仍然是 0，
+   只查它的高度是查不出来的。 */
+#icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}

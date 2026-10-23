@@ -1,0 +1,82 @@
+/* ══ 无障碍：减弱动效与键盘焦点 ══════════════════════════════
+   ⚠ 必须最后加载：焦点环要压过各组件和页面的静止态；
+   减弱动效用 !important，位置无所谓，但和焦点规则放在一起好找。 */
+
+/* ══ 减弱动效兜底 ══
+   系统开启「减少动态效果」时，位移、缩放、滑动一律不做过渡，
+   颜色和透明度照常渐变——状态变化仍然能被感知，但画面不会动。 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-property: color, background-color, border-color, opacity, box-shadow, outline-color !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  :where(button, a, [role="button"], label):active {
+    transform: none !important;
+  }
+}
+
+/* ══ V1 · 减弱动效 ══
+   关掉**位移、缩放与模糊**，保留颜色与透明度过渡——后者帮助理解状态变化，
+   不会引起前庭不适。不是一刀切把所有动画设成 0。 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  :where(button, a, .m-btn, .nav-ic):active {
+    transform: none !important;
+  }
+  .m-menu, .img-editor, .toast {
+    transition-property: opacity !important;
+  }
+  .m-segmented::before {
+    transition-duration: 0ms;
+  }
+  .submenu-indicator.ready {
+    transition-duration: 0ms;
+  }
+}
+
+/* ══ V1 · 键盘焦点环 ══
+   ⚠ 不用 `*:focus-visible`。全局通配会把焦点环套到 div、span 这类
+   本不该获得焦点的元素上（它们可能因为 contenteditable 或第三方库
+   意外可聚焦），出现"焦点框飘在奇怪位置"。这里只覆盖**真实可交互**元素。
+   用 :where() 保持零特异性，任何组件都能覆盖它而不必写 !important。 */
+body.keyboard-focus :where(
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [tabindex]:not([tabindex="-1"])
+):focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: var(--focus-glow);
+  /* 不要写 border-radius: inherit——那取的是父元素圆角，会把控件自己的圆角改掉；
+     outline 与 box-shadow 本身就跟随元素自身的圆角 */
+}
+
+/* ══ V1 · 把被 outline:none 抹掉的焦点环补回来 ══
+   下面这些选择器为了去掉**鼠标点击**时的焦点框写了 outline: none。
+   而上面的通用焦点规则用了 :where()，特异性为 0，会被它们盖掉——
+   结果就是这些输入控件按 Tab 时完全看不到焦点。
+   这里按同样的选择器补一条 :focus-visible，只在**键盘**聚焦时出现。
+   ⚠ 新增控件如果也要去掉鼠标焦点框，记得同步加进这份名单。 */
+body.keyboard-focus .barcode-input input:focus-visible,
+body.keyboard-focus .barcode-preset-picker select:focus-visible,
+body.keyboard-focus .batch-input-field textarea:focus-visible,
+body.keyboard-focus .color-preview input:focus-visible,
+body.keyboard-focus .format-options input[type="number"]:focus-visible,
+body.keyboard-focus .pdf-options input:focus-visible,
+body.keyboard-focus .pdf-watermark-controls select:focus-visible,
+body.keyboard-focus .search input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: var(--focus-glow);
+}

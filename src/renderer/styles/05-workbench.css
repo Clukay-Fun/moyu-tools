@@ -49,11 +49,6 @@
   font-weight: 600;
 }
 
-.cell-index {
-  width: 38px;
-  text-align: center;
-}
-
 .cell-name {
   flex: 1;
 }
@@ -96,18 +91,6 @@
 
 .cell-action {
   width: 33px;
-}
-
-.hint-mark {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border-radius: var(--r-md);
-  color: var(--accent);
-  background: var(--accent-10);
-  font-size: var(--fs-sm);
-  font-weight: 800;
 }
 
 
@@ -309,8 +292,7 @@
   background: color-mix(in srgb, var(--danger) 16%, transparent);
 }
 
-.result,
-.run-card {
+.result {
   display: flex;
   flex: none;
   align-items: center;
@@ -821,23 +803,10 @@
   text-align: center;
 }
 
-.barcode-mock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
 .bars {
   display: flex;
   height: 104px;
   align-items: flex-end;
-}
-
-.barcode-digits {
-  color: var(--foreground);
-  font: 18px Consolas, monospace;
-  letter-spacing: 0.3em;
 }
 
 .control-column,
@@ -888,4 +857,41 @@
 .barcode-advanced-content label {
   color: var(--muted);
   font-size: var(--fs-sm);
+}
+
+@media (max-height: 760px) {
+  .barcode-single-section {
+    padding: var(--sp-4);
+    padding-bottom: calc(var(--sp-4) + var(--sp-2));
+  }
+
+  .barcode-pane {
+    gap: var(--sp-3);
+  }
+
+  .barcode-mode-switch {
+    margin-bottom: var(--sp-2);
+  }
+
+  .artboard {
+    height: clamp(180px, 30vh, 260px);
+    min-height: 180px;
+    padding: 4%;
+  }
+
+  .barcode-spec-footer {
+    padding-top: var(--sp-2);
+  }
+}
+
+@media (max-width: 780px) {
+  .barcode-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .control-column {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 0;
+  }
 }
