@@ -406,7 +406,7 @@ body[data-fullscreen="true"] .topbar {
   min-height: 0;
 }
 
-/* 一级导航条：独立圆角条（圆角 14，无阴影，靠半透明底、描边和背景模糊成条），顶部留 6px（与工作区顶边对齐），左、下 12px。
+/* 一级导航条：独立圆角条（圆角 14，无阴影，靠半透明底、描边和背景模糊成条），顶部不留外边距（与工作区顶边对齐，顶栏胶囊上下各空 7px），左、下 12px。
    模块列表单独滚动，头像固定在底部，窗口再矮也不会被挤出去。 */
 .rail {
   position: relative;
@@ -416,7 +416,7 @@ body[data-fullscreen="true"] .topbar {
   flex-direction: column;
   align-items: center;
   min-height: 0;
-  margin: 6px 0 12px 12px;
+  margin: 0 0 12px 12px;
   padding: 10px 0;
   overflow: hidden;
   border: 1px solid var(--glass-border);
@@ -755,7 +755,7 @@ body[data-fullscreen="true"] .topbar {
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  margin: 6px 12px 12px;
+  margin: 0 12px 12px;
   overflow: hidden;
   /* 全应用唯一一层「卡片阴影」：描边 + 柔和外阴影 + 顶部高光。内部内容框不再各自带阴影 */
   border: 1px solid var(--glass-border);
