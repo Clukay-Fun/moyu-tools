@@ -26,7 +26,17 @@
 - 原生资产：按目标平台实测，不能用另一平台的结果代替。
 - 打包验证：只在触及打包布局、原生资产、运行闭包或发布收口时执行；不要为普通功能切片反复打包。
 
+- 样式改动：`npm run lint:css`（Stylelint + 样式门槛）。门槛只能减：写死的颜色、圆角、字号、重复选择器、废弃类名、没人用的变量都不能比 `scripts/style-baseline.json` 多；数字降下来后再跑 `node scripts/style-report.mjs --update-baseline`。
+
 未能执行的验证必须在交付中说明原因与残余风险。
+
+## 界面样式
+
+- 外观只改变量：基础值在 `styles/00-foundation.css`，组件语义变量（`--btn-*`、`--field-*`、`--seg-*`、`--card-*`、`--menu-*`、`--dialog-*`）在 `styles/01-tokens.css`。
+- 同类元素只用一种写法，组件在 `styles/components/`（前缀 `m-`）：按钮 `m-btn`、输入 `m-field-unit` / `m-stepper` / `m-select`、分段 `m-segmented`、开关 `m-switch`、卡片 `m-card`、空状态 `m-empty`、菜单 `m-menu`、对话框 `m-dialog` + `m-backdrop`。尺寸和变体用修饰类（`m-btn--primary`、`--sm`），状态用属性（`aria-pressed`、`aria-selected`、`aria-invalid`、`:disabled`）。
+- 模块文件（`02-*`–`13-*`）只写布局：宽度、位置、网格、间距组合；不再为某个按钮或输入框补外观。`components/` 里禁止写死颜色、圆角、字号（Stylelint 会拦）。
+- 库存 / 定制的 React 组件在 `.module.css` 里直接引用同一组语义变量，不另起一套外观。
+- 新组件或新变体要同步进 `docs/ui/catalog.html`。
 
 ## 发布与交付
 

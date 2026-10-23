@@ -72,7 +72,6 @@
      #d49119、#e3a62a、#d7525b、#a8332c…），统一收到这里 */
   --success: #3f9a66;
   --warning: #d49119;
-  --info: #527ae7;
   --status-ring: 4px;
   /* 业务固定色：含义不随主题变 */
   --channel-r: #e15357;
@@ -135,7 +134,6 @@
      收敛；**新代码一律用这里的变量**。 */
 
   /* 图标尺寸：14 行内密集 / 16 默认按钮 / 20 主导航 */
-  --ic-sm: 14px;
   --ic-md: 16px;
   --ic-lg: 20px;
   /* 描边 1.75 而非 Lucide 默认的 2：本项目边框与分隔线都很细，2 会显得笨重。
@@ -143,9 +141,6 @@
   --ic-stroke: 1.75;
 
   /* 图标按钮的点击区。视觉是图标本身，命中区由这三档保证。 */
-  --icon-btn-sm: 28px;
-  --icon-btn-md: 32px;
-  --icon-btn-lg: 36px;
 
   /* 焦点环。只在键盘 Tab 时出现，鼠标点击不显示。 */
   /* 键盘焦点：贴边的实色内圈保证可辨（主题色对白底约 4:1），外面再加一圈柔光；只在 Tab 操作时出现 */
@@ -266,7 +261,6 @@
   --danger: #e36a6c;
   --success: #5bbd88;
   --warning: #e0a458;
-  --info: #7ea2f0;
   /* 引用了 --foreground 的变量必须在主题块里重新声明，否则继承的是 :root 上按浅色算好的值 */
   --border-neutral: color-mix(in srgb, var(--foreground) 13%, transparent);
   --border-neutral-hover: color-mix(in srgb, var(--foreground) 22%, transparent);

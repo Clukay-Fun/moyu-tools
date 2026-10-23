@@ -73,21 +73,13 @@ body {
   --menu-bg: var(--menu-surface);
   --menu-border: var(--border);
   --menu-shadow: var(--shadow-small), var(--glass-rim);
-  --menu-item-h: var(--h-md);
   --menu-item-radius: var(--r-sm);
 
   /* 对话框 */
   --dialog-radius: var(--workspace-radius);
-  --dialog-pad: var(--sp-5);
   --dialog-bg: var(--menu-surface);
   --dialog-border: var(--border-neutral);
   --dialog-shadow: var(--shadow-panel);
   --backdrop: rgba(10, 14, 22, 0.36);
   --backdrop-blur: blur(3px);
-
-  /* 标签、徽标 */
-  --badge-h: 20px;
-  --badge-pad-x: 7px;
-  --badge-radius: var(--r-full);
-  --badge-font-size: var(--fs-xs);
 }

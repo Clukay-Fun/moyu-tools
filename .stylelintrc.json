@@ -1,0 +1,27 @@
+{
+  "rules": {
+    "color-no-invalid-hex": true,
+    "block-no-empty": true,
+    "no-duplicate-selectors": true,
+    "declaration-block-no-duplicate-properties": [true, { "ignore": ["consecutive-duplicates-with-different-values"] }],
+    "property-no-unknown": [true, { "ignoreProperties": ["-webkit-app-region"] }],
+    "function-no-unknown": [true, { "ignoreFunctions": ["/^-webkit-/"] }],
+    "unit-no-unknown": true,
+    "selector-pseudo-class-no-unknown": true,
+    "selector-pseudo-element-no-unknown": true,
+    "custom-property-no-missing-var-function": true
+  },
+  "overrides": [
+    {
+      "files": ["src/renderer/styles/components/**/*.css", "src/renderer/styles/15-a11y.css"],
+      "rules": {
+        "color-no-hex": [true, { "message": "组件里不写死颜色：用 00-foundation / 01-tokens 的变量" }],
+        "function-disallowed-list": [["rgb", "rgba", "hsl", "hsla"], { "message": "组件里不写死颜色：用 00-foundation / 01-tokens 的变量" }],
+        "declaration-property-value-disallowed-list": [
+          { "/^border(-[a-z]+)*-radius$/": ["/\\d+px/"], "font-size": ["/\\d+px/"] },
+          { "message": "组件里不写死圆角和字号：用 --r-* / --fs-* 或组件变量" }
+        ]
+      }
+    }
+  ]
+}

@@ -75,8 +75,6 @@
   background: var(--erp-bg-surface);
   text-align: center;
   padding: 8px;
-}
-.drop {
   transition:
     border-color var(--erp-dur-fast) ease,
     color var(--erp-dur-fast) ease,

@@ -1,7 +1,10 @@
 // 样式地图（UI 基础设施 · 第一步）
 //
-// 用法：node scripts/style-report.mjs [--json] [--out <文件>] [--catalog]
-//   --catalog  重新生成组件目录读取的动效清单 docs/ui/motion-inventory.js
+// 用法：node scripts/style-report.mjs [--json] [--out <文件>] [--catalog] [--check] [--update-baseline]
+//   --catalog          重新生成组件目录读取的动效清单 docs/ui/motion-inventory.js
+//   --check            和 scripts/style-baseline.json 比：写死的值、重复选择器、废弃类名、
+//                      没人用的变量、规则总数，任何一项变多就失败（只能减，不能加）
+//   --update-baseline  数字降下来以后，把当前值写回基线
 //
 // 回答三个问题：现在有多少规则、分别属于哪个模块、哪些值本该是变量却写死了。
 // 报告必须能随代码重跑——手工清单两周就过期，没人会再维护。
@@ -148,7 +151,14 @@ function literalCounts(pattern, { skipInsideVarDef = true } = {}) {
 }
 
 const colors = literalCounts(/#[0-9a-f]{3,8}\b|rgba?\([^)]*\)/gi)
-const radii = literalCounts(/(?<=border-radius:[^;]*?)\b\d+px\b/gi)
+const radii = new Map()
+for (const rule of rules) {
+  for (const declaration of rule.body.split(';')) {
+    const [prop, value] = declaration.split(':')
+    if (!prop || !value || !/^border(-[a-z]+)*-radius$/.test(prop.trim())) continue
+    for (const match of value.matchAll(/\b\d+(\.\d+)?px\b/g)) radii.set(match[0], (radii.get(match[0]) || 0) + 1)
+  }
+}
 const fontSizes = new Map()
 for (const rule of rules) {
   for (const declaration of rule.body.split(';')) {
@@ -281,6 +291,39 @@ const report = {
   motion,
   duplicatedSelectors: duplicated.map(([key, count]) => ({ selector: key.split('|')[1], media: key.split('|')[0] || null, count })),
   orphanClasses
+}
+
+// ── 门槛：只能减 ──
+const sum = (map) => [...map.values()].reduce((total, count) => total + count, 0)
+const gauges = {
+  colorLiterals: sum(colors),
+  radiusLiterals: sum(radii),
+  fontSizeLiterals: sum(fontSizes),
+  duplicatedSelectors: report.duplicatedSelectors.length,
+  orphanClasses: orphanClasses.length,
+  unusedTokens: unusedTokens.length,
+  undefinedTokens: undefinedTokens.length
+}
+const baselinePath = join(root, 'scripts/style-baseline.json')
+if (process.argv.includes('--update-baseline')) {
+  writeFileSync(baselinePath, JSON.stringify(gauges, null, 2) + '\n')
+  console.log(`已写入 ${baselinePath}`)
+  process.exit(0)
+}
+if (process.argv.includes('--check')) {
+  const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'))
+  const worse = Object.entries(gauges).filter(([key, value]) => value > (baseline[key] ?? 0))
+  for (const [key, value] of Object.entries(gauges)) {
+    const mark = value > (baseline[key] ?? 0) ? '✗' : value < (baseline[key] ?? 0) ? '↓' : '·'
+    console.log(`${mark} ${key.padEnd(20)} ${String(value).padStart(5)}  （基线 ${baseline[key] ?? 0}）`)
+  }
+  if (worse.length) {
+    console.error(`\n样式门槛未通过：${worse.map(([key]) => key).join('、')} 比基线多。` +
+      '新样式请用 01-tokens.css 的变量和 components/ 里的组件；确实降下来了再跑 --update-baseline。')
+    process.exit(1)
+  }
+  console.log('\n样式门槛通过。')
+  process.exit(0)
 }
 
 if (process.argv.includes('--json')) {

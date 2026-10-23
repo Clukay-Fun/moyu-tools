@@ -30,7 +30,6 @@
   cursor: pointer;
   user-select: none;
   outline: none;
-  white-space: nowrap;
   transition:
     background-color var(--erp-transition-fast),
     color var(--erp-transition-fast),

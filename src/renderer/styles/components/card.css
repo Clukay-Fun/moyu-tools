@@ -21,6 +21,8 @@
   background: var(--glass-edge);
   content: "";
   pointer-events: none;
+  /* 遮罩只取不透明度，颜色本身不显示 */
+  /* stylelint-disable-next-line color-no-hex */
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;

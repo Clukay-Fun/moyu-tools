@@ -176,18 +176,14 @@ body[data-theme='dark'] {
 }
 
 /* 页面容器：摸鱼的 .page / .active 负责显隐；React 页面各自管理滚动 */
-#page-erp,
-#page-custom {
-  position: relative;
-  overflow: hidden;
-  font-size: var(--erp-font-size-base);
-}
-
 /* 页面里的卡片和工作区内容框走同一层毛玻璃（--surface-inner），不再是实色白块；
    弹层 portal 到 body，不在这两个页面里，继续用实色 --card-solid 挡住下面的内容。 */
 #page-erp,
 #page-custom {
   --erp-bg-surface: var(--surface-inner);
+  position: relative;
+  overflow: hidden;
+  font-size: var(--erp-font-size-base);
 }
 
 /*

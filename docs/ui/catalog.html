@@ -579,6 +579,7 @@
       <p class="cat-rule">目录建成时顺手修掉的：深色模式下 <code>.gbtn.primary</code> 丢失主题色填充（一条多余的 <code>[data-theme="dark"] .gbtn</code> 规则特异性更高）；开关禁用态与可用态看不出区别。</p>
       <p class="cat-rule warn">刀模画布、图片编辑器、截图覆盖层有各自的交互约束，<b>不</b>为了统一去改它们已验收的样式。</p>
       <p class="cat-rule">盘点现状：<code>node scripts/style-report.mjs</code>（加 <code>--json</code> 输出机器可读结果）。</p>
+      <p class="cat-rule">门槛：<code>npm run lint:css</code>——Stylelint 禁止 <code>components/</code> 里写死颜色、圆角、字号；样式报告和 <code>scripts/style-baseline.json</code> 比，写死的值、重复选择器、废弃类名、没人用的变量只能减不能加。</p>
     </section>
   </main>
 
