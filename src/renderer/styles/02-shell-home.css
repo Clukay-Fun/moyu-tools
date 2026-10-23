@@ -30,6 +30,12 @@
   -webkit-app-region: drag;
 }
 
+/* 拖拽区不认层级：盖在顶栏上的弹层（抽屉、对话框、菜单、遮罩）若不声明 no-drag，
+   落在顶栏 56px 内的部分点不动，只会拖动窗口。 */
+:is(.modal-layer, .ocr-overlay, .app-menu, #overlay-layer, .toast, [data-base-ui-portal]) {
+  -webkit-app-region: no-drag;
+}
+
 /* 窗口按钮由系统绘制，顶栏只负责留位：
    macOS 红黄绿在左上，Windows 最小化/最大化/关闭在右上。 */
 body[data-platform="darwin"] .topbar {
@@ -397,7 +403,8 @@ body[data-platform="win32"] .topbar {
   background: var(--card-solid);
 }
 
-.profile-menu button {
+.app-menu.profile-menu button {
+  /* 双类名：11-controls-board.css 的 .app-menu button 在后加载，会把这里压回 display: block */
   display: flex;
   align-items: center;
   gap: 8px;
