@@ -149,6 +149,11 @@ body[data-theme='dark'] {
   }
 }
 
+/* 动效总开关（styles/15-a11y.css）：按下缩放也一起关掉 */
+body[data-motion="off"] {
+  --erp-motion: 0;
+}
+
 /* 原 ERP 全局工具类，只在库存 / 定制内容与它们的弹层里生效 */
 :is(#page-erp, #page-custom, .erp-settings, [data-base-ui-portal]) .srOnly {
   position: absolute;

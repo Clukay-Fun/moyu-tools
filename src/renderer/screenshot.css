@@ -241,3 +241,11 @@ body {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0ms !important; }
 }
+
+/* 动效总开关：和主窗口一样，body[data-motion="off"] 时不做任何过渡 */
+body[data-motion="off"] *,
+body[data-motion="off"] *::before,
+body[data-motion="off"] *::after {
+  transition: none !important;
+  animation: none !important;
+}

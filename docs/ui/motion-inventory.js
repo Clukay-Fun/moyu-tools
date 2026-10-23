@@ -375,6 +375,24 @@ window.MOTION_INVENTORY = [
     "media": null
   },
   {
+    "selector": ".settings-nav-back, .settings-nav-item",
+    "kind": "transition",
+    "property": "color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".settings-nav-back, .settings-nav-item",
+    "kind": "transition",
+    "property": "background-color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
     "selector": "body.home-active .page-home.active h1.home-slogan",
     "kind": "animation",
     "property": "home-slogan-enter",
@@ -420,6 +438,15 @@ window.MOTION_INVENTORY = [
     "media": null
   },
   {
+    "selector": ".settings-disclosure-arrow",
+    "kind": "transition",
+    "property": "transform",
+    "duration": "var(--dur-hover)",
+    "easing": "var(--ease-out)",
+    "tokenized": true,
+    "media": null
+  },
+  {
     "selector": ".update-available-dialog[open]",
     "kind": "transition",
     "property": "opacity",
@@ -458,53 +485,10 @@ window.MOTION_INVENTORY = [
   {
     "selector": ".theme-option",
     "kind": "transition",
-    "property": "background-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".theme-option",
-    "kind": "transition",
     "property": "border-color",
     "duration": "var(--dur-hover)",
     "easing": "ease",
     "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".github-link",
-    "kind": "transition",
-    "property": "border-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".github-link",
-    "kind": "transition",
-    "property": "background-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".github-link",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "120ms",
-    "easing": "var(--ease-out)",
-    "tokenized": false,
-    "media": null
-  },
-  {
-    "selector": ".github-link:active",
-    "kind": "press",
-    "property": "transform",
-    "value": "scale(var(--press-scale))",
     "media": null
   },
   {
@@ -593,6 +577,24 @@ window.MOTION_INVENTORY = [
     "kind": "press",
     "property": "transform",
     "value": "scale(0.9)",
+    "media": null
+  },
+  {
+    "selector": "body[data-motion=\"off\"], body[data-motion=\"off\"] *, body[data-motion=\"off\"] *::before, body[data-motion=\"off\"] *::after",
+    "kind": "transition",
+    "property": "none",
+    "duration": "",
+    "easing": "ease",
+    "tokenized": false,
+    "media": null
+  },
+  {
+    "selector": "body[data-motion=\"off\"], body[data-motion=\"off\"] *, body[data-motion=\"off\"] *::before, body[data-motion=\"off\"] *::after",
+    "kind": "animation",
+    "property": "none",
+    "duration": "",
+    "easing": "ease",
+    "tokenized": false,
     "media": null
   }
 ]

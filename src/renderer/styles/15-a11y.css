@@ -2,6 +2,23 @@
    ⚠ 必须最后加载：焦点环要压过各组件和页面的静止态；
    减弱动效用 !important，位置无所谓，但和焦点规则放在一起好找。 */
 
+/* ══ 动效总开关 ══
+   body[data-motion="off"]（写在 HTML 的 body 上）：所有过渡、动画、平滑滚动和按下缩放都关掉，
+   界面状态直接切换。JS 里的进场动画和首页视差看同一个属性（main.js motionDisabled）。
+   恢复动效：删掉 body 上的 data-motion="off"。 */
+body[data-motion="off"],
+body[data-motion="off"] *,
+body[data-motion="off"] *::before,
+body[data-motion="off"] *::after {
+  transition: none !important;
+  animation: none !important;
+  scroll-behavior: auto !important;
+}
+
+body[data-motion="off"] :where(button, a, [role="button"], label, .m-btn, .nav-ic):active {
+  transform: none !important;
+}
+
 /* ══ 减弱动效兜底 ══
    系统开启「减少动态效果」时，位移、缩放、滑动一律不做过渡，
    颜色和透明度照常渐变——状态变化仍然能被感知，但画面不会动。 */

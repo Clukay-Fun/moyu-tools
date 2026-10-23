@@ -40,6 +40,8 @@ installTooltips()
 // 平台来自 preload 暴露的 process.platform；没有桥接时退回 UA 判断。
 document.body.dataset.platform = window.api?.platform
   || (/Mac/i.test(navigator.platform) ? 'darwin' : /Win/i.test(navigator.platform) ? 'win32' : 'linux')
+// 动效总开关：body[data-motion="off"] 时不做进场动画和首页视差（CSS 侧见 styles/15-a11y.css）
+const motionDisabled = document.body.dataset.motion === 'off'
 
 // 全屏时系统窗口按钮隐藏，顶栏左侧不再留窗口按钮的位置
 document.body.dataset.fullscreen = 'false'
@@ -522,7 +524,7 @@ function captureHomeBounds() {
 }
 
 function moveHomeParallax(event) {
-  if (!document.body.classList.contains('home-active') || event.pointerType === 'touch' || prefersReducedMotion.matches) return
+  if (!document.body.classList.contains('home-active') || event.pointerType === 'touch' || motionDisabled || prefersReducedMotion.matches) return
   if (!homePointer.bounds || !homePointer.sloganBounds) captureHomeBounds()
   if (!homePointer.bounds.width || !homePointer.bounds.height || !homePointer.sloganBounds.width || !homePointer.sloganBounds.height) return
 
@@ -668,7 +670,7 @@ function renderSubmenu(module, indicatorFromTop = null) {
 const entryAnimations = new WeakMap()
 
 function animateEntry(element, { duration = 160, distance = 6, horizontal = false } = {}) {
-  if (!element) return
+  if (!element || motionDisabled) return
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
   entryAnimations.get(element)?.cancel()
   const transform = horizontal ? `translateX(${distance}px)` : `translateY(${distance}px)`
@@ -824,7 +826,7 @@ if (navIndicator) {
 // 透明度走在位移前面（前 40% 就到 1），读起来是「落下」而不是「淡入」；
 // 一次最多带 8 块，后面的直接就位——动得太多反而没有重点。
 function animatePageEntry(page) {
-  if (!page) return
+  if (!page || motionDisabled) return
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
   animateEntry(page, { duration: 120, distance: 0 })
   if (reduced) return
@@ -1509,7 +1511,7 @@ const popoverExitTimers = new WeakMap()
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
 
 function hidePopoverWithExit(menu) {
-  if (menu.hidden || reducedMotionQuery.matches) {
+  if (menu.hidden || motionDisabled || reducedMotionQuery.matches) {
     menu.hidden = true
     return
   }
