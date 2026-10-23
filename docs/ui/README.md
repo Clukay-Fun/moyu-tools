@@ -13,8 +13,8 @@
 
 - **顶栏**：`.topbar` 固定 50px，整条 `-webkit-app-region: drag`；搜索按钮、计时胶囊 `.mochi` 是 `no-drag`。平台由 `body[data-platform]` 决定让位：`darwin` 左留 96px（红黄绿后再空约 32px 才到搜索），`win32` 右留 148px 给系统最小化/最大化/关闭。进入全屏后 `body[data-fullscreen="true"]` 会把左右让位都收成 20px，搜索跟随窗口左移。平台值来自 preload 的 `process.platform`。
 - **颜色**：三层底色：外层 `--shell-bg`（顶栏与二级栏透明，直接显露外层）、一级导航条 `--rail-bg`、工作区 `--workspace-bg`、圆角 `--workspace-radius`（20px）。深色在 `[data-theme="dark"]` 有独立值，工作区不是强制白底。
-- **一级栏**：`.rail` 是独立圆角导航条（宽 60、圆角 20、上左下离外框 12px），模块按钮放在可滚动的 `.rail-list` 里，头像 `.rail-footer` 固定在底部；`.nav-ic` 40px，只放图标，名称走 `aria-label` + `data-tip`（`data-tip-side="right"`），由 `installTooltips()` 统一显示，键盘聚焦也会出现。选中底板是独立的 `.nav-indicator`，和按钮同在 `.rail-list` 里，滚动时一起走。
-- **二级栏**：`.submenu` 宽 `clamp(172px, 15vw, 184px)`、不铺底色，左右 12px 内边距就是它和导航条、工作区的间隔；行高 40px、独立滚动；名称 `.submenu-label` 单行省略，被截断的行由 `renderSubmenu()` 补 `data-tip` 显示全名；普通行无边框，选中态由 `.submenu-indicator` 画淡色圆角底板。主页没有二级栏。
+- **一级栏**：`.rail` 是独立圆角导航条（宽 60、圆角 14、上左下离外框 12px），模块按钮放在可滚动的 `.rail-list` 里，头像 `.rail-footer` 固定在底部；`.nav-ic` 40px（选中块圆角 10），只放图标，名称走 `aria-label` + `data-tip`（`data-tip-side="right"`），由 `installTooltips()` 统一显示，键盘聚焦也会出现。选中底板是独立的 `.nav-indicator`，和按钮同在 `.rail-list` 里，滚动时一起走。
+- **二级栏**：`.submenu` 宽 `clamp(180px, 15vw, 190px)`、不铺底色，左右 12px 内边距就是它和导航条、工作区的间隔；行高 40px、独立滚动；名称 `.submenu-label` 单行省略，被截断的行由 `renderSubmenu()` 补 `data-tip` 显示全名；普通行无边框，选中态由 `.submenu-indicator` 画淡色圆角底板。主页没有二级栏。
 - **工作区**：`.content` 是白色/深色实色圆角容器，外边距 12px（有二级栏时左外边距为 0），`overflow: hidden`；`.pages` 不滚，`.page` 自己滚。页面内部结构不用改。
 - **搜索**：`#search-wrap` 是居中模态（遮罩 + `#search-dialog`），内部仍复用 `#feature-search`、`#search-results`、`.search-result`。⌘K / Ctrl+K、Esc、点击遮罩；关闭后焦点回到打开前的元素。结果按模块相关度分组，组标题就是分类名（`renderSearchResults()`）。
 - **头像**：左下 `.profile-avatar`（按钮 38px、图片 32px，悬停提示「设置与反馈」），无自定义图片时用内置 SVG `#ic-default-avatar`；菜单 `#profile-menu` 挂在 `#overlay-layer`，用 `placePopover` 的 `side: 'right'` 出现在导航条右侧、底边对齐头像；菜单展开时头像不再显示悬停提示；只有「设置」「意见反馈」两项。换头像入口在「设置 › 通用」。

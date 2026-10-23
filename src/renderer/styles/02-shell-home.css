@@ -321,7 +321,7 @@ body[data-fullscreen="true"] .topbar {
   min-height: 0;
 }
 
-/* 一级导航条：独立圆角条，上、左、下各留 12px（与工作区顶边对齐），是三层底色里唯一的中间层。
+/* 一级导航条：独立圆角条（圆角 14，无阴影，只靠底色和外层区分），上、左、下各留 12px（与工作区顶边对齐），是三层底色里唯一的中间层。
    模块列表单独滚动，头像固定在底部，窗口再矮也不会被挤出去。 */
 .rail {
   position: relative;
@@ -334,7 +334,7 @@ body[data-fullscreen="true"] .topbar {
   margin: 12px 0 12px 12px;
   padding: 10px 0;
   overflow: hidden;
-  border-radius: 20px;
+  border-radius: 14px;
   background: var(--rail-bg);
 }
 
@@ -465,7 +465,7 @@ body[data-fullscreen="true"] .topbar {
   justify-content: center;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: 10px;
   color: var(--muted);
   background: transparent;
   cursor: pointer;
@@ -505,7 +505,7 @@ body[data-fullscreen="true"] .topbar {
   width: 40px;
   height: 40px;
   border: 1px solid var(--accent-18);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--accent-10);
   pointer-events: none;
   will-change: transform;
@@ -525,7 +525,7 @@ body[data-fullscreen="true"] .topbar {
   display: none;
   /* 固定宽度，窄窗口取下限；文字行不再把菜单越撑越宽。
      不铺底色，直接显露外层；左右 12px 内边距就是它和导航条、工作区之间的间隔 */
-  width: clamp(172px, 15vw, 184px);
+  width: clamp(180px, 15vw, 190px);
   min-height: 0;
   flex-shrink: 0;
   flex-direction: column;
