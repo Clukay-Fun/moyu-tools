@@ -489,15 +489,15 @@ body[data-platform="linux"] .search-wrap {
 .submenu {
   position: relative;
   display: none;
-  /* 宽度跟着本模块最长的一项走，不再固定 180px；上下限防止太窄挤压图标或太宽占掉工作区 */
-  width: max-content;
-  min-width: 140px;
-  max-width: 200px;
+  /* 固定宽度，窄窗口取下限；文字行不再把菜单越撑越宽 */
+  width: clamp(184px, 18vw, 208px);
+  min-height: 0;
   flex-shrink: 0;
   flex-direction: column;
-  gap: 3px;
-  padding: 14px 12px;
+  gap: 2px;
+  padding: 10px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--shell-nav-bg);
 }
 
@@ -505,25 +505,19 @@ body[data-platform="linux"] .search-wrap {
   position: absolute;
   z-index: 0;
   top: 0;
-  left: 12px;
-  right: 12px;
-  height: 43px;
-  border: 1px solid var(--accent-28);
+  left: 10px;
+  right: 10px;
+  height: 40px;
+  border: 1px solid var(--accent-18);
   border-radius: var(--r-sm);
-  background:
-    linear-gradient(160deg, var(--accent-18), transparent),
-    rgba(255, 255, 255, 0.24);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.55), 0 3px 10px rgba(35, 39, 65, 0.1);
+  background: var(--accent-10);
   pointer-events: none;
   will-change: transform;
 }
 
 [data-theme="dark"] .submenu-indicator {
-  border-color: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.36);
-  background:
-    linear-gradient(145deg, rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.18), transparent 82%),
-    rgba(27, 36, 52, 0.88);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.07), 0 6px 18px rgba(0, 0, 0, 0.2);
+  border-color: var(--accent-28);
+  background: var(--accent-18);
 }
 
 .submenu-indicator.ready {
@@ -556,11 +550,13 @@ body[data-platform="linux"] .search-wrap {
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   width: 100%;
-  padding: 8px 9px;
-  border: 1px solid transparent;
-  border-radius: 9px;
+  height: 40px;
+  flex: none;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--r-sm);
   color: var(--muted);
   background: transparent;
   font: 13px var(--font);
@@ -568,7 +564,6 @@ body[data-platform="linux"] .search-wrap {
   cursor: pointer;
   transition: transform var(--dur-press) var(--ease-out),
               color var(--dur-hover) ease,
-              border-color var(--dur-hover) ease,
               background-color var(--dur-hover) ease;
 }
 
@@ -578,12 +573,10 @@ body[data-platform="linux"] .search-wrap {
 }
 
 .submenu-item.on {
-  border-color: transparent;
   color: var(--accent);
   background: transparent;
   box-shadow: none;
   font-weight: 600;
-  backdrop-filter: blur(22px) saturate(165%);
 }
 
 .submenu-item.placeholder-action {

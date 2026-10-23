@@ -146,10 +146,6 @@ body.keyboard-focus :where(
 }
 
 @media (max-width: 780px) {
-  .submenu {
-    max-width: 158px;
-  }
-
   .barcode-grid {
     grid-template-columns: 1fr;
   }
