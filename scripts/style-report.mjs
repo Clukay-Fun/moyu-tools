@@ -35,7 +35,7 @@ const MODULES = [
   ['设置', /^\.?(settings|setting-|shortcut|theme-|accent|update|about|github-link|version-)/],
   ['Illustrator', /^\.?(illustrator|ai-)/],
   ['搜索', /^\.?search/],
-  ['导航/外壳', /^\.?(topbar|rail|nav-|panel|app-body|window-shell|brand|content$|pages$|page$|orbs?|mochi|slogan|home-)/]
+  ['导航/外壳', /^\.?(topbar|rail|nav-|panel|app-body|window-shell|brand|content$|pages$|page$|orbs?|mochi|slogan|home-|profile-)/]
 ]
 
 function stripComments(text) {
