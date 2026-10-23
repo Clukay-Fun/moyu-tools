@@ -595,13 +595,23 @@ function renderSubmenu(module, indicatorFromTop = null) {
       }
       iconNode.textContent = icon
       iconNode.style.background = color
-      button.append(iconNode, document.createTextNode(name))
+      const label = document.createElement('span')
+      label.className = 'submenu-label'
+      label.textContent = name
+      button.append(iconNode, label)
       fragment.append(button)
     })
   })
 
   submenu.replaceChildren(fragment)
   submenu.classList.add('show')
+
+  // 二级栏是固定窄宽度：名字被省略号截断的行才挂悬停提示，显示全名
+  submenu.querySelectorAll('.submenu-label').forEach((label) => {
+    if (label.scrollWidth <= label.clientWidth) return
+    label.parentElement.dataset.tip = label.textContent
+    label.parentElement.dataset.tipSide = 'right'
+  })
 
   const activeItem = submenu.querySelector('.submenu-item.on')
   if (!activeItem) {

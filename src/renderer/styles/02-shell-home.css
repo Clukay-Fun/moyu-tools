@@ -523,13 +523,14 @@ body[data-fullscreen="true"] .topbar {
 .submenu {
   position: relative;
   display: none;
-  /* 固定宽度，窄窗口取下限；文字行不再把菜单越撑越宽 */
-  width: clamp(184px, 18vw, 208px);
+  /* 固定宽度，窄窗口取下限；文字行不再把菜单越撑越宽。
+     不铺底色，直接显露外层；左右 12px 内边距就是它和导航条、工作区之间的间隔 */
+  width: clamp(172px, 15vw, 184px);
   min-height: 0;
   flex-shrink: 0;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 10px 10px;
+  padding: 12px 12px 12px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -538,8 +539,8 @@ body[data-fullscreen="true"] .topbar {
   position: absolute;
   z-index: 0;
   top: 0;
-  left: 10px;
-  right: 10px;
+  left: 12px;
+  right: 12px;
   height: 40px;
   border: 1px solid var(--accent-18);
   border-radius: var(--r-sm);
@@ -583,11 +584,11 @@ body[data-fullscreen="true"] .topbar {
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
   height: 40px;
   flex: none;
-  padding: 0 10px;
+  padding: 0 8px;
   border: 0;
   border-radius: var(--r-sm);
   color: var(--muted);
@@ -610,6 +611,14 @@ body[data-fullscreen="true"] .topbar {
   background: transparent;
   box-shadow: none;
   font-weight: 600;
+}
+
+.submenu-label {
+  overflow: hidden;
+  min-width: 0;
+  flex: 0 1 auto;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .submenu-item.placeholder-action {
@@ -660,6 +669,11 @@ body[data-fullscreen="true"] .topbar {
   border: 1px solid var(--border-neutral);
   border-radius: var(--workspace-radius);
   background: var(--workspace-bg);
+}
+
+/* 有二级栏时，它右侧 12px 的内边距已经是间隔，工作区不再重复留左外边距 */
+.submenu.show + .content {
+  margin-left: 0;
 }
 
 .pages {
