@@ -290,33 +290,6 @@
 
 .dieline-param-head { display: flex; align-items: center; justify-content: space-between; }
 
-.dieline-unit-switch,
-.dieline-size-type {
-  display: flex;
-  gap: 4px;
-  padding: 3px;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--foreground) 5%, transparent);
-}
-.dieline-unit-switch button,
-.dieline-size-type button {
-  flex: 1 1 auto;
-  min-width: 40px;
-  height: 26px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  cursor: pointer;
-}
-.dieline-unit-switch button.selected,
-.dieline-size-type button.selected { background: var(--card); color: var(--accent); box-shadow: 0 1px 3px rgba(20, 24, 48, 0.12); }
-.dieline-size-type button:disabled { opacity: 0.5; cursor: not-allowed; }
-
 .dieline-dimension-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

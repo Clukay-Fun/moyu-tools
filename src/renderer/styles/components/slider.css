@@ -1,0 +1,27 @@
+/* ══ 滑块 ════════════════════════════════════════════════════
+   原生 range 直接按元素绘制（不用加类）：细轨道 + 主题色圆点。
+   页面只决定宽度和在网格里的位置；色相条（.hue-slider）是竖向特例，自己画轨道。 */
+input[type="range"] {
+  height: 20px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: var(--r-full);
+  background: var(--hairline);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  appearance: none;
+  border: 2px solid var(--card-solid);
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 1px 5px var(--accent-28);
+}

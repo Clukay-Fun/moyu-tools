@@ -1,0 +1,92 @@
+/* ══ 分段切换 m-segmented ══════════════════════════════════════
+   一组互斥选项，选中块在底槽里滑动。选中项用属性标记，组件自己算选中块的位置，
+   不需要脚本写样式：
+
+   <div class="m-segmented" role="tablist">
+     <button role="tab" aria-selected="true">单个生成</button>
+     <button role="tab" aria-selected="false">批量</button>
+   </div>
+
+   选中：aria-selected / aria-checked / aria-pressed = "true"，或 .is-active。
+   尺寸：默认 32 · m-segmented--sm 28。各项等宽，最多 5 项；整体宽度由页面决定。 */
+.m-segmented {
+  --_h: var(--seg-h-md);
+  --_n: 2;
+  --_i: 0;
+  position: relative;
+  display: inline-grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  padding: var(--seg-pad);
+  border-radius: var(--seg-radius);
+  background: var(--seg-bg);
+}
+
+.m-segmented::before {
+  position: absolute;
+  top: var(--seg-pad);
+  bottom: var(--seg-pad);
+  left: var(--seg-pad);
+  width: calc((100% - var(--seg-pad) * 2) / var(--_n));
+  box-sizing: border-box;
+  border: 1px solid var(--seg-on-border);
+  border-radius: var(--seg-item-radius);
+  background: var(--seg-on-bg);
+  box-shadow: var(--seg-on-shadow);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(calc(100% * var(--_i)));
+  transition: transform var(--dur-spring-land) var(--ease-spring-land);
+}
+
+.m-segmented:has(> :nth-child(3):last-child) { --_n: 3; }
+.m-segmented:has(> :nth-child(4):last-child) { --_n: 4; }
+.m-segmented:has(> :nth-child(5):last-child) { --_n: 5; }
+
+.m-segmented:has(> :is([aria-selected="true"], [aria-checked="true"], [aria-pressed="true"], .is-active))::before { opacity: 1; }
+.m-segmented:has(> :nth-child(2):is([aria-selected="true"], [aria-checked="true"], [aria-pressed="true"], .is-active)) { --_i: 1; }
+.m-segmented:has(> :nth-child(3):is([aria-selected="true"], [aria-checked="true"], [aria-pressed="true"], .is-active)) { --_i: 2; }
+.m-segmented:has(> :nth-child(4):is([aria-selected="true"], [aria-checked="true"], [aria-pressed="true"], .is-active)) { --_i: 3; }
+.m-segmented:has(> :nth-child(5):is([aria-selected="true"], [aria-checked="true"], [aria-pressed="true"], .is-active)) { --_i: 4; }
+
+.m-segmented > button {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  height: var(--_h);
+  padding: 0 var(--sp-3);
+  border: 0;
+  border-radius: var(--seg-item-radius);
+  color: var(--seg-fg);
+  background: transparent;
+  font: inherit;
+  font-size: var(--fs-md);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dur-hover) ease, transform var(--dur-press) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .m-segmented > button:hover:not(:disabled) {
+    color: var(--seg-on-fg);
+  }
+}
+
+.m-segmented > button:active:not(:disabled) {
+  transform: scale(var(--press-scale));
+}
+
+.m-segmented > :is([aria-selected="true"], [aria-checked="true"], [aria-pressed="true"], .is-active) {
+  color: var(--seg-on-fg);
+  font-weight: 650;
+}
+
+.m-segmented > button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.m-segmented--sm {
+  --_h: var(--seg-h-sm);
+}

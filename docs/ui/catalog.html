@@ -160,14 +160,14 @@
         <div class="cat-pair">
         <div class="cat-stage cat-glass-stage" data-theme="light"><span class="cat-label">浅色</span>
           <div class="glass-card cat-glass-demo">
-            <div class="segments"><button type="button" class="on">单个</button><button type="button">批量</button></div>
+            <div class="m-segmented m-segmented--sm"><button type="button" aria-pressed="true">单个</button><button type="button" aria-pressed="false">批量</button></div>
             <div style="display:flex;gap:8px"><button class="m-btn" type="button">次要按钮</button><button class="m-btn m-btn--sm" type="button">小按钮</button></div>
           </div>
           <div class="app-menu cat-glass-menu"><button type="button">打开项目</button><button type="button">保存项目</button><button type="button">导出 PNG</button></div>
         </div>
         <div class="cat-stage cat-glass-stage" data-theme="dark"><span class="cat-label">深色</span>
           <div class="glass-card cat-glass-demo">
-            <div class="segments"><button type="button" class="on">单个</button><button type="button">批量</button></div>
+            <div class="m-segmented m-segmented--sm"><button type="button" aria-pressed="true">单个</button><button type="button" aria-pressed="false">批量</button></div>
             <div style="display:flex;gap:8px"><button class="m-btn" type="button">次要按钮</button><button class="m-btn m-btn--sm" type="button">小按钮</button></div>
           </div>
           <div class="app-menu cat-glass-menu"><button type="button">打开项目</button><button type="button">保存项目</button><button type="button">导出 PNG</button></div>
@@ -229,8 +229,8 @@
 
         <article class="cat-motion-card">
           <div class="cat-motion-stage" data-loop="indicator">
-            <div class="barcode-mode-switch" role="tablist" style="width:230px">
-              <button class="on" type="button">单个生成</button><button type="button">批量 / CSV</button>
+            <div class="m-segmented m-segmented--sm" role="tablist" style="width:230px">
+              <button type="button" role="tab" aria-selected="true">单个生成</button><button type="button" role="tab" aria-selected="false">批量 / CSV</button>
             </div>
           </div>
           <h3>滑动指示器</h3>
@@ -240,7 +240,7 @@
 
         <article class="cat-motion-card">
           <div class="cat-motion-stage" data-loop="toggle">
-            <label class="toggle-wrap"><input type="checkbox" /><span class="toggle"></span>开关</label>
+            <label class="m-switch"><input type="checkbox" /><span class="m-switch-track"></span>开关</label>
             <label class="cat-check"><input type="checkbox" />复选</label>
             <label class="cat-check"><input type="radio" name="cat-motion-radio" />单选</label>
           </div>
@@ -503,10 +503,11 @@
       <h2>开关与分段</h2>
       <div class="cat-item">
         <dl class="cat-meta">
-          <dt>开关</dt><dd><code>label.toggle-wrap &gt; input[type=checkbox] + span.toggle</code>；只有图标没有文字时加 <code>.icon-only-toggle</code> 并写 <code>.sr-only</code> 文案</dd>
-          <dt>分段控件</dt><dd><code>.segments &gt; button</code>，选中项加 <code>.on</code>——2～4 个互斥选项、选项短</dd>
+          <dt>开关</dt><dd><code>label.m-switch &gt; input[type=checkbox] + span.m-switch-track</code>（<code>components/switch.css</code>）；只有图标没有文字时加 <code>.icon-only-toggle</code> 并写 <code>.sr-only</code> 文案。菜单里的勾选项（<code>menuitemcheckbox</code>）只用 <code>.m-switch-track.m-switch-track--sm</code>，状态读外层 <code>aria-checked</code></dd>
+          <dt>分段控件</dt><dd><code>.m-segmented &gt; button</code>（<code>components/segmented.css</code>），选中项用 <code>aria-selected</code> / <code>aria-checked</code> / <code>aria-pressed="true"</code> 或 <code>.is-active</code>；选中块自动滑到位，不需要脚本。默认 32 高，<code>--sm</code> 28；2～5 个等宽选项</dd>
           <dt>等宽选项</dt><dd><code>.theme-options &gt; label.theme-option</code>——选项需要撑满一整行时用（设置页主题）</dd>
-          <dt>现用模块</dt><dd>开关：Illustrator、设置；分段：条码、图片；等宽选项：设置</dd>
+          <dt>滑块</dt><dd>原生 <code>input[type=range]</code> 按元素绘制（<code>components/slider.css</code>），页面只管宽度</dd>
+          <dt>现用模块</dt><dd>开关：Illustrator、设置、画板菜单；分段：条码、Illustrator、PDF 水印、刀模；等宽选项：设置</dd>
         </dl>
         <div class="cat-pair">
           <div class="cat-stage" data-theme="light" data-demo="toggles"><span class="cat-label">浅色</span></div>
@@ -684,12 +685,12 @@
 
   <template id="demo-toggles">
     <div class="cat-row">
-      <label class="toggle-wrap"><input type="checkbox" checked /><span class="toggle"></span>输出到原文件目录</label>
-      <label class="toggle-wrap"><input type="checkbox" /><span class="toggle"></span>关闭</label>
-      <label class="toggle-wrap"><input type="checkbox" checked disabled /><span class="toggle"></span>禁用</label>
+      <label class="m-switch"><input type="checkbox" checked /><span class="m-switch-track"></span>输出到原文件目录</label>
+      <label class="m-switch"><input type="checkbox" /><span class="m-switch-track"></span>关闭</label>
+      <label class="m-switch"><input type="checkbox" checked disabled /><span class="m-switch-track"></span>禁用</label>
     </div>
     <div class="cat-row">
-      <div class="segments" style="width:260px"><button type="button" class="on">单个生成</button><button type="button">批量</button><button type="button">CSV</button></div>
+      <div class="m-segmented" style="width:260px"><button type="button" aria-pressed="true">单个生成</button><button type="button" aria-pressed="false">批量</button><button type="button" aria-pressed="false">CSV</button></div>
     </div>
     <div class="cat-row" style="width:100%">
       <div class="theme-options"><label class="theme-option"><input type="radio" name="cat-theme-x" checked /><span>浅色</span></label><label class="theme-option"><input type="radio" name="cat-theme-x" /><span>深色</span></label><label class="theme-option"><input type="radio" name="cat-theme-x" /><span>跟随系统</span></label></div>
@@ -703,7 +704,7 @@
     </div>
     <div class="settings-section-body">
       <div class="setting-row"><span class="setting-label">当前版本</span><b class="setting-value">v2.2.0</b></div>
-      <div class="setting-row"><span class="setting-label">自动检查更新<small>应用启动后在后台检查新版本</small></span><label class="toggle-wrap icon-only-toggle"><input type="checkbox" checked /><span class="toggle"></span><span class="sr-only">自动检查更新</span></label></div>
+      <div class="setting-row"><span class="setting-label">自动检查更新<small>应用启动后在后台检查新版本</small></span><label class="m-switch icon-only-toggle"><input type="checkbox" checked /><span class="m-switch-track"></span><span class="sr-only">自动检查更新</span></label></div>
     </div>
   </template>
 
@@ -823,9 +824,8 @@
           setTimeout(() => { if (menu.classList.contains('closing')) { menu.classList.remove('closing'); menu.hidden = true } }, 160)
         },
         indicator: (stage, on) => {
-          const sw = stage.querySelector('.barcode-mode-switch')
-          sw.dataset.mode = on ? 'batch' : 'single'
-          sw.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', on ? i === 1 : i === 0))
+          const sw = stage.querySelector('.m-segmented')
+          sw.querySelectorAll('button').forEach((b, i) => b.setAttribute('aria-selected', String(on ? i === 1 : i === 0)))
         },
         toggle: (stage, on) => {
           stage.querySelectorAll('input').forEach((input) => { input.checked = on })
@@ -870,9 +870,9 @@
 
     // 分段控件在目录里可以点
     document.addEventListener('click', (event) => {
-      const button = event.target.closest('.segments button')
+      const button = event.target.closest('.m-segmented > button')
       if (!button) return
-      button.parentElement.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b === button))
+      button.parentElement.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === button)))
     })
   </script>
 </body>

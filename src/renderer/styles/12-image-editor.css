@@ -144,7 +144,7 @@
 
 .img-editor-options output { font-variant-numeric: tabular-nums; }
 
-.img-editor-options input[type="range"] { width: 100%; accent-color: var(--accent); }
+.img-editor-options input[type="range"] { width: 100%; }
 
 .img-editor-field {
   display: flex;
@@ -208,7 +208,7 @@
   .cmd-menu, .app-menu, .img-editor, .toast {
     transition-property: opacity !important;
   }
-  .barcode-mode-switch::before {
+  .m-segmented::before {
     transition-duration: 0ms;
   }
   .submenu-indicator.ready {

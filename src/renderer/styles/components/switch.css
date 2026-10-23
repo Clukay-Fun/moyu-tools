@@ -1,0 +1,76 @@
+/* ══ 开关 m-switch ══════════════════════════════════════════
+   复选框做的开关，文字可选：
+
+   <label class="m-switch"><input type="checkbox" /><span class="m-switch-track"></span>输出到原文件目录</label>
+
+   不是复选框的场合（菜单里的 menuitemcheckbox）只用滑轨，状态读外层的 aria-checked：
+
+   <button role="menuitemcheckbox" aria-checked="true">显示网格<span class="m-switch-track m-switch-track--sm"></span></button>
+
+   尺寸：默认 36×21 · m-switch-track--sm 30×18。 */
+.m-switch {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  color: var(--muted);
+  font-size: var(--fs-md);
+  cursor: pointer;
+}
+
+.m-switch > input {
+  position: absolute;
+  opacity: 0;
+}
+
+.m-switch-track {
+  --_w: 36px;
+  --_h: 21px;
+  --_gap: 2px;
+  position: relative;
+  flex: none;
+  width: var(--_w);
+  height: var(--_h);
+  border-radius: var(--r-full);
+  background: var(--faint);
+  transition: background-color var(--dur-hover) ease;
+}
+
+.m-switch-track::after {
+  position: absolute;
+  top: var(--_gap);
+  left: var(--_gap);
+  width: calc(var(--_h) - var(--_gap) * 2);
+  height: calc(var(--_h) - var(--_gap) * 2);
+  border-radius: 50%;
+  background: var(--on-accent);
+  box-shadow: var(--switch-thumb-shadow);
+  content: "";
+  transition: transform var(--dur-press) var(--ease-out);
+}
+
+.m-switch-track--sm {
+  --_w: 30px;
+  --_h: 18px;
+  --_gap: 3px;
+}
+
+.m-switch > input:checked + .m-switch-track,
+[aria-checked="true"] > .m-switch-track {
+  background: var(--accent);
+}
+
+.m-switch > input:checked + .m-switch-track::after,
+[aria-checked="true"] > .m-switch-track::after {
+  transform: translateX(calc(var(--_w) - var(--_h)));
+}
+
+body.keyboard-focus .m-switch > input:focus-visible + .m-switch-track {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: var(--focus-glow);
+}
+
+.m-switch:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: var(--btn-disabled-opacity);
+}

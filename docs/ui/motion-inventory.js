@@ -170,6 +170,58 @@ window.MOTION_INVENTORY = [
     "media": null
   },
   {
+    "selector": ".m-segmented::before",
+    "kind": "transition",
+    "property": "transform",
+    "duration": "var(--dur-spring-land)",
+    "easing": "var(--ease-spring-land)",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-segmented > button",
+    "kind": "transition",
+    "property": "color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-segmented > button",
+    "kind": "transition",
+    "property": "transform",
+    "duration": "var(--dur-press)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-segmented > button:active:not(:disabled)",
+    "kind": "press",
+    "property": "transform",
+    "value": "scale(var(--press-scale))",
+    "media": null
+  },
+  {
+    "selector": ".m-switch-track",
+    "kind": "transition",
+    "property": "background-color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-switch-track::after",
+    "kind": "transition",
+    "property": "transform",
+    "duration": "var(--dur-press)",
+    "easing": "var(--ease-out)",
+    "tokenized": true,
+    "media": null
+  },
+  {
     "selector": ".topbar-search-btn",
     "kind": "transition",
     "property": "color",
@@ -305,15 +357,6 @@ window.MOTION_INVENTORY = [
     "media": null
   },
   {
-    "selector": ".toggle::after",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "var(--dur-press)",
-    "easing": "var(--ease-out)",
-    "tokenized": true,
-    "media": null
-  },
-  {
     "selector": ".file-drop-target, .board-stage",
     "kind": "transition",
     "property": "border-color",
@@ -338,40 +381,6 @@ window.MOTION_INVENTORY = [
     "duration": "150ms",
     "easing": "ease",
     "tokenized": false,
-    "media": null
-  },
-  {
-    "selector": ".barcode-mode-switch::before",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "var(--dur-spring-land)",
-    "easing": "var(--ease-spring-land)",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".barcode-mode-switch button",
-    "kind": "transition",
-    "property": "color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".barcode-mode-switch button",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "var(--dur-press)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".barcode-mode-switch button:active",
-    "kind": "press",
-    "property": "transform",
-    "value": "scale(var(--press-scale))",
     "media": null
   },
   {
@@ -559,24 +568,6 @@ window.MOTION_INVENTORY = [
     "duration": "110ms",
     "easing": "ease",
     "tokenized": false,
-    "media": null
-  },
-  {
-    "selector": ".canvas-toggle-indicator",
-    "kind": "transition",
-    "property": "background-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".canvas-toggle-indicator::after",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "var(--dur-press)",
-    "easing": "ease",
-    "tokenized": true,
     "media": null
   },
   {

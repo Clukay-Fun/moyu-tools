@@ -139,7 +139,7 @@
                     <div class="pdf-watermark-controls-title">水印设置</div>
                     <section class="pdf-watermark-mode-section">
                       <h3>水印类型</h3>
-                      <div class="pdf-watermark-mode" role="group" aria-label="水印类型">
+                      <div class="m-segmented pdf-watermark-mode" role="group" aria-label="水印类型">
                         <button id="pdf-watermark-mode-text" type="button" data-watermark-mode="text">文字水印</button>
                         <button id="pdf-watermark-mode-image" type="button" data-watermark-mode="image">图片水印</button>
                       </div>
@@ -254,13 +254,13 @@
                 <div class="glass-card illustrator-config">
                   <div class="illustrator-config-group">
                     <span class="section-label">处理类型</span>
-                    <div class="illustrator-mode-switch" role="radiogroup" aria-label="Illustrator 处理类型">
+                    <div class="m-segmented illustrator-mode-switch" role="radiogroup" aria-label="Illustrator 处理类型">
                       <button class="active" type="button" role="radio" aria-checked="true" data-illustrator-action="standard-pdf">导出 PDF</button>
                       <button type="button" role="radio" aria-checked="false" data-illustrator-action="minimal-pdf">最小化 PDF</button>
                       <button type="button" role="radio" aria-checked="false" data-illustrator-action="outline">文字转曲</button>
                     </div>
                   </div>
-                  <label class="toggle-wrap"><input id="illustrator-same-directory" type="checkbox" checked /><span class="toggle"></span>输出到原文件目录</label>
+                  <label class="m-switch"><input id="illustrator-same-directory" type="checkbox" checked /><span class="m-switch-track"></span>输出到原文件目录</label>
                   <span class="toolbar-space"></span>
                   <button class="m-btn m-btn--primary" id="illustrator-run" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>开始处理</button>
                   <button class="m-btn m-btn--danger" id="illustrator-stop" type="button" hidden><svg class="ic" aria-hidden="true"><use href="#ic-stop"></use></svg>停止任务</button>
@@ -300,7 +300,7 @@
               <section class="page" id="page-bc">
                 <div class="barcode-grid">
                   <div class="barcode-work">
-                    <div class="barcode-mode-switch" role="tablist" aria-label="条码生成模式">
+                    <div class="m-segmented m-segmented--sm barcode-mode-switch" role="tablist" aria-label="条码生成模式">
                       <button class="on" id="barcode-single-tab" type="button" role="tab" aria-selected="true">单个生成</button>
                       <button id="barcode-batch-tab" type="button" role="tab" aria-selected="false">批量 / CSV</button>
                     </div>
@@ -454,12 +454,12 @@
                         <!-- 自定义色走原生取色器；隐藏 input 由菜单项触发 -->
                         <input type="color" id="board-bg-color" value="#ffffff" hidden />
                         <hr />
-                        <button class="canvas-toggle-row" type="button" role="menuitemcheckbox" data-bg="grid" aria-checked="false"><span>显示网格</span><span class="canvas-toggle-indicator"></span></button>
-                        <button class="canvas-toggle-row" type="button" role="menuitemcheckbox" data-bg="snap" aria-checked="false"><span>吸附网格</span><span class="canvas-toggle-indicator"></span></button>
+                        <button class="canvas-toggle-row" type="button" role="menuitemcheckbox" data-bg="grid" aria-checked="false"><span>显示网格</span><span class="m-switch-track m-switch-track--sm"></span></button>
+                        <button class="canvas-toggle-row" type="button" role="menuitemcheckbox" data-bg="snap" aria-checked="false"><span>吸附网格</span><span class="m-switch-track m-switch-track--sm"></span></button>
                       </div>
                       <div class="cmd-menu canvas-popover canvas-view-menu align-right" id="view-menu" role="menu" hidden>
                         <div class="canvas-popover-title">视图</div>
-                        <button class="canvas-toggle-row" type="button" role="menuitemcheckbox" data-view="rulers" aria-checked="false"><span>显示标尺</span><span class="canvas-toggle-indicator"></span></button>
+                        <button class="canvas-toggle-row" type="button" role="menuitemcheckbox" data-view="rulers" aria-checked="false"><span>显示标尺</span><span class="m-switch-track m-switch-track--sm"></span></button>
                         <hr />
                         <button type="button" role="menuitem" data-view="fit">适应画布</button>
                         <button type="button" role="menuitem" data-view="new">清空画布</button>
@@ -713,7 +713,7 @@
                     <section class="glass-card dieline-params" id="dieline-params" aria-label="自定义参数">
                       <div class="dieline-param-head">
                         <span class="dieline-field-label">尺寸</span>
-                        <div class="dieline-unit-switch" role="group" aria-label="单位">
+                        <div class="m-segmented m-segmented--sm dieline-unit-switch" role="group" aria-label="单位">
                           <button type="button" class="selected" data-dieline-unit="mm" aria-pressed="true">mm</button>
                           <button type="button" data-dieline-unit="in" aria-pressed="false">in</button>
                         </div>
@@ -738,7 +738,7 @@
                       <label class="dieline-field">材质<select id="dieline-material" data-param="material"></select></label>
 
                       <div class="dieline-field">尺寸类型
-                        <div class="dieline-size-type" role="group" aria-label="尺寸类型">
+                        <div class="m-segmented m-segmented--sm dieline-size-type" role="group" aria-label="尺寸类型">
                           <button type="button" class="selected" data-dieline-size-type="manufacturing" aria-pressed="true" title="刀版尺寸，结构图上标注的尺寸">制造尺寸</button>
                           <button type="button" data-dieline-size-type="inner" aria-pressed="false" title="包装能容纳的尺寸，通常小于制造尺寸">内尺寸</button>
                           <button type="button" data-dieline-size-type="outer" aria-pressed="false" title="包装占用的空间，通常大于制造尺寸">外尺寸</button>
@@ -800,9 +800,9 @@
                             <button class="m-btn shortcut-input" id="shortcut-capture" type="button"
                                     aria-describedby="shortcut-status">Control+Shift+A</button>
                             <button class="m-btn" id="shortcut-reset" type="button">恢复默认</button>
-                            <label class="toggle-wrap icon-only-toggle" data-tip="启用全局截图快捷键">
+                            <label class="m-switch icon-only-toggle" data-tip="启用全局截图快捷键">
                               <input type="checkbox" id="shortcut-enabled" checked />
-                              <span class="toggle" aria-hidden="true"></span>
+                              <span class="m-switch-track" aria-hidden="true"></span>
                               <span class="sr-only">启用</span>
                             </label>
                           </div>
@@ -961,9 +961,9 @@
                         </div>
                         <div class="setting-row">
                           <span class="setting-label">自动检查更新<small>应用启动后在后台检查新版本</small></span>
-                          <label class="toggle-wrap icon-only-toggle">
+                          <label class="m-switch icon-only-toggle">
                             <input type="checkbox" id="update-autocheck" checked />
-                            <span class="toggle" aria-hidden="true"></span>
+                            <span class="m-switch-track" aria-hidden="true"></span>
                             <span class="sr-only">自动检查更新</span>
                           </label>
                         </div>

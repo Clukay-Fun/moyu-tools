@@ -14,59 +14,6 @@
   }
 }
 
-.toggle-wrap {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  color: var(--muted);
-  font-size: var(--fs-md);
-  cursor: pointer;
-}
-
-.toggle-wrap input {
-  position: absolute;
-  opacity: 0;
-}
-
-.toggle {
-  position: relative;
-  width: 36px;
-  height: 21px;
-  border-radius: 99px;
-  background: var(--faint);
-}
-
-.toggle::after {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 17px;
-  height: 17px;
-  border-radius: 50%;
-  background: var(--on-accent);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-  content: "";
-  transition: transform var(--dur-press) var(--ease-out);
-}
-
-.toggle-wrap input:checked + .toggle {
-  background: var(--accent);
-}
-
-.toggle-wrap input:checked + .toggle::after {
-  transform: translateX(15px);
-}
-
-body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: var(--focus-ring-offset);
-  box-shadow: var(--focus-glow);
-}
-
-.toggle-wrap:has(input:disabled) {
-  cursor: not-allowed;
-  opacity: 0.48;
-}
 
 .file-list {
   display: flex;
@@ -265,13 +212,13 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
   gap: 6px;
 }
 
-.illustrator-config > .toggle-wrap,
+.illustrator-config > .m-switch,
 .illustrator-config > #illustrator-run,
 .illustrator-config > #illustrator-stop {
   align-self: flex-end;
 }
 
-.illustrator-config > .toggle-wrap {
+.illustrator-config > .m-switch {
   margin-bottom: 10px;
 }
 
@@ -282,28 +229,7 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
 }
 
 .illustrator-mode-switch {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(94px, 1fr));
-  /* 不画外框和底槽，只保留选中格的样式；padding 留着，选中格的投影不会被裁掉 */
-  padding: 3px;
-}
-
-.illustrator-mode-switch button {
-  height: 32px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 9px;
-  color: var(--muted);
-  background: transparent;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.illustrator-mode-switch button.active {
-  color: var(--accent);
-  background: var(--accent-10);
-  box-shadow: var(--glass-raised);
-  font-weight: 650;
+  grid-auto-columns: minmax(94px, 1fr);
 }
 
 #illustrator-run[hidden],
@@ -599,59 +525,10 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
 }
 
 .barcode-mode-switch {
-  position: relative;
-  display: grid;
   width: fit-content;
-  grid-template-columns: repeat(2, minmax(92px, 1fr));
-  gap: var(--sp-1);
+  grid-auto-columns: minmax(92px, 1fr);
   margin-bottom: var(--sp-4);
-  padding: var(--sp-1);
-  border: 0;
-  border-radius: var(--r-md);
-  background: transparent;
-  box-shadow: none;
 }
-
-.barcode-mode-switch::before {
-  position: absolute;
-  inset: var(--sp-1) auto var(--sp-1) var(--sp-1);
-  width: calc(50% - var(--sp-1));
-  border-radius: var(--r-sm);
-  border: 1px solid var(--selection-border);
-  background: var(--selection-bg);
-  box-shadow: var(--glass-raised);
-  content: "";
-  pointer-events: none;
-  transform: translateX(0);
-  transition: transform var(--dur-spring-land) var(--ease-spring-land);
-}
-
-.barcode-mode-switch[data-mode="batch"]::before {
-  transform: translateX(100%);
-}
-
-.barcode-mode-switch button {
-  position: relative;
-  z-index: 1;
-  height: var(--h-sm);
-  padding: 0 var(--sp-4);
-  border: 0;
-  border-radius: var(--r-sm);
-  color: var(--muted);
-  background: transparent;
-  font-size: var(--fs-md);
-  cursor: pointer;
-  transition: color var(--dur-hover) ease, transform var(--dur-press) ease;
-}
-
-.barcode-mode-switch button.on {
-  color: var(--accent);
-  background: transparent;
-  box-shadow: none;
-  font-weight: 650;
-}
-
-.barcode-mode-switch button:active { transform: scale(var(--press-scale)); }
 
 .barcode-pane {
   display: none;

@@ -58,6 +58,9 @@ body {
   --seg-on-border: var(--selection-border);
   --seg-on-shadow: var(--glass-raised);
 
+  /* 开关 */
+  --switch-thumb-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+
   /* 卡片（工作区里的内容框） */
   --card-radius: var(--frame-radius);
   --card-bg: var(--surface-inner);

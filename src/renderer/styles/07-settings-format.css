@@ -848,7 +848,6 @@
 .format-options input[type="range"] {
   grid-column: 1 / -1;
   width: 100%;
-  accent-color: var(--accent);
 }
 
 .format-engine-card {
@@ -1057,7 +1056,6 @@
 .bg-slider input[type="range"] {
   grid-column: 1 / -1;
   width: 100%;
-  accent-color: var(--accent);
 }
 
 .bg-divider {

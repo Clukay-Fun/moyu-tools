@@ -143,30 +143,6 @@
   font-size: var(--fs-md);
 }
 
-.pdf-watermark-mode {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  padding: 3px;
-  border: 1px solid var(--control-border);
-  border-radius: var(--r-md);
-  background: var(--control-bg);
-}
-
-.pdf-watermark-mode button {
-  height: 32px;
-  border: 0;
-  border-radius: 9px;
-  color: var(--muted);
-  background: transparent;
-  cursor: pointer;
-}
-
-.pdf-watermark-mode button.active {
-  color: var(--accent);
-  background: var(--accent-10);
-  font-weight: 650;
-}
-
 .pdf-watermark-controls label {
   display: grid;
   gap: 5px;
@@ -202,7 +178,6 @@
 .pdf-watermark-range input[type="range"] {
   grid-column: 1 / 3;
   padding: 0;
-  accent-color: var(--accent);
 }
 
 .pdf-watermark-range input[type="number"] {

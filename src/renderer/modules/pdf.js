@@ -652,7 +652,7 @@ export function initPdfTools({
     )
     const imageMode = state.pdfWatermarkMode === 'image'
     document.querySelectorAll('[data-watermark-mode]').forEach((button) => {
-      button.classList.toggle('active', button.dataset.watermarkMode === state.pdfWatermarkMode)
+      button.classList.toggle('is-active', button.dataset.watermarkMode === state.pdfWatermarkMode)
     })
     document.querySelector('#pdf-watermark-text').closest('label').hidden = imageMode
     document.querySelector('#pdf-watermark-font').closest('label').hidden = imageMode
