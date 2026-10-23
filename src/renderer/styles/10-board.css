@@ -47,37 +47,8 @@
   top: calc(100% + 6px);
   left: 0;
   min-width: 168px;
-  padding: 5px;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  /* ⚠ 不用 --card：菜单会浮在棋盘格和图片上方，0.2 的底色让文字和色块糊成一片。 */
-  background: var(--menu-surface);
-  box-shadow: var(--shadow-panel), var(--glass-rim);
-  backdrop-filter: var(--glass-blur);
-  transform-origin: top left;
-  transition: opacity var(--dur-popover) var(--ease-out),
-              transform var(--dur-popover) var(--ease-out);
 }
 .cmd-menu.align-right { left: auto; right: 0; transform-origin: top right; }
-.cmd-menu[hidden] { display: none; }
-.cmd-menu button {
-  display: block;
-  width: 100%;
-  padding: 7px 10px;
-  border: 0;
-  border-radius: 7px;
-  color: var(--foreground);
-  background: transparent;
-  font: 13px var(--font);
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 110ms ease, color 110ms ease;
-}
-@media (hover: hover) and (pointer: fine) {
-  .cmd-menu button:hover { color: var(--accent); background: var(--accent-10); }
-}
-.cmd-menu button[aria-checked="true"]::after { content: " ✓"; color: var(--accent); }
-.cmd-menu hr { margin: 5px 6px; border: 0; border-top: 1px solid var(--hairline); }
 
 /* 项目菜单只有短操作名，宽度跟最长一项走，不保留通用菜单的 168px 底宽。 */
 #overlay-layer > #project-menu {
@@ -194,6 +165,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--sp-4);
 }
 
 #overlay-layer > .canvas-popover .canvas-toggle-row[aria-checked="true"]::after { content: none; }

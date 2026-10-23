@@ -1,0 +1,80 @@
+/* ══ 弹出菜单 m-menu ═══════════════════════════════════════
+   下拉菜单、右键菜单、画板弹层的外观：近乎不透明的底 + 轻阴影 + 背景模糊，菜单项是透明按钮。
+   位置属于布局：浮层菜单再加 .app-menu（fixed，挂在 #overlay-layer），
+   跟着按钮走的加 .cmd-menu（absolute）。
+
+   <div class="m-menu app-menu" role="menu" hidden>
+     <button role="menuitem">设置</button>
+     <hr />
+     <button role="menuitemcheckbox" aria-checked="true">显示网格</button>
+   </div>
+
+   出场：去掉 hidden 即可（@starting-style 负责淡入）；
+   退场：先加 .closing 播放淡出，动画结束后脚本再设 hidden（见 main.js closePopover）。 */
+.m-menu {
+  padding: var(--menu-pad);
+  border: 1px solid var(--menu-border);
+  border-radius: var(--menu-radius);
+  background: var(--menu-bg);
+  box-shadow: var(--menu-shadow);
+  backdrop-filter: var(--glass-blur);
+  transform-origin: top left;
+  transition: opacity var(--dur-popover) var(--ease-out),
+              transform var(--dur-popover) var(--ease-out);
+}
+
+.m-menu[hidden] {
+  display: none;
+}
+
+.m-menu button {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: var(--menu-item-radius);
+  color: var(--foreground);
+  background: transparent;
+  font: inherit;
+  font-size: var(--fs-md);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--dur-hover) ease, color var(--dur-hover) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .m-menu button:hover {
+    color: var(--accent);
+    background: var(--accent-10);
+  }
+}
+
+.m-menu button[aria-checked="true"]::after {
+  color: var(--accent);
+  content: " ✓";
+}
+
+.m-menu hr {
+  margin: 5px 6px;
+  border: 0;
+  border-top: 1px solid var(--hairline);
+}
+
+/* 淡出期间菜单还在原位，不能挡住下方的点击；
+   #overlay-layer 里的菜单会把 pointer-events 设回 auto，所以这里带上同等特异性的选择器 */
+.m-menu.closing,
+#overlay-layer > .m-menu.closing {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px) scale(0.98);
+  transition-duration: var(--dur-popover-exit);
+}
+
+@starting-style {
+  .m-menu:not([hidden]) {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.98);
+  }
+}

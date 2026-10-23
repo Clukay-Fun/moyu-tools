@@ -1,0 +1,20 @@
+/* ══ 对话框 m-dialog / 遮罩 m-backdrop ═══════════════════════
+   对话框只管外壳（描边、圆角、底色、阴影）；尺寸、内边距、头尾分区属于各自的布局。
+   遮罩是铺满窗口的那一层：自绘的弹层加 .m-backdrop，原生 <dialog> 的 ::backdrop 自动套用。
+
+   <div class="m-backdrop modal-layer"><section class="m-dialog" role="dialog" aria-modal="true">…</section></div>
+   <dialog class="m-dialog">…</dialog> */
+.m-dialog {
+  border: 1px solid var(--dialog-border);
+  border-radius: var(--dialog-radius);
+  color: var(--foreground);
+  background: var(--dialog-bg);
+  box-shadow: var(--dialog-shadow);
+  backdrop-filter: var(--glass-blur);
+}
+
+.m-backdrop,
+.m-dialog::backdrop {
+  background: var(--backdrop);
+  backdrop-filter: var(--backdrop-blur);
+}

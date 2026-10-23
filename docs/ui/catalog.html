@@ -163,14 +163,14 @@
             <div class="m-segmented m-segmented--sm"><button type="button" aria-pressed="true">单个</button><button type="button" aria-pressed="false">批量</button></div>
             <div style="display:flex;gap:8px"><button class="m-btn" type="button">次要按钮</button><button class="m-btn m-btn--sm" type="button">小按钮</button></div>
           </div>
-          <div class="app-menu cat-glass-menu"><button type="button">打开项目</button><button type="button">保存项目</button><button type="button">导出 PNG</button></div>
+          <div class="m-menu app-menu cat-glass-menu"><button type="button">打开项目</button><button type="button">保存项目</button><button type="button">导出 PNG</button></div>
         </div>
         <div class="cat-stage cat-glass-stage" data-theme="dark"><span class="cat-label">深色</span>
           <div class="m-card cat-glass-demo">
             <div class="m-segmented m-segmented--sm"><button type="button" aria-pressed="true">单个</button><button type="button" aria-pressed="false">批量</button></div>
             <div style="display:flex;gap:8px"><button class="m-btn" type="button">次要按钮</button><button class="m-btn m-btn--sm" type="button">小按钮</button></div>
           </div>
-          <div class="app-menu cat-glass-menu"><button type="button">打开项目</button><button type="button">保存项目</button><button type="button">导出 PNG</button></div>
+          <div class="m-menu app-menu cat-glass-menu"><button type="button">打开项目</button><button type="button">保存项目</button><button type="button">导出 PNG</button></div>
         </div>
         </div>
       </div>
@@ -208,7 +208,7 @@
         <article class="cat-motion-card">
           <div class="cat-motion-stage" data-loop="hover">
             <button class="m-btn cat-sim" type="button">悬停按钮</button>
-            <div class="app-menu cat-static-menu" style="min-width:110px"><button type="button" class="cat-sim">菜单项</button><button type="button">菜单项</button></div>
+            <div class="m-menu app-menu cat-static-menu" style="min-width:110px"><button type="button" class="cat-sim">菜单项</button><button type="button">菜单项</button></div>
           </div>
           <h3>悬停反馈</h3>
           <p>颜色 / 背景 / 边框 · <code>--dur-hover</code> · <code>ease</code></p>
@@ -219,7 +219,7 @@
           <div class="cat-motion-stage" data-loop="popover" style="align-items:flex-start;height:150px">
             <div class="cat-popover-host">
               <button class="m-btn" type="button">更多操作 ▾</button>
-              <div class="app-menu" role="menu" hidden><button type="button">复制</button><button type="button">重命名</button><button type="button">删除</button></div>
+              <div class="m-menu app-menu" role="menu" hidden><button type="button">复制</button><button type="button">重命名</button><button type="button">删除</button></div>
             </div>
           </div>
           <h3>浮层开合</h3>
@@ -376,7 +376,7 @@
         <div class="cat-pair">
           <div class="cat-stage" data-theme="light"><span class="cat-label">浅色 · 居中弹窗</span>
             <div class="cat-search-demo"><div class="search-wrap open">
-              <section class="search-dialog" role="dialog" aria-label="搜索功能">
+              <section class="m-dialog search-dialog" role="dialog" aria-label="搜索功能">
                 <label class="search"><svg class="ic" aria-hidden="true"><use href="#ic-search"></use></svg><input type="search" value="水印" readonly /><kbd>⌘K</kbd></label>
                 <div class="search-results open" role="listbox">
                   <div class="search-group">PDF</div>
@@ -387,7 +387,7 @@
           </div>
           <div class="cat-stage" data-theme="dark"><span class="cat-label">深色 · 居中弹窗</span>
             <div class="cat-search-demo"><div class="search-wrap open">
-              <section class="search-dialog" role="dialog" aria-label="搜索功能">
+              <section class="m-dialog search-dialog" role="dialog" aria-label="搜索功能">
                 <label class="search"><svg class="ic" aria-hidden="true"><use href="#ic-search"></use></svg><input type="search" value="水印" readonly /><kbd>⌘K</kbd></label>
                 <div class="search-results open" role="listbox">
                   <div class="search-group">PDF</div>
@@ -401,7 +401,7 @@
 
       <div class="cat-item">
         <dl class="cat-meta">
-          <dt>头像菜单</dt><dd><code>.profile-avatar</code> + <code>.app-menu.profile-menu</code>，挂在 <code>#overlay-layer</code>；只有「设置」「意见反馈」两项</dd>
+          <dt>头像菜单</dt><dd><code>.profile-avatar</code> + <code>.m-menu.app-menu.profile-menu</code>，挂在 <code>#overlay-layer</code>；只有「设置」「意见反馈」两项</dd>
           <dt>默认头像</dt><dd>内置 SVG <code>#ic-default-avatar</code>，不依赖网络；自定义头像写入 <code>userData/profile/avatar.png</code>，经 <code>moyu-file://avatar/</code> 读取</dd>
           <dt>键盘</dt><dd>方向键在菜单内移动，Esc / 点外侧关闭并回焦到头像</dd>
         </dl>
@@ -409,7 +409,7 @@
           <div class="cat-stage" data-theme="light"><span class="cat-label">浅色 · 打开态</span>
             <div class="cat-avatar-demo">
               <button class="profile-avatar" type="button" aria-label="个人头像" aria-expanded="true"><svg class="profile-avatar-default" aria-hidden="true"><use href="#ic-default-avatar"></use></svg></button>
-              <div class="app-menu profile-menu" role="menu">
+              <div class="m-menu app-menu profile-menu" role="menu">
                 <button type="button" role="menuitem"><svg class="ic" aria-hidden="true"><use href="#ic-settings"></use></svg><span>设置</span></button>
                 <button type="button" role="menuitem"><svg class="ic" aria-hidden="true"><use href="#ic-info"></use></svg><span>意见反馈</span></button>
               </div>
@@ -418,7 +418,7 @@
           <div class="cat-stage" data-theme="dark"><span class="cat-label">深色 · 打开态</span>
             <div class="cat-avatar-demo">
               <button class="profile-avatar" type="button" aria-label="个人头像" aria-expanded="true"><svg class="profile-avatar-default" aria-hidden="true"><use href="#ic-default-avatar"></use></svg></button>
-              <div class="app-menu profile-menu" role="menu">
+              <div class="m-menu app-menu profile-menu" role="menu">
                 <button type="button" role="menuitem"><svg class="ic" aria-hidden="true"><use href="#ic-settings"></use></svg><span>设置</span></button>
                 <button type="button" role="menuitem"><svg class="ic" aria-hidden="true"><use href="#ic-info"></use></svg><span>意见反馈</span></button>
               </div>
@@ -476,11 +476,13 @@
     <!-- ══ 下拉菜单 ══ -->
     <section class="cat-section" id="menus">
       <h2>下拉菜单</h2>
-      <p>原生 <code>&lt;select&gt;</code> 的弹层由系统绘制，透明度、圆角、模糊都控制不了，压在画布上会露底。应用里的下拉统一由 <code>enhanceSelect()</code> 增强成自绘触发器 + 菜单；命令菜单直接用 <code>.app-menu</code>。菜单挂在 <code>#overlay-layer</code>，由 <code>placePopover()</code> 定位，不会被滚动容器裁掉。</p>
+      <p>原生 <code>&lt;select&gt;</code> 的弹层由系统绘制，透明度、圆角、模糊都控制不了，压在画布上会露底。应用里的下拉统一由 <code>enhanceSelect()</code> 增强成自绘触发器 + 菜单；命令菜单直接用 <code>.m-menu.app-menu</code>。菜单挂在 <code>#overlay-layer</code>，由 <code>placePopover()</code> 定位，不会被滚动容器裁掉。</p>
       <div class="cat-item">
         <dl class="cat-meta">
           <dt>选择下拉</dt><dd><code>.m-select</code> + <code>.app-menu.app-select-menu</code>；选中项 <code>aria-selected="true"</code>（主题色填充），不可选项 <code>disabled</code></dd>
-          <dt>命令菜单</dt><dd><code>.app-menu</code> + <code>button</code>；可勾选项用 <code>aria-checked="true"</code>（右侧 ✓）</dd>
+          <dt>命令菜单</dt><dd><code>.m-menu.app-menu</code> + <code>button</code>；可勾选项用 <code>aria-checked="true"</code>（右侧 ✓），分隔用 <code>&lt;hr&gt;</code></dd>
+          <dt>组件</dt><dd>外观在 <code>.m-menu</code>（<code>components/menu.css</code>，数值来自 <code>--menu-*</code>）；<code>.app-menu</code>（fixed，挂 <code>#overlay-layer</code>）和 <code>.cmd-menu</code>（跟着按钮 absolute）只管定位。退场先加 <code>.closing</code> 再设 <code>hidden</code></dd>
+          <dt>对话框</dt><dd>外壳 <code>.m-dialog</code>、遮罩 <code>.m-backdrop</code>（<code>components/dialog.css</code>，数值来自 <code>--dialog-*</code> / <code>--backdrop*</code>）；原生 <code>&lt;dialog&gt;</code> 的 <code>::backdrop</code> 自动套用。尺寸、内边距、头尾分区由各对话框自己定</dd>
           <dt>写法</dt><dd>业务里仍写原生 <code>&lt;select&gt;</code>，调用 <code>enhanceSelect(select)</code> 即可；不要自己再拼一套</dd>
           <dt>现用模块</dt><dd>PDF、格式工厂、图片、画布文字工具栏、刀模</dd>
         </dl>
@@ -644,7 +646,7 @@
     <div class="cat-row">
       <div class="cat-popover-host">
         <button type="button" class="m-select" style="width:170px" data-toggle-menu="select">瓦楞纸 E（三层）</button>
-        <div class="app-menu app-select-menu" role="listbox" data-menu="select" hidden style="width:170px">
+        <div class="m-menu app-menu app-select-menu" role="listbox" data-menu="select" hidden style="width:170px">
           <button type="button" aria-selected="true">瓦楞纸 E（三层）</button>
           <button type="button">瓦楞纸 B（三层）</button>
           <button type="button">白卡纸</button>
@@ -653,7 +655,7 @@
       </div>
       <div class="cat-popover-host">
         <button type="button" class="m-btn" data-toggle-menu="command">更多操作 ▾</button>
-        <div class="app-menu" role="menu" data-menu="command" hidden>
+        <div class="m-menu app-menu" role="menu" data-menu="command" hidden>
           <button type="button" aria-checked="true">显示网格</button>
           <button type="button">重命名</button>
           <button type="button">导出副本</button>
@@ -664,13 +666,13 @@
 
   <template id="demo-menus-static">
     <div class="cat-row" style="align-items:flex-start">
-      <div class="app-menu app-select-menu cat-static-menu" role="listbox" style="width:170px">
+      <div class="m-menu app-menu app-select-menu cat-static-menu" role="listbox" style="width:170px">
         <button type="button" aria-selected="true">瓦楞纸 E（三层）</button>
         <button type="button" class="cat-force-hover">瓦楞纸 B（三层）</button>
         <button type="button">白卡纸</button>
         <button type="button" disabled>牛皮纸（暂不支持）</button>
       </div>
-      <div class="app-menu cat-static-menu" role="menu">
+      <div class="m-menu app-menu cat-static-menu" role="menu">
         <button type="button" aria-checked="true">显示网格</button>
         <button type="button">重命名</button>
         <button type="button">导出副本</button>

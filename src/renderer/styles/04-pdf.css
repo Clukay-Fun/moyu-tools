@@ -31,8 +31,6 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(20, 22, 32, 0.3);
-  backdrop-filter: blur(16px);
 }
 
 .pdf-page-dialog {

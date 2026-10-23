@@ -205,7 +205,7 @@
   :where(button, a, .m-btn, .nav-ic):active {
     transform: none !important;
   }
-  .cmd-menu, .app-menu, .img-editor, .toast {
+  .m-menu, .img-editor, .toast {
     transition-property: opacity !important;
   }
   .m-segmented::before {

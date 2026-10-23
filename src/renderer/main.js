@@ -1816,7 +1816,7 @@ function enhanceSelect(select) {
 
   const menu = document.createElement('div')
   menu.id = menuId
-  menu.className = 'app-menu app-select-menu'
+  menu.className = 'm-menu app-menu app-select-menu'
   menu.role = 'listbox'
   menu.setAttribute('aria-label', selectAccessibleName(select))
   menu.hidden = true

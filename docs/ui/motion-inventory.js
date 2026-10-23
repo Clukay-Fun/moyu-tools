@@ -222,6 +222,42 @@ window.MOTION_INVENTORY = [
     "media": null
   },
   {
+    "selector": ".m-menu",
+    "kind": "transition",
+    "property": "opacity",
+    "duration": "var(--dur-popover)",
+    "easing": "var(--ease-out)",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-menu",
+    "kind": "transition",
+    "property": "transform",
+    "duration": "var(--dur-popover)",
+    "easing": "var(--ease-out)",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-menu button",
+    "kind": "transition",
+    "property": "background-color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-menu button",
+    "kind": "transition",
+    "property": "color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
     "selector": ".topbar-search-btn",
     "kind": "transition",
     "property": "color",
@@ -532,60 +568,6 @@ window.MOTION_INVENTORY = [
     "duration": "160ms",
     "easing": "ease",
     "tokenized": false,
-    "media": null
-  },
-  {
-    "selector": ".cmd-menu",
-    "kind": "transition",
-    "property": "opacity",
-    "duration": "var(--dur-popover)",
-    "easing": "var(--ease-out)",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".cmd-menu",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "var(--dur-popover)",
-    "easing": "var(--ease-out)",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".cmd-menu button",
-    "kind": "transition",
-    "property": "background-color",
-    "duration": "110ms",
-    "easing": "ease",
-    "tokenized": false,
-    "media": null
-  },
-  {
-    "selector": ".cmd-menu button",
-    "kind": "transition",
-    "property": "color",
-    "duration": "110ms",
-    "easing": "ease",
-    "tokenized": false,
-    "media": null
-  },
-  {
-    "selector": ".app-menu",
-    "kind": "transition",
-    "property": "opacity",
-    "duration": "var(--dur-popover)",
-    "easing": "var(--ease-out)",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": ".app-menu",
-    "kind": "transition",
-    "property": "transform",
-    "duration": "var(--dur-popover)",
-    "easing": "var(--ease-out)",
-    "tokenized": true,
     "media": null
   },
   {

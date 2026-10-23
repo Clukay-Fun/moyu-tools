@@ -114,7 +114,7 @@ body[data-bg="classic"] .panel {
 
 /* 拖拽区不认层级：盖在顶栏上的弹层（抽屉、对话框、菜单、遮罩）若不声明 no-drag，
    落在顶栏内的部分点不动，只会拖动窗口。 */
-:is(.modal-layer, .ocr-overlay, .app-menu, #overlay-layer, .toast, [data-base-ui-portal]) {
+:is(.modal-layer, .m-menu, #overlay-layer, .toast, [data-base-ui-portal]) {
   -webkit-app-region: no-drag;
 }
 
@@ -187,8 +187,6 @@ body[data-fullscreen="true"] .topbar {
   display: none;
   place-items: start center;
   padding: max(10vh, 50px) 24px 24px;
-  background: rgba(10, 14, 22, 0.36);
-  backdrop-filter: blur(3px);
   -webkit-app-region: no-drag;
 }
 
@@ -208,10 +206,6 @@ body[data-fullscreen="true"] .topbar {
   max-height: min(560px, calc(100vh - 120px));
   flex-direction: column;
   padding: 10px;
-  border: 1px solid var(--border-neutral);
-  border-radius: 18px;
-  background: var(--workspace-bg);
-  box-shadow: var(--shadow-panel);
 }
 
 .search {
@@ -514,11 +508,9 @@ body[data-fullscreen="true"] .topbar {
 
 .profile-menu {
   min-width: 148px;
-  background: var(--card-solid);
 }
 
-.app-menu.profile-menu button {
-  /* 双类名：11-controls-board.css 的 .app-menu button 在后加载，会把这里压回 display: block */
+.profile-menu button {
   display: flex;
   align-items: center;
   gap: 8px;

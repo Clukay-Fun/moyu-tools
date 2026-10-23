@@ -422,7 +422,7 @@
                     <div class="menu-wrap">
                       <button class="m-btn m-btn--quiet m-btn--icon" id="cmd-project" type="button"
                               aria-label="项目" data-tip="项目" aria-haspopup="true" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#ic-project"></use></svg></button>
-                      <div class="cmd-menu" id="project-menu" role="menu" hidden>
+                      <div class="m-menu cmd-menu" id="project-menu" role="menu" hidden>
                         <button type="button" role="menuitem" data-project="new">新建</button>
                         <button type="button" role="menuitem" data-project="open">打开项目</button>
                         <button type="button" role="menuitem" data-project="save">保存项目</button>
@@ -441,7 +441,7 @@
                               aria-label="背景" data-tip="背景" aria-haspopup="true" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#ic-background"></use></svg></button>
                       <button class="m-btn m-btn--icon canvas-view-trigger" id="cmd-view" type="button"
                               aria-label="视图" data-tip="视图" aria-haspopup="true" aria-expanded="false">···</button>
-                      <div class="cmd-menu canvas-popover align-right" id="background-menu" role="menu" hidden>
+                      <div class="m-menu cmd-menu canvas-popover align-right" id="background-menu" role="menu" hidden>
                         <div class="canvas-popover-title">背景</div>
                         <div class="canvas-color-grid" aria-label="背景颜色">
                           <button class="canvas-color transparent" type="button" role="menuitem" data-bg="transparent" aria-checked="true" aria-label="透明"></button>
@@ -457,7 +457,7 @@
                         <button class="canvas-toggle-row" type="button" role="menuitemcheckbox" data-bg="grid" aria-checked="false"><span>显示网格</span><span class="m-switch-track m-switch-track--sm"></span></button>
                         <button class="canvas-toggle-row" type="button" role="menuitemcheckbox" data-bg="snap" aria-checked="false"><span>吸附网格</span><span class="m-switch-track m-switch-track--sm"></span></button>
                       </div>
-                      <div class="cmd-menu canvas-popover canvas-view-menu align-right" id="view-menu" role="menu" hidden>
+                      <div class="m-menu cmd-menu canvas-popover canvas-view-menu align-right" id="view-menu" role="menu" hidden>
                         <div class="canvas-popover-title">视图</div>
                         <button class="canvas-toggle-row" type="button" role="menuitemcheckbox" data-view="rulers" aria-checked="false"><span>显示标尺</span><span class="m-switch-track m-switch-track--sm"></span></button>
                         <hr />
@@ -1049,8 +1049,8 @@
         </div>
       </div>
 
-      <div class="modal-layer pdf-page-organizer" id="pdf-page-organizer" hidden>
-        <section class="m-card pdf-page-dialog" role="dialog" aria-modal="true" aria-labelledby="pdf-page-title">
+      <div class="m-backdrop modal-layer pdf-page-organizer" id="pdf-page-organizer" hidden>
+        <section class="m-dialog pdf-page-dialog" role="dialog" aria-modal="true" aria-labelledby="pdf-page-title">
           <header>
             <div>
               <b id="pdf-page-title">页面顺序</b>
@@ -1077,7 +1077,7 @@
         </section>
       </div>
 
-      <dialog class="update-available-dialog" id="update-available-dialog" aria-labelledby="update-dialog-title">
+      <dialog class="m-dialog update-available-dialog" id="update-available-dialog" aria-labelledby="update-dialog-title">
         <h2 id="update-dialog-title">发现新版本</h2>
         <p id="update-dialog-description"></p>
         <div class="update-notes" id="update-dialog-notes" hidden></div>
@@ -1089,9 +1089,9 @@
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
     </div>
 
-    <div class="search-wrap" id="search-wrap">
+    <div class="m-backdrop search-wrap" id="search-wrap">
       <div class="search-backdrop" data-search-dismiss></div>
-      <section class="search-dialog" id="search-dialog" role="dialog" aria-modal="true" aria-labelledby="search-title">
+      <section class="m-dialog search-dialog" id="search-dialog" role="dialog" aria-modal="true" aria-labelledby="search-title">
         <h2 class="sr-only" id="search-title">搜索功能</h2>
         <label class="search" for="feature-search">
           <svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-search"></use></svg>
@@ -1111,25 +1111,25 @@
     </div>
 
     <div id="overlay-layer">
-      <div class="app-menu pdf-quality-menu" id="pdf-jpeg-quality-menu" role="listbox" aria-label="JPEG 质量" hidden>
+      <div class="m-menu app-menu pdf-quality-menu" id="pdf-jpeg-quality-menu" role="listbox" aria-label="JPEG 质量" hidden>
         <button type="button" role="option" data-value="0.85" aria-selected="true">85%</button>
         <button type="button" role="option" data-value="0.7" aria-selected="false">70%</button>
         <button type="button" role="option" data-value="0.95" aria-selected="false">95%</button>
       </div>
       <!-- 应用自己的下拉菜单（S1）。统一挂到顶层，绕开滚动容器裁切。 -->
-      <div class="app-menu" id="text-font-menu" role="menu" hidden>
+      <div class="m-menu app-menu" id="text-font-menu" role="menu" hidden>
         <button type="button" role="menuitemradio" data-font='system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif'>系统默认</button>
         <button type="button" role="menuitemradio" data-font='"Microsoft YaHei", "PingFang SC", sans-serif'>黑体</button>
         <button type="button" role="menuitemradio" data-font='"SimSun", "Songti SC", serif'>宋体</button>
         <button type="button" role="menuitemradio" data-font='"Segoe UI", Helvetica, Arial, sans-serif'>Segoe UI</button>
         <button type="button" role="menuitemradio" data-font='ui-monospace, "SFMono-Regular", Consolas, monospace'>等宽</button>
       </div>
-      <div class="app-menu" id="text-align-menu" role="menu" hidden>
+      <div class="m-menu app-menu" id="text-align-menu" role="menu" hidden>
         <button type="button" role="menuitemradio" data-align="left">左对齐</button>
         <button type="button" role="menuitemradio" data-align="center">居中</button>
         <button type="button" role="menuitemradio" data-align="right">右对齐</button>
       </div>
-      <div class="app-menu profile-menu" id="profile-menu" role="menu" aria-label="个人菜单" hidden>
+      <div class="m-menu app-menu profile-menu" id="profile-menu" role="menu" aria-label="个人菜单" hidden>
         <button type="button" role="menuitem" data-profile-action="settings">
           <svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-settings"></use></svg><span>设置</span>
         </button>
