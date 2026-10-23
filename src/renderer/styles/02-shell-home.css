@@ -82,24 +82,36 @@ body[data-platform="win32"] .topbar {
 
 .search-wrap {
   position: fixed;
-  top: 60px;
-  left: 78px;
-  z-index: var(--z-popover);
+  z-index: var(--z-modal);
+  inset: 0;
   display: none;
-  width: min(360px, calc(100vw - 32px));
+  place-items: start center;
+  padding: max(10vh, 56px) 24px 24px;
+  background: rgba(10, 14, 22, 0.36);
+  backdrop-filter: blur(3px);
   -webkit-app-region: no-drag;
 }
 
-body[data-platform="win32"] .search-wrap {
-  left: 14px;
-}
-
-body[data-platform="linux"] .search-wrap {
-  left: 16px;
-}
-
 .search-wrap.open {
-  display: block;
+  display: grid;
+}
+
+.search-backdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.search-dialog {
+  position: relative;
+  display: flex;
+  width: min(620px, 100%);
+  max-height: min(560px, calc(100vh - 120px));
+  flex-direction: column;
+  padding: 10px;
+  border: 1px solid var(--border-neutral);
+  border-radius: 18px;
+  background: var(--workspace-bg);
+  box-shadow: var(--shadow-panel);
 }
 
 .search {
@@ -107,25 +119,27 @@ body[data-platform="linux"] .search-wrap {
   align-items: center;
   gap: 9px;
   width: 100%;
-  height: 36px;
-  padding: 0 11px;
-  border: 1px solid var(--border);
+  height: 44px;
+  flex: none;
+  padding: 0 12px;
+  border: 1px solid var(--border-neutral);
   border-radius: var(--radius-small);
-  background: rgba(255, 255, 255, 0.38);
+  background: var(--background);
   color: var(--faint);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.42);
-  backdrop-filter: blur(20px) saturate(155%);
 }
 
 [data-theme="dark"] .search {
-  background: rgba(16, 23, 35, 0.82);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.06);
+  background: var(--card-solid);
 }
 
 .search:hover,
 .search:focus-within {
-  background: transparent;
-  box-shadow: none;
+  background: var(--background);
+}
+
+[data-theme="dark"] .search:hover,
+[data-theme="dark"] .search:focus-within {
+  background: var(--card-solid);
 }
 
 .search:focus-within {
@@ -139,6 +153,7 @@ body[data-platform="linux"] .search-wrap {
   outline: 0;
   color: var(--foreground);
   background: transparent;
+  font-size: 14px;
 }
 
 .search input:hover,
@@ -152,6 +167,11 @@ body[data-platform="linux"] .search-wrap {
   color: var(--faint);
 }
 
+/* 原生搜索框的清空叉在居中弹窗里像个额外按钮，且和 Esc/遮罩关闭重复 */
+.search input::-webkit-search-cancel-button {
+  display: none;
+}
+
 .search kbd {
   padding: 2px 6px;
   border: 1px solid var(--hairline);
@@ -162,26 +182,13 @@ body[data-platform="linux"] .search-wrap {
 }
 
 .search-results {
-  position: absolute;
-  top: 43px;
-  left: 0;
   display: none;
   width: 100%;
-  max-height: min(520px, calc(100vh - 86px));
-  padding: 8px;
-  overflow: auto;
-  border: 1px solid var(--border);
-  border-radius: 15px;
-  background: rgba(247, 248, 251, 0.97);
-  box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(34px) saturate(150%);
-  transform-origin: top left;
-  transition: opacity var(--dur-popover) var(--ease-out),
-              transform var(--dur-popover) var(--ease-out);
-}
-
-[data-theme="dark"] .search-results {
-  background: var(--menu-surface);
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 6px 4px 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .search-results.open {
@@ -189,15 +196,16 @@ body[data-platform="linux"] .search-wrap {
 }
 
 .search-group {
-  padding: 10px 8px 5px;
-  color: var(--accent);
+  padding: 12px 10px 6px;
+  color: var(--faint);
   font-size: var(--fs-sm);
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .search-group:first-child {
-  padding-top: 3px;
+  padding-top: 4px;
 }
 
 .search-result {
@@ -206,28 +214,20 @@ body[data-platform="linux"] .search-wrap {
   gap: 10px;
   align-items: center;
   width: 100%;
-  margin: 3px 0;
-  padding: 7px 10px;
-  border: 1px solid var(--hairline);
-  border-radius: 10px;
+  margin: 2px 0;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 9px;
   color: var(--foreground);
-  background: var(--card);
-  box-shadow: 0 2px 6px rgba(35, 39, 65, 0.05);
+  background: transparent;
   text-align: left;
   cursor: pointer;
 }
 
 .search-result:hover,
 .search-result.keyboard-active {
-  border-color: color-mix(in srgb, var(--accent) 68%, #111b36);
-  color: var(--on-accent);
-  background: color-mix(in srgb, var(--accent) 68%, #111b36);
-  box-shadow: 0 5px 14px rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.22);
-}
-
-.search-result:hover i,
-.search-result.keyboard-active i {
-  background: rgba(255, 255, 255, 0.2) !important;
+  color: var(--accent);
+  background: var(--accent-10);
 }
 
 .search-result i {

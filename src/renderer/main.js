@@ -286,6 +286,7 @@ const moduleLabels = {
   bc: '条码',
   image: '图片',
   video: '格式工厂',
+  dieline: '刀模',
   erp: '库存',
   custom: '定制',
   more: '设置'
@@ -339,6 +340,9 @@ const searchFeatures = [
   ['音频转换', '格式工厂', 'video', '音频转换', 'MP3 AAC WAV FLAC'],
   ['图片转换', '格式工厂', 'video', '图片转换', 'sharp JPG PNG WebP AVIF TIFF GIF'],
   ['图片压缩', '格式工厂', 'video', '图片压缩', 'sharp 批量 质量'],
+  ['刀模设计', '刀模', 'dieline', '', '包装 盒型 展开图 结构 尺寸 纸盒'],
+  ['刀模导出 PDF', '刀模', 'dieline', '', '刀版 展开图 PDF 导出'],
+  ['刀模发送到 Illustrator', '刀模', 'dieline', '', 'AI 矢量 刀版'],
   ['库存概览', '库存', 'erp', '概览', 'ERP 库存 KPI 汇总 销售 毛利'],
   ['商品与库存', '库存', 'erp', '商品', 'SKU 商品 库存 流水 期初'],
   ['单据', '库存', 'erp', '单据', '出库 入库 订单 草稿 作废'],
@@ -428,6 +432,7 @@ const searchInput = document.querySelector('#feature-search')
 const searchResults = document.querySelector('#search-results')
 const searchTrigger = document.querySelector('#search-trigger')
 const searchWrap = document.querySelector('#search-wrap')
+const searchDialog = document.querySelector('#search-dialog')
 const homePage = document.querySelector('#page-home')
 const homeSlogan = document.querySelector('#home-slogan')
 const toast = document.querySelector('#toast')
@@ -2226,6 +2231,7 @@ for (const [module, groups] of Object.entries(submenuData)) {
 
 const moduleSearchIcons = {
   ai: { icon: 'Ai', color: '#31a766' },
+  dieline: { icon: '刀', color: '#e88c32' },
   erp: { icon: '库', color: '#e88c32' },
   custom: { icon: 'PS', color: '#2f6fb5' },
   image: { icon: 'IMG', color: '#6978e6' },
@@ -2254,7 +2260,19 @@ function renderSearchResults(query) {
   const matches = normalized
     ? searchFeatures.filter((feature) => feature.searchable.includes(normalized))
     : [...searchFeatures]
-  state.searchMatches = searchModuleOrder.flatMap((module) => matches
+  // 先按模块的最高相关度排序，再按模块注册顺序排；组内再按相关度。
+  // 只按模块顺序 flatMap 会让「库存」先命中条码里带“库存”关键词的 MSI。
+  const moduleScores = new Map()
+  for (const feature of matches) {
+    const value = score(feature)
+    if (!moduleScores.has(feature.module) || value < moduleScores.get(feature.module)) {
+      moduleScores.set(feature.module, value)
+    }
+  }
+  const orderedModules = [...moduleScores.keys()].sort((left, right) =>
+    moduleScores.get(left) - moduleScores.get(right)
+    || searchModuleOrder.indexOf(left) - searchModuleOrder.indexOf(right))
+  state.searchMatches = orderedModules.flatMap((module) => matches
     .filter((feature) => feature.module === module)
     .sort((left, right) => score(left) - score(right)))
   state.activeSearchIndex = -1
@@ -2300,15 +2318,24 @@ function renderSearchResults(query) {
   searchInput.setAttribute('aria-expanded', 'true')
 }
 
-function closeSearch() {
+function closeSearch({ restoreFocus = true } = {}) {
   searchResults.classList.remove('open')
   searchInput.setAttribute('aria-expanded', 'false')
   searchWrap?.classList.remove('open')
   searchTrigger?.setAttribute('aria-expanded', 'false')
+  if (restoreFocus && searchReturnFocus?.isConnected) {
+    searchReturnFocus.focus({ preventScroll: true })
+  }
+  searchReturnFocus = null
 }
+
+let searchReturnFocus = null
 
 function openSearchPanel() {
   if (!searchWrap) return
+  if (!searchWrap.classList.contains('open')) {
+    searchReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+  }
   searchWrap.classList.add('open')
   searchTrigger?.setAttribute('aria-expanded', 'true')
   searchInput.focus()
@@ -2358,6 +2385,33 @@ searchTrigger?.addEventListener('click', (event) => {
   else openSearchPanel()
 })
 
+searchWrap?.querySelector('[data-search-dismiss]')?.addEventListener('click', () => closeSearch())
+
+// 模态里 Tab 不跑出弹窗：在输入框和结果之间循环
+searchWrap?.addEventListener('keydown', (event) => {
+  if (event.key !== 'Tab' || !searchDialog) return
+  const focusables = [...searchDialog.querySelectorAll('input, button')]
+    .filter((element) => !element.disabled && element.offsetParent !== null)
+  if (!focusables.length) return
+  const first = focusables[0]
+  const last = focusables.at(-1)
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault()
+    first.focus()
+  }
+})
+
+// Esc 在捕获阶段处理：搜索弹窗比普通浮层更靠上，先关它
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape' || !searchWrap?.classList.contains('open')) return
+  event.preventDefault()
+  event.stopPropagation()
+  closeSearch()
+}, true)
+
 searchResults.addEventListener('click', (event) => {
   const button = event.target.closest('.search-result')
   if (button) runSearchResult(Number(button.dataset.index))
@@ -2367,10 +2421,6 @@ searchResults.addEventListener('pointermove', () => {
   if (state.activeSearchIndex < 0) return
   state.activeSearchIndex = -1
   refreshActiveSearchResult()
-})
-
-document.addEventListener('pointerdown', (event) => {
-  if (!event.target.closest('.topbar-left')) closeSearch()
 })
 
 document.addEventListener('keydown', (event) => {
