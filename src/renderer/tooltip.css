@@ -19,6 +19,7 @@
 }
 
 .app-tooltip[data-side="bottom"] { transform-origin: center top; }
+.app-tooltip[data-side="right"] { transform-origin: left center; }
 .app-tooltip[data-instant],
 .app-tooltip[data-keyboard] { transition-duration: 0ms; }
 .app-tooltip[hidden] { display: none; }

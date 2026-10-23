@@ -335,29 +335,16 @@ body[data-platform="linux"] .search-wrap {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 3px 1px;
+  padding: 0;
   border: 1px solid transparent;
   border-radius: 11px;
   color: var(--muted);
   background: transparent;
-  font-size: var(--fs-compact);
-  font-weight: 600;
   cursor: pointer;
   transition: transform var(--dur-press) var(--ease-out),
               color var(--dur-hover) ease,
               border-color var(--dur-hover) ease,
               background-color var(--dur-hover) ease;
-}
-
-.nav-label {
-  overflow: hidden;
-  max-width: 100%;
-  color: currentColor;
-  font-size: var(--fs-compact);
-  line-height: 1.1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .nav-ic:hover {

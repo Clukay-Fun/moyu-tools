@@ -29,6 +29,24 @@ export function installTooltips(root = document) {
   function position(target) {
     const rect = target.getBoundingClientRect()
     const tip = tooltip.getBoundingClientRect()
+    if (target.dataset.tipSide === 'right') {
+      // 一级栏是竖排窄条：提示放右侧，避免盖住相邻图标或二级菜单。
+      const left = Math.max(
+        EDGE_GAP,
+        Math.min(rect.right + EDGE_GAP, window.innerWidth - tip.width - EDGE_GAP)
+      )
+      const top = Math.max(
+        EDGE_GAP,
+        Math.min(
+          rect.top + (rect.height - tip.height) / 2,
+          window.innerHeight - tip.height - EDGE_GAP
+        )
+      )
+      tooltip.style.left = `${Math.round(left)}px`
+      tooltip.style.top = `${Math.round(top)}px`
+      tooltip.dataset.side = 'right'
+      return
+    }
     const left = Math.min(
       Math.max(EDGE_GAP, rect.left + (rect.width - tip.width) / 2),
       window.innerWidth - tip.width - EDGE_GAP

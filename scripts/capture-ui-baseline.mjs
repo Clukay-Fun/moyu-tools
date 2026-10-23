@@ -137,17 +137,31 @@ try {
 
   /** 切模块：优先点一级栏；「设置」在一级栏移除后改走头像菜单。 */
   async function openModule(module) {
-    const route = await P.ev(`(() => {
+    const route = await P.ev(`(async () => {
       const nav = document.querySelector('.nav-ic[data-module="${module}"]')
       if (nav) { nav.click(); return 'nav' }
       if ('${module}' === 'more') {
         const avatar = document.querySelector('.profile-avatar, #profile-avatar')
-        if (!avatar) return null
-        avatar.click()
-        const item = document.querySelector('#profile-menu [data-profile-action="settings"]')
-        if (!item) return null
-        item.click()
-        return 'profile-menu'
+        if (avatar) {
+          avatar.click()
+          await new Promise(r => setTimeout(r, 150))
+          const item = document.querySelector('#profile-menu [data-profile-action="settings"]')
+          if (item) { item.click(); return 'profile-menu' }
+        }
+        const trigger = document.querySelector('.topbar-search-btn')
+        if (trigger) {
+          trigger.click()
+          await new Promise(r => setTimeout(r, 200))
+          const input = document.querySelector('#search-dialog input, #feature-search')
+          if (input) {
+            input.value = '主题'
+            input.dispatchEvent(new Event('input', { bubbles: true }))
+            await new Promise(r => setTimeout(r, 250))
+            const result = [...document.querySelectorAll('.search-result')]
+              .find((button) => button.textContent.includes('主题'))
+            if (result) { result.click(); return 'search' }
+          }
+        }
       }
       return null
     })()`)
