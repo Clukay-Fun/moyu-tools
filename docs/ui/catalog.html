@@ -90,6 +90,7 @@
     .cat-shell { height: 100%; }
     .cat-shell .app-body { height: calc(100% - 50px); }
     .cat-shell .topbar { padding: 0 14px; }
+    .cat-shell .rail { margin: 10px 0 10px 10px; }
     .cat-shell .submenu { display: flex; min-height: 0; }
     .cat-shell .submenu-indicator { display: none; }
     .cat-shell .submenu-item.on { color: var(--accent); background: var(--accent-10); font-weight: 600; }
@@ -294,17 +295,17 @@
     <!-- ══ 外壳 ══ -->
     <section class="cat-section" id="shell">
       <h2>外壳</h2>
-      <p>V1 桌面改版：外层冷灰底 + 两级导航 + 白色圆角工作区。下面的预览直接复用应用的 <code>.topbar</code> / <code>.rail</code> / <code>.submenu</code> / <code>.content</code>，不是另画一套。</p>
+      <p>V2 精修：三层底色——外层（含顶栏、二级栏）、独立圆角一级导航条、白色圆角工作区。下面的预览直接复用应用的 <code>.topbar</code> / <code>.rail</code> / <code>.submenu</code> / <code>.content</code>，不是另画一套。</p>
 
       <div class="cat-item">
         <dl class="cat-meta">
           <dt>结构</dt><dd><code>.window-shell</code> → <code>.topbar</code> + <code>.app-body</code>（<code>.rail</code> / <code>.submenu</code> / <code>.content</code>）</dd>
           <dt>颜色</dt><dd><code>--shell-bg</code>（含顶栏、二级栏）/ <code>--rail-bg</code> / <code>--workspace-bg</code> / <code>--workspace-radius</code>，深浅各一套；工作区深色下不是白底</dd>
-          <dt>平台让位</dt><dd><code>body[data-platform="darwin"]</code> 顶栏左留 72px 给红黄绿，<code>win32</code> 右留 148px 给系统三键；全屏时 <code>body[data-fullscreen="true"]</code> 收成 14px；截图里看不到这些原生按钮</dd>
+          <dt>平台让位</dt><dd><code>body[data-platform="darwin"]</code> 顶栏左留 96px（红黄绿后再空约 32px），<code>win32</code> 右留 148px 给系统三键；全屏时 <code>body[data-fullscreen="true"]</code> 收成 20px；截图里看不到这些原生按钮</dd>
           <dt>顶栏</dt><dd><code>.topbar</code> 50px，整条可拖动；搜索按钮与 <code>.mochi</code> 是 <code>no-drag</code></dd>
-          <dt>一级栏</dt><dd><code>.rail</code> 64px，<code>.nav-ic</code> 只放图标，名称走 <code>aria-label</code> + <code>data-tip</code></dd>
-          <dt>二级栏</dt><dd><code>.submenu</code> 宽 <code>clamp(184px, 18vw, 208px)</code>，行高 40px，独立滚动；主页不显示</dd>
-          <dt>工作区</dt><dd><code>.content</code> 20px 圆角、外边距 12px、内部滚动；<code>.page</code> 自己滚</dd>
+          <dt>一级栏</dt><dd><code>.rail</code> 独立圆角条：宽 60、圆角 20、四周离外框 12px；<code>.rail-list</code> 滚动、头像固定在底部；<code>.nav-ic</code> 40px 只放图标，名称走 <code>aria-label</code> + <code>data-tip</code>；头像 32px</dd>
+          <dt>二级栏</dt><dd><code>.submenu</code> 宽 <code>clamp(172px, 15vw, 184px)</code>、透明、行高 40px，独立滚动；名称 <code>.submenu-label</code> 单行省略，被截断时挂 <code>data-tip</code>；主页不显示</dd>
+          <dt>工作区</dt><dd><code>.content</code> 20px 圆角、外边距 12px（有二级栏时左外边距为 0）、内部滚动；<code>.page</code> 自己滚</dd>
           <dt>现用模块</dt><dd>全部模块</dd>
         </dl>
         <div class="cat-pair">
@@ -316,10 +317,11 @@
               </header>
               <div class="app-body">
                 <nav class="rail" aria-label="工具模块">
-                  <button class="nav-ic active" type="button" aria-label="主页"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-home"></use></svg></button>
-                  <button class="nav-ic" type="button" aria-label="PDF"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-crop"></use></svg></button>
-                  <button class="nav-ic" type="button" aria-label="图片"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-plus"></use></svg></button>
-                  <div class="rail-spacer"></div>
+                  <div class="rail-list">
+                    <button class="nav-ic active" type="button" aria-label="主页"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-home"></use></svg></button>
+                    <button class="nav-ic" type="button" aria-label="PDF"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-crop"></use></svg></button>
+                    <button class="nav-ic" type="button" aria-label="图片"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-plus"></use></svg></button>
+                  </div>
                   <div class="rail-footer"><button class="profile-avatar" type="button" aria-label="个人头像"><svg class="profile-avatar-default" aria-hidden="true"><use href="#ic-default-avatar"></use></svg></button></div>
                 </nav>
                 <aside class="submenu show" aria-label="模块功能">
@@ -341,10 +343,11 @@
               </header>
               <div class="app-body">
                 <nav class="rail" aria-label="工具模块">
-                  <button class="nav-ic active" type="button" aria-label="主页"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-home"></use></svg></button>
-                  <button class="nav-ic" type="button" aria-label="PDF"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-crop"></use></svg></button>
-                  <button class="nav-ic" type="button" aria-label="图片"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-plus"></use></svg></button>
-                  <div class="rail-spacer"></div>
+                  <div class="rail-list">
+                    <button class="nav-ic active" type="button" aria-label="主页"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-home"></use></svg></button>
+                    <button class="nav-ic" type="button" aria-label="PDF"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-crop"></use></svg></button>
+                    <button class="nav-ic" type="button" aria-label="图片"><svg class="ic ic-lg" aria-hidden="true"><use href="#ic-plus"></use></svg></button>
+                  </div>
                   <div class="rail-footer"><button class="profile-avatar" type="button" aria-label="个人头像"><svg class="profile-avatar-default" aria-hidden="true"><use href="#ic-default-avatar"></use></svg></button></div>
                 </nav>
                 <aside class="submenu show" aria-label="模块功能">
