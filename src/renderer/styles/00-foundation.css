@@ -49,6 +49,8 @@
   /* 书签阴影往左、上下散；抽屉主体的阴影更轻，且只往右下（负扩散），不压到书签上 */
   --drawer-shadow: -5px 3px 16px rgba(40, 50, 85, 0.06);
   --drawer-body-shadow: 6px 4px 18px -6px rgba(30, 40, 65, 0.05);
+  /* 书签与内容之间的竖线：--glass-border 是白色，压在白色毛玻璃上看不见，单独用中性灰 */
+  --drawer-divider: rgba(120, 130, 155, 0.28);
   /* 框线与阴影层级：只有工作区一层柔和外阴影；内部内容框只用描边 + 顶部高光；弹窗和下拉另有阴影 */
   --glass-border: rgba(255, 255, 255, 0.58);
   --glass-shadow: 0 4px 20px rgba(30, 40, 65, 0.06);
@@ -233,6 +235,7 @@
   --glass-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
   --drawer-shadow: -6px 4px 20px rgba(0, 0, 0, 0.26);
   --drawer-body-shadow: 6px 5px 20px -6px rgba(0, 0, 0, 0.24);
+  --drawer-divider: rgba(159, 177, 204, 0.2);
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   --panel: rgba(13, 19, 29, 0.88);
   --card: rgba(28, 37, 52, 0.62);

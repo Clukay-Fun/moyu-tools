@@ -783,6 +783,7 @@ body.home-active .content {
 /* 有二级栏时工作区是抽屉的主体：左侧直角，和书签接成一个面，左边保留一条描边作为书签和内容的分隔线；
    阴影只往右下走（负扩散抵掉左侧），不压到书签上 */
 .submenu.show + .content {
+  border-left-color: var(--drawer-divider);
   border-radius: 0 var(--workspace-radius) var(--workspace-radius) 0;
   box-shadow: var(--drawer-body-shadow), var(--glass-highlight);
 }
