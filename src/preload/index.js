@@ -11,8 +11,10 @@ contextBridge.exposeInMainWorld(
   Object.freeze({
     // ── 应用本身 ──────────────────────────────────────────────
     ping: () => ipcRenderer.invoke('ping'),
+    platform: process.platform,
     getAppInfo: () => ipcRenderer.invoke('app:info'),
     openExternal: (url) => ipcRenderer.invoke('app:open-external', url),
+    setTitleBarTheme: (theme) => ipcRenderer.invoke('window:set-titlebar-theme', theme),
     reportStartupReady: () => ipcRenderer.send('startup:report-ready'),
     onWindowRevive: (handler) => {
       const listener = () => handler()

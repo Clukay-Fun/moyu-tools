@@ -110,14 +110,39 @@ function resolveWindowIcon() {
   return undefined
 }
 
+/** 顶栏高度与外壳顶栏 CSS 保持一致；Windows 系统按钮的覆盖层也按它对齐。 */
+const TITLEBAR_HEIGHT = 56
+const TITLEBAR_THEMES = {
+  light: { color: '#E8EAF1', symbolColor: '#252734' },
+  dark: { color: '#0E151F', symbolColor: '#EDF3FB' }
+}
+
+/** 无边框标题栏按平台取值：macOS 留红黄绿，Windows 用 overlay 让系统按钮落在右上。 */
+function platformTitleBarOptions() {
+  if (process.platform === 'darwin') {
+    return {
+      titleBarStyle: 'hiddenInset',
+      trafficLightPosition: { x: 18, y: 22 }
+    }
+  }
+  if (process.platform === 'win32') {
+    return {
+      titleBarStyle: 'hidden',
+      titleBarOverlay: { ...TITLEBAR_THEMES.light, height: TITLEBAR_HEIGHT }
+    }
+  }
+  return {}
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 960,
-    height: 640,
+    width: 1200,
+    height: 780,
     minWidth: 960,
     minHeight: 640,
     show: false,
     icon: resolveWindowIcon(),
+    ...platformTitleBarOptions(),
     webPreferences: {
       preload: join(__dirname, '../preload/index.cjs'),
       contextIsolation: true,
@@ -214,6 +239,19 @@ ipcMain.handle('ping', () => 'pong')
 ipcMain.handle('app:info', (event) => {
   assertMainWindowSender(event)
   return { version: getApplicationVersion() }
+})
+
+/**
+ * 深浅主题切换时同步 Windows 系统窗口按钮的底色。
+ * 只接受主窗口、只接受 light | dark；其他平台没有 overlay，直接确认即可。
+ */
+ipcMain.handle('window:set-titlebar-theme', (event, theme) => {
+  assertMainWindowSender(event)
+  if (theme !== 'light' && theme !== 'dark') throw new Error('不支持的主题')
+  if (process.platform === 'win32' && mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.setTitleBarOverlay({ ...TITLEBAR_THEMES[theme], height: TITLEBAR_HEIGHT })
+  }
+  return { status: 'ok', theme }
 })
 
 // ── 自动更新（GitHub Releases，仅 Windows 安装版）──

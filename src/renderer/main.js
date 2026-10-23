@@ -35,6 +35,11 @@ const eraserBrushReady = import('fabric/src/mixins/eraser_brush.mixin.js')
   .then(() => fabric.EraserBrush)
 installTooltips()
 
+// CSS 按平台留出系统窗口按钮的位置（macOS 左上红黄绿、Windows 右上三键）。
+// 平台来自 preload 暴露的 process.platform；没有桥接时退回 UA 判断。
+document.body.dataset.platform = window.api?.platform
+  || (/Mac/i.test(navigator.platform) ? 'darwin' : /Win/i.test(navigator.platform) ? 'win32' : 'linux')
+
 const appLogoUrl = new URL('../../assets/app-icon.png', import.meta.url).href
 
 document.querySelectorAll('[data-app-logo]').forEach((image) => {
@@ -421,6 +426,8 @@ const formatFactoryModule = initFormatFactory({ state, renderSubmenu, showToast,
 const submenu = document.querySelector('#submenu')
 const searchInput = document.querySelector('#feature-search')
 const searchResults = document.querySelector('#search-results')
+const searchTrigger = document.querySelector('#search-trigger')
+const searchWrap = document.querySelector('#search-wrap')
 const homePage = document.querySelector('#page-home')
 const homeSlogan = document.querySelector('#home-slogan')
 const toast = document.querySelector('#toast')
@@ -2172,6 +2179,16 @@ function renderSearchResults(query) {
 function closeSearch() {
   searchResults.classList.remove('open')
   searchInput.setAttribute('aria-expanded', 'false')
+  searchWrap?.classList.remove('open')
+  searchTrigger?.setAttribute('aria-expanded', 'false')
+}
+
+function openSearchPanel() {
+  if (!searchWrap) return
+  searchWrap.classList.add('open')
+  searchTrigger?.setAttribute('aria-expanded', 'true')
+  searchInput.focus()
+  searchInput.select()
 }
 
 function runSearchResult(index) {
@@ -2211,6 +2228,12 @@ searchInput.addEventListener('keydown', (event) => {
   }
 })
 
+searchTrigger?.addEventListener('click', (event) => {
+  event.stopPropagation()
+  if (searchWrap?.classList.contains('open')) closeSearch()
+  else openSearchPanel()
+})
+
 searchResults.addEventListener('click', (event) => {
   const button = event.target.closest('.search-result')
   if (button) runSearchResult(Number(button.dataset.index))
@@ -2223,14 +2246,13 @@ searchResults.addEventListener('pointermove', () => {
 })
 
 document.addEventListener('pointerdown', (event) => {
-  if (!event.target.closest('.search-wrap')) closeSearch()
+  if (!event.target.closest('.topbar-left')) closeSearch()
 })
 
 document.addEventListener('keydown', (event) => {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
     event.preventDefault()
-    searchInput.focus()
-    searchInput.select()
+    openSearchPanel()
   }
 })
 
@@ -2262,6 +2284,9 @@ function applyTheme(theme) {
   document.body.dataset.theme = resolved
   document.body.dataset.themePreference = theme
   localStorage.setItem('theme', theme)
+  // Windows 的系统窗口按钮不归 CSS 管：切换深浅时要同步 titleBarOverlay 底色。
+  // 其他平台该 IPC 直接返回，失败也不该打断主题切换。
+  window.api?.setTitleBarTheme?.(resolved)?.catch?.(() => {})
 }
 
 document.querySelectorAll('input[name="theme"]').forEach((input) => {

@@ -106,13 +106,8 @@ body.keyboard-focus :where(
 }
 
 @media (max-width: 940px) {
-  .brand b,
   .slogan {
     display: none;
-  }
-
-  .search-wrap {
-    flex: 1;
   }
 
   .toolbar-hint {

@@ -14,25 +14,35 @@
     <div class="window-shell">
       <div class="panel">
         <header class="topbar">
-          <div class="brand">
-            <span class="brand-logo"><img data-app-logo alt="" /></span>
-          </div>
+          <div class="topbar-left">
+            <button
+              class="topbar-search-btn"
+              id="search-trigger"
+              type="button"
+              aria-label="搜索功能"
+              aria-expanded="false"
+              aria-controls="search-results"
+              data-tip="搜索功能"
+            >
+              <svg class="ic ic-lg" aria-hidden="true" focusable="false"><use href="#ic-search"></use></svg>
+            </button>
 
-          <div class="search-wrap">
-            <label class="search" for="feature-search">
-              <svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-search"></use></svg>
-              <input
-                id="feature-search"
-                type="search"
-                placeholder="搜索功能…"
-                autocomplete="off"
-                aria-label="搜索功能"
-                aria-controls="search-results"
-                aria-expanded="false"
-              />
-              <kbd>⌘K</kbd>
-            </label>
-            <div class="search-results" id="search-results" role="listbox"></div>
+            <div class="search-wrap" id="search-wrap">
+              <label class="search" for="feature-search">
+                <svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-search"></use></svg>
+                <input
+                  id="feature-search"
+                  type="search"
+                  placeholder="搜索功能…"
+                  autocomplete="off"
+                  aria-label="搜索功能"
+                  aria-controls="search-results"
+                  aria-expanded="false"
+                />
+                <kbd>⌘K</kbd>
+              </label>
+              <div class="search-results" id="search-results" role="listbox"></div>
+            </div>
           </div>
 
           <div class="topbar-right">
