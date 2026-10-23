@@ -324,15 +324,15 @@
 }
 .dieline-dimension-grid.single { grid-template-columns: minmax(0, 1fr); }
 .dieline-dimension-grid.triple { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.dieline-dimension-grid.triple .unit-input input { padding-right: 24px; }
-.dieline-dimension-grid.triple .unit-input em { right: 6px; }
+.dieline-dimension-grid.triple .m-field-unit input { padding-right: 24px; }
+.dieline-dimension-grid.triple .m-field-unit em { right: 6px; }
 .dieline-dimension-grid label {
   display: grid;
   align-content: start;
   gap: 5px;
 }
 /* 参数与标注联动：聚焦某个参数时高亮输入框（刀模私有） */
-.dieline-params .unit-input input.focus-param:not([aria-invalid="true"]) { border-color: var(--accent); }
+.dieline-params .m-field-unit input.focus-param:not([aria-invalid="true"]) { border-color: var(--accent); }
 
 .dieline-export {
   display: grid;

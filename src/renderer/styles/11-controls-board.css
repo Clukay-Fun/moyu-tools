@@ -113,35 +113,6 @@
   pointer-events: none !important;
 }
 
-.app-select-trigger {
-  display: inline-flex;
-  min-width: 72px;
-  min-height: var(--control-height);
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 30px 0 10px;
-  overflow: hidden;
-  border: 1px solid var(--control-border);
-  border-radius: var(--r-sm);
-  color: var(--foreground);
-  background:
-    linear-gradient(45deg, transparent 50%, var(--faint) 50%) calc(100% - 16px) calc(50% - 2px) / 5px 5px no-repeat,
-    linear-gradient(135deg, var(--faint) 50%, transparent 50%) calc(100% - 11px) calc(50% - 2px) / 5px 5px no-repeat,
-    var(--control-bg);
-  font: inherit;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .app-select-trigger:hover:not(:disabled) {
-    border-color: var(--control-border-hover);
-    background-color: var(--control-bg-hover);
-  }
-}
-
 .app-select-menu button[aria-selected="true"] {
   color: var(--on-accent);
   background: var(--accent);
@@ -152,35 +123,30 @@
   opacity: 0.4;
 }
 
-.pdf-options .app-select-trigger {
-  height: var(--control-height);
-  border-radius: 8px;
-}
-
-.pdf-watermark-controls .app-select-trigger,
-.format-options .app-select-trigger,
-.image-panel .app-select-trigger,
-.img-editor-field .app-select-trigger {
+.pdf-watermark-controls .m-select,
+.format-options .m-select,
+.image-panel .m-select,
+.img-editor-field .m-select {
   width: 100%;
 }
 
-.format-options .app-select-trigger {
+.format-options .m-select {
   grid-column: 1 / -1;
 }
 
 .format-options label:has(select),
-.format-options label:has(.app-select-trigger) {
+.format-options label:has(.m-select) {
   grid-template-columns: 92px minmax(0, 1fr);
   align-items: center;
   column-gap: var(--sp-3);
 }
 
-.format-options label > .app-select-trigger {
+.format-options label > .m-select {
   grid-column: 2;
 }
 
-.barcode-font-picker .app-select-trigger,
-.barcode-preset-picker .app-select-trigger {
+.barcode-font-picker .m-select,
+.barcode-preset-picker .m-select {
   width: 124px;
 }
 @media (hover: hover) and (pointer: fine) {
@@ -212,19 +178,6 @@
 
 /* 触发钮：外观与工具栏其他按钮一致，右侧带一个下拉标记 */
 .txt-trigger::after { content: " ▾"; color: var(--faint); font-size: var(--fs-xs); }
-
-.txt-select {
-  height: var(--control-height);
-  max-width: 104px;
-  padding: 0 4px;
-  border: 1px solid var(--control-border);
-  border-radius: var(--r-sm);
-  background-color: var(--control-bg);
-  color: var(--foreground);
-  font: inherit;
-  font-size: var(--fs-md);
-}
-.txt-select:disabled { opacity: 0.35; }
 
 .txt-color {
   width: 26px;
@@ -259,7 +212,6 @@
 
 /* 锁定态：只留解锁 / 复制 / 删除，其余禁用但**不隐藏**——
    隐藏会让工具栏宽度突变，用户以为按钮消失了 */
-.text-toolbar.locked .txt-select,
 .text-toolbar.locked .txt-color { opacity: 0.35; }
 
 .object-toolbar .obj-group {

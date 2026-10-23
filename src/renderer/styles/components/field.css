@@ -1,0 +1,207 @@
+/* ══ 输入类 m-field / m-field-unit / m-stepper / m-select ══════════════
+   文本框、数字框、多行框、原生下拉直接按元素绘制（不用加类）；带单位的输入、步进器、
+   自绘下拉用下面的组件类。高度、圆角、底色、焦点和报错都只有这一套，数值来自 --field-*。
+   页面 CSS 只决定宽度和布局。
+
+   <span class="m-field-unit"><input type="number" /><em>mm</em></span>
+   <span class="m-stepper"><button aria-label="减小">−</button><input type="number" /><button aria-label="增大">+</button></span>
+   <button class="m-select" aria-haspopup="listbox">当前值</button>   （原生 select 会被 main.js 自动增强成它）
+
+   报错：输入框加 aria-invalid="true"；步进器和自绘下拉把错误画在外框上。 */
+input[type="text"],
+input[type="number"],
+input[type="search"],
+input[type="password"],
+textarea,
+select {
+  border: 1px solid var(--field-border);
+  outline: 0;
+  color: var(--field-fg);
+  background-color: var(--field-bg);
+  transition: border-color var(--dur-hover) ease,
+              background-color var(--dur-hover) ease,
+              box-shadow var(--dur-hover) ease;
+}
+
+input[type="text"]:hover:not(:disabled):not([aria-invalid="true"]),
+input[type="number"]:hover:not(:disabled):not([aria-invalid="true"]),
+input[type="search"]:hover:not(:disabled):not([aria-invalid="true"]),
+input[type="password"]:hover:not(:disabled):not([aria-invalid="true"]),
+textarea:hover:not(:disabled):not([aria-invalid="true"]),
+select:hover:not(:disabled):not([aria-invalid="true"]) {
+  border-color: var(--field-border-hover);
+  background-color: var(--field-bg-hover);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--field-border-hover);
+  background-color: var(--field-bg-hover);
+  box-shadow: none;
+}
+
+select {
+  min-height: var(--field-h);
+  padding-right: 32px !important;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--faint) 50%),
+    linear-gradient(135deg, var(--faint) 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) calc(50% - 2px),
+    calc(100% - 11px) calc(50% - 2px);
+  background-repeat: no-repeat;
+  background-size: 5px 5px, 5px 5px;
+}
+
+select option {
+  color: var(--foreground);
+  background: var(--card-solid);
+}
+
+/* ── 带单位输入：单位贴在框内右侧 ── */
+.m-field-unit {
+  position: relative;
+  display: flex;
+}
+
+.m-field-unit input,
+.m-stepper input {
+  min-width: 0;
+  height: var(--field-h);
+  padding: 0 var(--field-pad-x);
+  border-radius: var(--field-radius);
+  font: inherit;
+  font-size: var(--field-font-size);
+}
+
+.m-field-unit input {
+  width: 100%;
+  padding-right: 34px;
+}
+
+.m-field-unit em {
+  position: absolute;
+  top: 50%;
+  right: var(--field-pad-x);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  font-style: normal;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.m-field-unit input:focus-visible {
+  border-color: var(--accent);
+  box-shadow: var(--field-focus-ring);
+}
+
+/* ── 步进器：加减逻辑由使用方处理；输入框仍可直接键入 ── */
+.m-stepper {
+  display: grid;
+  height: var(--field-h);
+  grid-template-columns: var(--field-h) minmax(0, 1fr) var(--field-h);
+  overflow: hidden;
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  background: var(--field-bg);
+}
+
+.m-stepper button {
+  border: 0;
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  color: var(--foreground);
+  font-size: var(--fs-lg);
+  cursor: pointer;
+}
+
+.m-stepper input,
+.m-stepper input:hover:not(:disabled):not([aria-invalid="true"]),
+.m-stepper input:focus {
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  text-align: center;
+  background: transparent;
+}
+
+/* 步进器是 overflow: hidden 的整体，内部焦点环会被裁成两条竖线：
+   输入框聚焦时焦点画到外框上；两端按钮的键盘焦点收进按钮内侧。
+   带上 body.keyboard-focus：全局键盘焦点规则（08）特异性相同且位置更靠后。 */
+.m-stepper input:focus-visible,
+body.keyboard-focus .m-stepper input:focus-visible {
+  box-shadow: none;
+  outline: none;
+}
+
+.m-stepper:has(input:focus-visible) {
+  border-color: var(--accent);
+  box-shadow: var(--field-focus-ring);
+}
+
+body.keyboard-focus .m-stepper:has(input:focus-visible) {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: var(--focus-glow);
+}
+
+body.keyboard-focus .m-stepper button:focus-visible {
+  outline-offset: calc(var(--focus-ring-width) * -1 - 1px);
+  box-shadow: none;
+}
+
+/* ── 自绘下拉的触发按钮 ── */
+.m-select {
+  display: inline-flex;
+  min-width: 72px;
+  height: var(--field-h);
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 30px 0 var(--field-pad-x);
+  overflow: hidden;
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  color: var(--field-fg);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--faint) 50%) calc(100% - 16px) calc(50% - 2px) / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--faint) 50%, transparent 50%) calc(100% - 11px) calc(50% - 2px) / 5px 5px no-repeat,
+    var(--field-bg);
+  font: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color var(--dur-hover) ease,
+              background-color var(--dur-hover) ease,
+              box-shadow var(--dur-hover) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .m-select:hover:not(:disabled) {
+    border-color: var(--field-border-hover);
+    background-color: var(--field-bg-hover);
+  }
+}
+
+/* ── 报错 ──
+   body 前缀把特异性抬过页面里「某区域的输入框聚焦」这类规则，所以不必放在最后加载。
+   键盘焦点的实线内圈照常显示，外层柔光换成红色。 */
+body :is(input, textarea, select)[aria-invalid="true"]:not(:disabled),
+body .m-select[aria-invalid="true"]:not(:disabled),
+body .m-stepper:has(input[aria-invalid="true"]:not(:disabled)) {
+  border-color: color-mix(in srgb, var(--danger) 65%, transparent);
+  box-shadow: var(--field-invalid-ring);
+}
+
+body .m-stepper input[aria-invalid="true"]:not(:disabled) {
+  border: 0;
+  box-shadow: none;
+}
+
+body.keyboard-focus .m-stepper:has(input[aria-invalid="true"]:not(:disabled):focus-visible) {
+  box-shadow: var(--field-invalid-ring);
+}

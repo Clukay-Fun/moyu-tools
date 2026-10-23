@@ -1,33 +1,6 @@
 // 由 scripts/style-report.mjs --catalog 生成，请勿手改。组件目录的动效清单读取这里。
 window.MOTION_INVENTORY = [
   {
-    "selector": "input[type=\"text\"], input[type=\"number\"], input[type=\"search\"], textarea, select",
-    "kind": "transition",
-    "property": "border-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": "input[type=\"text\"], input[type=\"number\"], input[type=\"search\"], textarea, select",
-    "kind": "transition",
-    "property": "background-color",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
-    "selector": "input[type=\"text\"], input[type=\"number\"], input[type=\"search\"], textarea, select",
-    "kind": "transition",
-    "property": "box-shadow",
-    "duration": "var(--dur-hover)",
-    "easing": "ease",
-    "tokenized": true,
-    "media": null
-  },
-  {
     "selector": "input[type=\"checkbox\"], input[type=\"radio\"]",
     "kind": "transition",
     "property": "border-color",
@@ -140,6 +113,60 @@ window.MOTION_INVENTORY = [
     "kind": "press",
     "property": "transform",
     "value": "scale(var(--press-scale))",
+    "media": null
+  },
+  {
+    "selector": "input[type=\"text\"], input[type=\"number\"], input[type=\"search\"], input[type=\"password\"], textarea, select",
+    "kind": "transition",
+    "property": "border-color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": "input[type=\"text\"], input[type=\"number\"], input[type=\"search\"], input[type=\"password\"], textarea, select",
+    "kind": "transition",
+    "property": "background-color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": "input[type=\"text\"], input[type=\"number\"], input[type=\"search\"], input[type=\"password\"], textarea, select",
+    "kind": "transition",
+    "property": "box-shadow",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-select",
+    "kind": "transition",
+    "property": "border-color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-select",
+    "kind": "transition",
+    "property": "background-color",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
+    "media": null
+  },
+  {
+    "selector": ".m-select",
+    "kind": "transition",
+    "property": "box-shadow",
+    "duration": "var(--dur-hover)",
+    "easing": "ease",
+    "tokenized": true,
     "media": null
   },
   {

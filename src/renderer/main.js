@@ -1808,7 +1808,7 @@ function enhanceSelect(select) {
   const menuId = `app-select-menu-${++appSelectSequence}`
   const trigger = document.createElement('button')
   trigger.type = 'button'
-  trigger.className = 'app-select-trigger'
+  trigger.className = 'm-select'
   trigger.setAttribute('aria-haspopup', 'listbox')
   trigger.setAttribute('aria-expanded', 'false')
   trigger.setAttribute('aria-controls', menuId)

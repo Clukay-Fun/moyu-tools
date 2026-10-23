@@ -190,7 +190,7 @@ export function initDieline({ showToast }) {
       const label = document.createElement('label')
       label.textContent = entry.label
       const wrap = document.createElement('span')
-      wrap.className = 'unit-input'
+      wrap.className = 'm-field-unit'
       const input = document.createElement('input')
       input.type = 'number'
       input.step = String(entry.step || 0.5)

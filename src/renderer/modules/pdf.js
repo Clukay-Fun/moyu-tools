@@ -275,7 +275,7 @@ export function initPdfTools({
     } else if (action === '转 JPEG') {
       pdfOptions.innerHTML = `
         <label>质量
-          <button class="pdf-select-trigger" id="pdf-jpeg-quality" type="button"
+          <button class="m-select" id="pdf-jpeg-quality" type="button"
             data-value="${state.pdfJpegQuality}" aria-haspopup="listbox" aria-expanded="false">
             ${Math.round(Number(state.pdfJpegQuality) * 100)}%
           </button>
