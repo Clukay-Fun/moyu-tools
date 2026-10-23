@@ -10,7 +10,7 @@
     <title>摸鱼工具箱</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
-  <body data-theme="light" data-bg="default">
+  <body data-theme="light" data-bg="classic">
     <!-- 默认头像：本地内联 SVG，不依赖网络；主题色随 --accent 变化 -->
     <svg class="profile-avatar-sprite" width="0" height="0" aria-hidden="true" focusable="false">
       <symbol id="ic-default-avatar" viewBox="0 0 40 40">
@@ -21,6 +21,13 @@
     </svg>
 
     <div class="window-shell">
+      <!-- 旧版背景光斑：只在「旧版紫蓝青渐变」背景下显示 -->
+      <div class="orbs" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+      </div>
+
       <div class="panel">
         <header class="topbar">
           <div class="topbar-left">
@@ -857,8 +864,9 @@
                           <div class="bg-settings" id="bg-settings">
                             <div class="bg-mode-options" role="radiogroup" aria-label="背景样式">
                               <span class="bg-settings-title">背景样式</span>
-                              <label><input type="radio" name="bg-mode" value="default" checked />默认浅灰色背景</label>
-                              <label><input type="radio" name="bg-mode" value="gradient" />自定义渐变背景（预设为旧版紫蓝渐变）</label>
+                              <label><input type="radio" name="bg-mode" value="classic" checked />旧版紫蓝青渐变（默认）</label>
+                              <label><input type="radio" name="bg-mode" value="plain" />浅灰色背景</label>
+                              <label><input type="radio" name="bg-mode" value="gradient" />自定义渐变背景</label>
                               <label><input type="radio" name="bg-mode" value="solid" />自定义纯色背景</label>
                             </div>
                             <div class="bg-colors" id="bg-colors">
@@ -883,12 +891,12 @@
                             </label>
                             <hr class="bg-divider" />
                             <label class="bg-slider">
-                              <span>毛玻璃不透明度</span><output id="bg-alpha-value" for="bg-alpha">82%</output>
-                              <input type="range" id="bg-alpha" min="50" max="100" value="82" />
+                              <span>毛玻璃不透明度</span><output id="bg-alpha-value" for="bg-alpha">30%</output>
+                              <input type="range" id="bg-alpha" min="20" max="100" value="30" />
                             </label>
                             <label class="bg-slider">
-                              <span>背景模糊程度</span><output id="bg-blur-value" for="bg-blur">14px</output>
-                              <input type="range" id="bg-blur" min="0" max="30" value="14" />
+                              <span>背景模糊程度</span><output id="bg-blur-value" for="bg-blur">26px</output>
+                              <input type="range" id="bg-blur" min="0" max="30" value="26" />
                             </label>
                             <div class="bg-preview-head">
                               <span class="bg-settings-title">实时效果预览</span>

@@ -17,7 +17,7 @@
   justify-content: space-between;
   gap: var(--erp-space-3);
   padding: var(--erp-space-2-5) var(--erp-space-3);
-  background-color: var(--erp-bg-surface);
+  background-color: var(--erp-bg-popover);
   border: 1px solid var(--erp-border-subtle);
   border-radius: var(--erp-radius-md);
   box-shadow: var(--erp-shadow-overlay);

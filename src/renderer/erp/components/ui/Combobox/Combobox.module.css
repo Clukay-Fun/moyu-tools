@@ -83,7 +83,7 @@
   right: 0;
   max-height: 280px;
   overflow-y: auto;
-  background-color: var(--erp-bg-surface);
+  background-color: var(--erp-bg-popover);
   border: 1px solid var(--erp-border-subtle);
   border-radius: var(--erp-radius-md);
   box-shadow: var(--erp-shadow-overlay);

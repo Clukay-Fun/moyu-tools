@@ -52,6 +52,8 @@ body {
   /* 表面与文字 */
   --erp-bg-app: transparent;
   --erp-bg-surface: var(--card-solid);
+  /* 不走 portal、但要盖住内容的浮层（吸附提示、内联下拉）：始终实色 */
+  --erp-bg-popover: var(--card-solid);
   --erp-bg-subtle: color-mix(in srgb, var(--foreground) 4%, transparent);
   --erp-bg-overlay: rgba(20, 22, 40, 0.28);
   --erp-bg-overlay-strong: rgba(10, 12, 20, 0.86);
@@ -179,6 +181,13 @@ body[data-theme='dark'] {
   position: relative;
   overflow: hidden;
   font-size: var(--erp-font-size-base);
+}
+
+/* 页面里的卡片和工作区内容框走同一层毛玻璃（--surface-inner），不再是实色白块；
+   弹层 portal 到 body，不在这两个页面里，继续用实色 --card-solid 挡住下面的内容。 */
+#page-erp,
+#page-custom {
+  --erp-bg-surface: var(--surface-inner);
 }
 
 /*

@@ -6,25 +6,83 @@
   background: var(--app-bg);
 }
 
-/* ══ 背景模式（设置 › 外观 › 背景与毛玻璃，modules/background.js 写 body[data-bg] 与 --bg-*）══
-   深色主题下自定义颜色只混入 22%，不把浅色直接铺满；比例与 background.js 的 DARK_MIX 一致。 */
+/* ══ 背景模式（设置 › 外观 › 背景与毛玻璃，modules/background.js 写 body[data-bg] 与 --app-bg-*）══
+   classic  旧版光斑 + 白纱（默认，b8e8e7b 原样）
+   plain    浅灰纯底，中性描边，不做背景模糊
+   gradient / solid  自定义颜色；深色主题下只混入 22%，不把浅色直接铺满（与 background.js 的 DARK_MIX 一致） */
 body {
-  --app-bg: var(--shell-bg);
-  --bg-tone-1: var(--bg-c1);
-  --bg-tone-2: var(--bg-c2);
+  --app-bg: var(--background);
+  --app-bg-tone-start: var(--app-bg-start);
+  --app-bg-tone-end: var(--app-bg-end);
 }
 
 body[data-theme="dark"] {
-  --bg-tone-1: color-mix(in srgb, var(--bg-c1) 22%, #0b1018);
-  --bg-tone-2: color-mix(in srgb, var(--bg-c2) 22%, #0b1018);
+  --app-bg-tone-start: color-mix(in srgb, var(--app-bg-start) 22%, #0b1018);
+  --app-bg-tone-end: color-mix(in srgb, var(--app-bg-end) 22%, #0b1018);
+}
+
+body[data-bg="plain"] {
+  --app-bg: var(--shell-bg);
+  --glass-edge: none;
+  /* 放在 box-shadow 列表里，不能写 none */
+  --glass-highlight: 0 0 transparent;
+}
+
+/* 浅灰底上白色描边看不见，换成中性色（深色主题本来就是中性描边） */
+body[data-bg="plain"]:not([data-theme="dark"]) {
+  --glass-border: rgba(140, 150, 170, 0.18);
+  --control-border: rgba(140, 150, 170, 0.36);
+  --rail-bg: rgb(229 232 240 / calc(var(--glass-opacity) * 0.9));
 }
 
 body[data-bg="gradient"] {
-  --app-bg: linear-gradient(var(--bg-angle), var(--bg-tone-1), var(--bg-tone-2));
+  --app-bg: linear-gradient(var(--app-bg-angle), var(--app-bg-tone-start), var(--app-bg-tone-end));
 }
 
 body[data-bg="solid"] {
-  --app-bg: var(--bg-tone-1);
+  --app-bg: var(--app-bg-tone-start);
+}
+
+.orbs {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+body:not([data-bg="classic"]) .orbs {
+  display: none;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(86px);
+  opacity: var(--orb-opacity);
+}
+
+.orb-1 {
+  top: -150px;
+  left: -80px;
+  width: 520px;
+  height: 520px;
+  background: var(--orb-1);
+}
+
+.orb-2 {
+  right: 6%;
+  bottom: -140px;
+  width: 460px;
+  height: 460px;
+  background: var(--orb-2);
+}
+
+.orb-3 {
+  top: 42%;
+  left: 43%;
+  width: 340px;
+  height: 340px;
+  background: var(--orb-3);
 }
 
 .panel {
@@ -36,11 +94,17 @@ body[data-bg="solid"] {
   height: 100%;
 }
 
+/* 整窗白纱：把光斑压柔，模糊程度跟随设置 */
+body[data-bg="classic"] .panel {
+  background: var(--veil);
+  backdrop-filter: blur(var(--glass-blur-px)) saturate(var(--veil-saturate));
+}
+
 .topbar {
   position: relative;
   z-index: var(--z-chrome);
   display: flex;
-  height: 50px;
+  height: 48px;
   flex: none;
   align-items: center;
   justify-content: space-between;
@@ -50,7 +114,7 @@ body[data-bg="solid"] {
 }
 
 /* 拖拽区不认层级：盖在顶栏上的弹层（抽屉、对话框、菜单、遮罩）若不声明 no-drag，
-   落在顶栏 50px 内的部分点不动，只会拖动窗口。 */
+   落在顶栏 48px 内的部分点不动，只会拖动窗口。 */
 :is(.modal-layer, .ocr-overlay, .app-menu, #overlay-layer, .toast, [data-base-ui-portal]) {
   -webkit-app-region: no-drag;
 }
@@ -342,7 +406,7 @@ body[data-fullscreen="true"] .topbar {
   min-height: 0;
 }
 
-/* 一级导航条：独立圆角条（圆角 14，无阴影，只靠底色和外层区分），上、左、下各留 12px（与工作区顶边对齐），是三层底色里唯一的中间层。
+/* 一级导航条：独立圆角条（圆角 14，无阴影，靠半透明底、描边和背景模糊成条），顶部留 6px（与工作区顶边对齐），左、下 12px。
    模块列表单独滚动，头像固定在底部，窗口再矮也不会被挤出去。 */
 .rail {
   position: relative;
@@ -352,9 +416,10 @@ body[data-fullscreen="true"] .topbar {
   flex-direction: column;
   align-items: center;
   min-height: 0;
-  margin: 12px 0 12px 12px;
+  margin: 6px 0 12px 12px;
   padding: 10px 0;
   overflow: hidden;
+  border: 1px solid var(--glass-border);
   border-radius: 14px;
   background: var(--rail-bg);
 }
@@ -544,14 +609,14 @@ body[data-fullscreen="true"] .topbar {
 .submenu {
   position: relative;
   display: none;
-  /* 固定宽度，窄窗口取下限；文字行不再把菜单越撑越宽。
+  /* 宽度由 main.js fitSubmenuWidth 按本模块最长的一行写成像素（160–240），切模块才变；这里只是兜底。
      不铺底色，直接显露外层；左右 12px 内边距就是它和导航条、工作区之间的间隔 */
-  width: clamp(180px, 15vw, 190px);
+  width: 180px;
   min-height: 0;
   flex-shrink: 0;
   flex-direction: column;
   gap: 2px;
-  padding: 12px 12px 12px;
+  padding: 6px 12px 12px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -562,7 +627,7 @@ body[data-fullscreen="true"] .topbar {
   top: 0;
   left: 12px;
   right: 12px;
-  height: 40px;
+  height: 36px;
   border: 1px solid var(--accent-18);
   border-radius: var(--r-sm);
   background: var(--accent-10);
@@ -588,16 +653,19 @@ body[data-fullscreen="true"] .topbar {
 .submenu-heading {
   position: relative;
   z-index: 1;
-  padding: 8px 8px 5px;
+  /* 行高 22；上 10 + 行间 2 = 组间 12；下 4 + 行间 2 = 标题到首个工具 6 */
+  padding: 10px 8px 4px;
   color: var(--faint);
   font-size: var(--fs-xs);
   font-weight: 700;
+  line-height: 22px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.submenu-heading:first-child {
-  padding-top: 2px;
+/* 第一个子元素是选中块，所以首个标题用相邻选择器找 */
+.submenu-indicator + .submenu-heading {
+  padding-top: 0;
 }
 
 .submenu-item {
@@ -607,7 +675,7 @@ body[data-fullscreen="true"] .topbar {
   align-items: center;
   gap: 8px;
   width: 100%;
-  height: 40px;
+  height: 36px;
   flex: none;
   padding: 0 8px;
   border: 0;
@@ -631,6 +699,10 @@ body[data-fullscreen="true"] .topbar {
   color: var(--accent);
   background: transparent;
   box-shadow: none;
+  font-weight: 600;
+}
+
+.submenu.measuring .submenu-item {
   font-weight: 600;
 }
 
@@ -683,18 +755,26 @@ body[data-fullscreen="true"] .topbar {
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  margin: 12px;
+  margin: 6px 12px 12px;
   overflow: hidden;
-  /* 全应用唯一一层「卡片阴影」：轻描边 + 柔和外阴影。内部内容框不再各自带阴影 */
-  border: 1px solid var(--frame-border);
+  /* 全应用唯一一层「卡片阴影」：描边 + 柔和外阴影 + 顶部高光。内部内容框不再各自带阴影 */
+  border: 1px solid var(--glass-border);
   border-radius: var(--workspace-radius);
   background: var(--workspace-bg);
-  box-shadow: var(--workspace-shadow);
+  box-shadow: var(--glass-shadow), var(--glass-highlight);
 }
 
-/* 非默认背景（渐变 / 纯色）时两个主容器才做背景模糊：默认浅灰背后没有可模糊的东西 */
-body:not([data-bg="default"]) :is(.content, .rail) {
+/* 两个主容器做背景模糊；浅灰背景背后没有可模糊的东西，不做 */
+body:not([data-bg="plain"]) :is(.content, .rail) {
   backdrop-filter: blur(var(--glass-blur-px)) saturate(140%);
+}
+
+/* 首页不要工作区底板：标语直接压在背景上 */
+body.home-active .content {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 /* 有二级栏时，它右侧 12px 的内边距已经是间隔，工作区不再重复留左外边距 */

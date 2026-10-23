@@ -166,12 +166,13 @@
 }
 
 /* 标题在框外，设置项包进带边框的块里 */
-/* 与工作区里的 .glass-card 同一套规则：浅描边 + 内层半透明底，不加阴影 */
+/* 与工作区里的 .glass-card 同一套规则：描边 + 内层半透明底 + 顶部高光，不加外阴影 */
 .settings-section-body {
   padding: 4px 16px;
-  border: 1px solid var(--frame-border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--frame-radius);
   background: var(--surface-inner);
+  box-shadow: var(--glass-highlight);
 }
 
 .theme-options {
@@ -1016,7 +1017,7 @@
   height: 30px;
   flex: none;
   padding: 0;
-  border: 1px solid var(--frame-border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--r-sm);
   background: none;
   cursor: pointer;
@@ -1064,7 +1065,7 @@
   height: 1px;
   margin: 2px 0;
   border: 0;
-  background: var(--frame-border);
+  background: var(--glass-border);
 }
 
 .bg-preview-head {
@@ -1077,19 +1078,29 @@
 /* 预览：底是 --app-bg，卡片和内层走与工作区相同的毛玻璃变量 */
 .bg-preview {
   padding: 18px;
-  border: 1px solid var(--frame-border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--frame-radius);
   background: var(--app-bg);
+}
+
+/* 光斑按窗口像素排布，放不进小预览：用三个径向渐变按同样的颜色和方位近似，再叠一层白纱 */
+body[data-bg="classic"] .bg-preview {
+  background:
+    linear-gradient(var(--veil), var(--veil)),
+    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--orb-1) calc(var(--orb-opacity) * 100%), transparent), transparent 60%),
+    radial-gradient(circle at 85% 100%, color-mix(in srgb, var(--orb-2) calc(var(--orb-opacity) * 100%), transparent), transparent 60%),
+    radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--orb-3) calc(var(--orb-opacity) * 100%), transparent), transparent 45%),
+    var(--background);
 }
 
 .bg-preview-card {
   display: grid;
   gap: 12px;
   padding: 16px;
-  border: 1px solid var(--frame-border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--frame-radius);
   background: var(--workspace-bg);
-  box-shadow: var(--workspace-shadow);
+  box-shadow: var(--glass-shadow), var(--glass-highlight);
   backdrop-filter: blur(var(--glass-blur-px)) saturate(140%);
 }
 
@@ -1100,7 +1111,7 @@
 
 .bg-preview-inner {
   padding: 12px 14px;
-  border: 1px solid var(--frame-border);
+  border: 1px solid var(--glass-border);
   border-radius: 10px;
   color: var(--muted);
   background: var(--surface-inner);

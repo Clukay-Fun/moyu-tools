@@ -169,10 +169,7 @@ const submenuData = {
       items: [
         ['转 PNG', 'PNG', '#3c9a5e'],
         ['转 JPEG', 'JPG', '#3c9a5e'],
-        ['转 TXT', 'TXT', '#707387'],
-        ['转 DOCX', 'DOC', '#2b6cb0', 'M7x'],
-        ['转 XLSX', 'XLS', '#217346', 'M7x'],
-        ['转 PPTX', 'PPT', '#d24726', 'M7x']
+        ['转 TXT', 'TXT', '#707387']
       ]
     },
     {
@@ -281,12 +278,6 @@ const defaultSelections = {
   custom: '生产'
 }
 
-const deferredPdfActions = new Map([
-  ['转 DOCX', 'M7x'],
-  ['转 XLSX', 'M7x'],
-  ['转 PPTX', 'M7x']
-])
-
 const moduleLabels = {
   pdf: 'PDF',
   ai: 'Illustrator',
@@ -303,9 +294,6 @@ const searchFeatures = [
   ['转 PNG', 'PDF', 'pdf', '转 PNG', 'PDF 图片 PNG 导出'],
   ['转 JPEG', 'PDF', 'pdf', '转 JPEG', 'PDF 图片 JPG JPEG 导出'],
   ['转 TXT', 'PDF', 'pdf', '转 TXT', 'PDF 文字 文本 提取'],
-  ['转 DOCX', 'PDF', 'pdf', '转 DOCX', 'PDF Word 内容提取'],
-  ['转 XLSX', 'PDF', 'pdf', '转 XLSX', 'PDF Excel 表格提取'],
-  ['转 PPTX', 'PDF', 'pdf', '转 PPTX', 'PDF PowerPoint 幻灯片'],
   ['合并 PDF', 'PDF', 'pdf', '合并 PDF', '合并 文件'],
   ['逐页拆分', 'PDF', 'pdf', '逐页拆分', '拆分 PDF 每页 独立文件'],
   ['旋转 PDF', 'PDF', 'pdf', '旋转 PDF', '旋转 页面'],
@@ -561,6 +549,24 @@ document.addEventListener('pointerdown', () => {
   document.body.classList.remove('keyboard-focus')
 }, true)
 
+// 二级栏宽度按本模块最长的一行定，限制在 160–240px。每个模块只量一次并缓存：
+// 同一模块里悬停、选中、重新渲染都不会让宽度跳动。量的时候整列按选中态的粗体排，
+// 这样选中项变粗也不会超出。
+const SUBMENU_MIN_WIDTH = 160
+const SUBMENU_MAX_WIDTH = 240
+const submenuWidths = new Map()
+
+function fitSubmenuWidth(module) {
+  if (!submenuWidths.has(module)) {
+    submenu.classList.add('measuring')
+    submenu.style.width = 'max-content'
+    const natural = Math.ceil(submenu.getBoundingClientRect().width)
+    submenu.classList.remove('measuring')
+    submenuWidths.set(module, Math.min(SUBMENU_MAX_WIDTH, Math.max(SUBMENU_MIN_WIDTH, natural)))
+  }
+  submenu.style.width = `${submenuWidths.get(module)}px`
+}
+
 function renderSubmenu(module, indicatorFromTop = null) {
   const groups = submenuData[module]
 
@@ -606,8 +612,9 @@ function renderSubmenu(module, indicatorFromTop = null) {
 
   submenu.replaceChildren(fragment)
   submenu.classList.add('show')
+  fitSubmenuWidth(module)
 
-  // 二级栏是固定窄宽度：名字被省略号截断的行才挂悬停提示，显示全名
+  // 超过最大宽度的名字被省略号截断：这些行才挂悬停提示，显示全名
   submenu.querySelectorAll('.submenu-label').forEach((label) => {
     if (label.scrollWidth <= label.clientWidth) return
     label.parentElement.dataset.tip = label.textContent
@@ -815,10 +822,8 @@ function activateModule(module, action = '', animate = false) {
   }
   if (animate && changed) animatePageEntry(activePage)
 
-  const deferredMilestone = module === 'pdf' ? deferredPdfActions.get(action) : null
-
   const erpCommand = action.startsWith('cmd:') ? action.slice(4) : ''
-  if (action && submenuData[module] && !deferredMilestone && !erpCommand) {
+  if (action && submenuData[module] && !erpCommand) {
     state.selections[module] = action
   }
 
@@ -826,7 +831,6 @@ function activateModule(module, action = '', animate = false) {
 
   if (module === 'pdf') {
     pdfModule.updatePdfState(state.selections.pdf)
-    if (deferredMilestone) showToast(`“${action}”将在 ${deferredMilestone} 接入`)
   } else if (module === 'bc') {
     if (action) barcodeModule.selectBarcodeType(action, true)
   } else if (module === 'image') {

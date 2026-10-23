@@ -168,6 +168,8 @@
   border-radius: var(--erp-radius-lg);
   background: var(--erp-bg-surface);
   box-shadow: var(--erp-shadow-card);
+  /* 吸底时盖在列表上：底色是半透明的，靠背景模糊挡住下面滚过的内容 */
+  backdrop-filter: blur(20px) saturate(140%);
 }
 .generateTop {
   display: flex;

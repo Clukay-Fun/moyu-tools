@@ -17,29 +17,39 @@
   --accent-28: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.28);
   --background: #e7e9ee;
   /* ══ 外壳配色（V1 桌面外壳）══
-     只有三块大面积底色：外层（含顶栏、二级工具区）→ 独立的一级导航条 → 中央工作区。
+     三块大面积：外层背景（含顶栏、二级工具区）→ 独立的一级导航条 → 中央工作区。
      顶栏和二级区不另铺底色，直接显露外层；选中高亮是局部状态，不算一层。
-     深色模式必须各自有值，不能在深色下强制白底。
-     ── V3 毛玻璃：内容区不再写死白底，统一由下面几个变量控制 ──
-     --glass-alpha / --glass-blur-px 由「设置 › 外观 › 背景与毛玻璃」写到 <html> 上。
-     内层内容框的不透明度取主容器的 0.8 倍：同一种半透明白一层层叠上去会变回不透明，
-     所以内层只比工作区「再白一点」，靠描边和这点差异区分，不加阴影。
-     背景模糊只加在工作区和一级导航条两个主容器上（body[data-bg] 非默认时），内层不加。
+     ── V4 毛玻璃：默认主题还原 V1 之前的光斑 + 白纱（b8e8e7b），统一由下面几个变量控制 ──
+     --glass-opacity / --glass-blur-px 由「设置 › 外观 › 背景与毛玻璃」写到 <html> 上。
+     工作区取 opacity，内层内容框取一半：内层叠在工作区上，再叠一层同样的白会变回不透明；
+     默认 0.3 时内层约 0.15，和旧版卡片的 0.14 一致。
+     背景模糊只加在工作区和一级导航条两个主容器上，内层不加（叠在已模糊的工作区上看不出区别）。
+     描边、高光、折射边随背景样式变：「浅灰」背景（body[data-bg="plain"]）改回中性描边、无高光，
+     见 02-shell-home.css。
      派生变量（--workspace-bg 等）在深色块里要重新声明：自定义属性在定义处就算好了值，
      只改 --surface-rgb 不会让 :root 上已算好的 --workspace-bg 跟着变。 */
   --shell-bg: #eff0f5;
   --surface-rgb: 255 255 255;
-  --glass-alpha: 0.82;
-  --glass-inner-alpha: calc(var(--glass-alpha) * 0.8);
-  --glass-blur-px: 14px;
-  /* 一级导航条比外层略深，做成独立圆角条；半透明，换了背景能透出一点颜色 */
-  --rail-bg: rgb(229 232 240 / calc(var(--glass-alpha) * 0.9));
-  --workspace-bg: rgb(var(--surface-rgb) / var(--glass-alpha));
-  --surface-inner: rgb(var(--surface-rgb) / var(--glass-inner-alpha));
+  --glass-opacity: 0.3;
+  --glass-inner-opacity: calc(var(--glass-opacity) * 0.5);
+  --glass-blur-px: 26px;
+  /* 旧版光斑与白纱（照搬 b8e8e7b 的取值） */
+  --orb-1: #b9a0f2;
+  --orb-2: #92d8d0;
+  --orb-3: #f2cfa0;
+  --orb-opacity: 0.8;
+  --veil: rgba(255, 255, 255, 0.27);
+  --veil-saturate: 150%;
+  /* 一级导航条：比工作区更通透的白，靠描边和模糊成条 */
+  --rail-bg: rgb(255 255 255 / calc(var(--glass-opacity) * 0.7));
+  --workspace-bg: rgb(var(--surface-rgb) / var(--glass-opacity));
+  --surface-inner: rgb(var(--surface-rgb) / var(--glass-inner-opacity));
   --workspace-radius: 18px;
-  /* 框线与阴影层级：只有工作区一层柔和外阴影；内部内容框只用浅描边；弹窗和下拉另有阴影 */
-  --frame-border: rgba(140, 150, 170, 0.18);
-  --workspace-shadow: 0 4px 20px rgba(30, 40, 65, 0.06);
+  /* 框线与阴影层级：只有工作区一层柔和外阴影；内部内容框只用描边 + 顶部高光；弹窗和下拉另有阴影 */
+  --glass-border: rgba(255, 255, 255, 0.58);
+  --glass-shadow: 0 4px 20px rgba(30, 40, 65, 0.06);
+  /* 顶部 1px 白高光（旧版 --glass-rim），浅灰背景下关掉 */
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
   --frame-radius: 12px;
   --panel: rgba(255, 255, 255, 0.27);
   --card: rgba(255, 255, 255, 0.14);
@@ -68,8 +78,8 @@
   --control-bg: rgba(255, 255, 255, 0.2);
   --control-bg-hover: rgba(255, 255, 255, 0.36);
   --control-bg-active: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.12);
-  /* V3：内容区是半透明白底，白色描边会看不见；改用和 --frame-border 同一色系、稍重一点的中性描边 */
-  --control-border: rgba(140, 150, 170, 0.36);
+  /* 旧版的白色半透明描边；浅灰背景下看不见，在 02-shell-home.css 里换成中性色 */
+  --control-border: rgba(255, 255, 255, 0.58);
   /* 浅色按钮不画边线（边框透明占位，尺寸不变），靠更白的底色 + 轻投影区分；深色沿用控件边框和底色 */
   --button-border: transparent;
   --button-bg: rgba(255, 255, 255, 0.62);
@@ -192,6 +202,7 @@
   /* 选项切换里「选中那一格」的浮起感 */
   --glass-raised: 0 1px 4px rgba(35, 39, 65, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   /* 卡片折射边：左上亮、右下淡，画在 ::before 上，不占 background */
+  --glass-edge: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.2) 45%, rgba(255, 255, 255, 0.5));
   --radius: 16px;
   --radius-small: 10px;
   --font: "Segoe UI", "PingFang SC", "Microsoft YaHei UI", system-ui, sans-serif;
@@ -205,11 +216,19 @@
   --background: #0b1018;
   --shell-bg: #0b1018;
   --surface-rgb: 21 29 42;
-  --rail-bg: rgb(17 25 36 / calc(var(--glass-alpha) * 0.9));
-  --workspace-bg: rgb(var(--surface-rgb) / var(--glass-alpha));
-  --surface-inner: rgb(30 40 56 / var(--glass-inner-alpha));
-  --frame-border: rgba(159, 177, 204, 0.14);
-  --workspace-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  --orb-1: #7452bf;
+  --orb-2: #258b91;
+  --orb-3: #aa7545;
+  --orb-opacity: 0.48;
+  --veil: rgba(13, 19, 29, 0.58);
+  --veil-saturate: 115%;
+  /* 深色的半透明底要更实才压得住光斑：系数翻倍，默认 0.3 → 0.6，对应旧版白纱 0.58、卡片 0.62 */
+  --rail-bg: rgb(17 25 36 / min(1, calc(var(--glass-opacity) * 1.6)));
+  --workspace-bg: rgb(var(--surface-rgb) / min(1, calc(var(--glass-opacity) * 2)));
+  --surface-inner: rgb(28 37 52 / min(1, calc(var(--glass-opacity) * 2)));
+  --glass-border: rgba(159, 177, 204, 0.14);
+  --glass-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   --panel: rgba(13, 19, 29, 0.88);
   --card: rgba(28, 37, 52, 0.62);
   --card-thin: rgba(24, 32, 46, 0.62);
@@ -247,6 +266,7 @@
   --glass-sheen: inset 0 22px 26px -18px rgba(255, 255, 255, 0.07), inset 0 -12px 18px -14px rgba(0, 0, 0, 0.18);
   --glass: var(--glass-rim), var(--glass-sheen);
   --glass-raised: 0 2px 6px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --glass-edge: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.1));
 }
 
 *,
