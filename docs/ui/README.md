@@ -18,6 +18,8 @@
 - **工作区**：`.content` 是白色/深色实色圆角容器，外边距 12px（有二级栏时左外边距为 0），`overflow: hidden`；`.pages` 不滚，`.page` 自己滚。页面内部结构不用改。
 - **搜索**：`#search-wrap` 是居中模态（遮罩 + `#search-dialog`），内部仍复用 `#feature-search`、`#search-results`、`.search-result`。⌘K / Ctrl+K、Esc、点击遮罩；关闭后焦点回到打开前的元素。结果按模块相关度分组，组标题就是分类名（`renderSearchResults()`）。
 - **头像**：左下 `.profile-avatar`（按钮 38px、图片 32px，悬停提示「设置与反馈」），无自定义图片时用内置 SVG `#ic-default-avatar`；菜单 `#profile-menu` 挂在 `#overlay-layer`，用 `placePopover` 的 `side: 'right'` 出现在导航条右侧、底边对齐头像；菜单展开时头像不再显示悬停提示；只有「设置」「意见反馈」两项。换头像入口在「设置 › 通用」。
+- **阴影与毛玻璃（V3）**：只有工作区 `.content` 带一层柔和外阴影（`--workspace-shadow`）和轻描边（`--frame-border`）；工作区里的内容框（`.glass-card`、`.settings-section-body`）只用浅描边 + `--surface-inner`，圆角 `--frame-radius`（12px），**不加阴影、不做背景模糊**。透明度统一由 `--glass-alpha`（主容器）和 `--glass-inner-alpha`（= 主容器 × 0.8）控制，模糊用 `--glass-blur-px`，只作用于工作区和一级导航条，且仅在 `body[data-bg]` 不是 `default` 时开启。新页面要半透明就用这几个变量，别再写死 rgba 白，也别给整个组件设 `opacity`。弹窗保留 `--shadow-panel`，下拉菜单 `.app-menu` 用 `--shadow-small`。
+- **背景**：`.window-shell` 铺 `--app-bg`。「设置 › 外观 › 背景与毛玻璃」（`modules/background.js`）写 `body[data-bg]`（default / gradient / solid）和 `--bg-c1`、`--bg-c2`、`--bg-angle`；深色主题下自定义颜色只混入 22% 深色底。设置存 `localStorage['appearance-bg']`。
 - **不要再加**：`.window-shell` 上的渐变光球、`.panel` 的毛玻璃、顶栏常驻长搜索框。新外壳只用上面的 token 和类。
 
 ## 新功能怎么选组件
@@ -39,6 +41,7 @@
 - [x] **D 拆分 style.css**：保留唯一 `@import` 入口，按原级联顺序拆入 `styles/`；989 条业务规则不变。全量 290 状态比较中的 6 处指针状态差异经固定指针复核，34 个常规与交互状态零差异；OCR-B 在开发版、构建版及 `file://` 组件目录均加载成功。
 
 - [x] **E 库存 / 定制并入**：原 ajuan-erp 组件的变量统一改为 `--erp-*` 并映射到摸鱼变量（`src/renderer/erp/styles/erp.css`），主题跟随摸鱼；摸鱼全局输入框边框在 ERP 范围内复位。约定见组件目录「库存 / 定制」。
+- [x] **V3 视觉系统**：导航条圆角 14、二级栏 180–190px；阴影只留工作区一层；毛玻璃变量（`--glass-alpha` / `--glass-blur-px` / `--surface-inner`）；外观设置新增「背景与毛玻璃」，旧版紫蓝渐变作为预设；浅色控件描边改中性色。
 - [x] **V2 外壳精修**：三层底色（删 `--shell-nav-bg`）、顶栏 50px、独立圆角一级导航条、图标底板 40px、头像 32px、二级栏收窄并透明、长名称省略加提示。
 - [x] **V1 桌面外壳**：外层底色 + 两级导航 + 白色工作区容器；顶栏改 56px 无边框（macOS 红黄绿 / Windows `titleBarOverlay`），一级栏只留图标与 Tooltip，二级栏固定宽度，搜索改居中弹窗，左下加入头像与两项菜单。约定见上面「外壳（V1 桌面改版）」。
 

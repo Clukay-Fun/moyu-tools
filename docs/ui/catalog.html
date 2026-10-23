@@ -305,7 +305,9 @@
           <dt>顶栏</dt><dd><code>.topbar</code> 50px，整条可拖动；搜索按钮与 <code>.mochi</code> 是 <code>no-drag</code></dd>
           <dt>一级栏</dt><dd><code>.rail</code> 独立圆角条：宽 60、圆角 14、四周离外框 12px；<code>.rail-list</code> 滚动、头像固定在底部；<code>.nav-ic</code> 40px（选中块圆角 10） 只放图标，名称走 <code>aria-label</code> + <code>data-tip</code>；头像 32px</dd>
           <dt>二级栏</dt><dd><code>.submenu</code> 宽 <code>clamp(180px, 15vw, 190px)</code>、透明、行高 40px，独立滚动；名称 <code>.submenu-label</code> 单行省略，被截断时挂 <code>data-tip</code>；主页不显示</dd>
-          <dt>工作区</dt><dd><code>.content</code> 20px 圆角、外边距 12px（有二级栏时左外边距为 0）、内部滚动；<code>.page</code> 自己滚</dd>
+          <dt>阴影与毛玻璃</dt><dd>只有 <code>.content</code> 带 <code>--workspace-shadow</code> 与 <code>--frame-border</code>；内容框 <code>.glass-card</code> 只用浅描边 + <code>--surface-inner</code>、圆角 12、无阴影；透明度 <code>--glass-alpha</code>，模糊 <code>--glass-blur-px</code>（仅非默认背景）</dd>
+          <dt>背景</dt><dd><code>body[data-bg]</code> default / gradient / solid，颜色 <code>--bg-c1</code> <code>--bg-c2</code> <code>--bg-angle</code>，由设置 › 外观 › 背景与毛玻璃写入</dd>
+          <dt>工作区</dt><dd><code>.content</code> 18px 圆角、外边距 12px（有二级栏时左外边距为 0）、内部滚动；<code>.page</code> 自己滚</dd>
           <dt>现用模块</dt><dd>全部模块</dd>
         </dl>
         <div class="cat-pair">
