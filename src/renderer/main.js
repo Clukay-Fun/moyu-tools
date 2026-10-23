@@ -1478,7 +1478,7 @@ function closeTopPopover() {
 }
 
 /** 把浮层定位到触发钮下方；越界时钳制回窗口内。position: fixed，用视口坐标。 */
-function placePopover(menu, trigger, { align = 'left', gap = 6, matchWidth = false } = {}) {
+function placePopover(menu, trigger, { align = 'left', gap = 6, matchWidth = false, offsetX = 0 } = {}) {
   menu.hidden = false // 先显形才量得到尺寸
   const t = trigger.getBoundingClientRect()
   if (matchWidth) {
@@ -1488,7 +1488,7 @@ function placePopover(menu, trigger, { align = 'left', gap = 6, matchWidth = fal
     menu.style.maxWidth = triggerWidth
   }
   const m = menu.getBoundingClientRect()
-  let left = align === 'right' ? t.right - m.width : t.left
+  let left = (align === 'right' ? t.right - m.width : t.left) + offsetX
   left = Math.max(8, Math.min(left, window.innerWidth - m.width - 8))
   // 下方放不下就翻到上方
   let top = t.bottom + gap
@@ -1565,6 +1565,130 @@ bindTextPopover(textFontTrigger, textFontMenu, (item) => {
 bindTextPopover(textAlignTrigger, textAlignMenu, (item) => {
   boardController?.applyTextStyleFromToolbar({ textAlign: item.dataset.align })
 })
+
+// ── 头像与头像菜单 ──────────────────────────────────────────
+// 换头像的入口在「设置 › 通用」；头像菜单只放已经确认的设置与反馈两项。
+const FEEDBACK_URL = 'https://github.com/Clukay-Fun/moyu-tools/issues'
+const profileAvatar = document.querySelector('#profile-avatar')
+const profileAvatarImage = document.querySelector('#profile-avatar-image')
+const profileMenu = document.querySelector('#profile-menu')
+const settingsAvatarPreview = document.querySelector('#settings-avatar-preview')
+const settingsAvatarImage = document.querySelector('#settings-avatar-image')
+
+function applyAvatar(url = '') {
+  for (const [root, image] of [
+    [profileAvatar, profileAvatarImage],
+    [settingsAvatarPreview, settingsAvatarImage]
+  ]) {
+    if (!root || !image) continue
+    if (url) {
+      image.src = url
+      image.hidden = false
+      root.classList.add('has-image')
+    } else {
+      image.removeAttribute('src')
+      image.hidden = true
+      root.classList.remove('has-image')
+    }
+  }
+}
+
+async function refreshAvatar() {
+  try {
+    const result = await window.api.profile.getAvatar()
+    applyAvatar(result?.status === 'ok' ? result.url : '')
+  } catch (error) {
+    console.warn('读取头像失败：', error?.message || error)
+    applyAvatar('')
+  }
+}
+
+for (const image of [profileAvatarImage, settingsAvatarImage]) {
+  image?.addEventListener('error', () => {
+    // 文件被外部删掉或格式损坏时退回默认头像，不把破图留在界面上
+    image.hidden = true
+    image.closest('.profile-avatar, .profile-avatar-preview')?.classList.remove('has-image')
+  })
+}
+
+registerPopover(profileMenu, profileAvatar, { align: 'left', gap: 8, offsetX: 56 })
+
+profileAvatar?.addEventListener('click', (event) => {
+  event.stopPropagation()
+  if (isPopoverOpen(profileMenu)) {
+    closePopover(profileMenu)
+    return
+  }
+  openPopover(profileMenu)
+  // 鼠标点开时不要把焦点环留在第一项上；键盘 Enter / 空格（detail 为 0）才转移焦点
+  if (event.detail === 0) requestAnimationFrame(() => profileMenu?.querySelector('button')?.focus())
+})
+
+profileAvatar?.addEventListener('keydown', (event) => {
+  if (event.key !== 'ArrowDown') return
+  event.preventDefault()
+  if (!isPopoverOpen(profileMenu)) openPopover(profileMenu)
+  profileMenu?.querySelector('button')?.focus()
+})
+
+profileMenu?.addEventListener('keydown', (event) => {
+  if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
+  const items = [...profileMenu.querySelectorAll('button')]
+  if (!items.length) return
+  event.preventDefault()
+  const current = items.indexOf(document.activeElement)
+  if (event.key === 'Home') items[0].focus()
+  else if (event.key === 'End') items.at(-1).focus()
+  else {
+    const step = event.key === 'ArrowDown' ? 1 : -1
+    const start = current === -1 ? (step === 1 ? -1 : 0) : current
+    items[(start + step + items.length) % items.length].focus()
+  }
+})
+
+profileMenu?.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-profile-action]')
+  if (!button) return
+  const action = button.dataset.profileAction
+  closePopover(profileMenu)
+  if (action === 'settings') {
+    activateModule('more')
+    return
+  }
+  if (action === 'feedback') {
+    try {
+      await window.api.openExternal(FEEDBACK_URL)
+    } catch (error) {
+      showToast(`无法打开反馈页面：${cleanIpcError(error?.message ?? error)}`)
+    }
+  }
+})
+
+async function chooseProfileAvatar() {
+  try {
+    const result = await window.api.profile.chooseAvatar()
+    if (result?.status === 'ok') {
+      applyAvatar(result.url)
+      showToast('头像已更新')
+    }
+  } catch (error) {
+    showToast(`更换头像失败：${cleanIpcError(error?.message ?? error)}`)
+  }
+}
+
+async function clearProfileAvatar() {
+  try {
+    await window.api.profile.clearAvatar()
+    applyAvatar('')
+    showToast('已恢复默认头像')
+  } catch (error) {
+    showToast(`恢复默认头像失败：${cleanIpcError(error?.message ?? error)}`)
+  }
+}
+
+document.querySelector('#profile-choose-avatar')?.addEventListener('click', chooseProfileAvatar)
+document.querySelector('#profile-clear-avatar')?.addEventListener('click', clearProfileAvatar)
+void refreshAvatar()
 
 // ── 全应用 Select 适配层 ──────────────────────────────────
 // 原生 select 的弹层由系统窗口绘制，无法解决圆角容器裁切、主题和宽度不一致。

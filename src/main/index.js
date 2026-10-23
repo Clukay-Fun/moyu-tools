@@ -20,6 +20,7 @@ import { registerBarcodeHandlers } from './modules/barcode.js'
 import { registerIllustratorHandlers } from './modules/illustrator.js'
 import { bindOwnerSessionCleanup, registerDropAndOfficeHandlers } from './modules/dropAndOffice.js'
 import { registerDielineHandlers } from './modules/dieline.js'
+import { registerProfileHandlers } from './modules/profile.js'
 import { registerFormatFactoryHandlers } from './modules/formatFactory.js'
 import {
   closeAllScreenshotWindows,
@@ -285,7 +286,8 @@ ipcMain.handle('update:open-releases', (event) => {
 })
 
 const ALLOWED_EXTERNAL_URLS = new Set([
-  'https://github.com/Clukay-Fun/moyu-tools'
+  'https://github.com/Clukay-Fun/moyu-tools',
+  'https://github.com/Clukay-Fun/moyu-tools/issues'
 ])
 
 ipcMain.handle('app:open-external', async (event, value) => {
@@ -306,6 +308,9 @@ registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, app, assertMainW
 
 // 刀模发送到 Illustrator（dieline:*）：渲染层给 SVG，主进程交给 COM worker 打开。
 registerDielineHandlers({ ipcMain, assertMainWindowSender, app, utilityProcess })
+
+// 个人头像（profile:*）：系统选图、256px PNG 落盘，经 moyu-file://avatar/ 读取。
+registerProfileHandlers({ ipcMain, dialog, BrowserWindow, app, assertMainWindowSender })
 
 // Office/Adobe COM 联动的公共基础设施（com:probe / com:show-result）已拆到 ./modules/comWorker.js。
 registerComWorkerHandlers({ ipcMain, shell, app, utilityProcess, assertMainWindowSender })

@@ -325,6 +325,95 @@ body[data-platform="linux"] .search-wrap {
   min-height: 0;
 }
 
+.rail-footer {
+  display: flex;
+  flex: none;
+  justify-content: center;
+  padding: 6px 0 2px;
+}
+
+.profile-avatar {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color var(--dur-hover) ease,
+              transform var(--dur-press) var(--ease-out);
+}
+
+.profile-avatar:hover,
+.profile-avatar[aria-expanded="true"] {
+  background: var(--accent-10);
+}
+
+.profile-avatar-default,
+.profile-avatar-image {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.profile-avatar-image {
+  object-fit: cover;
+}
+
+.profile-avatar.has-image .profile-avatar-default {
+  display: none;
+}
+
+.profile-avatar-image[hidden],
+.profile-avatar-default[hidden] {
+  display: none;
+}
+
+.profile-avatar-sprite {
+  position: absolute;
+  overflow: hidden;
+}
+
+.profile-settings-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-avatar-preview {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+}
+
+.profile-menu {
+  min-width: 148px;
+  background: var(--card-solid);
+}
+
+.profile-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+}
+
+.profile-menu .ic {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+}
+
+.profile-menu button:hover .ic {
+  color: currentColor;
+}
+
 .nav-ic {
   position: relative;
   z-index: 1;

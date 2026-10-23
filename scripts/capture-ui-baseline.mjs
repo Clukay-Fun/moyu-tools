@@ -250,7 +250,16 @@ try {
 
       const hasProfile = await P.ev(`Boolean(document.querySelector('.profile-avatar, #profile-avatar'))`)
       if (hasProfile) {
-        await P.ev(`document.querySelector('.profile-avatar, #profile-avatar').click(); true`)
+        const avatarBox = await P.ev(`(() => {
+          const b = document.querySelector('.profile-avatar, #profile-avatar').getBoundingClientRect()
+          return { x: Math.round(b.left + b.width / 2), y: Math.round(b.top + b.height / 2) } })()`)
+        await P.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: avatarBox.x, y: avatarBox.y })
+        await P.send('Input.dispatchMouseEvent', {
+          type: 'mousePressed', x: avatarBox.x, y: avatarBox.y, button: 'left', clickCount: 1
+        })
+        await P.send('Input.dispatchMouseEvent', {
+          type: 'mouseReleased', x: avatarBox.x, y: avatarBox.y, button: 'left', clickCount: 1
+        })
         await sleep(400)
         lastPx = await shot(P, `${theme}-头像菜单`)
         record(`${theme}-头像菜单`, '头像菜单打开态')

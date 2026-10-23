@@ -16,6 +16,14 @@ contextBridge.exposeInMainWorld(
     openExternal: (url) => ipcRenderer.invoke('app:open-external', url),
     setTitleBarTheme: (theme) => ipcRenderer.invoke('window:set-titlebar-theme', theme),
     reportStartupReady: () => ipcRenderer.send('startup:report-ready'),
+
+    // ── 个人头像（profile:*）：只经系统选图对话框，renderer 不接触文件路径 ──
+    profile: {
+      getAvatar: () => ipcRenderer.invoke('profile:get-avatar'),
+      chooseAvatar: () => ipcRenderer.invoke('profile:choose-avatar'),
+      clearAvatar: () => ipcRenderer.invoke('profile:clear-avatar')
+    },
+
     onWindowRevive: (handler) => {
       const listener = () => handler()
       ipcRenderer.on('window:revive', listener)
