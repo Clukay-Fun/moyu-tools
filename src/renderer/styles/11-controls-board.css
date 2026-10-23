@@ -78,7 +78,7 @@
 }
 
 .pdf-quality-menu button[aria-selected="true"] {
-  color: #fff;
+  color: var(--on-accent);
   background: var(--accent);
 }
 .app-menu[hidden] { display: none; }
@@ -142,7 +142,7 @@
 }
 
 .app-select-menu button[aria-selected="true"] {
-  color: #fff;
+  color: var(--on-accent);
   background: var(--accent);
 }
 
@@ -370,7 +370,7 @@
 
 .obj-danger { color: #c0453f; }
 @media (hover: hover) and (pointer: fine) {
-  .obj-danger:hover { color: #ffffff; background: #c0453f; }
+  .obj-danger:hover { color: var(--on-accent); background: #c0453f; }
 }
 .obj-btn[aria-pressed="true"] { color: var(--accent); background: var(--accent-10); }
 

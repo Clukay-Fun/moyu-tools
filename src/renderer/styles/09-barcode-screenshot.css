@@ -28,7 +28,7 @@
 .barcode-preset-picker .barcode-check input {
   width: 16px;
   height: 16px;
-  accent-color: var(--accent, #6978e6);
+  accent-color: var(--accent, var(--accent-default));
   cursor: pointer;
 }
 
@@ -117,7 +117,7 @@
 
 .board-text-style button[aria-pressed='true'] {
   font-weight: 700;
-  color: var(--accent, #6978e6);
+  color: var(--accent, var(--accent-default));
 }
 
 .board-edge-style {
@@ -148,7 +148,7 @@
 }
 
 #board-connect[aria-pressed='true'] {
-  color: var(--accent, #6978e6);
+  color: var(--accent, var(--accent-default));
   font-weight: 600;
 }
 

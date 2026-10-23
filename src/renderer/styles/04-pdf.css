@@ -119,7 +119,7 @@
   width: 100%;
   aspect-ratio: 0.72;
   border-radius: 7px;
-  background: #fff;
+  background: var(--on-accent);
   object-fit: contain;
 }
 

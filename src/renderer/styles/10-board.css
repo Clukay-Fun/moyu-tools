@@ -87,11 +87,11 @@
 .cbtn:active { transform: scale(var(--press-scale)); }
 .cbtn.primary {
   border-color: transparent;
-  color: #fff;
+  color: var(--on-accent);
   background: var(--accent);
 }
 @media (hover: hover) and (pointer: fine) {
-  .cbtn.primary:hover { color: #fff; background: var(--accent); filter: brightness(1.06); }
+  .cbtn.primary:hover { color: var(--on-accent); background: var(--accent); filter: brightness(1.06); }
 }
 .cbtn.ghost {
   padding: 5px 10px;
@@ -254,8 +254,8 @@
 }
 
 #overlay-layer > .canvas-popover .canvas-color.transparent {
-  background-color: #fff;
-  background-image: conic-gradient(#e4e6ed 25%, #fff 25% 50%, #e4e6ed 50% 75%, #fff 75%);
+  background-color: var(--on-accent);
+  background-image: conic-gradient(#e4e6ed 25%, var(--on-accent) 25% 50%, #e4e6ed 50% 75%, var(--on-accent) 75%);
   background-size: 10px 10px;
 }
 
@@ -295,7 +295,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--on-accent);
   box-shadow: 0 1px 3px rgba(25, 30, 46, 0.22);
   content: "";
   transition: transform var(--dur-press) ease;

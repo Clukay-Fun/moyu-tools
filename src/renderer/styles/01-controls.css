@@ -175,8 +175,8 @@ input[type="radio"] { border-radius: 50%; }
 input[type="checkbox"]::before {
   width: 8px;
   height: 5px;
-  border-bottom: 2px solid #fff;
-  border-left: 2px solid #fff;
+  border-bottom: 2px solid var(--on-accent);
+  border-left: 2px solid var(--on-accent);
   content: "";
   opacity: 0;
   transform: translateY(-1px) rotate(-45deg) scale(0.7);
@@ -187,7 +187,7 @@ input[type="radio"]::before {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--on-accent);
   content: "";
   opacity: 0;
   transform: scale(0.65);

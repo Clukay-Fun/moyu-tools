@@ -115,8 +115,8 @@
   height: 30px;
   place-items: center;
   border-radius: 8px;
-  color: #fff;
-  font-size: 13px;
+  color: var(--on-accent);
+  font-size: var(--fs-body);
 }
 
 .ai-icon {
@@ -247,7 +247,7 @@
   z-index: 4;
   padding: 3px 7px;
   border-radius: 5px;
-  color: #fff;
+  color: var(--on-accent);
   background: rgba(35, 39, 52, 0.92);
   content: attr(data-name);
   font-size: var(--fs-xs);
@@ -313,7 +313,7 @@
 
 .image-save {
   border: 0;
-  color: #fff;
+  color: var(--on-accent);
   background: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.84);
   font-weight: 600;
 }

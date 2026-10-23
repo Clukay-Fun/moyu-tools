@@ -120,7 +120,13 @@ for (const match of css.matchAll(/var\(\s*(--[\w-]+)/g)) {
   used.set(match[1], (used.get(match[1]) || 0) + 1)
 }
 const unusedTokens = [...defined.keys()].filter((token) => !used.has(token))
-const undefinedTokens = [...used.keys()].filter((token) => !defined.has(token))
+// These tokens are intentionally supplied outside CSS: pointer parallax values
+// come from renderer JS, while palette swatches are inline HTML custom properties.
+const dynamicTokens = new Set([
+  '--home-shine-x', '--home-shine-y', '--home-shine-core', '--home-shine-edge',
+  '--home-title-x', '--home-title-y', '--preset', '--swatch'
+])
+const undefinedTokens = [...used.keys()].filter((token) => !defined.has(token) && !dynamicTokens.has(token))
 
 // ── 3. 本该是变量却写死的值 ──
 function literalCounts(pattern, { skipInsideVarDef = true } = {}) {
