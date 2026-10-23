@@ -549,22 +549,35 @@ document.addEventListener('pointerdown', () => {
   document.body.classList.remove('keyboard-focus')
 }, true)
 
-// 二级栏宽度按本模块最长的一行定，限制在 120–240px。每个模块只量一次并缓存：
-// 同一模块里悬停、选中、重新渲染都不会让宽度跳动。量的时候整列按选中态的粗体排，
-// 这样选中项变粗也不会超出。
+// 二级栏所有模块共用一个宽度：取全部模块里最长的一行，限制在 120–240px。
+// 第一次显示时把所有工具名临时放进二级栏量一次，之后切模块、悬停、选中都不再变。
+// 量的时候整列按选中态的粗体排，这样选中项变粗也不会超出。
 const SUBMENU_MIN_WIDTH = 120
 const SUBMENU_MAX_WIDTH = 240
-const submenuWidths = new Map()
+let submenuWidth = 0
 
-function fitSubmenuWidth(module) {
-  if (!submenuWidths.has(module)) {
+function fitSubmenuWidth() {
+  if (!submenuWidth) {
+    const probes = Object.values(submenuData).flat().flatMap((group) => group.items).map(([name, icon]) => {
+      const row = document.createElement('div')
+      const iconNode = document.createElement('i')
+      const label = document.createElement('span')
+      row.className = 'submenu-item'
+      iconNode.textContent = icon
+      label.className = 'submenu-label'
+      label.textContent = name
+      row.append(iconNode, label)
+      return row
+    })
     submenu.classList.add('measuring')
     submenu.style.width = 'max-content'
+    submenu.append(...probes)
     const natural = Math.ceil(submenu.getBoundingClientRect().width)
+    probes.forEach((row) => row.remove())
     submenu.classList.remove('measuring')
-    submenuWidths.set(module, Math.min(SUBMENU_MAX_WIDTH, Math.max(SUBMENU_MIN_WIDTH, natural)))
+    submenuWidth = Math.min(SUBMENU_MAX_WIDTH, Math.max(SUBMENU_MIN_WIDTH, natural))
   }
-  submenu.style.width = `${submenuWidths.get(module)}px`
+  submenu.style.width = `${submenuWidth}px`
 }
 
 function renderSubmenu(module, indicatorFromTop = null) {
@@ -612,7 +625,7 @@ function renderSubmenu(module, indicatorFromTop = null) {
 
   submenu.replaceChildren(fragment)
   submenu.classList.add('show')
-  fitSubmenuWidth(module)
+  fitSubmenuWidth()
 
   // 超过最大宽度的名字被省略号截断：这些行才挂悬停提示，显示全名
   submenu.querySelectorAll('.submenu-label').forEach((label) => {
