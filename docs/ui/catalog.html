@@ -299,8 +299,8 @@
       <div class="cat-item">
         <dl class="cat-meta">
           <dt>结构</dt><dd><code>.window-shell</code> → <code>.topbar</code> + <code>.app-body</code>（<code>.rail</code> / <code>.submenu</code> / <code>.content</code>）</dd>
-          <dt>颜色</dt><dd><code>--shell-bg</code> / <code>--shell-nav-bg</code> / <code>--workspace-bg</code> / <code>--workspace-radius</code>，深浅各一套；工作区深色下不是白底</dd>
-          <dt>平台让位</dt><dd><code>body[data-platform="darwin"]</code> 顶栏左留 78px 给红黄绿，<code>win32</code> 右留 148px 给系统三键；截图里看不到这些原生按钮</dd>
+          <dt>颜色</dt><dd><code>--shell-bg</code> / <code>--rail-bg</code> / <code>--shell-nav-bg</code> / <code>--workspace-bg</code> / <code>--workspace-radius</code>，深浅各一套；工作区深色下不是白底</dd>
+          <dt>平台让位</dt><dd><code>body[data-platform="darwin"]</code> 顶栏左留 72px 给红黄绿，<code>win32</code> 右留 148px 给系统三键；全屏时 <code>body[data-fullscreen="true"]</code> 收成 14px；截图里看不到这些原生按钮</dd>
           <dt>顶栏</dt><dd><code>.topbar</code> 56px，整条可拖动；搜索按钮与 <code>.mochi</code> 是 <code>no-drag</code></dd>
           <dt>一级栏</dt><dd><code>.rail</code> 64px，<code>.nav-ic</code> 只放图标，名称走 <code>aria-label</code> + <code>data-tip</code></dd>
           <dt>二级栏</dt><dd><code>.submenu</code> 宽 <code>clamp(184px, 18vw, 208px)</code>，行高 40px，独立滚动；主页不显示</dd>

@@ -29,6 +29,11 @@ contextBridge.exposeInMainWorld(
       ipcRenderer.on('window:revive', listener)
       return () => ipcRenderer.removeListener('window:revive', listener)
     },
+    onFullscreenChange: (handler) => {
+      const listener = (_event, fullscreen) => handler(Boolean(fullscreen))
+      ipcRenderer.on('window:fullscreen', listener)
+      return () => ipcRenderer.removeListener('window:fullscreen', listener)
+    },
 
     // ── 汇总画布（board:* / recovery:*）──────────────────────────
     setBoardDirty: (dirty) => ipcRenderer.send('board:dirty', Boolean(dirty)),

@@ -40,6 +40,12 @@ installTooltips()
 document.body.dataset.platform = window.api?.platform
   || (/Mac/i.test(navigator.platform) ? 'darwin' : /Win/i.test(navigator.platform) ? 'win32' : 'linux')
 
+// 全屏时系统窗口按钮隐藏，顶栏左侧不再留窗口按钮的位置
+document.body.dataset.fullscreen = 'false'
+window.api?.onFullscreenChange?.((fullscreen) => {
+  document.body.dataset.fullscreen = fullscreen ? 'true' : 'false'
+})
+
 const appLogoUrl = new URL('../../assets/app-icon.png', import.meta.url).href
 
 document.querySelectorAll('[data-app-logo]').forEach((image) => {
@@ -605,8 +611,9 @@ function renderSubmenu(module, indicatorFromTop = null) {
 
   const targetTop = activeItem.offsetTop
   if (indicatorFromTop == null) {
+    // 首次渲染/切模块：直接落位，不要从 0 滑进来。之前在这里补 .ready，
+    // 浏览器会把初始 transform 当成过渡起点，PDF 首屏会看到底板从标题滑到第一项。
     indicator.style.transform = `translate3d(0, ${targetTop}px, 0)`
-    requestAnimationFrame(() => indicator.classList.add('ready'))
     return
   }
 
@@ -1616,7 +1623,8 @@ for (const image of [profileAvatarImage, settingsAvatarImage]) {
   })
 }
 
-registerPopover(profileMenu, profileAvatar, { align: 'left', gap: 8, offsetX: 56 })
+// 一级栏宽 64：菜单左缘落在 14px，菜单项图标中心正好和头像中心对齐
+registerPopover(profileMenu, profileAvatar, { align: 'left', gap: 8, offsetX: 4 })
 
 profileAvatar?.addEventListener('click', (event) => {
   event.stopPropagation()

@@ -185,6 +185,14 @@ function createWindow() {
     mainWindow.show()
   })
 
+  // 全屏时 macOS 红黄绿 / Windows 三键都会隐藏，渲染层要把顶栏左侧的让位收掉。
+  for (const [eventName, fullscreen] of [['enter-full-screen', true], ['leave-full-screen', false]]) {
+    mainWindow.on(eventName, () => {
+      if (mainWindow.isDestroyed()) return
+      mainWindow.webContents.send('window:fullscreen', fullscreen)
+    })
+  }
+
   // 未保存的汇总画布：关闭前确认，三选项与新建/打开完全一致（规格 7.2）。
   //
   // 必须异步：选「保存」时要把保存交给 renderer 执行（打包、写盘、
