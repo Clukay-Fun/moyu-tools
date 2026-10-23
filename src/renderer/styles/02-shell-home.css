@@ -32,7 +32,6 @@ body[data-bg="plain"] {
 body[data-bg="plain"]:not([data-theme="dark"]) {
   --glass-border: rgba(140, 150, 170, 0.18);
   --control-border: rgba(140, 150, 170, 0.36);
-  --rail-bg: rgb(229 232 240 / calc(var(--glass-opacity) * 0.9));
 }
 
 body[data-bg="gradient"] {
@@ -104,7 +103,7 @@ body[data-bg="classic"] .panel {
   position: relative;
   z-index: var(--z-chrome);
   display: flex;
-  height: 48px;
+  height: var(--shell-bar);
   flex: none;
   align-items: center;
   justify-content: space-between;
@@ -114,7 +113,7 @@ body[data-bg="classic"] .panel {
 }
 
 /* 拖拽区不认层级：盖在顶栏上的弹层（抽屉、对话框、菜单、遮罩）若不声明 no-drag，
-   落在顶栏 48px 内的部分点不动，只会拖动窗口。 */
+   落在顶栏内的部分点不动，只会拖动窗口。 */
 :is(.modal-layer, .ocr-overlay, .app-menu, #overlay-layer, .toast, [data-base-ui-portal]) {
   -webkit-app-region: no-drag;
 }
@@ -406,24 +405,19 @@ body[data-fullscreen="true"] .topbar {
   min-height: 0;
 }
 
-/* 一级导航条：独立圆角条（圆角 12，无阴影，靠半透明底、描边和背景模糊成条），顶部不留外边距（与工作区顶边对齐，顶栏胶囊上下各空 7px），左、下 8px（和工作区右、下以及顶栏左右内边距一致）。
+/* 一级导航：无框。不铺底色、不描边、不加阴影，直接压在窗口背景上，和顶栏连成一个 L 形底层。
+   宽度与顶栏高度同为 --shell-bar（56px）；40 的按钮居中，两侧各 8px。
    模块列表单独滚动，头像固定在底部，窗口再矮也不会被挤出去。 */
 .rail {
   position: relative;
   display: flex;
-  /* 52 = 40 的按钮 + 两侧各 5px（含 1px 描边），刚好放下 5px 的键盘焦点光晕 */
-  width: 52px;
+  width: var(--shell-bar);
   flex-shrink: 0;
   flex-direction: column;
   align-items: center;
   min-height: 0;
-  margin: 0 0 8px 8px;
-  /* 上下也留 5px，和左右一致：顶部 2 + .rail-list 的 3 = 5 到第一个按钮；底部 5 到头像 */
-  padding: 2px 0 5px;
-  overflow: hidden;
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  background: var(--rail-bg);
+  /* 顶部 .rail-list 自带 3px（给焦点光晕），底部 8px 和工作区底边齐平 */
+  padding: 0 0 8px;
 }
 
 .rail-list {
@@ -612,15 +606,22 @@ body[data-fullscreen="true"] .topbar {
   position: relative;
   display: none;
   /* 宽度由 main.js fitSubmenuWidth 按所有模块里最长的一行写成像素（120–240），各模块同宽；这里只是兜底。
-     不铺底色，直接显露外层；左右 12px 内边距就是它和导航条、工作区之间的间隔 */
+     书签抽屉：和工作区同一层表面，只描左、上、下三边，左侧圆角，右侧开放接工作区。
+     不和工作区重叠：两边都是半透明底，叠 1px 会多出一条更深的竖线。 */
   width: 180px;
   min-height: 0;
   flex-shrink: 0;
   flex-direction: column;
   gap: 2px;
-  padding: 6px 12px 12px;
+  margin-bottom: 8px;
+  padding: 12px 12px 12px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  border: 1px solid var(--glass-border);
+  border-right: 0;
+  border-radius: var(--drawer-radius) 0 0 var(--drawer-radius);
+  background: var(--workspace-bg);
+  box-shadow: var(--drawer-shadow), var(--glass-highlight);
 }
 
 .submenu-indicator {
@@ -757,7 +758,7 @@ body[data-fullscreen="true"] .topbar {
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  margin: 0 8px 8px;
+  margin: 0 8px 8px 0;
   overflow: hidden;
   /* 全应用唯一一层「卡片阴影」：描边 + 柔和外阴影 + 顶部高光。内部内容框不再各自带阴影 */
   border: 1px solid var(--glass-border);
@@ -767,7 +768,7 @@ body[data-fullscreen="true"] .topbar {
 }
 
 /* 两个主容器做背景模糊；浅灰背景背后没有可模糊的东西，不做 */
-body:not([data-bg="plain"]) :is(.content, .rail) {
+body:not([data-bg="plain"]) :is(.content, .submenu) {
   backdrop-filter: blur(var(--glass-blur-px)) saturate(140%);
 }
 
@@ -779,9 +780,12 @@ body.home-active .content {
   backdrop-filter: none;
 }
 
-/* 有二级栏时，它右侧 12px 的内边距已经是间隔，工作区不再重复留左外边距 */
+/* 有二级栏时工作区是抽屉的主体：左边不描边、左侧直角，和书签接成一个面；
+   阴影只往右下走（负扩散抵掉左侧），不压到书签上形成接缝 */
 .submenu.show + .content {
-  margin-left: 0;
+  border-left: 0;
+  border-radius: 0 var(--workspace-radius) var(--workspace-radius) 0;
+  box-shadow: var(--drawer-body-shadow), var(--glass-highlight);
 }
 
 .pages {

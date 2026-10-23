@@ -17,13 +17,13 @@
   --accent-28: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.28);
   --background: #e7e9ee;
   /* ══ 外壳配色（V1 桌面外壳）══
-     三块大面积：外层背景（含顶栏、二级工具区）→ 独立的一级导航条 → 中央工作区。
-     顶栏和二级区不另铺底色，直接显露外层；选中高亮是局部状态，不算一层。
+     三层抽屉：外层背景（顶栏 + 无框一级导航，L 形）→ 二级书签 → 中央工作区（抽屉主体）。
+     顶栏和一级导航不另铺底色，直接显露外层；选中高亮是局部状态，不算一层。
      ── V4 毛玻璃：默认主题还原 V1 之前的光斑 + 白纱（b8e8e7b），统一由下面几个变量控制 ──
      --glass-opacity / --glass-blur-px 由「设置 › 外观 › 背景与毛玻璃」写到 <html> 上。
      工作区取 opacity，内层内容框取一半：内层叠在工作区上，再叠一层同样的白会变回不透明；
      默认 0.3 时内层约 0.15，和旧版卡片的 0.14 一致。
-     背景模糊只加在工作区和一级导航条两个主容器上，内层不加（叠在已模糊的工作区上看不出区别）。
+     背景模糊只加在工作区和二级书签两个主容器上，内层不加（叠在已模糊的工作区上看不出区别）。
      描边、高光、折射边随背景样式变：「浅灰」背景（body[data-bg="plain"]）改回中性描边、无高光，
      见 02-shell-home.css。
      派生变量（--workspace-bg 等）在深色块里要重新声明：自定义属性在定义处就算好了值，
@@ -40,11 +40,15 @@
   --orb-opacity: 0.8;
   --veil: rgba(255, 255, 255, 0.27);
   --veil-saturate: 150%;
-  /* 一级导航条：比工作区更通透的白，靠描边和模糊成条 */
-  --rail-bg: rgb(255 255 255 / calc(var(--glass-opacity) * 0.7));
   --workspace-bg: rgb(var(--surface-rgb) / var(--glass-opacity));
   --surface-inner: rgb(var(--surface-rgb) / var(--glass-inner-opacity));
-  --workspace-radius: 18px;
+  --workspace-radius: 20px;
+  /* 三层抽屉：顶栏高 = 一级导航宽；二级栏是书签，左侧圆角 */
+  --shell-bar: 56px;
+  --drawer-radius: 16px;
+  /* 书签阴影往左、上下散；抽屉主体的阴影更轻，且只往右下（负扩散），不压到书签上 */
+  --drawer-shadow: -5px 3px 16px rgba(40, 50, 85, 0.06);
+  --drawer-body-shadow: 6px 4px 18px -6px rgba(30, 40, 65, 0.05);
   /* 框线与阴影层级：只有工作区一层柔和外阴影；内部内容框只用描边 + 顶部高光；弹窗和下拉另有阴影 */
   --glass-border: rgba(255, 255, 255, 0.58);
   --glass-shadow: 0 4px 20px rgba(30, 40, 65, 0.06);
@@ -223,11 +227,12 @@
   --veil: rgba(13, 19, 29, 0.58);
   --veil-saturate: 115%;
   /* 深色的半透明底要更实才压得住光斑：系数翻倍，默认 0.3 → 0.6，对应旧版白纱 0.58、卡片 0.62 */
-  --rail-bg: rgb(17 25 36 / min(1, calc(var(--glass-opacity) * 1.6)));
   --workspace-bg: rgb(var(--surface-rgb) / min(1, calc(var(--glass-opacity) * 2)));
   --surface-inner: rgb(28 37 52 / min(1, calc(var(--glass-opacity) * 2)));
   --glass-border: rgba(159, 177, 204, 0.14);
   --glass-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  --drawer-shadow: -6px 4px 20px rgba(0, 0, 0, 0.26);
+  --drawer-body-shadow: 6px 5px 20px -6px rgba(0, 0, 0, 0.24);
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   --panel: rgba(13, 19, 29, 0.88);
   --card: rgba(28, 37, 52, 0.62);
