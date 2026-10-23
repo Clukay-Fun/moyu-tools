@@ -68,17 +68,6 @@
   min-height: 420px;
 }
 
-.board-work .empty {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: var(--sp-2);
-  pointer-events: none;
-  text-align: center;
-}
-
 .board-status {
   display: flex;
   align-items: center;

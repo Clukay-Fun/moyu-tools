@@ -201,12 +201,6 @@
 .canvas-empty {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: var(--sp-2);
-  color: var(--muted);
-  text-align: center;
   pointer-events: none;
 }
 
@@ -215,12 +209,6 @@
   pointer-events: auto;
 }
 
-/* ⚠ 没有这条规则，hidden 属性会被上面的 display:grid 盖掉——
-   空状态提示会一直画在内容之上。同文件里其他可隐藏组件都有对应规则。 */
-.canvas-empty[hidden] {
-  display: none;
-}
-.canvas-empty small { color: var(--faint); font-size: var(--fs-md); }
 
 /* 缩放固定左下；状态固定右下，二者都不再占一整条底栏。 */
 .canvas-zoom-controls {

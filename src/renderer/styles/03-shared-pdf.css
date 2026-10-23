@@ -1,33 +1,3 @@
-/* 工作区里的内容框（文件列表、输出设置、工具面板、设置分组）：
-   描边 + 比工作区略白一点的半透明底 + 顶部高光 + 折射边（旧版做法），不加外阴影、不做背景模糊；
-   外阴影只留给工作区本身、弹窗和下拉菜单。 */
-.glass-card {
-  border: 1px solid var(--glass-border);
-  border-radius: var(--frame-radius);
-  background: var(--surface-inner);
-  box-shadow: var(--glass-highlight);
-}
-
-/* 折射边：遮罩只留 1px 边框环，渐变叠在原边框上；浅灰背景下 --glass-edge 为 none */
-.glass-card,
-.settings-section-body {
-  position: relative;
-}
-
-.glass-card::before,
-.settings-section-body::before {
-  position: absolute;
-  inset: -1px;
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--glass-edge);
-  content: "";
-  pointer-events: none;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-}
-
 .toolbar {
   display: flex;
   flex: none;
@@ -295,7 +265,7 @@
   box-shadow: 0 9px 26px rgba(25, 28, 45, 0.16);
 }
 
-.pdf-watermark-preview-stage > .empty {
+.pdf-watermark-preview-stage > .m-empty {
   position: absolute;
   inset: 0;
 }

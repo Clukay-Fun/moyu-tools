@@ -159,14 +159,14 @@
         <dl class="cat-meta"><dt>毛玻璃</dt><dd><code>--glass-blur</code>（卡片、菜单）/ <code>--glass-blur-control</code>（按钮、切换槽）负责模糊与提饱和；<code>--glass-rim</code> 边沿光（顶亮底暗）；<code>--glass-sheen</code> 顶部柔光；二者合成 <code>--glass</code>。<code>--glass-raised</code> 用于选项切换的选中格；<code>--glass-edge</code> 是卡片与设置块的折射边（左上亮、右下淡，画在 <code>::before</code>）。背后有颜色时效果才明显，下面垫了彩色光斑演示</dd></dl>
         <div class="cat-pair">
         <div class="cat-stage cat-glass-stage" data-theme="light"><span class="cat-label">浅色</span>
-          <div class="glass-card cat-glass-demo">
+          <div class="m-card cat-glass-demo">
             <div class="m-segmented m-segmented--sm"><button type="button" aria-pressed="true">单个</button><button type="button" aria-pressed="false">批量</button></div>
             <div style="display:flex;gap:8px"><button class="m-btn" type="button">次要按钮</button><button class="m-btn m-btn--sm" type="button">小按钮</button></div>
           </div>
           <div class="app-menu cat-glass-menu"><button type="button">打开项目</button><button type="button">保存项目</button><button type="button">导出 PNG</button></div>
         </div>
         <div class="cat-stage cat-glass-stage" data-theme="dark"><span class="cat-label">深色</span>
-          <div class="glass-card cat-glass-demo">
+          <div class="m-card cat-glass-demo">
             <div class="m-segmented m-segmented--sm"><button type="button" aria-pressed="true">单个</button><button type="button" aria-pressed="false">批量</button></div>
             <div style="display:flex;gap:8px"><button class="m-btn" type="button">次要按钮</button><button class="m-btn m-btn--sm" type="button">小按钮</button></div>
           </div>
@@ -269,7 +269,7 @@
 
         <article class="cat-motion-card">
           <div class="cat-motion-stage" data-loop="drop">
-            <div class="glass-card file-drop-target cat-drop">拖入文件到这里</div>
+            <div class="m-card file-drop-target cat-drop">拖入文件到这里</div>
           </div>
           <h3>拖放高亮</h3>
           <p>边框 / 内阴影 / 背景 · 150ms · <code>ease</code></p>
@@ -333,7 +333,7 @@
                   <div class="submenu-heading">编辑</div>
                   <button class="submenu-item" type="button">合并 PDF</button>
                 </aside>
-                <main class="content"><div class="pages"><section class="page active"><div class="glass-card cat-shell-card"><b>PDF 转 PNG</b><p style="margin:6px 0 0;color:var(--muted);font-size:12px">工作区内容仍由各工具页面自己渲染。</p></div></section></div></main>
+                <main class="content"><div class="pages"><section class="page active"><div class="m-card cat-shell-card"><b>PDF 转 PNG</b><p style="margin:6px 0 0;color:var(--muted);font-size:12px">工作区内容仍由各工具页面自己渲染。</p></div></section></div></main>
               </div>
             </div></div></div>
           </div>
@@ -359,7 +359,7 @@
                   <div class="submenu-heading">编辑</div>
                   <button class="submenu-item" type="button">合并 PDF</button>
                 </aside>
-                <main class="content"><div class="pages"><section class="page active"><div class="glass-card cat-shell-card"><b>PDF 转 PNG</b><p style="margin:6px 0 0;color:var(--muted);font-size:12px">工作区内容仍由各工具页面自己渲染。</p></div></section></div></main>
+                <main class="content"><div class="pages"><section class="page active"><div class="m-card cat-shell-card"><b>PDF 转 PNG</b><p style="margin:6px 0 0;color:var(--muted);font-size:12px">工作区内容仍由各工具页面自己渲染。</p></div></section></div></main>
               </div>
             </div></div></div>
           </div>
@@ -522,9 +522,10 @@
       <p>约定：<b>大模块不用卡片，小分组才用卡片</b>；卡片里不要再套卡片。</p>
       <div class="cat-item">
         <dl class="cat-meta">
-          <dt>玻璃卡片</dt><dd><code>.glass-card</code>——工作区里承载一组输入或结果（条码、刀模面板）</dd>
-          <dt>设置块</dt><dd><code>.settings-section-body</code> + <code>.setting-row</code>——「标签在左、控件在右」的键值行；质感与 <code>.glass-card</code> 相同</dd>
-          <dt>现用模块</dt><dd>玻璃卡片：条码、刀模、PDF；设置块：设置</dd>
+          <dt>卡片</dt><dd><code>.m-card</code>（<code>components/card.css</code>，数值来自 <code>--card-*</code>）——工作区里承载一组输入或结果；内边距由页面加的布局类决定（<code>control-card</code>、<code>log-card</code>……）</dd>
+          <dt>设置块</dt><dd><code>.m-card.settings-section-body</code> + <code>.setting-row</code>——「标签在左、控件在右」的键值行；<code>.settings-section-body</code> 只管内边距</dd>
+          <dt>空状态</dt><dd><code>.m-empty</code>（<code>components/empty.css</code>）：一行说明 + <code>&lt;small&gt;</code> 小字，可再跟按钮；在父容器里撑满居中，盖在内容上时由页面加定位</dd>
+          <dt>现用模块</dt><dd>卡片：条码、刀模、PDF、Illustrator、格式工厂；设置块：设置；空状态：PDF、Illustrator、格式工厂、画板</dd>
         </dl>
         <div class="cat-pair">
           <div class="cat-stage" data-theme="light" data-demo="cards"><span class="cat-label">浅色</span></div>
@@ -698,11 +699,11 @@
   </template>
 
   <template id="demo-cards">
-    <div class="glass-card" style="padding:14px 16px;margin-bottom:14px">
+    <div class="m-card" style="padding:14px 16px;margin-bottom:14px">
       <b style="font-size:var(--fs-lg)">玻璃卡片</b>
       <p style="margin:6px 0 0;color:var(--muted);font-size:var(--fs-md)">承载一组输入或一块结果。</p>
     </div>
-    <div class="settings-section-body">
+    <div class="m-card settings-section-body">
       <div class="setting-row"><span class="setting-label">当前版本</span><b class="setting-value">v2.2.0</b></div>
       <div class="setting-row"><span class="setting-label">自动检查更新<small>应用启动后在后台检查新版本</small></span><label class="m-switch icon-only-toggle"><input type="checkbox" checked /><span class="m-switch-track"></span><span class="sr-only">自动检查更新</span></label></div>
     </div>

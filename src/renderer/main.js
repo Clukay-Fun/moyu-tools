@@ -787,7 +787,7 @@ function animatePageEntry(page) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
   animateEntry(page, { duration: 120, distance: 0 })
   if (reduced) return
-  const cards = [...page.querySelectorAll('.glass-card, .settings-section-body')]
+  const cards = [...page.querySelectorAll('.m-card')]
     .filter((card) => card.offsetParent !== null)
     .slice(0, 8)
   const easing = getComputedStyle(document.documentElement).getPropertyValue('--ease-spring-land').trim() || 'cubic-bezier(0.23, 1, 0.32, 1)'

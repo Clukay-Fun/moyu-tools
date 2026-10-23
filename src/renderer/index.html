@@ -98,7 +98,7 @@
                   <button class="m-btn" id="pdf-clear-files" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
                   <div class="pdf-options" id="pdf-options"></div>
                 </div>
-                <div class="glass-card file-list pdf-drop-zone" id="pdf-drop-zone">
+                <div class="m-card file-list pdf-drop-zone" id="pdf-drop-zone">
                   <div class="pdf-list-title">文件列表</div>
                   <div class="file-head">
                     <span class="cell-name">文件名</span><span class="cell-pages">页数</span>
@@ -106,14 +106,14 @@
                     <span class="cell-action" aria-label="操作"></span>
                   </div>
                   <div class="pdf-file-body" id="pdf-file-body"></div>
-                  <div class="empty" id="pdf-empty">
+                  <div class="m-empty" id="pdf-empty">
                     <div id="pdf-empty-text">拖入 PDF 文件到这里</div>
                     <small>支持拖入文件或文件夹，也可以手动选择</small>
                   </div>
                 </div>
                 <div class="pdf-watermark-workbench" id="pdf-watermark-workbench" hidden>
                   <div class="pdf-watermark-left">
-                    <section class="glass-card pdf-watermark-preview-card">
+                    <section class="m-card pdf-watermark-preview-card">
                       <header>
                         <div>
                           <b>水印预览</b>
@@ -126,7 +126,7 @@
                       </div>
                       <div class="pdf-watermark-preview-stage">
                         <canvas id="pdf-watermark-preview"></canvas>
-                        <div class="empty" id="pdf-watermark-preview-empty">添加 PDF 后显示预览</div>
+                        <div class="m-empty" id="pdf-watermark-preview-empty">添加 PDF 后显示预览</div>
                       </div>
                       <footer class="pdf-watermark-preview-nav">
                         <button class="m-btn" id="pdf-watermark-previous-page" type="button">上一页</button>
@@ -135,7 +135,7 @@
                       </footer>
                     </section>
                   </div>
-                  <aside class="glass-card pdf-watermark-controls">
+                  <aside class="m-card pdf-watermark-controls">
                     <div class="pdf-watermark-controls-title">水印设置</div>
                     <section class="pdf-watermark-mode-section">
                       <h3>水印类型</h3>
@@ -223,7 +223,7 @@
                     <button class="m-btn m-btn--primary pdf-watermark-run" id="run-pdf-watermark-action" type="button" disabled>开始</button>
                   </aside>
                 </div>
-                <div class="glass-card result pdf-result-card">
+                <div class="m-card result pdf-result-card">
                   <div class="pdf-output-row">
                     <div class="pdf-output-copy">
                       <b>输出位置</b>
@@ -251,7 +251,7 @@
                   <button class="m-btn" id="illustrator-add-folder" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-folder-add"></use></svg> 添加文件夹</button>
                   <button class="m-btn" id="illustrator-clear" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
                 </div>
-                <div class="glass-card illustrator-config">
+                <div class="m-card illustrator-config">
                   <div class="illustrator-config-group">
                     <span class="section-label">处理类型</span>
                     <div class="m-segmented illustrator-mode-switch" role="radiogroup" aria-label="Illustrator 处理类型">
@@ -265,14 +265,14 @@
                   <button class="m-btn m-btn--primary" id="illustrator-run" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>开始处理</button>
                   <button class="m-btn m-btn--danger" id="illustrator-stop" type="button" hidden><svg class="ic" aria-hidden="true"><use href="#ic-stop"></use></svg>停止任务</button>
                 </div>
-                <div class="glass-card file-list file-drop-target" id="illustrator-drop-zone">
+                <div class="m-card file-list file-drop-target" id="illustrator-drop-zone">
                   <div class="pdf-list-title">文件列表</div>
                   <div class="file-head">
                     <span class="cell-name">文件名</span>
                     <span class="cell-meta">大小</span><span class="cell-status">状态</span><span class="cell-action" aria-label="操作"></span>
                   </div>
                   <div class="pdf-file-body" id="illustrator-file-body"></div>
-                  <div class="empty" id="illustrator-empty">
+                  <div class="m-empty" id="illustrator-empty">
                     <div>拖入 Illustrator 文件或文件夹</div>
                     <small>支持 .ai 文件 · 需要 Windows 与已安装的 Adobe Illustrator</small>
                     <div class="illustrator-empty-actions">
@@ -281,7 +281,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="glass-card illustrator-progress-card">
+                <div class="m-card illustrator-progress-card">
                   <div class="illustrator-section-head">
                     <div><b>批处理进度</b><span id="illustrator-progress-summary">0 个文件 · 等待任务</span></div>
                     <button class="m-btn open" id="illustrator-open-output" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-open"></use></svg>打开输出目录</button>
@@ -291,7 +291,7 @@
                     <span class="progress-text" id="illustrator-progress-text">等待任务</span>
                   </div>
                 </div>
-                <div class="glass-card log-card illustrator-log-card">
+                <div class="m-card log-card illustrator-log-card">
                   <div class="illustrator-log-title">运行日志</div>
                   <div class="log-inner" id="illustrator-log">等待添加 Illustrator 文件。</div>
                 </div>
@@ -305,7 +305,7 @@
                       <button id="barcode-batch-tab" type="button" role="tab" aria-selected="false">批量 / CSV</button>
                     </div>
 
-                    <div class="glass-card barcode-pane barcode-single-section active" id="barcode-single-pane">
+                    <div class="m-card barcode-pane barcode-single-section active" id="barcode-single-pane">
                       <label class="barcode-input-field">
                         <span>条码内容</span>
                         <div class="barcode-input">
@@ -326,7 +326,7 @@
                     </div>
 
                     <div class="barcode-pane" id="barcode-batch-pane">
-                      <div class="glass-card barcode-batch-section barcode-batch-input-section">
+                      <div class="m-card barcode-batch-section barcode-batch-input-section">
                         <label class="batch-input-field">
                           <span>批量数据</span>
                           <textarea id="barcode-batch-value" rows="4" placeholder="每行一个编码；粘贴 CSV 时读取第一列"></textarea>
@@ -336,7 +336,7 @@
                           <button class="m-btn m-btn--primary" id="generate-barcode-batch" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-play"></use></svg>批量生成</button>
                         </div>
                       </div>
-                      <div class="glass-card barcode-batch-section barcode-batch-result-section">
+                      <div class="m-card barcode-batch-section barcode-batch-result-section">
                         <div class="batch-result-head"><b>批量结果</b><span class="batch-summary" id="barcode-batch-summary">等待输入，最多 500 条。</span></div>
                         <div class="batch-list" id="barcode-batch-list"></div>
                         <div class="batch-export-actions">
@@ -347,7 +347,7 @@
                     </div>
                   </div>
                   <div class="control-column">
-                    <div class="glass-card control-card barcode-settings-card" id="barcode-settings-card">
+                    <div class="m-card control-card barcode-settings-card" id="barcode-settings-card">
                       <span class="label barcode-settings-title" id="barcode-settings-title">基础设置</span>
                       <label class="barcode-preset-picker" id="itf14-preset-picker" hidden>ITF-14 印刷预设
                         <select id="itf14-preset">
@@ -384,7 +384,7 @@
                         </div>
                       </details>
                     </div>
-                    <div class="glass-card control-card barcode-export-card">
+                    <div class="m-card control-card barcode-export-card">
                       <div class="barcode-export-section">
                         <span class="label">导出</span>
                         <div class="format-grid">
@@ -395,7 +395,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="glass-card control-card">
+                    <div class="m-card control-card">
                       <span class="label">发送到</span>
                       <div class="app-grid">
                         <button class="m-btn m-btn--tile app-button" id="open-barcode-illustrator" type="button"><b class="ai-icon">Ai</b><span>Illustrator</span></button>
@@ -527,7 +527,7 @@
                 <button class="m-btn m-btn--quiet m-btn--sm m-btn--icon m-btn--danger txt-btn" data-text="delete" type="button" aria-label="删除" data-tip="删除"><svg class="ic" aria-hidden="true"><use href="#ic-delete"></use></svg></button>
               </div>
 
-              <div class="canvas-empty" id="board-empty">
+              <div class="m-empty canvas-empty" id="board-empty">
                       <div>拖入、粘贴或导入图片开始创作</div>
                       <button class="m-btn canvas-empty-import" id="board-empty-import" type="button">导入图片</button>
                       <small>支持 Ctrl / ⌘ + V 直接粘贴</small>
@@ -609,7 +609,7 @@
                   <button class="m-btn" id="format-clear-inputs" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
                 </div>
                 <div class="format-workspace">
-                  <section class="glass-card format-file-panel file-drop-target" id="format-drop-zone">
+                  <section class="m-card format-file-panel file-drop-target" id="format-drop-zone">
                     <h2 class="format-section-title">文件列表</h2>
                     <header class="format-file-head">
                       <span class="cell-name">文件名</span>
@@ -620,12 +620,12 @@
                       <span aria-hidden="true"></span>
                     </header>
                     <div class="format-file-list" id="format-file-list"></div>
-                    <div class="empty" id="format-empty">
+                    <div class="m-empty" id="format-empty">
                       <div id="format-empty-title">添加视频文件</div>
                       <small>支持拖入、批量选择或读取文件夹</small>
                     </div>
                   </section>
-                  <aside class="glass-card format-control-panel">
+                  <aside class="m-card format-control-panel">
                     <div class="format-control-heading">
                       <b id="format-action-title">转换设置</b>
                       <p id="format-action-copy">转换为 MP4、MKV 或 WebM。</p>
@@ -641,7 +641,7 @@
                     </div>
                   </aside>
                 </div>
-                <div class="glass-card format-result-bar">
+                <div class="m-card format-result-bar">
                   <div class="format-progress-copy">
                     <b>批处理进度</b>
                     <span id="format-status-text">0 个文件 · 等待添加</span>
@@ -654,13 +654,13 @@
               <section class="page page-dieline" id="page-dieline">
 
                 <div class="dieline-workbench">
-                  <aside class="glass-card dieline-presets" id="dieline-presets" aria-label="预设资源">
+                  <aside class="m-card dieline-presets" id="dieline-presets" aria-label="预设资源">
                     <h2>预设</h2>
                     <input id="dieline-preset-search" type="search" placeholder="搜索模板" aria-label="搜索模板" autocomplete="off" />
                     <div class="dieline-preset-list" id="dieline-preset-list" role="listbox" aria-label="模板列表"></div>
                   </aside>
 
-                  <section class="glass-card dieline-canvas-card" aria-label="2D 刀模">
+                  <section class="m-card dieline-canvas-card" aria-label="2D 刀模">
                     <header class="dieline-canvas-toolbar">
                       <div class="dieline-legend">
                         <span><i class="bleed-swatch"></i>出血线</span>
@@ -683,7 +683,7 @@
                   </section>
 
                   <div class="dieline-side">
-                    <section class="glass-card dieline-3d-card" aria-label="3D 预览">
+                    <section class="m-card dieline-3d-card" aria-label="3D 预览">
                       <div class="dieline-3d-stage" id="dieline-3d-stage"></div>
                       <button class="m-btn m-btn--sm m-btn--icon dieline-3d-reset" id="dieline-3d-reset" type="button" title="复位视角" aria-label="复位视角">⌂</button>
                       <div class="dieline-stage-error" id="dieline-stage-error" hidden>
@@ -710,7 +710,7 @@
                       </div>
                     </section>
 
-                    <section class="glass-card dieline-params" id="dieline-params" aria-label="自定义参数">
+                    <section class="m-card dieline-params" id="dieline-params" aria-label="自定义参数">
                       <div class="dieline-param-head">
                         <span class="dieline-field-label">尺寸</span>
                         <div class="m-segmented m-segmented--sm dieline-unit-switch" role="group" aria-label="单位">
@@ -748,7 +748,7 @@
                       <div class="dieline-dimension-grid triple" id="dieline-structure-params"></div>
                     </section>
 
-                    <section class="glass-card dieline-export" aria-label="导出与发送">
+                    <section class="m-card dieline-export" aria-label="导出与发送">
                       <label class="dieline-check"><input id="dieline-export-annotations" type="checkbox" checked />包含尺寸标注</label>
                       <div class="dieline-export-actions">
                         <button class="m-btn m-btn--primary" id="dieline-export-pdf" type="button">导出 PDF</button>
@@ -771,7 +771,7 @@
                       <header class="settings-section-head">
                         <svg class="ic" aria-hidden="true"><use href="#ic-settings"></use></svg><h2>通用</h2>
                       </header>
-                      <div class="settings-section-body">
+                      <div class="m-card settings-section-body">
                         <div class="setting-row">
                           <span class="setting-label">头像<small>显示在一级栏左下角，点击可打开菜单</small></span>
                           <div class="setting-row-control profile-settings-control">
@@ -793,7 +793,7 @@
                       <header class="settings-section-head">
                         <svg class="ic" aria-hidden="true"><use href="#ic-keyboard"></use></svg><h2>快捷键</h2>
                       </header>
-                      <div class="settings-section-body">
+                      <div class="m-card settings-section-body">
                         <div class="setting-row">
                           <span class="setting-label">区域截图</span>
                           <div class="setting-row-control shortcut-controls">
@@ -815,7 +815,7 @@
                       <header class="settings-section-head">
                         <svg class="ic" aria-hidden="true"><use href="#ic-appearance"></use></svg><h2>外观</h2>
                       </header>
-                      <div class="settings-section-body">
+                      <div class="m-card settings-section-body">
                         <div class="setting-row is-wide">
                           <span class="setting-label">主题</span>
                           <div class="theme-options" role="radiogroup" aria-label="主题">
@@ -920,21 +920,21 @@
                       <header class="settings-section-head">
                         <svg class="ic" aria-hidden="true"><use href="#ic-nav-inventory"></use></svg><h2>库存</h2>
                       </header>
-                      <div class="settings-section-body erp-settings" id="erp-settings-inventory"></div>
+                      <div class="m-card settings-section-body erp-settings" id="erp-settings-inventory"></div>
                     </section>
 
                     <section class="settings-section" id="settings-custom" data-settings-section>
                       <header class="settings-section-head">
                         <svg class="ic" aria-hidden="true"><use href="#ic-nav-custom"></use></svg><h2>定制</h2>
                       </header>
-                      <div class="settings-section-body erp-settings" id="erp-settings-custom"></div>
+                      <div class="m-card settings-section-body erp-settings" id="erp-settings-custom"></div>
                     </section>
 
                     <section class="settings-section" id="settings-update" data-settings-section>
                       <header class="settings-section-head">
                         <svg class="ic" aria-hidden="true"><use href="#ic-update"></use></svg><h2>更新</h2>
                       </header>
-                      <div class="settings-section-body">
+                      <div class="m-card settings-section-body">
                         <div class="version-hero">
                           <div class="version-hero-copy">
                             <span>当前版本</span>
@@ -974,7 +974,7 @@
                       <header class="settings-section-head">
                         <svg class="ic" aria-hidden="true"><use href="#ic-info"></use></svg><h2>关于</h2>
                       </header>
-                      <div class="settings-section-body">
+                      <div class="m-card settings-section-body">
                         <div class="about-brand">
                           <span class="about-logo"><img data-app-logo alt="" /></span>
                           <div class="about-brand-copy">
@@ -1050,7 +1050,7 @@
       </div>
 
       <div class="modal-layer pdf-page-organizer" id="pdf-page-organizer" hidden>
-        <section class="glass-card pdf-page-dialog" role="dialog" aria-modal="true" aria-labelledby="pdf-page-title">
+        <section class="m-card pdf-page-dialog" role="dialog" aria-modal="true" aria-labelledby="pdf-page-title">
           <header>
             <div>
               <b id="pdf-page-title">页面顺序</b>

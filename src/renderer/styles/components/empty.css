@@ -1,0 +1,26 @@
+/* ══ 空状态 m-empty ══════════════════════════════════════════
+   列表或画布还没有内容时的提示：一行说明 + 一行小字，可以再跟按钮。
+
+   <div class="m-empty"><div>拖入 PDF 文件到这里</div><small>也可以手动选择</small></div>
+
+   默认在父容器里撑满并居中；需要盖在内容上时由页面加 position。
+   隐藏用 hidden 属性或 .hidden（旧脚本在用）。 */
+.m-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  color: var(--faint);
+  text-align: center;
+}
+
+.m-empty small {
+  font-size: var(--fs-sm);
+}
+
+.m-empty[hidden],
+.m-empty.hidden {
+  display: none;
+}

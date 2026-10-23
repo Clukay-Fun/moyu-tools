@@ -165,13 +165,9 @@
 }
 
 /* 标题在框外，设置项包进带边框的块里 */
-/* 与工作区里的 .glass-card 同一套规则：描边 + 内层半透明底 + 顶部高光，不加外阴影 */
+/* 外观来自 .m-card，这里只管内边距 */
 .settings-section-body {
   padding: 4px 16px;
-  border: 1px solid var(--glass-border);
-  border-radius: var(--frame-radius);
-  background: var(--surface-inner);
-  box-shadow: var(--glass-highlight);
 }
 
 .theme-options {
@@ -779,13 +775,9 @@
   opacity: 0.45;
 }
 
-.format-file-panel > .empty {
+.format-file-panel > .m-empty {
   position: absolute;
   inset: 90px 0 0;
-}
-
-.format-file-panel > .empty[hidden] {
-  display: none;
 }
 
 .format-control-panel {

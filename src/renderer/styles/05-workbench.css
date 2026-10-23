@@ -98,17 +98,6 @@
   width: 33px;
 }
 
-.empty {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-3);
-  color: var(--faint);
-  text-align: center;
-}
-
 .hint-mark {
   display: grid;
   width: 48px;
@@ -121,13 +110,6 @@
   font-weight: 800;
 }
 
-.empty small {
-  font-size: var(--fs-sm);
-}
-
-.file-list .empty.hidden {
-  display: none;
-}
 
 .pdf-drop-zone.drag-over {
   border-color: var(--accent-28);
