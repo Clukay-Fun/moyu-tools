@@ -11,9 +11,9 @@
   align-items: center;
   width: 100%;
   height: 32px;
-  background-color: var(--erp-bg-surface);
-  border: 1px solid var(--erp-border-default);
-  border-radius: var(--erp-radius-control);
+  background-color: var(--field-bg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
   transition:
     border-color var(--erp-transition-fast),
     box-shadow var(--erp-transition-fast),
@@ -22,15 +22,18 @@
 
 .inputContainer:focus-within {
   border-color: var(--erp-accent);
-  box-shadow: var(--erp-focus-ring);
+  box-shadow: var(--field-focus-ring);
 }
 
+.inputContainer:hover:not(:focus-within):not(.hasError):not(.disabled) {
+  border-color: var(--field-border-hover);
+  background-color: var(--field-bg-hover);
+}
+
+/* 报错与摸鱼输入框一致：红框 + 淡红外圈 */
 .inputContainer.hasError {
-  border-color: var(--erp-danger);
-}
-
-.inputContainer.hasError:focus-within {
-  box-shadow: 0 0 0 1px var(--erp-danger);
+  border-color: color-mix(in srgb, var(--danger) 65%, transparent);
+  box-shadow: var(--field-invalid-ring);
 }
 
 .inputContainer.readOnly {
@@ -86,9 +89,9 @@
   position: relative;
   width: 100%;
   min-height: 64px;
-  background-color: var(--erp-bg-surface);
-  border: 1px solid var(--erp-border-default);
-  border-radius: var(--erp-radius-control);
+  background-color: var(--field-bg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
   transition:
     border-color var(--erp-transition-fast),
     box-shadow var(--erp-transition-fast),
@@ -97,11 +100,12 @@
 
 .textareaContainer:focus-within {
   border-color: var(--erp-accent);
-  box-shadow: var(--erp-focus-ring);
+  box-shadow: var(--field-focus-ring);
 }
 
 .textareaContainer.hasError {
-  border-color: var(--erp-danger);
+  border-color: color-mix(in srgb, var(--danger) 65%, transparent);
+  box-shadow: var(--field-invalid-ring);
 }
 
 .textareaContainer.readOnly {

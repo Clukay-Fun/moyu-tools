@@ -6,11 +6,13 @@
   box-sizing: border-box;
   min-width: 160px;
   max-width: 280px;
-  padding: var(--erp-space-1);
-  background-color: var(--erp-bg-surface);
-  border: 1px solid var(--erp-border-subtle);
-  border-radius: var(--erp-radius-md);
-  box-shadow: var(--erp-shadow-overlay);
+  /* 与摸鱼的 m-menu 一致（--menu-*） */
+  padding: var(--menu-pad);
+  background-color: var(--menu-bg);
+  border: 1px solid var(--menu-border);
+  border-radius: var(--menu-radius);
+  box-shadow: var(--menu-shadow);
+  backdrop-filter: var(--glass-blur);
   outline: none;
   animation: fadeIn 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -32,7 +34,7 @@
   gap: var(--erp-space-3);
   min-height: 30px;
   padding: 0 var(--erp-space-2);
-  border-radius: var(--erp-radius-sm);
+  border-radius: var(--menu-item-radius);
   color: var(--erp-text-primary);
   font-size: var(--erp-font-size-sm);
   cursor: pointer;
@@ -72,7 +74,13 @@
 
 .item:hover,
 .item[data-highlighted] {
-  background-color: var(--erp-bg-subtle);
+  color: var(--accent);
+  background-color: var(--accent-10);
+}
+
+.item:hover .itemIcon,
+.item[data-highlighted] .itemIcon {
+  color: currentColor;
 }
 
 .item.danger {
@@ -96,7 +104,7 @@
 
 .separator {
   height: 1px;
-  background-color: var(--erp-border-subtle);
+  background-color: var(--hairline);
   margin: var(--erp-space-1) 0;
 }
 

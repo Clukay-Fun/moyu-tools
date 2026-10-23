@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  border-radius: var(--erp-radius-control);
+  border-radius: var(--btn-radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
   user-select: none;
@@ -13,7 +13,12 @@
     background-color var(--erp-transition-fast),
     border-color var(--erp-transition-fast),
     color var(--erp-transition-fast),
-    opacity var(--erp-transition-fast);
+    opacity var(--erp-transition-fast),
+    transform var(--dur-press) var(--ease-out);
+}
+
+.iconButton:active:not(:disabled):not([aria-disabled='true']) {
+  transform: scale(var(--press-scale));
 }
 
 .iconButton:focus-visible {
@@ -32,40 +37,44 @@
   font-size: var(--erp-font-size-base);
 }
 
+/* 外观与 m-btn--icon 一致（--btn-*） */
 .ghost {
   background-color: transparent;
-  color: var(--erp-text-secondary);
+  color: var(--btn-fg);
   border-color: transparent;
 }
 
 .ghost:hover:not(:disabled):not([aria-disabled='true']) {
-  background-color: var(--erp-bg-subtle);
-  color: var(--erp-text-primary);
+  background-color: var(--btn-quiet-hover-bg);
+  color: var(--btn-hover-fg);
 }
 
 .secondary {
-  background-color: var(--erp-bg-surface);
-  color: var(--erp-text-primary);
-  border-color: var(--erp-border-default);
+  background-color: var(--btn-bg);
+  color: var(--btn-fg);
+  border-color: var(--btn-border);
+  box-shadow: var(--btn-shadow);
 }
 
 .secondary:hover:not(:disabled):not([aria-disabled='true']) {
-  background-color: var(--erp-bg-subtle);
+  background-color: var(--btn-hover-bg);
+  border-color: var(--btn-hover-border);
+  color: var(--btn-hover-fg);
 }
 
 .danger {
   background-color: transparent;
-  color: var(--erp-danger);
+  color: var(--danger);
   border-color: transparent;
 }
 
 .danger:hover:not(:disabled):not([aria-disabled='true']) {
-  background-color: var(--erp-danger-bg);
+  background-color: color-mix(in srgb, var(--danger) 10%, transparent);
 }
 
 .iconButton:disabled,
 .iconButton[aria-disabled='true'] {
-  opacity: 0.45;
+  opacity: var(--btn-disabled-opacity);
   cursor: not-allowed;
 }
 

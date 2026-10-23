@@ -13,10 +13,11 @@
   width: 100%;
   height: 32px;
   padding: 0 var(--erp-space-2);
-  background-color: var(--erp-bg-surface);
-  border: 1px solid var(--erp-border-default);
-  border-radius: var(--erp-radius-control);
-  color: var(--erp-text-primary);
+  /* 触发器与 m-select 一致（--field-*），弹层与 m-menu 一致（--menu-*） */
+  background-color: var(--field-bg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  color: var(--field-fg);
   font-family: inherit;
   font-size: var(--erp-font-size-sm);
   cursor: pointer;
@@ -29,13 +30,14 @@
 }
 
 .trigger:hover:not(:disabled) {
-  border-color: var(--erp-border-bold, var(--erp-border-default));
+  border-color: var(--field-border-hover);
+  background-color: var(--field-bg-hover);
 }
 
 .trigger:focus-visible,
 .trigger[data-popup-open] {
-  border-color: var(--erp-accent);
-  box-shadow: var(--erp-focus-ring);
+  border-color: var(--accent);
+  box-shadow: var(--field-focus-ring);
 }
 
 .trigger:disabled {
@@ -45,7 +47,8 @@
 }
 
 .trigger.hasError {
-  border-color: var(--erp-danger);
+  border-color: color-mix(in srgb, var(--danger) 65%, transparent);
+  box-shadow: var(--field-invalid-ring);
 }
 
 .icon {
@@ -65,11 +68,12 @@
   min-width: var(--anchor-width, 140px);
   max-height: 260px;
   overflow-y: auto;
-  padding: var(--erp-space-1);
-  background-color: var(--erp-bg-surface);
-  border: 1px solid var(--erp-border-subtle);
-  border-radius: var(--erp-radius-md);
-  box-shadow: var(--erp-shadow-overlay);
+  padding: var(--menu-pad);
+  background-color: var(--menu-bg);
+  border: 1px solid var(--menu-border);
+  border-radius: var(--menu-radius);
+  box-shadow: var(--menu-shadow);
+  backdrop-filter: var(--glass-blur);
   outline: none;
 }
 
@@ -86,18 +90,19 @@
   justify-content: space-between;
   min-height: 30px;
   padding: 0 var(--erp-space-2);
-  border-radius: var(--erp-radius-sm);
+  border-radius: var(--menu-item-radius);
   color: var(--erp-text-primary);
   font-size: var(--erp-font-size-sm);
   cursor: pointer;
   user-select: none;
   outline: none;
-  transition: background-color var(--erp-transition-fast);
+  transition: background-color var(--erp-transition-fast), color var(--erp-transition-fast);
 }
 
 .item:hover,
 .item[data-highlighted] {
-  background-color: var(--erp-bg-subtle);
+  color: var(--accent);
+  background-color: var(--accent-10);
 }
 
 .item[data-disabled] {

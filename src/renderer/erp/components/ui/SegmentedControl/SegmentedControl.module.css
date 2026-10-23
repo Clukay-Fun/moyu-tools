@@ -2,9 +2,10 @@
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  background-color: var(--erp-bg-subtle);
-  border: 1px solid var(--erp-border-subtle);
-  border-radius: var(--erp-radius-control);
+  /* 外观与摸鱼的 m-segmented 一致（--seg-*）；高度保持库存的紧凑档 */
+  background-color: var(--seg-bg);
+  border: 1px solid transparent;
+  border-radius: var(--seg-radius);
   padding: 2px;
   gap: 2px;
   height: 32px;
@@ -22,11 +23,10 @@
   padding: 0 var(--erp-space-2-5);
   background-color: transparent;
   border: none;
-  border-radius: var(--erp-radius-sm);
-  color: var(--erp-text-secondary);
+  border-radius: var(--seg-item-radius);
+  color: var(--seg-fg);
   font-family: inherit;
   font-size: var(--erp-font-size-xs);
-  font-weight: var(--erp-font-weight-medium);
   cursor: pointer;
   user-select: none;
   outline: none;
@@ -38,7 +38,7 @@
 }
 
 .item:hover:not(.active):not(:disabled) {
-  color: var(--erp-text-primary);
+  color: var(--seg-on-fg);
 }
 
 .item:focus-visible {
@@ -46,9 +46,10 @@
 }
 
 .item.active {
-  background-color: var(--erp-bg-surface);
-  color: var(--erp-text-primary);
-  box-shadow: var(--erp-shadow-sm);
+  background-color: var(--seg-on-bg);
+  color: var(--seg-on-fg);
+  box-shadow: inset 0 0 0 1px var(--seg-on-border), var(--seg-on-shadow);
+  font-weight: 650;
 }
 
 .item:disabled {

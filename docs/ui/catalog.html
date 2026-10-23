@@ -560,6 +560,7 @@
       <div class="cat-item">
         <dl class="cat-meta">
           <dt>变量</dt><dd>组件只用 <code>--erp-*</code>，在 <code>src/renderer/erp/styles/erp.css</code> 映射到摸鱼变量（文字 <code>--foreground</code> / <code>--muted</code> / <code>--faint</code>、描边 <code>--hairline</code> / <code>--border-neutral</code>、强调色 <code>--accent</code>、圆角 <code>--r-sm</code> / <code>--r-md</code> / <code>--radius</code>、阴影 <code>--shadow-small</code> / <code>--shadow-panel</code>）。不要在组件里直接写摸鱼变量，也不要定义无前缀的同名变量（<code>--accent</code>、<code>--danger</code>、<code>--z-popover</code> 曾经撞名）。</dd>
+          <dt>外观对齐</dt><dd>通用组件的外观直接取摸鱼的组件语义变量（<code>01-tokens.css</code>）：Button / IconButton ↔ <code>--btn-*</code>（同 <code>m-btn</code>），SegmentedControl ↔ <code>--seg-*</code>，Input / Select 触发器 ↔ <code>--field-*</code>，Select / Menu 弹层 ↔ <code>--menu-*</code>，ConfirmDialog / Drawer ↔ <code>--dialog-*</code> 与 <code>--backdrop</code>，Card / Panel ↔ <code>--card-*</code>。尺寸保持库存的紧凑档（28 / 32）。改这些外观改摸鱼的变量即可，两边一起变</dd>
           <dt>状态色</dt><dd>入库蓝、出库琥珀、调整青、期初灰蓝、告急红是业务含义，固定取值、不随强调色变化；浅色 / 深色各一套。</dd>
           <dt>弹层</dt><dd>抽屉、对话框、下拉由 Base UI portal 到 <code>body</code>（<code>[data-base-ui-portal]</code>），层级 <code>--erp-z-*</code> 排在摸鱼弹层之上。</dd>
           <dt>输入框</dt><dd>外层容器画边框、内层 <code>input</code> 透明；摸鱼全局的 <code>input[type=text]</code> 边框在库存 / 定制范围内被复位。新写的输入框沿用这个结构。</dd>

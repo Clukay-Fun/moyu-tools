@@ -5,8 +5,7 @@
   justify-content: center;
   gap: var(--erp-space-1);
   font-family: inherit;
-  font-weight: var(--erp-font-weight-medium);
-  border-radius: var(--erp-radius-control);
+  border-radius: var(--btn-radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
   user-select: none;
@@ -17,7 +16,13 @@
     background-color var(--erp-transition-fast),
     border-color var(--erp-transition-fast),
     color var(--erp-transition-fast),
-    opacity var(--erp-transition-fast);
+    opacity var(--erp-transition-fast),
+    filter var(--erp-transition-fast),
+    transform var(--dur-press) var(--ease-out);
+}
+
+.button:active:not(:disabled):not([aria-disabled='true']) {
+  transform: scale(var(--press-scale));
 }
 
 .button:focus-visible {
@@ -33,60 +38,63 @@
 
 .md {
   height: 32px;
+  border-radius: var(--btn-radius);
   padding: 0 var(--erp-space-3);
   font-size: var(--erp-font-size-sm);
 }
 
-/* 变体：主要按钮（墨绿实心） */
+/* 外观与摸鱼的 m-btn 一致，数值取 01-tokens.css 的 --btn-*；尺寸保持库存的紧凑档 */
+
+/* 变体：主要按钮 = m-btn--primary */
 .primary {
-  background-color: var(--erp-accent);
-  color: var(--erp-accent-fg);
-  border-color: var(--erp-accent);
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border-color: var(--btn-primary-bg);
+  box-shadow: var(--btn-primary-shadow);
+  font-weight: 650;
 }
 
 .primary:hover:not(:disabled):not([aria-disabled='true']) {
-  background-color: var(--erp-accent-hover);
-  border-color: var(--erp-accent-hover);
+  filter: brightness(1.06);
 }
 
-.primary:active:not(:disabled):not([aria-disabled='true']) {
-  background-color: var(--erp-accent-active);
-  border-color: var(--erp-accent-active);
-}
-
-/* 变体：次要按钮（线框） */
+/* 变体：次要按钮 = m-btn */
 .secondary {
-  background-color: var(--erp-bg-surface);
-  color: var(--erp-text-primary);
-  border-color: var(--erp-border-default);
+  background-color: var(--btn-bg);
+  color: var(--btn-fg);
+  border-color: var(--btn-border);
+  box-shadow: var(--btn-shadow);
 }
 
 .secondary:hover:not(:disabled):not([aria-disabled='true']) {
-  background-color: var(--erp-bg-subtle);
-  border-color: var(--erp-border-default);
+  background-color: var(--btn-hover-bg);
+  border-color: var(--btn-hover-border);
+  color: var(--btn-hover-fg);
 }
 
-/* 变体：幽灵态按钮（无边框） */
+/* 变体：幽灵态按钮 = m-btn--quiet */
 .ghost {
   background-color: transparent;
-  color: var(--erp-text-secondary);
+  color: var(--btn-fg);
   border-color: transparent;
 }
 
 .ghost:hover:not(:disabled):not([aria-disabled='true']) {
-  background-color: var(--erp-bg-subtle);
-  color: var(--erp-text-primary);
+  background-color: var(--btn-quiet-hover-bg);
+  color: var(--btn-hover-fg);
 }
 
-/* 变体：危险操作按钮（默认红色线框，solid 模式下实心） */
+/* 变体：危险操作按钮 = m-btn--danger；solid 模式下实心 */
 .danger {
-  background-color: var(--erp-bg-surface);
-  color: var(--erp-danger);
-  border-color: var(--erp-danger);
+  background-color: var(--btn-bg);
+  color: var(--danger);
+  border-color: var(--btn-border);
+  box-shadow: var(--btn-shadow);
 }
 
 .danger:hover:not(:disabled):not([aria-disabled='true']) {
-  background-color: var(--erp-danger-bg);
+  background-color: color-mix(in srgb, var(--danger) 10%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 34%, transparent);
 }
 
 .dangerSolid {
@@ -102,7 +110,7 @@
 /* 禁用与只读态 */
 .button:disabled,
 .button[aria-disabled='true'] {
-  opacity: 0.45;
+  opacity: var(--btn-disabled-opacity);
   cursor: not-allowed;
 }
 
