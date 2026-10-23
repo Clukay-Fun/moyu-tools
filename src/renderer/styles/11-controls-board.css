@@ -369,9 +369,9 @@
   font-weight: 600;
 }
 
-.obj-danger { color: #c0453f; }
+.obj-danger { color: var(--danger); }
 @media (hover: hover) and (pointer: fine) {
-  .obj-danger:hover { color: var(--on-accent); background: #c0453f; }
+  .obj-danger:hover { color: var(--on-accent); background: var(--danger); }
 }
 .obj-btn[aria-pressed="true"] { color: var(--accent); background: var(--accent-10); }
 

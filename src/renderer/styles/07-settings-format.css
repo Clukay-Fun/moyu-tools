@@ -97,7 +97,7 @@
 .update-notice > .ic { width: 18px; height: 18px; color: var(--accent); }
 .update-notice-copy p { margin: 0; font-size: var(--fs-body); line-height: 1.5; }
 .update-notice-copy .version-hero-meta { margin-top: 6px; color: var(--faint); font-size: var(--fs-sm); }
-#update-status[data-status="up-to-date"] > .ic { color: #36a477; }
+#update-status[data-status="up-to-date"] > .ic { color: var(--success); }
 .update-notice .update-actions { flex: none; }
 .update-notice .gbtn[hidden] { display: none; }
 
@@ -440,15 +440,15 @@
 }
 
 .slider-row .red {
-  color: #e15357;
+  color: var(--channel-r);
 }
 
 .slider-row .green {
-  color: #3caa78;
+  color: var(--channel-g);
 }
 
 .slider-row .blue {
-  color: #527ae7;
+  color: var(--channel-b);
 }
 
 .slider-row input {
@@ -636,15 +636,15 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #e1a93c;
+  background: var(--warning);
 }
 
 .format-runtime-state.ready i {
-  background: #4aae82;
+  background: var(--success);
 }
 
 .format-runtime-state.error i {
-  background: #df5d63;
+  background: var(--danger);
 }
 
 .format-workspace {
@@ -747,11 +747,11 @@
 }
 
 .format-file-status.success {
-  color: #3c9a5e;
+  color: var(--success);
 }
 
 .format-file-status.error {
-  color: #d7525b;
+  color: var(--danger);
   cursor: help;
 }
 
@@ -771,7 +771,7 @@
 }
 
 .format-remove:hover {
-  color: #d7525b;
+  color: var(--danger);
   background: rgba(215, 82, 91, 0.1);
 }
 
@@ -906,7 +906,7 @@
 .format-cancel {
   min-width: 0;
   flex: 1;
-  color: #d7525b;
+  color: var(--danger);
 }
 
 .format-result-bar {

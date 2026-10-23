@@ -132,9 +132,9 @@
 .dieline-legend { display: flex; align-items: center; gap: 12px; }
 .dieline-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .dieline-legend i { display: inline-block; width: 18px; height: 2px; border-radius: 2px; }
-.dieline-legend .bleed-swatch { background: #3fb950; }
-.dieline-legend .cut-swatch { background: #2036c9; }
-.dieline-legend .crease-swatch { background: repeating-linear-gradient(90deg, #e5312b 0 4px, transparent 4px 7px); }
+.dieline-legend .bleed-swatch { background: var(--dieline-bleed); }
+.dieline-legend .cut-swatch { background: var(--dieline-cut); }
+.dieline-legend .crease-swatch { background: repeating-linear-gradient(90deg, var(--dieline-crease) 0 4px, transparent 4px 7px); }
 
 .dieline-canvas-actions { display: flex; align-items: center; gap: 6px; }
 .dieline-canvas-actions .gbtn { min-width: 30px; height: 28px; padding: 0 9px; }
@@ -196,8 +196,8 @@
 .dieline-sizes dd { margin: 0 0 3px; color: var(--foreground); font-weight: 650; font-variant-numeric: tabular-nums; }
 
 .dieline-annotation text { pointer-events: auto; cursor: pointer; }
-.dieline-annotation.secondary { color: #6b7390; stroke: #6b7390; opacity: 0.85; }
-.dieline-annotation.focus { color: #e5312b; stroke: #e5312b; opacity: 1; }
+.dieline-annotation.secondary { color: var(--muted); stroke: var(--muted); opacity: 0.85; }
+.dieline-annotation.focus { color: var(--dieline-crease); stroke: var(--dieline-crease); opacity: 1; }
 .dieline-annotation.focus text { font-weight: 800; }
 
 .dieline-empty,
@@ -207,7 +207,7 @@
   padding: 9px 12px;
   border-radius: 10px;
   background: rgba(224, 85, 78, 0.12);
-  color: #a8332c;
+  color: var(--danger);
   font-size: 11.5px;
 }
 
@@ -349,7 +349,7 @@
 .dieline-export-actions button { width: 100%; }
 .dieline-export button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 .dieline-export-status { margin: 0; color: var(--muted); font-size: 10.5px; line-height: 1.4; }
-.dieline-export-status.error { color: #a8332c; }
+.dieline-export-status.error { color: var(--danger); }
 
 [data-theme="dark"] .dieline-stage { background-color: rgba(11, 16, 27, 0.32); }
 [data-theme="dark"] .dieline-3d-stage { background: linear-gradient(180deg, rgba(20, 26, 40, 0.8), rgba(12, 16, 26, 0.9)); }

@@ -136,11 +136,11 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
 }
 
 .cell-progress.success {
-  color: #4a9a6a;
+  color: var(--success);
 }
 
 .cell-progress.busy {
-  color: #d49119;
+  color: var(--warning);
 }
 
 .cell-progress.error {
@@ -236,11 +236,11 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
 }
 
 .illustrator-status.success {
-  color: #4a9a6a;
+  color: var(--success);
 }
 
 .illustrator-status.busy {
-  color: #d49119;
+  color: var(--warning);
 }
 
 .illustrator-status.error {
@@ -248,7 +248,7 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
 }
 
 .illustrator-status.cancelled {
-  color: #8a8f9c;
+  color: var(--faint);
 }
 
 .illustrator-config {
@@ -509,17 +509,17 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #9da0b3;
+  background: var(--faint);
 }
 
 .result-dot.busy {
-  background: #e3a62a;
-  box-shadow: 0 0 0 4px rgba(227, 166, 42, 0.1);
+  background: var(--warning);
+  box-shadow: 0 0 0 var(--status-ring) color-mix(in srgb, var(--warning) 10%, transparent);
 }
 
 .result-dot.success {
-  background: #4a9a6a;
-  box-shadow: 0 0 0 4px rgba(74, 154, 106, 0.1);
+  background: var(--success);
+  box-shadow: 0 0 0 var(--status-ring) color-mix(in srgb, var(--success) 10%, transparent);
 }
 
 .result-dot.error {
@@ -731,11 +731,11 @@ body.keyboard-focus .toggle-wrap input:focus-visible + .toggle {
 }
 
 .barcode-message.success {
-  color: #4a9a6a;
+  color: var(--success);
 }
 
 .barcode-message.preview {
-  color: #b58900;
+  color: var(--warning);
 }
 
 .batch-input-field {

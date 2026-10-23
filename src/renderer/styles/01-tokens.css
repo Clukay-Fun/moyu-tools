@@ -1,0 +1,88 @@
+/* ══ 组件语义变量 ══════════════════════════════════════════
+   基础数值（颜色、圆角、字号、间距、阴影）只在 00-foundation.css 里写；
+   这里把它们映射成「某类组件用什么」，components/ 下的组件样式只引用这里的变量。
+   以后调整某类元素的外观（例如所有按钮的圆角）只改这里一处。
+
+   ⚠ 写在 body 上，不写在 :root：主题切换写的是 body[data-theme]。
+     定义在 :root 的变量在 :root 就算好了值，深色下继承的仍是浅色的结果。 */
+body {
+  /* 按钮 */
+  --btn-h-lg: var(--h-lg);
+  --btn-h-md: var(--h-md);
+  --btn-h-sm: var(--h-sm);
+  --btn-pad-x: var(--sp-4);
+  --btn-pad-x-sm: var(--sp-3);
+  --btn-gap: var(--sp-2);
+  --btn-radius: var(--r-md);
+  --btn-radius-sm: var(--r-sm);
+  --btn-font-size: inherit;
+  --btn-fg: var(--muted);
+  --btn-bg: var(--button-bg);
+  --btn-border: var(--button-border);
+  --btn-shadow: var(--button-shadow);
+  --btn-hover-fg: var(--accent);
+  --btn-hover-bg: var(--control-bg-active);
+  --btn-hover-border: var(--control-border-hover);
+  --btn-primary-fg: var(--on-accent);
+  --btn-primary-bg: var(--accent);
+  --btn-primary-shadow: 0 4px 12px var(--accent-28);
+  /* 透明按钮（工具条、图标按钮）：平时无底，悬停淡强调色，按下 / 选中更深一档 */
+  --btn-quiet-hover-bg: var(--accent-10);
+  --btn-quiet-pressed-bg: var(--accent-18);
+  --btn-disabled-opacity: 0.45;
+
+  /* 输入框、下拉、步进器 */
+  --field-h: var(--control-height);
+  --field-pad-x: 10px;
+  --field-radius: var(--r-sm);
+  --field-font-size: var(--fs-md);
+  --field-fg: var(--foreground);
+  --field-bg: var(--control-bg);
+  --field-bg-hover: var(--control-bg-hover);
+  --field-border: var(--control-border);
+  --field-border-hover: var(--control-border-hover);
+  --field-focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+  --field-invalid-ring: 0 0 0 3px color-mix(in srgb, var(--danger) 12%, transparent);
+
+  /* 分段切换 */
+  --seg-h-md: var(--h-md);
+  --seg-h-sm: var(--h-sm);
+  --seg-pad: var(--sp-1);
+  --seg-radius: var(--r-md);
+  --seg-item-radius: var(--r-sm);
+  --seg-bg: color-mix(in srgb, var(--foreground) 5%, transparent);
+  --seg-fg: var(--muted);
+  --seg-on-fg: var(--accent);
+  --seg-on-bg: var(--selection-bg);
+  --seg-on-border: var(--selection-border);
+  --seg-on-shadow: var(--glass-raised);
+
+  /* 卡片（工作区里的内容框） */
+  --card-radius: var(--frame-radius);
+  --card-bg: var(--surface-inner);
+  --card-border: var(--glass-border);
+  --card-shadow: var(--glass-highlight);
+
+  /* 弹出菜单 */
+  --menu-radius: var(--r-md);
+  --menu-pad: var(--sp-1);
+  --menu-bg: var(--menu-surface);
+  --menu-border: var(--border);
+  --menu-shadow: var(--shadow-small), var(--glass-rim);
+  --menu-item-h: var(--h-md);
+  --menu-item-radius: var(--r-sm);
+
+  /* 对话框 */
+  --dialog-radius: var(--workspace-radius);
+  --dialog-pad: var(--sp-5);
+  --dialog-bg: var(--card-solid);
+  --dialog-border: var(--border-neutral);
+  --dialog-shadow: var(--shadow-panel);
+  --backdrop: rgba(10, 14, 22, 0.36);
+
+  /* 标签、徽标 */
+  --badge-h: 20px;
+  --badge-pad-x: 7px;
+  --badge-radius: var(--r-full);
+  --badge-font-size: var(--fs-xs);
+}

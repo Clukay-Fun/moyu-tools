@@ -384,8 +384,8 @@ body[data-fullscreen="true"] .topbar {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #e1a93c;
-  box-shadow: 0 0 7px #e1a93c;
+  background: var(--warning);
+  box-shadow: 0 0 7px var(--warning);
 }
 
 .mochi time {

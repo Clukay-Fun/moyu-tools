@@ -68,6 +68,22 @@
   --muted: #707387;
   --faint: #9da0b3;
   --danger: #d54f50;
+  /* 状态色：成功 / 进行中、待处理 / 信息。原来各页面各写各的绿、琥珀、红（#4a9a6a、#3c9a5e、#4aae82、
+     #d49119、#e3a62a、#d7525b、#a8332c…），统一收到这里 */
+  --success: #3f9a66;
+  --warning: #d49119;
+  --info: #527ae7;
+  --status-ring: 4px;
+  /* 业务固定色：含义不随主题变 */
+  --channel-r: #e15357;
+  --channel-g: #3caa78;
+  --channel-b: #527ae7;
+  --dieline-bleed: #3fb950;
+  --dieline-cut: #2036c9;
+  --dieline-crease: #e5312b;
+  --brand-ai-bg: #ff7c00;
+  --brand-ps-bg: #001e36;
+  --brand-ps-fg: #31c5f0;
   --on-accent: #fff;
   --accent-default: #6978e6;
   --canvas-line-light: #dce1eb;
@@ -248,6 +264,9 @@
   --muted: #a8b3c7;
   --faint: #758198;
   --danger: #e36a6c;
+  --success: #5bbd88;
+  --warning: #e0a458;
+  --info: #7ea2f0;
   /* 引用了 --foreground 的变量必须在主题块里重新声明，否则继承的是 :root 上按浅色算好的值 */
   --border-neutral: color-mix(in srgb, var(--foreground) 13%, transparent);
   --border-neutral-hover: color-mix(in srgb, var(--foreground) 22%, transparent);

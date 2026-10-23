@@ -185,5 +185,5 @@
   margin: 6px 0 0;
   font-size: var(--fs-sm);
   line-height: 1.5;
-  color: var(--muted, #7b7f92);
+  color: var(--muted);
 }
