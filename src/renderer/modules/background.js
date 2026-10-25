@@ -156,7 +156,6 @@ export function initBackgroundSettings({ onChange = () => {}, notify = () => {},
     root.style.setProperty('--app-bg-angle', `${settings.angle}deg`)
     root.style.setProperty('--glass-opacity', String(settings.alpha / 100))
     root.style.setProperty('--glass-blur-px', `${settings.blur}px`)
-    onChange()
   }
 
   function render() {
@@ -194,6 +193,8 @@ export function initBackgroundSettings({ onChange = () => {}, notify = () => {},
     for (const input of [color1, color1Hex, color2, color2Hex]) input.disabled = !custom
     color2Field.hidden = settings.mode === 'solid'
     angleField.hidden = settings.mode !== 'gradient'
+    // 单选项等界面状态都更新完再通知（摘要读的是当前选中的样式）
+    onChange()
   }
 
   function update(patch) {
