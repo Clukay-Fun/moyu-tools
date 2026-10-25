@@ -11,35 +11,52 @@
   min-width: 0;
   min-height: 0;
   flex: 1 1 auto;
-  grid-template-columns: 200px minmax(0, 1fr) minmax(300px, 340px);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
   gap: 11px;
 }
 
-.dieline-presets,
 .dieline-canvas-card,
 .dieline-3d-card,
-.dieline-params,
-.dieline-export {
+.dieline-params {
   min-width: 0;
   min-height: 0;
   border-radius: 16px;
   background: var(--card);
 }
 
-.dieline-presets {
+/* ══ 预设栏 ══
+   刀模的二级栏：和 .submenu 同一种书签抽屉（同表面、同毛玻璃，和工作区接成一个面），
+   比文字二级栏宽，放得下缩略图。列表项不描边，选中和 .submenu-indicator 同一种底板。 */
+.dieline-drawer {
   display: flex;
+  width: 200px;
+  min-height: 0;
+  flex-shrink: 0;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  margin-bottom: 8px;
   padding: 12px;
   overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-right: 0;
+  border-radius: var(--drawer-radius) 0 0 var(--drawer-radius);
+  background: var(--workspace-bg);
+  box-shadow: var(--drawer-shadow), var(--glass-highlight);
 }
 
-.dieline-presets h2 {
-  margin: 0;
-  color: var(--foreground);
-  font-size: var(--fs-md);
-  font-weight: 700;
-  letter-spacing: 0.02em;
+.dieline-drawer[hidden] { display: none; }
+
+.dieline-drawer .submenu-heading { padding-top: 0; }
+
+/* 外观用全局输入框（field.css），这里只定尺寸 */
+#dieline-preset-search {
+  min-width: 0;
+  height: var(--field-h);
+  flex: none;
+  padding: 0 var(--field-pad-x);
+  border-radius: var(--field-radius);
+  font: inherit;
+  font-size: var(--field-font-size);
 }
 
 /* 参数区没有分组大标题，每个字段自己的标题就是层级（与参考站一致） */
@@ -53,7 +70,6 @@
 
 .dieline-field { display: grid; gap: 5px; }
 
-.dieline-presets input[type="search"],
 .dieline-params select {
   min-width: 0;
   height: 34px;
@@ -67,7 +83,6 @@
   font-size: var(--fs-md);
 }
 
-.dieline-presets input[type="search"]:focus-visible,
 .dieline-params select:focus-visible {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
@@ -78,18 +93,23 @@
   min-height: 0;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  margin: 0 -4px;
+  padding: 0 4px;
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .dieline-preset {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  gap: 8px;
+  min-height: 56px;
+  flex: none;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 10px;
   align-items: center;
-  padding: 7px;
-  border: 1px solid var(--hairline);
-  border-radius: 12px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
   background: transparent;
   color: var(--foreground);
   text-align: left;
@@ -97,11 +117,13 @@
   font: inherit;
 }
 
-.dieline-preset:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
-.dieline-preset.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
-.dieline-preset svg { width: 44px; height: 44px; display: block; }
-.dieline-preset b { display: block; font-size: var(--fs-md); }
-.dieline-preset span { display: block; color: var(--muted); font-size: var(--fs-xs); line-height: 1.35; }
+.dieline-preset:hover { background: var(--accent-10); }
+.dieline-preset.selected { border-color: var(--accent-18); background: var(--accent-10); }
+[data-theme="dark"] .dieline-preset.selected { border-color: var(--accent-28); background: var(--accent-18); }
+.dieline-preset.selected b { color: var(--accent); }
+.dieline-preset svg { width: 40px; height: 40px; display: block; }
+.dieline-preset b { display: block; font-size: var(--fs-body); font-weight: 600; line-height: 1.35; }
+.dieline-preset span { display: block; color: var(--muted); font-size: var(--fs-sm); line-height: 1.4; }
 
 .dieline-canvas-card {
   display: flex;
@@ -207,7 +229,7 @@
   display: grid;
   min-width: 0;
   min-height: 0;
-  grid-template-rows: minmax(220px, 40%) minmax(0, 1fr) auto;
+  grid-template-rows: minmax(220px, 40%) minmax(0, 1fr);
   gap: 11px;
 }
 
@@ -272,14 +294,31 @@
 .dieline-fold-jump button:hover:not(:disabled) { color: var(--foreground); background: color-mix(in srgb, var(--foreground) 10%, transparent); }
 .dieline-fold-jump button.active { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
 
+/* 参数和导出同一张卡：参数区滚动，按组排，组间一条分隔线；导出固定在卡底 */
 .dieline-params {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 12px;
+  overflow: hidden;
+}
+
+.dieline-params-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding: 0 14px;
   overflow: auto;
 }
-.dieline-params > * { flex: 0 0 auto; }
+
+.dieline-param-group {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 12px;
+  padding: 14px 0;
+}
+
+.dieline-param-group + .dieline-param-group { border-top: 1px solid var(--hairline); }
+.dieline-param-group[hidden] { display: none; }
 
 .dieline-param-head { display: flex; align-items: center; justify-content: space-between; }
 
@@ -302,8 +341,10 @@
 
 .dieline-export {
   display: grid;
+  flex: 0 0 auto;
   gap: 8px;
-  padding: 12px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid var(--hairline);
 }
 .dieline-export-actions { display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; }
 .dieline-export-actions button { width: 100%; }
@@ -315,14 +356,14 @@
 [data-theme="dark"] .dieline-3d-stage { background: linear-gradient(180deg, rgba(20, 26, 40, 0.8), rgba(12, 16, 26, 0.9)); }
 
 @media (max-width: 1180px) {
-  .dieline-workbench { grid-template-columns: 180px minmax(0, 1fr) minmax(280px, 320px); }
+  .dieline-workbench { grid-template-columns: minmax(0, 1fr) minmax(280px, 320px); }
 }
 
 @media (max-width: 860px) {
   .page-dieline { overflow: auto; }
   .dieline-workbench { display: flex; flex-direction: column; }
-  .dieline-presets, .dieline-canvas-card, .dieline-side { flex: 0 0 auto; }
+  .dieline-canvas-card, .dieline-side { flex: 0 0 auto; }
   .dieline-canvas-card { min-height: 380px; }
-  .dieline-side { grid-template-rows: 260px auto auto; }
-  .dieline-params { max-height: 360px; }
+  .dieline-side { grid-template-rows: 260px auto; }
+  .dieline-params { max-height: 460px; }
 }

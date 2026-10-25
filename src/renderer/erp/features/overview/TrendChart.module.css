@@ -8,9 +8,11 @@
 .legend {
   display: flex;
   align-items: center;
-  gap: var(--erp-space-4);
-  margin-bottom: var(--erp-space-2);
-  font-size: var(--erp-font-size-xs);
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 26px;
+  margin-top: var(--erp-space-3);
+  font-size: var(--erp-font-size-sm);
   color: var(--erp-text-secondary);
 }
 
@@ -21,7 +23,7 @@
 }
 
 .legendLine {
-  width: 16px;
+  width: 12px;
   height: 2px;
   border-radius: 1px;
 }
@@ -32,12 +34,6 @@
 
 .outLine {
   background-color: var(--erp-chart-out);
-}
-
-.unit {
-  margin-left: auto;
-  color: var(--erp-text-tertiary);
-  font-size: 11px;
 }
 
 .plot {

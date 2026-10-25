@@ -44,8 +44,8 @@ export interface StatCardProps {
   changePercentage?: number | null
   /** 点击回调 */
   onClick?: () => void
-  /** 尺寸：md 概览 KPI（28px），sm 抽屉内概要（20px） */
-  size?: 'md' | 'sm'
+  /** 尺寸：lg 概览 KPI（32px），md 常规（28px），sm 抽屉内概要（20px） */
+  size?: 'lg' | 'md' | 'sm'
   /** 自定义类名 */
   className?: string
 }
@@ -75,7 +75,7 @@ export function StatCard({
 
   return (
     <div
-      className={`${styles.statCard} ${size === 'sm' ? styles.small : ''} ${isClickable ? styles.clickable : ''} ${className}`}
+      className={`${styles.statCard} ${size === 'sm' ? styles.small : size === 'lg' ? styles.large : ''} ${isClickable ? styles.clickable : ''} ${className}`}
       onClick={onClick}
       role={isClickable ? 'button' : undefined}
       tabIndex={isClickable ? 0 : undefined}

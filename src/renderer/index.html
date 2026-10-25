@@ -103,6 +103,13 @@
 
           <aside class="submenu" id="submenu" aria-label="模块功能"></aside>
 
+          <!-- 刀模的二级栏：预设列表。和 .submenu 同一种书签抽屉，只在刀模模块显示（main.js activateModule） -->
+          <aside class="dieline-drawer" id="dieline-presets" aria-label="刀模预设" hidden>
+            <div class="submenu-heading">预设</div>
+            <input id="dieline-preset-search" type="search" placeholder="搜索模板" aria-label="搜索模板" autocomplete="off" />
+            <div class="dieline-preset-list" id="dieline-preset-list" role="listbox" aria-label="模板列表"></div>
+          </aside>
+
           <main class="content">
             <div class="pages">
               <section class="page page-home active" id="page-home" aria-labelledby="home-slogan">
@@ -671,12 +678,6 @@
               <section class="page page-dieline" id="page-dieline">
 
                 <div class="dieline-workbench">
-                  <aside class="m-card dieline-presets" id="dieline-presets" aria-label="预设资源">
-                    <h2>预设</h2>
-                    <input id="dieline-preset-search" type="search" placeholder="搜索模板" aria-label="搜索模板" autocomplete="off" />
-                    <div class="dieline-preset-list" id="dieline-preset-list" role="listbox" aria-label="模板列表"></div>
-                  </aside>
-
                   <section class="m-card dieline-canvas-card" aria-label="2D 刀模">
                     <header class="dieline-canvas-toolbar">
                       <div class="dieline-legend">
@@ -727,51 +728,56 @@
                       </div>
                     </section>
 
+                    <!-- 参数和导出同一张卡：参数按「尺寸 / 材料 / 结构」分组，组间一条分隔线；导出固定在卡底 -->
                     <section class="m-card dieline-params" id="dieline-params" aria-label="自定义参数">
-                      <div class="dieline-param-head">
-                        <span class="dieline-field-label">尺寸</span>
-                        <div class="m-segmented m-segmented--sm dieline-unit-switch" role="group" aria-label="单位">
-                          <button type="button" class="selected" data-dieline-unit="mm" aria-pressed="true">mm</button>
-                          <button type="button" data-dieline-unit="in" aria-pressed="false">in</button>
+                      <div class="dieline-params-body">
+                        <div class="dieline-param-group">
+                          <div class="dieline-param-head">
+                            <span class="dieline-field-label">尺寸</span>
+                            <div class="m-segmented m-segmented--sm dieline-unit-switch" role="group" aria-label="单位">
+                              <button type="button" class="selected" data-dieline-unit="mm" aria-pressed="true">mm</button>
+                              <button type="button" data-dieline-unit="in" aria-pressed="false">in</button>
+                            </div>
+                          </div>
+                          <div class="dieline-dimension-grid triple">
+                            <label>长度<span class="m-field-unit"><input id="dieline-length" data-param="length" type="number" step="0.1" /><em data-unit-label>mm</em></span></label>
+                            <label>宽度<span class="m-field-unit"><input id="dieline-width" data-param="width" type="number" step="0.1" /><em data-unit-label>mm</em></span></label>
+                            <label>高度<span class="m-field-unit"><input id="dieline-height" data-param="height" type="number" step="0.1" /><em data-unit-label>mm</em></span></label>
+                          </div>
+                          <div class="dieline-field">尺寸类型
+                            <div class="m-segmented m-segmented--sm dieline-size-type" role="group" aria-label="尺寸类型">
+                              <button type="button" class="selected" data-dieline-size-type="manufacturing" aria-pressed="true" title="刀版尺寸，结构图上标注的尺寸">制造尺寸</button>
+                              <button type="button" data-dieline-size-type="inner" aria-pressed="false" title="包装能容纳的尺寸，通常小于制造尺寸">内尺寸</button>
+                              <button type="button" data-dieline-size-type="outer" aria-pressed="false" title="包装占用的空间，通常大于制造尺寸">外尺寸</button>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div class="dieline-dimension-grid triple">
-                        <label>长度<span class="m-field-unit"><input id="dieline-length" data-param="length" type="number" step="0.1" /><em data-unit-label>mm</em></span></label>
-                        <label>宽度<span class="m-field-unit"><input id="dieline-width" data-param="width" type="number" step="0.1" /><em data-unit-label>mm</em></span></label>
-                        <label>高度<span class="m-field-unit"><input id="dieline-height" data-param="height" type="number" step="0.1" /><em data-unit-label>mm</em></span></label>
-                      </div>
 
-                      <div class="dieline-dimension-grid">
-                        <label>纸板厚度
-                          <span class="m-stepper">
-                            <button type="button" id="dieline-thickness-dec" aria-label="减小厚度">−</button>
-                            <input id="dieline-thickness" data-param="thickness" type="number" step="0.1" />
-                            <button type="button" id="dieline-thickness-inc" aria-label="增大厚度">+</button>
-                          </span>
-                        </label>
-                        <label>出血宽度<span class="m-field-unit"><input id="dieline-bleed" data-param="bleed" type="number" step="0.5" /><em>mm</em></span></label>
-                      </div>
-
-                      <label class="dieline-field">材质<select id="dieline-material" data-param="material"></select></label>
-
-                      <div class="dieline-field">尺寸类型
-                        <div class="m-segmented m-segmented--sm dieline-size-type" role="group" aria-label="尺寸类型">
-                          <button type="button" class="selected" data-dieline-size-type="manufacturing" aria-pressed="true" title="刀版尺寸，结构图上标注的尺寸">制造尺寸</button>
-                          <button type="button" data-dieline-size-type="inner" aria-pressed="false" title="包装能容纳的尺寸，通常小于制造尺寸">内尺寸</button>
-                          <button type="button" data-dieline-size-type="outer" aria-pressed="false" title="包装占用的空间，通常大于制造尺寸">外尺寸</button>
+                        <div class="dieline-param-group">
+                          <div class="dieline-dimension-grid">
+                            <label>纸板厚度
+                              <span class="m-stepper">
+                                <button type="button" id="dieline-thickness-dec" aria-label="减小厚度">−</button>
+                                <input id="dieline-thickness" data-param="thickness" type="number" step="0.1" />
+                                <button type="button" id="dieline-thickness-inc" aria-label="增大厚度">+</button>
+                              </span>
+                            </label>
+                            <label>出血宽度<span class="m-field-unit"><input id="dieline-bleed" data-param="bleed" type="number" step="0.5" /><em>mm</em></span></label>
+                          </div>
+                          <label class="dieline-field">材质<select id="dieline-material" data-param="material"></select></label>
                         </div>
+
+                        <div class="dieline-dimension-grid triple dieline-param-group" id="dieline-structure-params"></div>
                       </div>
 
-                      <div class="dieline-dimension-grid triple" id="dieline-structure-params"></div>
-                    </section>
-
-                    <section class="m-card dieline-export" aria-label="导出与发送">
-                      <label class="dieline-check"><input id="dieline-export-annotations" type="checkbox" checked />包含尺寸标注</label>
-                      <div class="dieline-export-actions">
-                        <button class="m-btn m-btn--primary" id="dieline-export-pdf" type="button">导出 PDF</button>
-                        <button class="m-btn" id="dieline-export-ai" type="button" disabled title="在 Illustrator 中打开刀模，不自动保存文件">发送到 AI</button>
-                      </div>
-                      <p class="dieline-export-status" id="dieline-export-status" aria-live="polite">1:1 矢量刀模 · 页面按展开尺寸生成</p>
+                      <footer class="dieline-export" aria-label="导出与发送">
+                        <label class="dieline-check"><input id="dieline-export-annotations" type="checkbox" checked />包含尺寸标注</label>
+                        <div class="dieline-export-actions">
+                          <button class="m-btn m-btn--primary" id="dieline-export-pdf" type="button">导出 PDF</button>
+                          <button class="m-btn" id="dieline-export-ai" type="button" disabled title="在 Illustrator 中打开刀模，不自动保存文件">发送到 AI</button>
+                        </div>
+                        <p class="dieline-export-status" id="dieline-export-status" aria-live="polite">1:1 矢量刀模 · 页面按展开尺寸生成</p>
+                      </footer>
                     </section>
                   </div>
                 </div>

@@ -1,23 +1,119 @@
+/* 一行：日期范围 · 三个单选 · 日期框；放不下时整体换行，日期框里的两个日期始终横排 */
 .wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2) 18px;
+  flex-wrap: wrap;
+}
+
+.label {
+  color: var(--erp-text-primary);
+  font-size: var(--erp-font-size-base);
+  font-weight: var(--erp-font-weight-semibold);
+  white-space: nowrap;
+}
+
+.radios {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.radio {
   display: inline-flex;
   align-items: center;
   gap: var(--erp-space-2);
-  flex-wrap: wrap;
+  padding: var(--erp-space-1) 0;
+  border: 0;
+  background: none;
+  color: var(--erp-text-secondary);
+  font: inherit;
+  font-size: var(--erp-font-size-base);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.radio:hover,
+.radio[aria-checked='true'] {
+  color: var(--erp-text-primary);
+}
+.radio:focus-visible {
+  outline: 2px solid var(--erp-accent);
+  outline-offset: 3px;
+  border-radius: var(--erp-radius-xs);
 }
 
-.custom {
+.circle {
   display: inline-flex;
   align-items: center;
-  gap: var(--erp-space-1-5);
-  flex-wrap: wrap;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--erp-border-bold);
+  border-radius: var(--erp-radius-full);
+  background: var(--field-bg);
+  box-sizing: border-box;
+}
+.radio[aria-checked='true'] .circle {
+  border-color: var(--erp-accent);
+}
+.radio[aria-checked='true'] .circle::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: var(--erp-radius-full);
+  background: var(--erp-accent);
+}
+
+/* 日期框：和输入框同一套描边与圆角，里面两个原生日期选择不再各自画框 */
+.range {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  height: 34px;
+  padding: 0 var(--erp-space-2-5);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  background: var(--field-bg);
+  box-sizing: border-box;
+}
+.range:focus-within {
+  border-color: var(--erp-accent);
+  box-shadow: var(--field-focus-ring);
+}
+.range input {
+  width: 118px;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--erp-text-primary);
+  font-family: var(--erp-font-mono);
+  font-size: var(--erp-font-size-sm);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+.range input:disabled {
+  color: var(--erp-text-tertiary);
+  -webkit-text-fill-color: var(--erp-text-tertiary);
+  cursor: default;
+}
+.range input::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+  cursor: pointer;
+}
+.range input:disabled::-webkit-calendar-picker-indicator {
+  opacity: 0.25;
+  cursor: default;
 }
 
 .sep {
-  font-size: var(--erp-font-size-xs);
+  font-size: var(--erp-font-size-sm);
   color: var(--erp-text-tertiary);
 }
 
 .error {
-  font-size: var(--erp-font-size-xs);
+  font-size: var(--erp-font-size-sm);
   color: var(--erp-danger);
 }

@@ -2,12 +2,12 @@
  * 描述: 日期区间筛选（近 7 天 / 近 30 天 / 自定义）
  * 主要功能:
  *   - 概览的趋势图和最近单据各用一份，状态互不影响
+ *   - 一行排开：「日期范围」+ 三个单选 + 常驻的「开始 至 结束」日期框；非自定义时日期框只读显示当前区间
  *   - 自定义区间必填，并校验起始日期不晚于结束日期
  */
 
 import { useState, type ReactElement } from 'react'
-import { DateInput, type DateRange } from '../DatePicker'
-import { SegmentedControl } from '../SegmentedControl'
+import type { DateRange } from '../DatePicker'
 import { shiftDate, todayString } from '@erp/lib/format'
 import styles from './RangeFilter.module.css'
 
@@ -58,26 +58,50 @@ export function RangeFilter({ value, onChange, label }: RangeFilterProps): React
     if (next.from && next.to && next.from <= next.to) onChange(next)
   }
 
+  const isCustom = preset === 'custom'
+  const shown = isCustom ? custom : value
+
   return (
     <div className={styles.wrap} role="group" aria-label={label}>
-      <SegmentedControl options={OPTIONS} value={preset} onChange={choose} />
-      {preset === 'custom' && (
-        <div className={styles.custom}>
-          <DateInput
-            aria-label="开始日期"
-            value={custom.from}
-            max={custom.to || undefined}
-            onChange={(e) => changeCustom({ ...custom, from: e.target.value })}
-          />
-          <span className={styles.sep}>至</span>
-          <DateInput
-            aria-label="结束日期"
-            value={custom.to}
-            min={custom.from || undefined}
-            onChange={(e) => changeCustom({ ...custom, to: e.target.value })}
-          />
-          {!valid && <span className={styles.error}>起止日期必填，且起始不能晚于结束</span>}
-        </div>
+      <span className={styles.label}>日期范围</span>
+      <div className={styles.radios} role="radiogroup" aria-label={`${label}预设`}>
+        {OPTIONS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={preset === option.value}
+            className={styles.radio}
+            onClick={() => choose(option.value)}
+          >
+            <span className={styles.circle} aria-hidden="true" />
+            {option.label}
+          </button>
+        ))}
+      </div>
+      <div className={styles.range}>
+        <input
+          type="date"
+          aria-label="开始日期"
+          value={shown.from}
+          max={shown.to || undefined}
+          disabled={!isCustom}
+          onChange={(e) => changeCustom({ ...custom, from: e.target.value })}
+        />
+        <span className={styles.sep}>至</span>
+        <input
+          type="date"
+          aria-label="结束日期"
+          value={shown.to}
+          min={shown.from || undefined}
+          disabled={!isCustom}
+          onChange={(e) => changeCustom({ ...custom, to: e.target.value })}
+        />
+      </div>
+      {!valid && (
+        <span className={styles.error} role="alert">
+          起止日期必填，且起始不能晚于结束
+        </span>
       )}
     </div>
   )

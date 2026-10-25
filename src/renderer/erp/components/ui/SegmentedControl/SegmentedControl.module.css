@@ -20,7 +20,7 @@
   justify-content: center;
   gap: var(--erp-space-1);
   height: 26px;
-  padding: 0 var(--erp-space-2-5);
+  padding: 0 var(--erp-space-2);
   background-color: transparent;
   border: none;
   border-radius: var(--seg-item-radius);

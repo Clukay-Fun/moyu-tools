@@ -1,9 +1,10 @@
 /**
  * 描述: 单据列表页 (DocumentsPage)
  * 主要功能:
- *   - 单行紧凑工具条：开单、类型、状态、日期、搜索、总数与「更多」
- *   - 「更多」里提供导出当前列表 CSV（按当前筛选，前端生成）与清除筛选条件
- *   - 9 列完整保留，窄窗口下表格横向滚动；点击一行打开真实单据弹窗
+ *   - 表格卡顶部一行筛选条：类型、状态、日期、搜索、总数，右侧固定「开单」与「更多」；
+ *     放不下时自动换行，操作区仍靠右；下面是 9 列表格（表格自己横向滚动）和底栏计数
+ *   - 「更多」里提供导出当前列表 CSV（按当前筛选，主进程生成）与清除筛选条件
+ *   - 窄窗口下表格横向滚动；点击一行打开真实单据弹窗
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -187,7 +188,6 @@ export function DocumentsPage(): React.JSX.Element {
 
       <main className={styles.mainPanel}>
         <div className={styles.toolbar}>
-          <NewDocumentButton />
           <SegmentedControl options={TYPE_OPTIONS} value={type} onChange={setType} />
           <SegmentedControl
             options={[
@@ -210,11 +210,14 @@ export function DocumentsPage(): React.JSX.Element {
             />
           </div>
           <span className={styles.count}>{loading ? '正在筛选…' : `共 ${total} 张`}</span>
-          <Menu
-            align="end"
-            trigger={<IconButton label="更多" icon={<MoreVertical size={16} />} variant="secondary" />}
-            items={moreItems}
-          />
+          <div className={styles.toolActions}>
+            <NewDocumentButton />
+            <Menu
+              align="end"
+              trigger={<IconButton label="更多" icon={<MoreVertical size={16} />} variant="secondary" />}
+              items={moreItems}
+            />
+          </div>
         </div>
 
         {error && <p className={styles.error}>读取失败：{error}</p>}
@@ -232,11 +235,11 @@ export function DocumentsPage(): React.JSX.Element {
                 <th className={styles.colType}>类型</th>
                 <th className={styles.colNo}>单号</th>
                 <th className={styles.colStatus}>状态</th>
-                <th>渠道 · 订单号</th>
+                <th className={styles.colChannel}>渠道 · 订单号</th>
                 <th className={`${styles.num} ${styles.colQty}`}>数量</th>
                 <th className={`${styles.num} ${styles.colMoney}`}>金额</th>
-                <th className={`${styles.num} ${styles.colMoney}`}>毛利</th>
-                <th className={styles.colNote}>备注</th>
+                <th className={`${styles.num} ${styles.colProfit}`}>毛利</th>
+                <th>备注</th>
               </tr>
             </thead>
             <tbody>
@@ -288,6 +291,8 @@ export function DocumentsPage(): React.JSX.Element {
             </tbody>
           </table>
         </div>
+
+        {docs && <footer className={styles.footer}>显示 {visible.length} 张单据</footer>}
       </main>
     </div>
   )

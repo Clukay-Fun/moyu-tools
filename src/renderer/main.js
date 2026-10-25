@@ -432,6 +432,7 @@ const formatFactoryModule = initFormatFactory({ state, renderSubmenu, showToast,
 
 const submenu = document.querySelector('#submenu')
 const settingsNav = document.querySelector('#settings-nav')
+const dielinePresets = document.querySelector('#dieline-presets')
 const searchInput = document.querySelector('#feature-search')
 const searchResults = document.querySelector('#search-results')
 const searchTrigger = document.querySelector('#search-trigger')
@@ -857,6 +858,7 @@ function activateModule(module, action = '', animate = false) {
   document.body.classList.toggle('home-active', module === 'home')
   document.body.classList.toggle('settings-mode', module === 'more')
   settingsNav.hidden = module !== 'more'
+  dielinePresets.hidden = module !== 'dieline'
   if (module !== 'home') resetHomeParallax()
   if (module !== 'dieline') dielineModule?.deactivate()
   state.module = module

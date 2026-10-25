@@ -45,8 +45,9 @@ export function initDieline({ showToast }) {
   if (!page) return null
 
   const query = (selector) => page.querySelector(selector)
-  const presetList = query('#dieline-preset-list')
-  const presetSearch = query('#dieline-preset-search')
+  // 预设列表是刀模的二级栏，在工作区外面（index.html #dieline-presets）
+  const presetList = document.querySelector('#dieline-preset-list')
+  const presetSearch = document.querySelector('#dieline-preset-search')
   const stage = query('#dieline-stage')
   const svg = query('#dieline-svg')
   const sizesList = query('#dieline-sizes')

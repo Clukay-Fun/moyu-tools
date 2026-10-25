@@ -43,8 +43,10 @@
   --workspace-bg: rgb(var(--surface-rgb) / var(--glass-opacity));
   --surface-inner: rgb(var(--surface-rgb) / var(--glass-inner-opacity));
   --workspace-radius: 20px;
-  /* 三层抽屉：顶栏高 = 一级导航宽；二级栏是书签，左侧圆角 */
+  /* 三层抽屉：一级导航宽 56；顶栏高 52 = 最高的控件（搜索 36）上下各留 8，和顶栏左右内边距一致。
+     改顶栏高度要同步主进程 TITLEBAR_HEIGHT 和 macOS 红黄绿的 y（src/main/index.js） */
   --shell-bar: 56px;
+  --shell-topbar: 52px;
   --drawer-radius: 16px;
   /* 书签阴影往左、上下散；抽屉主体的阴影更轻，且只往右下（负扩散），不压到书签上 */
   --drawer-shadow: -5px 3px 16px rgba(40, 50, 85, 0.06);

@@ -103,7 +103,7 @@ body[data-bg="classic"] .panel {
   position: relative;
   z-index: var(--z-chrome);
   display: flex;
-  height: var(--shell-bar);
+  height: var(--shell-topbar);
   flex: none;
   align-items: center;
   justify-content: space-between;
@@ -400,7 +400,7 @@ body[data-fullscreen="true"] .topbar {
 }
 
 /* 一级导航：无框。不铺底色、不描边、不加阴影，直接压在窗口背景上，和顶栏连成一个 L 形底层。
-   宽度与顶栏高度同为 --shell-bar（56px）；40 的按钮居中，两侧各 8px。
+   宽度 --shell-bar（56px）；40 的按钮居中，两侧各 8px。
    模块列表单独滚动，头像固定在底部，窗口再矮也不会被挤出去。 */
 .rail {
   position: relative;
@@ -748,7 +748,7 @@ body[data-fullscreen="true"] .topbar {
 }
 
 /* 两个主容器做背景模糊；浅灰背景背后没有可模糊的东西，不做 */
-body:not([data-bg="plain"]) :is(.content, .submenu, .settings-nav) {
+body:not([data-bg="plain"]) :is(.content, .submenu, .settings-nav, .dieline-drawer) {
   backdrop-filter: blur(var(--glass-blur-px)) saturate(140%);
 }
 
@@ -761,9 +761,10 @@ body.home-active .content {
 }
 
 /* 有二级栏时工作区是抽屉的主体：左侧直角，和书签接成一个面，左边保留一条描边作为书签和内容的分隔线；
-   阴影只往右下走（负扩散抵掉左侧），不压到书签上 */
+   阴影只往右下走（负扩散抵掉左侧），不压到书签上。刀模的预设栏（.dieline-drawer）也是二级栏 */
 body.settings-mode .content,
-.submenu.show + .content {
+.submenu.show ~ .content,
+.dieline-drawer:not([hidden]) + .content {
   border-left-color: var(--drawer-divider);
   border-radius: 0 var(--workspace-radius) var(--workspace-radius) 0;
   box-shadow: var(--drawer-body-shadow), var(--glass-highlight);

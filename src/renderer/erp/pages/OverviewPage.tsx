@@ -5,6 +5,7 @@
  *   - 四张 KPI：出库额、出库毛利、当前库存成本、最短可售天数
  *   - 全宽出入库趋势双折线，拥有独立的近 7 天 / 近 30 天 / 自定义区间
  *   - 全宽最近单据表格，日期筛选与趋势互不影响
+ *   - 排版按《综合页》概览原型：卡头只放标题，日期筛选单独一行放在卡头下面
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -232,6 +233,7 @@ export function OverviewPage(): React.JSX.Element {
       {/* 2. 四张 KPI，固定近 30 天口径 */}
       <section className={styles.kpiGrid} aria-label="核心经营指标">
         <StatCard
+          size="lg"
           label="出库额"
           extra={<span className={styles.scope}>近 30 天</span>}
           value={summary ? `¥${formatCents(summary.current.outAmountCents)}` : baseLoading ? '…' : '—'}
@@ -247,6 +249,7 @@ export function OverviewPage(): React.JSX.Element {
           }
         />
         <StatCard
+          size="lg"
           label="出库毛利"
           extra={<span className={styles.scope}>近 30 天</span>}
           value={
@@ -274,6 +277,7 @@ export function OverviewPage(): React.JSX.Element {
           }
         />
         <StatCard
+          size="lg"
           label="当前库存成本"
           extra={<span className={styles.scope}>当前快照</span>}
           value={baseLoading ? '…' : `¥${formatCents(stockCostCents)}`}
@@ -281,6 +285,7 @@ export function OverviewPage(): React.JSX.Element {
           onClick={() => navigate('products')}
         />
         <StatCard
+          size="lg"
           label="最短可售天数"
           extra={<span className={styles.scope}>近 30 天</span>}
           value={
@@ -296,47 +301,48 @@ export function OverviewPage(): React.JSX.Element {
       </section>
 
       {/* 3. 全宽趋势图 */}
-      <Panel
-        title="出入库趋势"
-        actions={<RangeFilter label="趋势统计区间" value={trendRange} onChange={setTrendRange} />}
-      >
-        {trendError ? (
-          <div className={styles.errorBlock} role="alert">
-            <span>趋势数据读取失败：{trendError}</span>
-            <Button
-              size="sm"
-              variant="secondary"
-              icon={<RotateCw size={13} />}
-              onClick={() => {
-                setTrendError(null)
-                setRefreshKey((k) => k + 1)
-              }}
-            >
-              重试
-            </Button>
-          </div>
-        ) : trendData === null ? (
-          <div className={styles.loadingBlock}>{trendLoading ? '正在读取趋势数据…' : '暂无趋势数据'}</div>
-        ) : (
-          <TrendChart data={trendData} />
-        )}
+      <Panel title="出入库趋势" flush>
+        <div className={styles.filterBar}>
+          <RangeFilter label="趋势统计区间" value={trendRange} onChange={setTrendRange} />
+        </div>
+        <div className={styles.chartArea}>
+          {trendError ? (
+            <div className={styles.errorBlock} role="alert">
+              <span>趋势数据读取失败：{trendError}</span>
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={<RotateCw size={13} />}
+                onClick={() => {
+                  setTrendError(null)
+                  setRefreshKey((k) => k + 1)
+                }}
+              >
+                重试
+              </Button>
+            </div>
+          ) : trendData === null ? (
+            <div className={styles.loadingBlock}>{trendLoading ? '正在读取趋势数据…' : '暂无趋势数据'}</div>
+          ) : (
+            <TrendChart data={trendData} height={300} />
+          )}
+        </div>
       </Panel>
 
       {/* 4. 全宽最近单据 */}
-      <Panel
-        title="最近单据"
-        actions={<RangeFilter label="最近单据日期区间" value={recentRange} onChange={setRecentRange} />}
-        flush
-      >
+      <Panel title="最近单据" flush>
+        <div className={styles.filterBar}>
+          <RangeFilter label="最近单据日期区间" value={recentRange} onChange={setRecentRange} />
+        </div>
         <div className={styles.tableWrap}>
           <table className={styles.recentTable}>
             <thead>
               <tr>
-                <th>编号</th>
+                <th>单据编号</th>
                 <th>类型</th>
                 <th>日期</th>
                 <th>渠道</th>
-                <th className={styles.num}>数量</th>
+                <th>数量</th>
                 <th>状态</th>
               </tr>
             </thead>
@@ -362,7 +368,7 @@ export function OverviewPage(): React.JSX.Element {
                     </td>
                     <td className={styles.date}>{doc.docDate}</td>
                     <td className={styles.secondary}>{doc.channelName || '—'}</td>
-                    <td className={styles.num}>{formatQty(doc.totalQuantity)}</td>
+                    <td className={styles.qty}>{formatQty(doc.totalQuantity)} 件</td>
                     <td>
                       <DocStatusBadge status={doc.status} />
                     </td>

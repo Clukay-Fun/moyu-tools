@@ -7,56 +7,44 @@
   max-width: 1680px;
 }
 
-.headerRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--erp-space-3);
-  min-height: 40px;
-  flex-shrink: 0;
-}
-
-.headerTitle {
-  margin: 0;
-  font-size: 22px;
-  font-weight: var(--erp-font-weight-semibold);
-  line-height: 1.2;
-  color: var(--erp-accent-text);
-}
-
-.headerActions {
-  display: flex;
-  align-items: center;
-  gap: var(--erp-space-2);
-  margin-left: auto;
-}
-
 .mainPanel {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   background: var(--erp-bg-surface);
-  border: 1px solid var(--erp-border-subtle);
-  border-radius: var(--erp-radius-lg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
   overflow: hidden;
 }
 
+/* 筛选条优先一行；放不下时换行，开单与更多始终靠右。只有搜索框会压缩，其余控件保持原宽 */
 .toolbar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--erp-space-2) var(--erp-space-3);
-  padding: var(--erp-space-2) var(--erp-space-4);
+  gap: var(--erp-space-2);
+  padding: 10px var(--erp-space-3);
   border-bottom: 1px solid var(--erp-border-subtle);
+  flex-shrink: 0;
+}
+
+.toolbar > * {
   flex-shrink: 0;
 }
 
 .search {
   position: relative;
-  flex: 1;
-  min-width: 180px;
-  max-width: 300px;
+  flex: 1 1 140px;
+  min-width: 140px;
+  max-width: 400px;
+}
+
+.toolActions {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  margin-left: auto;
 }
 .search input {
   padding-left: 30px;
@@ -72,8 +60,8 @@
 }
 
 .count {
-  margin-left: auto;
-  font-size: var(--erp-font-size-xs);
+  white-space: nowrap;
+  font-size: var(--erp-font-size-sm);
   color: var(--erp-text-tertiary);
   font-variant-numeric: tabular-nums;
 }
@@ -111,19 +99,18 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  height: 32px;
-  padding: 0 var(--erp-space-2);
-  background: var(--erp-bg-subtle);
-  border-bottom: 1px solid var(--erp-border-subtle);
+  padding: 12px 13px;
+  background: var(--erp-bg-surface);
+  box-shadow: inset 0 -1px 0 var(--erp-border-subtle);
   color: var(--erp-text-tertiary);
-  font-size: var(--erp-font-size-xs);
+  font-size: var(--erp-font-size-sm);
   font-weight: var(--erp-font-weight-medium);
   text-align: left;
   white-space: nowrap;
 }
 .table td {
-  height: 38px;
-  padding: 0 var(--erp-space-2);
+  height: 47px;
+  padding: 0 13px;
   border-bottom: 1px solid var(--erp-border-subtle);
   white-space: nowrap;
   overflow: hidden;
@@ -131,29 +118,34 @@
 }
 .table th:first-child,
 .table td:first-child {
-  padding-left: var(--erp-space-4);
+  padding-left: 17px;
 }
 
+/* 列宽按原型（132 / 78 / 185 / 108 / 205 / 70 / 128 / 125）的比例收窄约一成：
+   这里左边多了一级栏和二级栏，照搬原宽度 1366 宽的窗口也要横向滚动。备注占余下 */
 .colDate {
   width: 116px;
 }
 .colType {
-  width: 64px;
+  width: 70px;
 }
 .colNo {
-  width: 150px;
+  width: 168px;
 }
 .colStatus {
-  width: 84px;
+  width: 96px;
+}
+.colChannel {
+  width: 184px;
 }
 .colQty {
-  width: 64px;
+  width: 62px;
 }
 .colMoney {
-  width: 100px;
+  width: 112px;
 }
-.colNote {
-  width: 18%;
+.colProfit {
+  width: 110px;
 }
 
 .row {
@@ -196,9 +188,13 @@
   color: var(--erp-text-tertiary);
 }
 
-/* 窄窗口不隐藏列：表格保持最小宽度，由外层横向滚动 */
-@media (max-width: 1100px) {
-  .table {
-    min-width: 980px;
-  }
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  padding: var(--erp-space-3) var(--erp-space-4);
+  border-top: 1px solid var(--erp-border-subtle);
+  color: var(--erp-text-tertiary);
+  font-size: var(--erp-font-size-sm);
+  font-variant-numeric: tabular-nums;
 }

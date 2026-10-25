@@ -2,7 +2,7 @@
  * 描述: 出入库趋势双折线图 (TrendChart)
  * 主要功能:
  *   - 纯 SVG 绘制入库（蓝）/ 出库（橙棕）两条折线，逐自然日统计
- *   - 纵轴单位为「件」，横轴按范围稀疏显示日期
+ *   - 纵轴单位「件」标在左上角，横轴按范围稀疏显示日期，图例在图表下方居中
  *   - 悬停显示当天日期与两组件数
  *   - 没有交易时两条线落在 0 上并给出说明，不伪造数据
  */
@@ -45,7 +45,7 @@ export function TrendChart({ data, height = 260 }: TrendChartProps): React.JSX.E
   const padL = 42
   const padR = 16
   const padB = 28
-  const padT = 18
+  const padT = 24
   const innerW = Math.max(10, width - padL - padR)
   const innerH = Math.max(10, height - padT - padB)
   const maxVal = Math.max(1, ...data.map((d) => Math.max(d.inQty, d.outQty)))
@@ -71,18 +71,6 @@ export function TrendChart({ data, height = 260 }: TrendChartProps): React.JSX.E
 
   return (
     <div className={styles.wrap} ref={wrapRef}>
-      <div className={styles.legend} aria-hidden="true">
-        <span className={styles.legendItem}>
-          <span className={`${styles.legendLine} ${styles.inLine}`} />
-          入库件数
-        </span>
-        <span className={styles.legendItem}>
-          <span className={`${styles.legendLine} ${styles.outLine}`} />
-          出库件数
-        </span>
-        <span className={styles.unit}>单位：件</span>
-      </div>
-
       <div className={styles.plot} style={{ height }}>
         <svg
           viewBox={`0 0 ${width} ${height}`}
@@ -93,6 +81,9 @@ export function TrendChart({ data, height = 260 }: TrendChartProps): React.JSX.E
           aria-label="出入库趋势折线图"
           onMouseLeave={() => setHovered(null)}
         >
+          <text x={padL - 8} y={padT - 12} className={styles.tick} textAnchor="end">
+            件
+          </text>
           {ticks.map((t) => {
             const y = getY(t)
             return (
@@ -159,6 +150,17 @@ export function TrendChart({ data, height = 260 }: TrendChartProps): React.JSX.E
             </div>
           </div>
         )}
+      </div>
+
+      <div className={styles.legend} aria-hidden="true">
+        <span className={styles.legendItem}>
+          <span className={`${styles.legendLine} ${styles.inLine}`} />
+          入库件数
+        </span>
+        <span className={styles.legendItem}>
+          <span className={`${styles.legendLine} ${styles.outLine}`} />
+          出库件数
+        </span>
       </div>
     </div>
   )

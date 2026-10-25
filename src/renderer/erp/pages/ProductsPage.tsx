@@ -1,14 +1,15 @@
 /**
  * 描述: 商品管理工作台页面 (ProductsPage)
  * 主要功能:
- *   - 商品卡片网格（最多三列），1:1 大图、名称、编码 / SKU、库存、平均成本、售价、预警值
+ *   - 顶部只有一行工具条：搜索、商品总数、显示已停用，右侧固定「新建商品」与「更多」；下面是三列商品卡，不套外框
+ *   - 商品卡：1:1 大图、名称、编码 / SKU、库存 / 平均成本 / 售价、底栏预警值与「查看详情」
  *   - 库存告急 / 缺货在卡片图片右上角显示徽标；不展示可售天数
  *   - 搜索与「显示已停用」保留；整卡点击打开商品详情
  *   - 预警值编辑移到详情弹窗的「编辑」，列表不再就地编辑
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Plus, MoreVertical, Upload, Download, ImageIcon } from 'lucide-react'
+import { Plus, MoreVertical, Upload, Download, ImageIcon, ArrowUpRight } from 'lucide-react'
 import type { StockRow } from '@shared/erp/types'
 import type { ProductHealthItem } from '@shared/erp/schemas'
 import { Button, IconButton, Input, Menu, StockBadge, isStockAlert } from '@erp/components/ui'
@@ -105,122 +106,121 @@ export function ProductsPage(): React.JSX.Element {
     <div className={styles.container}>
       <h1 className="srOnly">商品</h1>
 
-      <header className={styles.headerRow}>
-        <div className={styles.headerActions}>
+      <div className={styles.toolbar}>
+        <div className={styles.searchBox}>
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="搜索商品名称 / 编码 / SKU" />
+        </div>
+        <span className={styles.countText}>共 {filteredRows.length} 个商品</span>
+        <label className={styles.switchLabel}>
+          <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
+          <span>显示已停用</span>
+        </label>
+        <div className={styles.toolActions}>
           <Button variant="primary" onClick={newProduct}>
             <Plus size={16} /> 新建商品
           </Button>
           <Menu
+            align="end"
             trigger={<IconButton label="更多选项" icon={<MoreVertical size={16} />} variant="secondary" />}
             items={moreMenuItems}
           />
         </div>
-      </header>
+      </div>
 
-      <main className={styles.mainPanel}>
-        <div className={styles.toolbar}>
-          <div className={styles.searchBox}>
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="搜索商品名称 / 编码 / SKU" />
-          </div>
-          <div className={styles.toolRight}>
-            <span className={styles.countText}>共 {filteredRows.length} 个商品</span>
-            <label className={styles.switchLabel}>
-              <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
-              <span>显示已停用</span>
-            </label>
-          </div>
+      {loadError && (
+        <div className={styles.loadError} role="alert">
+          <span>
+            <strong>读取失败</strong>商品与库存数据未能加载。
+          </span>
+          <Button size="sm" variant="secondary" onClick={() => void loadData()} disabled={loading}>
+            {loading ? '重试中…' : '重试'}
+          </Button>
         </div>
+      )}
 
-        {loadError && (
-          <div className={styles.loadError} role="alert">
-            <span>
-              <strong>读取失败</strong>商品与库存数据未能加载。
-            </span>
-            <Button size="sm" variant="secondary" onClick={() => void loadData()} disabled={loading}>
-              {loading ? '重试中…' : '重试'}
-            </Button>
+      <div className={styles.gridWrap}>
+        {rows === null ? (
+          <div className={styles.gridState}>{loadError ? '读取失败' : '正在读取商品…'}</div>
+        ) : filteredRows.length === 0 ? (
+          <div className={styles.gridState}>暂无符合条件的商品记录</div>
+        ) : (
+          <div className={styles.grid}>
+            {filteredRows.map((r) => {
+              const p = r.product
+              const health = healthByProduct.get(p.id)
+              const url = productImageUrl(p)
+              const alert = health ? isStockAlert(health.status) : false
+
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  className={`${styles.card} ${!p.isActive ? styles.inactive : ''}`}
+                  data-product-card
+                  aria-label={`${p.name}，当前库存 ${formatQty(r.stock.quantity)} ${p.unit}`}
+                  onClick={() => void openProduct(p.id)}
+                >
+                  <span className={styles.imageWrap}>
+                    {url ? (
+                      <img src={url} alt={p.name} loading="lazy" />
+                    ) : (
+                      <ImageIcon size={36} strokeWidth={1.2} className={styles.imagePlaceholder} />
+                    )}
+                    {!p.isActive ? (
+                      <span className={styles.badgeSlot}>
+                        <StockBadge status="inactive" />
+                      </span>
+                    ) : alert && health ? (
+                      <span className={styles.badgeSlot}>
+                        <StockBadge status={health.status} />
+                      </span>
+                    ) : null}
+                  </span>
+
+                  <span className={styles.cardBody}>
+                    <span className={styles.productName} title={p.name}>
+                      {p.name}
+                    </span>
+                    <span className={styles.productMeta}>
+                      {p.code} · <span className="mono">{p.defaultSku.code}</span>
+                    </span>
+
+                    <span className={styles.metrics}>
+                      <span className={styles.metric}>
+                        <span className={styles.metricLabel}>当前库存</span>
+                        <span className={styles.metricValue}>
+                          {formatQty(r.stock.quantity)} {p.unit}
+                        </span>
+                      </span>
+                      <span className={styles.metric}>
+                        <span className={styles.metricLabel}>平均成本</span>
+                        <span className={styles.metricValue}>
+                          {r.stock.quantity > 0 ? `¥${formatCents(r.stock.avgCostCents)}` : '—'}
+                        </span>
+                      </span>
+                      <span className={styles.metric}>
+                        <span className={styles.metricLabel}>默认售价</span>
+                        <span className={styles.metricValue}>
+                          {p.defaultPriceCents > 0 ? `¥${formatCents(p.defaultPriceCents)}` : '—'}
+                        </span>
+                      </span>
+                    </span>
+
+                    <span className={styles.cardFooter}>
+                      <span className={styles.threshold}>
+                        库存预警值 {formatQty(p.lowStockThreshold)} {p.unit}
+                      </span>
+                      <span className={styles.detailLink}>
+                        查看详情 <ArrowUpRight size={13} />
+                      </span>
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
           </div>
         )}
-
-        <div className={styles.gridWrap}>
-          {rows === null ? (
-            <div className={styles.gridState}>{loadError ? '读取失败' : '正在读取商品…'}</div>
-          ) : filteredRows.length === 0 ? (
-            <div className={styles.gridState}>暂无符合条件的商品记录</div>
-          ) : (
-            <div className={styles.grid}>
-              {filteredRows.map((r) => {
-                const p = r.product
-                const health = healthByProduct.get(p.id)
-                const url = productImageUrl(p)
-                const alert = health ? isStockAlert(health.status) : false
-
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    className={`${styles.card} ${!p.isActive ? styles.inactive : ''}`}
-                    data-product-card
-                    aria-label={`${p.name}，当前库存 ${formatQty(r.stock.quantity)} ${p.unit}`}
-                    onClick={() => void openProduct(p.id)}
-                  >
-                    <span className={styles.imageWrap}>
-                      {url ? (
-                        <img src={url} alt={p.name} loading="lazy" />
-                      ) : (
-                        <ImageIcon size={36} strokeWidth={1.2} className={styles.imagePlaceholder} />
-                      )}
-                      {!p.isActive ? (
-                        <span className={styles.badgeSlot}>
-                          <StockBadge status="inactive" />
-                        </span>
-                      ) : alert && health ? (
-                        <span className={styles.badgeSlot}>
-                          <StockBadge status={health.status} />
-                        </span>
-                      ) : null}
-                    </span>
-
-                    <span className={styles.cardBody}>
-                      <span className={styles.productName} title={p.name}>
-                        {p.name}
-                      </span>
-                      <span className={styles.productMeta}>
-                        {p.code} · <span className="mono">{p.defaultSku.code}</span>
-                      </span>
-
-                      <span className={styles.metrics}>
-                        <span className={styles.metric}>
-                          <span className={styles.metricLabel}>当前库存</span>
-                          <span className={styles.metricValue}>
-                            {formatQty(r.stock.quantity)} {p.unit}
-                          </span>
-                        </span>
-                        <span className={styles.metric}>
-                          <span className={styles.metricLabel}>平均成本</span>
-                          <span className={styles.metricValue}>
-                            {r.stock.quantity > 0 ? `¥${formatCents(r.stock.avgCostCents)}` : '—'}
-                          </span>
-                        </span>
-                        <span className={styles.metric}>
-                          <span className={styles.metricLabel}>默认售价</span>
-                          <span className={styles.metricValue}>
-                            {p.defaultPriceCents > 0 ? `¥${formatCents(p.defaultPriceCents)}` : '—'}
-                          </span>
-                        </span>
-                      </span>
-
-                      <span className={styles.threshold}>
-                        预警值 {formatQty(p.lowStockThreshold)} {p.unit}
-                      </span>
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </main>
+      </div>
     </div>
   )
 }

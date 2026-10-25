@@ -65,6 +65,31 @@
   font-size: 20px;
 }
 
+/* 概览 KPI：名称 → 32px 数值 → 说明，最小高 128（《综合页》概览原型） */
+.statCard.large {
+  min-height: 128px;
+  padding: 18px 20px 15px;
+  gap: 0;
+}
+
+.large .labelRow {
+  margin-bottom: 14px;
+}
+
+.large .label {
+  font-size: var(--erp-font-size-base);
+  font-weight: var(--erp-font-weight-semibold);
+}
+
+.large .value {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.large .footerRow {
+  margin-top: var(--erp-space-3);
+}
+
 .value.neutral {
   color: var(--erp-text-primary);
 }
