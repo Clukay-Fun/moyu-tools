@@ -1,8 +1,9 @@
 /**
  * 描述: 定制 › 生产视图 (ProductionView)
  * 主要功能:
- *   - 当前模板 → 替换位置卡片 → 导出目录与格式 → 生成任务
- *   - 位置卡片最多三列，超过 9 个时区域限高内部滚动
+ *   - 当前模板栏 → 替换位置卡片 → 底部操作区（导出目录与格式 / 定制标题与生成）
+ *   - 位置卡片默认三列，按可用宽度降到两列 / 一列；超过 9 个时区域限高内部滚动
+ *   - 新建模板只在当前模板栏出现一次，空状态只给说明
  *   - 点狗图 / 名字图分别打开对应类别的选图弹窗；生产页不再有素材库面板
  *   - 位置增删与图层映射都写入模板配置，不修改 PSD 文件
  *   - Photoshop 未就绪、缺图、图层名不合法时禁用生成并逐条说明
@@ -115,7 +116,7 @@ export function ProductionView({
     }
     if (layerError) list.push('图层映射不合法：名称不能为空或含特殊字符，且模板内不能重复')
 
-    if (!psReady) list.push('Photoshop 未就绪，生成按钮已禁用；点右上角状态胶囊检查连接')
+    if (!psReady) list.push('Photoshop 未就绪，生成按钮已禁用；点顶部的 Photoshop 状态检查连接')
     return list
     // pickOf 依赖 picks，这里显式列出以便缺图提示实时更新
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -210,7 +211,7 @@ export function ProductionView({
 
   return (
     <div className={styles.root}>
-      {/* 当前模板 */}
+      {/* 当前模板：左边模板，右边管理 / 新建 */}
       <section className={styles.templateRow} aria-label="当前模板">
         <span className={styles.rowLabel}>当前模板</span>
         {templates.length ? (
@@ -225,32 +226,31 @@ export function ProductionView({
             />
           </div>
         ) : (
-          <span className={styles.muted}>还没有模板。</span>
+          <span className={styles.muted}>尚未选择模板</span>
         )}
         {template && (
           <span className={template.sourceExists ? styles.fileOk : styles.danger}>
             {template.sourceExists ? 'PSD 文件可用' : 'PSD 文件丢失'}
           </span>
         )}
-        <button type="button" className={styles.link} onClick={onGoTemplates}>
-          管理模板 →
-        </button>
-        {!templates.length && (
-          <Button variant="primary" size="sm" icon={<Plus size={14} />} onClick={onNewTemplate}>
+        <div className={styles.templateActions}>
+          <Button variant="ghost" onClick={onGoTemplates}>
+            管理模板
+          </Button>
+          <Button variant="primary" icon={<Plus size={14} />} onClick={onNewTemplate}>
             新建模板
           </Button>
-        )}
+        </div>
       </section>
 
       {/* 替换位置 */}
       <section className={styles.slotSection} aria-label="替换位置">
         <header className={styles.sectionHead}>
-          <h2 className={styles.sectionTitle}>替换位置</h2>
-          <span className={styles.count}>{slots.length} 个</span>
-          <span className={styles.spacer} />
+          <h2 className={styles.sectionTitle}>
+            替换位置<span className={styles.count}> · {slots.length} 个</span>
+          </h2>
           <Button
             variant="secondary"
-            size="sm"
             icon={<Plus size={14} />}
             disabled={busy || adding || !template}
             onClick={() => void addSlot()}
@@ -262,18 +262,12 @@ export function ProductionView({
         {!template ? (
           <div className={styles.empty}>
             <ImagePlus size={24} />
-            <p>先新建一个模板，模板里的替换位置会显示在这里。</p>
-            <Button variant="primary" size="sm" onClick={onNewTemplate}>
-              新建模板
-            </Button>
+            <p>请先创建并选择模板，替换位置将在这里显示。</p>
           </div>
         ) : slots.length === 0 ? (
           <div className={styles.empty}>
             <ImagePlus size={24} />
-            <p>这个模板还没有替换位置。</p>
-            <Button variant="primary" size="sm" onClick={() => void addSlot()}>
-              添加第一个位置
-            </Button>
+            <p>这个模板还没有替换位置，点右上角「添加位置」开始。</p>
           </div>
         ) : (
           <div className={styles.slotGrid}>
@@ -293,25 +287,22 @@ export function ProductionView({
         )}
       </section>
 
-      {/* 导出目录与格式 */}
-      <section className={styles.exportRow} aria-label="导出设置">
-        <div className={styles.exportItem}>
+      {/* 底部操作区：导出设置与生成合成一块 */}
+      <section className={styles.actionBar} aria-label="导出与生成">
+        <div className={styles.exportLine}>
           <span className={styles.rowLabel}>导出目录</span>
           <span className={styles.path} title={board?.outputDir}>
             {board?.outputDir ? middleEllipsis(board.outputDir, 64) : '读取中…'}
           </span>
           <Button
             variant="ghost"
-            size="sm"
             icon={<FolderOpen size={14} />}
             disabled={busy}
             onClick={() => void onAct(() => unwrap(window.api.erp.psd.pickOutputDir()), '导出目录已更新')}
           >
             更改
           </Button>
-        </div>
-        <div className={styles.exportItem}>
-          <span className={styles.rowLabel}>格式</span>
+          <span className={`${styles.rowLabel} ${styles.formatLabel}`}>导出格式</span>
           <div className={styles.formatSelect}>
             <Select
               value={format}
@@ -322,23 +313,19 @@ export function ProductionView({
               onChange={(v) => setFormat(v as PsdExportFormat)}
             />
           </div>
-        </div>
-        <Tooltip
-          content={
-            <span className={styles.tip}>
-              PSD 和 TIFF 都会写入 W1 红色专色通道（密度 100%）。素材按圆内矩形区域等比例缩放，完整显示、不拉伸。
+          <Tooltip
+            content={
+              <span className={styles.tip}>
+                PSD 和 TIFF 都会写入 W1 红色专色通道（密度 100%）。素材按圆内矩形区域等比例缩放，完整显示、不拉伸。
+              </span>
+            }
+          >
+            <span className={styles.info} tabIndex={0} aria-label="导出规则">
+              <Info size={15} />
             </span>
-          }
-        >
-          <span className={styles.info} tabIndex={0} aria-label="导出规则">
-            <Info size={15} />
-          </span>
-        </Tooltip>
-      </section>
-
-      {/* 生成 */}
-      <section className={styles.generateBar} aria-label="生成任务">
-        <div className={styles.generateTop}>
+          </Tooltip>
+        </div>
+        <div className={styles.generateLine}>
           <div className={styles.titleInput}>
             <Input
               value={title}
@@ -351,7 +338,6 @@ export function ProductionView({
               }}
             />
           </div>
-          <span className={styles.spacer} />
           <Button
             variant="primary"
             icon={<Check size={14} />}

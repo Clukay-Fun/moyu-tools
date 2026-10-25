@@ -1,28 +1,30 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: var(--erp-space-3);
+  gap: var(--erp-space-4);
   min-height: 0;
 }
 
-/* 当前模板 */
-.templateRow {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--erp-space-3);
-  padding: var(--erp-space-2) var(--erp-space-3);
-  border: 1px solid var(--erp-border-subtle);
-  border-radius: var(--erp-radius-lg);
-  background: var(--erp-bg-surface);
-}
 .rowLabel {
   font-size: var(--erp-font-size-xs);
   color: var(--erp-text-tertiary);
   white-space: nowrap;
 }
+
+/* 当前模板：一层半透明底，左模板、右管理 / 新建 */
+.templateRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--erp-space-2) var(--erp-space-3);
+  padding: var(--erp-space-2) var(--erp-space-2) var(--erp-space-2) var(--erp-space-4);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-md);
+  background: var(--erp-bg-surface);
+}
 .templateSelect {
-  flex: 0 0 260px;
+  flex: 0 1 280px;
+  min-width: 180px;
 }
 .muted {
   margin: 0;
@@ -32,51 +34,44 @@
 .fileOk {
   font-size: var(--erp-font-size-xs);
   color: var(--erp-text-secondary);
+  white-space: nowrap;
 }
 .danger {
   font-size: var(--erp-font-size-xs);
   color: var(--erp-danger);
+  white-space: nowrap;
 }
-.link {
+.templateActions {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
   margin-left: auto;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: var(--erp-font-size-xs);
-  color: var(--erp-accent-text);
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
-.link:hover {
-  text-decoration: underline;
 }
 
-/* 替换位置 */
+/* 替换位置：主工作区。按自身宽度定列数，不跟窗口宽度 */
 .slotSection {
   display: flex;
   flex-direction: column;
-  gap: var(--erp-space-2);
+  gap: var(--erp-space-3);
   min-height: 0;
+  container-type: inline-size;
 }
 .sectionHead {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--erp-space-2);
 }
 .sectionTitle {
   margin: 0;
-  font-size: var(--erp-font-size-md, 15px);
+  font-size: var(--erp-font-size-md);
   font-weight: var(--erp-font-weight-semibold);
   color: var(--erp-text-primary);
 }
 .count {
-  font-size: var(--erp-font-size-xs);
+  font-weight: var(--erp-font-weight-normal);
   color: var(--erp-text-tertiary);
   font-variant-numeric: tabular-nums;
-}
-.spacer {
-  flex: 1;
 }
 
 .slotGrid {
@@ -88,26 +83,27 @@
   overflow-y: auto;
   padding-right: 2px;
 }
-@media (max-width: 1200px) {
+@container (max-width: 760px) {
   .slotGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-@media (max-width: 760px) {
+@container (max-width: 460px) {
   .slotGrid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
+/* 空状态只有图标和说明，操作入口都在上面 */
 .empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--erp-space-3);
-  min-height: 180px;
+  gap: var(--erp-space-2);
+  min-height: 160px;
   border: 1px dashed var(--erp-border-default);
-  border-radius: var(--erp-radius-lg);
+  border-radius: var(--erp-radius-md);
   color: var(--erp-text-tertiary);
   font-size: var(--erp-font-size-sm);
 }
@@ -115,31 +111,44 @@
   margin: 0;
 }
 
-/* 导出目录与格式 */
-.exportRow {
+/* 底部操作区：导出设置一行 + 标题与生成一行，同一层底，吸底 */
+.actionBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--erp-space-3);
-  padding: var(--erp-space-2) var(--erp-space-3);
+  flex-direction: column;
+  gap: var(--erp-space-2-5);
+  padding: var(--erp-space-3) var(--erp-space-4);
   border: 1px solid var(--erp-border-subtle);
-  border-radius: var(--erp-radius-lg);
+  border-radius: var(--erp-radius-md);
   background: var(--erp-bg-surface);
+  box-shadow: var(--erp-shadow-card);
+  /* 吸底时盖在列表上：底色是半透明的，靠背景模糊挡住下面滚过的内容 */
+  backdrop-filter: blur(20px) saturate(140%);
 }
-.exportItem {
+.exportLine,
+.generateLine {
   display: flex;
   align-items: center;
   gap: var(--erp-space-2);
   min-width: 0;
 }
 .path {
-  max-width: 420px;
+  flex: 0 1 auto;
+  min-width: 0;
   font-family: var(--erp-font-mono);
   font-size: var(--erp-font-size-xs);
   color: var(--erp-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.exportLine > :not(.path) {
+  flex-shrink: 0;
+}
+.formatLabel {
+  margin-left: var(--erp-space-2);
 }
 .formatSelect {
   width: 96px;
@@ -155,31 +164,13 @@
   line-height: 1.5;
 }
 
-/* 生成栏 */
-.generateBar {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  gap: var(--erp-space-2);
-  padding: var(--erp-space-3) var(--erp-space-4);
-  border: 1px solid var(--erp-border-subtle);
-  border-radius: var(--erp-radius-lg);
-  background: var(--erp-bg-surface);
-  box-shadow: var(--erp-shadow-card);
-  /* 吸底时盖在列表上：底色是半透明的，靠背景模糊挡住下面滚过的内容 */
-  backdrop-filter: blur(20px) saturate(140%);
-}
-.generateTop {
-  display: flex;
-  align-items: center;
-  gap: var(--erp-space-2);
-  flex-wrap: wrap;
-}
 .titleInput {
-  flex: 0 1 320px;
+  --erp-control-h: 38px;
+  flex: 1;
   min-width: 180px;
+}
+.generateLine > :last-child {
+  flex-shrink: 0;
 }
 .blockers {
   margin: 0;

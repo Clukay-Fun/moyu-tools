@@ -1,13 +1,13 @@
 /**
  * 描述: 定制 › 素材库视图 (AssetLibraryView)
  * 主要功能:
- *   - 狗图 / 名字图二级切换，显示数量、导入与素材网格
+ *   - 狗图 / 名字图二级切换，显示数量、导入与素材网格；导入入口只在顶部一处，跟随当前分类
  *   - 每个素材可抠白底、查看抠图结果、删除（引用检查由页面统一处理）
  *   - 生成时使用素材原图；缩略图只用于浏览
  */
 
 import { useMemo, useState, type ReactElement } from 'react'
-import { ImagePlus, Trash2, Upload, Wand2 } from 'lucide-react'
+import { ImagePlus, Plus, Trash2, Wand2 } from 'lucide-react'
 import type { PsdAsset, PsdAssetKind, PsdBoard } from '@shared/erp/psd'
 import { Button, EmptyState, IconButton, SegmentedControl } from '@erp/components/ui'
 import { unwrap } from '@erp/lib/api'
@@ -62,14 +62,8 @@ export function AssetLibraryView({
           共 {list.length} 个{KIND_LABEL[kind]}
         </span>
         <span className={styles.spacer} />
-        <Button
-          variant="secondary"
-          size="sm"
-          icon={<Upload size={14} />}
-          disabled={busy}
-          onClick={() => void onImport(kind)}
-        >
-          ＋ 导入图片
+        <Button variant="primary" icon={<Plus size={14} />} disabled={busy} onClick={() => void onImport(kind)}>
+          导入图片
         </Button>
       </div>
 
@@ -83,8 +77,7 @@ export function AssetLibraryView({
         <EmptyState
           icon={<ImagePlus size={24} />}
           title={`还没有${KIND_LABEL[kind]}`}
-          description={`导入 PNG 或 JPG 后会出现在这里，生产页选图时可直接使用。`}
-          actions={[{ label: `导入${KIND_LABEL[kind]}`, variant: 'primary', onClick: () => void onImport(kind) }]}
+          description={`点右上角「导入图片」添加 PNG 或 JPG，生产页选${KIND_LABEL[kind]}时可直接使用。`}
         />
       ) : (
         <ul className={styles.grid}>

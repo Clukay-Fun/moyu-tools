@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 32px;
+  height: var(--erp-control-h);
   padding: 0 var(--erp-space-2);
   /* 触发器与 m-select 一致（--field-*），弹层与 m-menu 一致（--menu-*） */
   background-color: var(--field-bg);

@@ -3,18 +3,19 @@
   flex-direction: column;
   gap: var(--erp-space-3);
   min-height: 0;
+  container-type: inline-size;
 }
 
 .toolbar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--erp-space-3);
+  gap: var(--erp-space-2) var(--erp-space-3);
 }
 
 .count {
-  font-size: var(--erp-font-size-xs);
-  color: var(--erp-text-tertiary);
+  font-size: var(--erp-font-size-sm);
+  color: var(--erp-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -35,13 +36,29 @@
   font-size: var(--erp-font-size-sm);
 }
 
+/* 正方形缩略图，按自身宽度 5 / 4 / 3 / 2 列 */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--erp-space-3);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+@container (max-width: 1000px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@container (max-width: 760px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@container (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .item {

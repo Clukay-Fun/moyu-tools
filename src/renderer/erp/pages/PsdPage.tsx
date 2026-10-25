@@ -2,15 +2,14 @@
  * 描述: 定制页 (PsdPage)
  * 主要功能:
  *   - 三个平级视图：生产 / 模板 / 素材库，由摸鱼「定制」子菜单切换
- *   - 页头：Photoshop 状态胶囊（去设置检查）、打开 PS、任务记录
+ *   - 公共工具栏（PsdToolbar，靠左）：Photoshop 状态胶囊（去设置检查）、打开 PS、任务记录
  *   - 看板来自共享轮询源（lib/psdBoardFeed）：本页在前台时提速到 1.5 秒；任务完成 / 失败的 Toast 由外壳负责
  *   - 素材删除前检查排队中任务与生产页选择；抠白底结果自动弹出确认
  */
 
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react'
-import { ListChecks } from 'lucide-react'
 import type { PsdAsset, PsdBoard, PsdTemplate } from '@shared/erp/psd'
-import { Button, ConfirmDialog, useDrawer } from '@erp/components/ui'
+import { ConfirmDialog, useDrawer } from '@erp/components/ui'
 import { useToast } from '@erp/components/Toast'
 import { useNav } from '@erp/app/navigation'
 import { useHost } from '@erp/app/host'
@@ -23,6 +22,7 @@ import { AssetLibraryView } from '@erp/features/psd/AssetLibraryView'
 import { NewTemplateDialog } from '@erp/features/psd/NewTemplateDialog'
 import { JobsPanel } from '@erp/features/psd/JobsPanel'
 import { CutoutReview } from '@erp/features/psd/CutoutReview'
+import { PsdToolbar } from '@erp/features/psd/PsdToolbar'
 import { fileName } from '@erp/features/psd/psdLabels'
 import styles from './PsdPage.module.css'
 
@@ -183,35 +183,17 @@ export function PsdPage(): ReactElement {
     <div className={styles.container}>
       <h1 className="srOnly">定制</h1>
 
-      <header className={styles.header}>
-        {/* 视图名由摸鱼子菜单显示，这里只给读屏 */}
-        <h2 className="srOnly">{VIEW_TITLES[view]}</h2>
-        <div className={styles.headRight}>
-          <button
-            type="button"
-            className={styles.psPill}
-            data-ready={psName ? true : undefined}
-            title="查看 Photoshop 连接设置"
-            onClick={() => host.openSettings('custom')}
-          >
-            <span className={styles.dot} aria-hidden="true" />
-            {board ? (psName ?? '未就绪') : '检查中…'}
-          </button>
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={busy}
-            onClick={() => void act(() => unwrap(window.api.erp.psd.openPhotoshop()).then(() => null))}
-          >
-            打开 PS
-          </Button>
-          <button type="button" className={styles.jobsButton} onClick={openJobs}>
-            <ListChecks size={14} />
-            任务记录
-            {activeJobs > 0 && <span className={styles.jobsCount}>{activeJobs}</span>}
-          </button>
-        </div>
-      </header>
+      {/* 视图名由摸鱼子菜单显示，这里只给读屏 */}
+      <h2 className="srOnly">{VIEW_TITLES[view]}</h2>
+      <PsdToolbar
+        loaded={!!board}
+        psName={psName}
+        busy={busy}
+        activeJobs={activeJobs}
+        onCheckPhotoshop={() => host.openSettings('custom')}
+        onOpenPhotoshop={() => void act(() => unwrap(window.api.erp.psd.openPhotoshop()).then(() => null))}
+        onOpenJobs={openJobs}
+      />
 
       <div className={styles.body}>
         <div className={styles.pane} hidden={view !== 'production'}>

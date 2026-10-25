@@ -1,0 +1,52 @@
+/* 直接排在毛玻璃工作区里，不加底色；三个控件同为 36 高，靠左 */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  flex-shrink: 0;
+}
+
+.psPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--erp-control-h);
+  padding: 0 var(--erp-space-3);
+  border: 1px solid var(--erp-border-subtle);
+  border-radius: var(--erp-radius-full);
+  background: var(--erp-bg-surface);
+  font: inherit;
+  font-size: var(--erp-font-size-xs);
+  color: var(--erp-text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.psPill:hover {
+  border-color: var(--erp-border-default);
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--erp-warning);
+}
+.psPill[data-ready] .dot {
+  background: var(--erp-accent);
+}
+
+.jobsCount {
+  display: inline-block;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--erp-accent);
+  color: var(--erp-accent-fg);
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
+}

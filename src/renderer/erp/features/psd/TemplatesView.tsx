@@ -3,7 +3,7 @@
  * 主要功能:
  *   - 模板卡片：名称、PSD 路径（中间省略）、文件状态、位置数
  *   - 「使用模板」切到生产页并选中；支持重命名（只改配置名称）与删除（不删 PSD）
- *   - 新建模板是一步弹窗，由页面统一打开
+ *   - 新建模板是一步弹窗，由页面统一打开；入口只在顶部一处，空状态只给说明
  */
 
 import { useState, type ReactElement } from 'react'
@@ -58,8 +58,8 @@ export function TemplatesView({ board, busy, onAct, onBoard, onNew, onUse }: Pro
   return (
     <div className={styles.root}>
       <div className={styles.toolbar}>
-        <span className={styles.count}>{templates.length} 个模板</span>
-        <Button variant="primary" size="sm" icon={<Plus size={14} />} onClick={onNew}>
+        <span className={styles.count}>共 {templates.length} 个模板</span>
+        <Button variant="primary" icon={<Plus size={14} />} onClick={onNew}>
           新建模板
         </Button>
       </div>
@@ -68,8 +68,7 @@ export function TemplatesView({ board, busy, onAct, onBoard, onNew, onUse }: Pro
         <EmptyState
           icon={<FileImage size={24} />}
           title="还没有模板"
-          description="选一个 PSD 创建模板，然后在生产页添加替换位置并选择素材。"
-          actions={[{ label: '新建模板', onClick: onNew, variant: 'primary' }]}
+          description="选择 PSD 文件并填写名称，即可创建模板。"
         />
       ) : (
         <ul className={styles.grid}>

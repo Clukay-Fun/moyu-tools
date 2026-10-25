@@ -1,7 +1,7 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: var(--erp-space-3);
+  gap: var(--erp-space-4);
 }
 
 .toolbar {
@@ -10,8 +10,9 @@
   justify-content: space-between;
 }
 .count {
-  font-size: var(--erp-font-size-xs);
-  color: var(--erp-text-tertiary);
+  font-size: var(--erp-font-size-sm);
+  color: var(--erp-text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .grid {
@@ -30,7 +31,7 @@
   padding: var(--erp-space-3) var(--erp-space-4) var(--erp-space-4);
   background: var(--erp-bg-surface);
   border: 1px solid var(--erp-border-subtle);
-  border-radius: var(--erp-radius-lg);
+  border-radius: var(--erp-radius-md);
 }
 .cardHead {
   display: flex;
