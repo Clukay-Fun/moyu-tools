@@ -1,7 +1,9 @@
 .split {
   display: inline-flex;
   height: var(--erp-control-h);
-  border-radius: var(--erp-radius-control);
+  /* 与主按钮（Button primary md）同圆角、同投影、同字重，和「新建商品」并排看不出差别 */
+  border-radius: var(--btn-radius);
+  box-shadow: var(--btn-primary-shadow);
   overflow: hidden;
 }
 
@@ -11,11 +13,11 @@
   align-items: center;
   gap: var(--erp-space-1);
   border: 0;
-  background: var(--erp-accent);
-  color: var(--erp-accent-fg);
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
   font: inherit;
   font-size: var(--erp-font-size-sm);
-  font-weight: var(--erp-font-weight-medium);
+  font-weight: 650;
   cursor: pointer;
   transition: background-color var(--erp-transition-fast);
 }
@@ -24,7 +26,7 @@
 }
 .arrow {
   padding: 0 var(--erp-space-2);
-  border-left: 1px solid color-mix(in srgb, var(--erp-accent-fg) 25%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--btn-primary-fg) 25%, transparent);
 }
 .main:hover,
 .arrow:hover {

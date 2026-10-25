@@ -10,6 +10,7 @@
 
 /* 不画底框：控件直接放在工作区上；新建与更多靠右，窄窗口换行后仍在右侧 */
 .toolbar {
+  --erp-control-h: 36px;
   display: flex;
   align-items: center;
   gap: var(--erp-space-2) var(--erp-space-4);

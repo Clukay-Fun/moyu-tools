@@ -116,8 +116,8 @@ export function ProductsPage(): React.JSX.Element {
           <span>显示已停用</span>
         </label>
         <div className={styles.toolActions}>
-          <Button variant="primary" onClick={newProduct}>
-            <Plus size={16} /> 新建商品
+          <Button variant="primary" icon={<Plus size={14} />} onClick={newProduct}>
+            新建商品
           </Button>
           <Menu
             align="end"
