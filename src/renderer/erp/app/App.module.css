@@ -6,14 +6,17 @@
   display: flex;
 }
 
+/* 库存 / 定制页面唯一的一层内边距：左右 24（窄窗口 16），宽度跟着工作区走，不另设上限 */
 .pageLayer {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--erp-space-3) var(--erp-space-6) var(--erp-space-5);
+  padding: var(--erp-space-4) var(--erp-space-6) var(--erp-space-5);
 }
 
 .pageLayer[hidden] {

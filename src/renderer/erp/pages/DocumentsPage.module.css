@@ -4,7 +4,8 @@
   gap: var(--erp-space-3);
   height: 100%;
   width: 100%;
-  max-width: 1680px;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .mainPanel {

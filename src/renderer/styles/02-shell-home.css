@@ -874,6 +874,12 @@ body.home-active .pages {
   padding: 0;
 }
 
+/* 库存 / 定制的 React 页面有自己的滚动层和内边距（erp/app/App.module.css .pageLayer），
+   这里不再叠一层，否则左右留白翻倍 */
+.pages:has(> :is(#page-erp, #page-custom).active) {
+  padding: 0;
+}
+
 .page {
   display: none;
   height: 100%;
