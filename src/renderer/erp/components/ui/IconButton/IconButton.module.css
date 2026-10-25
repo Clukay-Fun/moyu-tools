@@ -32,8 +32,8 @@
 }
 
 .md {
-  width: 32px;
-  height: 32px;
+  width: var(--erp-control-h);
+  height: var(--erp-control-h);
   font-size: var(--erp-font-size-base);
 }
 

@@ -21,24 +21,38 @@
 
 /* 筛选条优先一行；放不下时换行，开单与更多始终靠右。只有搜索框会压缩，其余控件保持原宽 */
 .toolbar {
+  --erp-control-h: 36px;
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--erp-space-2);
-  padding: 10px var(--erp-space-3);
+  flex-direction: column;
+  gap: var(--erp-space-2-5);
+  padding: var(--erp-space-4);
   border-bottom: 1px solid var(--erp-border-subtle);
   flex-shrink: 0;
 }
 
-.toolbar > * {
+.toolRow {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  min-width: 0;
+}
+
+.toolRow > * {
   flex-shrink: 0;
 }
 
-.search {
-  position: relative;
-  flex: 1 1 140px;
-  min-width: 140px;
-  max-width: 400px;
+/* 两组筛选靠左；窗口太窄时只在这一段里横向滚动，开单操作不被挤走 */
+.filterGroups {
+  display: flex;
+  align-items: center;
+  gap: var(--erp-space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filterGroups > * {
+  flex-shrink: 0;
 }
 
 .toolActions {
@@ -47,6 +61,13 @@
   gap: var(--erp-space-2);
   margin-left: auto;
 }
+
+.search {
+  position: relative;
+  flex: 1 1 160px;
+  min-width: 160px;
+}
+
 .search input {
   padding-left: 30px;
 }
@@ -61,6 +82,7 @@
 }
 
 .count {
+  margin-left: auto;
   white-space: nowrap;
   font-size: var(--erp-font-size-sm);
   color: var(--erp-text-tertiary);

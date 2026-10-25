@@ -1,6 +1,6 @@
 .split {
   display: inline-flex;
-  height: 32px;
+  height: var(--erp-control-h);
   border-radius: var(--erp-radius-control);
   overflow: hidden;
 }

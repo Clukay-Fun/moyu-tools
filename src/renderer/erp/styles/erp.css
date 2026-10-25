@@ -16,6 +16,9 @@ body {
   --erp-space-6: 24px;
   --erp-space-8: 32px;
 
+  /* 输入框 / 按钮 / 分段控件的默认高度；单个工具栏可在自己范围内覆盖 */
+  --erp-control-h: 32px;
+
   /* 字体与字号：摸鱼正文 13px，标题与 KPI 稍大 */
   --erp-font-sans: var(--font);
   --erp-font-mono: 'SF Mono', Menlo, Consolas, monospace;

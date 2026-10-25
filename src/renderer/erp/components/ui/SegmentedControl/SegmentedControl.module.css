@@ -8,7 +8,7 @@
   border-radius: var(--seg-radius);
   padding: 2px;
   gap: 2px;
-  height: 32px;
+  height: var(--erp-control-h);
   box-sizing: border-box;
 }
 
@@ -19,7 +19,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--erp-space-1);
-  height: 26px;
+  height: calc(var(--erp-control-h) - 6px);
   padding: 0 var(--erp-space-2);
   background-color: transparent;
   border: none;
