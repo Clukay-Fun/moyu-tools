@@ -26,10 +26,14 @@ const MANIFEST_ENTRY = 'manifest.json'
 const PREFERENCES_ENTRY = 'preferences.json'
 const PREFERENCES_MAX_BYTES = 64 * 1024
 const ATTACH_PREFIX = 'attachments/'
+/** 定制素材图片（psd_assets 表指向的文件）。旧版应用会校验后忽略它，所以不提升 formatVersion */
+const PSD_ASSETS_PREFIX = 'psd-assets/'
 
 export interface DataPaths {
   dbPath: string
   attachmentsDir: string
+  /** 定制素材目录；不传则备份 / 恢复都不碰它 */
+  psdAssetsDir?: string
 }
 
 const sha256 = (buf: Buffer): string => createHash('sha256').update(buf).digest('hex')
@@ -46,7 +50,7 @@ function walk(dir: string): string[] {
 }
 
 /**
- * 生成备份 zip：manifest.json + 一致性数据库副本（VACUUM INTO）+ 附件目录。
+ * 生成备份 zip：manifest.json + 一致性数据库副本（VACUUM INTO）+ 附件目录 + 定制素材目录。
  * 数据库副本在 WAL 模式下也能保证完整。
  */
 export function createBackup(
@@ -65,12 +69,16 @@ export function createBackup(
     const dbBuf = readFileSync(tmpDb)
     zip.addFile(DB_ENTRY, dbBuf)
     files.push({ path: DB_ENTRY, size: dbBuf.length, sha256: sha256(dbBuf) })
-    for (const full of walk(paths.attachmentsDir)) {
-      const rel = relative(paths.attachmentsDir, full).split(sep).join('/')
-      const buf = readFileSync(full)
-      zip.addFile(ATTACH_PREFIX + rel, buf)
-      files.push({ path: ATTACH_PREFIX + rel, size: buf.length, sha256: sha256(buf) })
+    const addDir = (dir: string, prefix: string): void => {
+      for (const full of walk(dir)) {
+        const rel = relative(dir, full).split(sep).join('/')
+        const buf = readFileSync(full)
+        zip.addFile(prefix + rel, buf)
+        files.push({ path: prefix + rel, size: buf.length, sha256: sha256(buf) })
+      }
     }
+    addDir(paths.attachmentsDir, ATTACH_PREFIX)
+    if (paths.psdAssetsDir) addDir(paths.psdAssetsDir, PSD_ASSETS_PREFIX)
     if (preferences) {
       const buf = Buffer.from(JSON.stringify(preferences))
       if (buf.length <= PREFERENCES_MAX_BYTES) {
@@ -203,18 +211,27 @@ export function restoreBackup(path: string, paths: DataPaths, trashDir: string):
   moveAway(`${paths.dbPath}-wal`, 'moyu-erp.db-wal')
   moveAway(`${paths.dbPath}-shm`, 'moyu-erp.db-shm')
   moveAway(paths.attachmentsDir, 'attachments')
+  // 早期备份里没有定制素材：这时保留现有素材目录，不把它清空
+  const restorePsdAssets =
+    !!paths.psdAssetsDir && inspection.manifest.files.some((f) => f.path.startsWith(PSD_ASSETS_PREFIX))
+  if (restorePsdAssets) moveAway(paths.psdAssetsDir!, 'psd-assets')
+
+  const unpack = (dir: string, prefix: string): void => {
+    mkdirSync(dir, { recursive: true })
+    for (const f of inspection.manifest.files) {
+      if (!f.path.startsWith(prefix)) continue
+      const rel = f.path.slice(prefix.length)
+      const dst = join(dir, ...rel.split('/'))
+      mkdirSync(join(dst, '..'), { recursive: true })
+      writeFileSync(dst, zip.getEntry(f.path)!.getData())
+    }
+  }
 
   try {
     mkdirSync(join(paths.dbPath, '..'), { recursive: true })
     writeFileSync(paths.dbPath, zip.getEntry(DB_ENTRY)!.getData())
-    mkdirSync(paths.attachmentsDir, { recursive: true })
-    for (const f of inspection.manifest.files) {
-      if (!f.path.startsWith(ATTACH_PREFIX)) continue
-      const rel = f.path.slice(ATTACH_PREFIX.length)
-      const dst = join(paths.attachmentsDir, ...rel.split('/'))
-      mkdirSync(join(dst, '..'), { recursive: true })
-      writeFileSync(dst, zip.getEntry(f.path)!.getData())
-    }
+    unpack(paths.attachmentsDir, ATTACH_PREFIX)
+    if (restorePsdAssets) unpack(paths.psdAssetsDir!, PSD_ASSETS_PREFIX)
     const db = openDatabase(paths.dbPath)
     runMigrations(db)
     return db
@@ -222,6 +239,7 @@ export function restoreBackup(path: string, paths: DataPaths, trashDir: string):
     // 回滚：清掉半成品，把原数据移回
     rmSync(paths.dbPath, { force: true })
     rmSync(paths.attachmentsDir, { recursive: true, force: true })
+    if (restorePsdAssets) rmSync(paths.psdAssetsDir!, { recursive: true, force: true })
     for (const [src, dst] of moved) renameSync(dst, src)
     throw err
   }

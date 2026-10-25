@@ -23,7 +23,7 @@ export async function createBackupInteractive(): Promise<string | null> {
   if (r.canceled || !r.filePath) return null
   createBackup(
     state.db,
-    { dbPath: state.dbPath, attachmentsDir: state.attachmentsDir },
+    { dbPath: state.dbPath, attachmentsDir: state.attachmentsDir, psdAssetsDir: state.psdAssetsDir },
     app.getVersion(),
     r.filePath,
     null
@@ -54,7 +54,7 @@ export function restoreBackupFile(path: string): void {
   inspectBackupFile(path)
   state.close()
   try {
-    const db = restoreBackup(path, { dbPath: state.dbPath, attachmentsDir: state.attachmentsDir }, state.trashDir)
+    const db = restoreBackup(path, { dbPath: state.dbPath, attachmentsDir: state.attachmentsDir, psdAssetsDir: state.psdAssetsDir }, state.trashDir)
     state.adopt(db)
   } catch (err) {
     state.open()
