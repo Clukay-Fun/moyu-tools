@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import { readFileSync } from 'node:fs'
 
-export function getApplicationVersion() {
+export function getApplicationVersion(): string {
   if (app.isPackaged) return app.getVersion()
 
   try {

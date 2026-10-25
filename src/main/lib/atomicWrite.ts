@@ -7,7 +7,7 @@ import { open, rename, unlink } from 'node:fs/promises'
  * 场景）会留下半个文件，下次启动读到的是"看起来有、其实坏掉"的快照——
  * 比没有快照更糟。rename 在同一文件系统内是原子的。
  */
-export async function writeFileAtomic(filePath, data) {
+export async function writeFileAtomic(filePath: string, data: string | Uint8Array): Promise<void> {
   const temporary = `${filePath}.${process.pid}.tmp`
   const handle = await open(temporary, 'w')
   try {

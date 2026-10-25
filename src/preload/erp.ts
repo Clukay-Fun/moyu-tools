@@ -1,7 +1,7 @@
 import { ipcRenderer } from 'electron'
 import { IPC, type ErpApi } from '@shared/erp/ipc'
 
-// 库存 / 定制（原 ajuan-erp）的白名单桥：由 preload/index.js 挂到 window.api.erp。
+// 库存 / 定制（原 ajuan-erp）的白名单桥：由 preload/index.ts 挂到 window.api.erp。
 // 每个方法只转发到固定的 erp:* 通道，不暴露 ipcRenderer 本身。
 export const erpApi: ErpApi = {
   app: {
@@ -10,7 +10,7 @@ export const erpApi: ErpApi = {
     onDataReplaced: (handler) => {
       const listener = () => handler()
       ipcRenderer.on(IPC.dataReplaced, listener)
-      return () => ipcRenderer.removeListener(IPC.dataReplaced, listener)
+      return () => void ipcRenderer.removeListener(IPC.dataReplaced, listener)
     }
   },
   products: {

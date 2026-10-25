@@ -1,3 +1,4 @@
+// @ts-check
 // 汇总画布 · 撤销/重做（F-009 S4）
 //
 // 设计决策 D-2：场景图快照式。
@@ -27,6 +28,7 @@ export class BoardHistory {
   /**
    * 提交一步。
    * 在指针不在末尾时提交（即撤销后又做了新操作），末尾的 redo 分支会被丢弃。
+   * @param {Parameters<typeof snapshotScene>[0]} scene
    */
   push(scene) {
     const started = performance.now()
@@ -81,6 +83,7 @@ export class BoardHistory {
     }
   }
 
+  /** @param {Parameters<typeof snapshotScene>[0]} scene */
   reset(scene) {
     this.stack = [snapshotScene(scene)]
     this.index = 0

@@ -55,7 +55,7 @@ export function validateParams(template, params, extraValidate) {
 }
 
 /**
- * @param {object} spec 模板描述：id/version/name/category/description/defaults/ranges/materials/structureParams/build/extraValidate/sizes/sizeConversion
+ * @param {{ id: string } & Record<string, any>} spec 模板描述：id/version/name/category/description/defaults/ranges/materials/structureParams/build/extraValidate/sizes/sizeConversion
  */
 export function makeTemplate(spec) {
   const template = {

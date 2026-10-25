@@ -1,3 +1,4 @@
+// @ts-check
 // COM 联动的错误处理（F-006）
 //
 // 独立成模块的原因：不依赖 DOM 与 fabric，可在 Node 侧直接测到每个分支。
@@ -7,6 +8,7 @@
  * 原始文案形如：
  *   Error invoking remote method 'barcode:xxx': Error: 真正的原因
  * 直接展示会让用户看到与自己无关的方法名。
+ * @param {unknown} reason
  */
 export function cleanIpcError(reason) {
   return String(reason ?? '')
@@ -20,6 +22,7 @@ export function cleanIpcError(reason) {
  *
  * 每个分支都对应主进程或 com-worker 里真实存在的抛错点；
  * harness 会逐条比对，新增抛错点若没归类会落到兜底并被测出来。
+ * @param {unknown} reason
  */
 export function illustratorFailureHint(reason) {
   const text = cleanIpcError(reason)
@@ -40,7 +43,10 @@ export function illustratorFailureHint(reason) {
 /** 兜底提示文案，harness 用它判断某条错误是否被归类。 */
 export const ILLUSTRATOR_FALLBACK_HINT = '联动失败，请查看提示详情'
 
-/** 任务被取消：这不是失败，UI 不应按错误呈现。 */
+/**
+ * 任务被取消：这不是失败，UI 不应按错误呈现。
+ * @param {unknown} reason
+ */
 export function isComCancelled(reason) {
   return /TASK_CANCELLED|任务已取消/.test(cleanIpcError(reason))
 }

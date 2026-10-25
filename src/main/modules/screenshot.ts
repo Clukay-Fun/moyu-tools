@@ -2,26 +2,54 @@ import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { copyFile, mkdir, readFile, stat, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { runFormatProcess } from '../lib/spawnProcess.js'
-import { loadTesseract } from '../lib/lazyModules.js'
-import { sanitizeFileBaseName } from '../lib/outputPath.js'
+import { runFormatProcess } from '../lib/spawnProcess'
+import { loadTesseract } from '../lib/lazyModules'
+import { sanitizeFileBaseName } from '../lib/outputPath'
+import { showSaveDialogFor, type MainDeps } from '../lib/deps'
+import type { BrowserWindow, Display, IpcMainInvokeEvent, NativeImage, Rectangle, Size, WebContents } from 'electron'
+import type { Worker as OcrWorker } from 'tesseract.js'
 
 // 区域截图（含 macOS ScreenCaptureKit 原生抓屏、覆盖层窗口、钉图、OCR）
 // + 全局截图快捷键。快捷键放在同一个模块里，是因为触发函数需要直接读
 // screenshotSessions（"已经有一个覆盖层时连按要忽略"），拆开反而要为这一个
 // 判断单独导出一个只读接口，不如放在一起自然。
 
-const screenshotSessions = new Map()
-let reusableScreenshotOverlay = null
-let screenshotOverlayReadyPromise = null
-const pinnedScreenshotSessions = new Map()
+interface ScreenshotSession {
+  data: Buffer
+  displayBounds: Rectangle
+  imageSize: Size
+  backend: string
+  owner: WebContents
+  overlay: BrowserWindow
+}
+
+interface PinnedScreenshotSession {
+  data: Buffer
+  image: NativeImage
+  originalSize: Size
+  window: BrowserWindow
+}
+
+interface CaptureSource {
+  thumbnail: NativeImage
+  /** ScreenCaptureKit 侧车直接给出的 PNG；desktopCapturer 没有，由 thumbnail 编码 */
+  data?: Buffer
+  backend: string
+}
+
+type ShortcutResult = { ok: boolean; disabled?: boolean; accelerator?: string; reason?: 'invalid' | 'taken' }
+
+const screenshotSessions = new Map<string, ScreenshotSession>()
+let reusableScreenshotOverlay: BrowserWindow | null = null
+let screenshotOverlayReadyPromise: Promise<BrowserWindow> | null = null
+const pinnedScreenshotSessions = new Map<string, PinnedScreenshotSession>()
 
 /** 亮度低于此值的画面视为黑帧。留一点余量以容忍深色壁纸的极端情况。 */
 const BLANK_CAPTURE_THRESHOLD = 8
 /** 黑帧重试前给屏幕采集器一帧恢复时间；不改变任何应用窗口状态。 */
 const CAPTURE_RETRY_DELAY_MS = 140
 
-function isBlankCapture(image) {
+function isBlankCapture(image: NativeImage | null | undefined) {
   if (!image || image.isEmpty()) return true
   const size = image.getSize()
   if (!size.width || !size.height) return true
@@ -37,9 +65,9 @@ function isBlankCapture(image) {
   return true
 }
 
-let screenCaptureKitBinaryPromise = null
+let screenCaptureKitBinaryPromise: Promise<string> | null = null
 
-export async function ensureScreenCaptureKitBinary({ app, __dirname }) {
+export async function ensureScreenCaptureKitBinary({ app, __dirname }: Pick<MainDeps, 'app' | '__dirname'>): Promise<string> {
   if (screenCaptureKitBinaryPromise) return screenCaptureKitBinaryPromise
   screenCaptureKitBinaryPromise = (async () => {
     const sourceCandidates = [
@@ -72,7 +100,12 @@ export async function ensureScreenCaptureKitBinary({ app, __dirname }) {
 }
 
 /** macOS 原生抓屏：保留屏幕上的全部应用，包括工具箱自身。 */
-async function captureDisplayScreenCaptureKit({ app, __dirname, nativeImage }, display, physicalWidth, physicalHeight) {
+async function captureDisplayScreenCaptureKit(
+  { app, __dirname, nativeImage }: Pick<MainDeps, 'app' | '__dirname' | 'nativeImage'>,
+  display: Display,
+  physicalWidth: number,
+  physicalHeight: number
+): Promise<CaptureSource> {
   const binary = await ensureScreenCaptureKitBinary({ app, __dirname })
   const directory = join(app.getPath('temp'), 'moyu-tools-native')
   const output = join(directory, `capture-${randomUUID()}.png`)
@@ -102,7 +135,7 @@ async function captureDisplayScreenCaptureKit({ app, __dirname, nativeImage }, d
  * 继续使用工具箱已验证的 BrowserWindow 组合；electron-screenshots 的
  * panel/toolbar + kiosk 参数在 Electron 43/macOS 上会阻断覆盖层显示，不能照搬。
  */
-function createScreenshotOverlay({ BrowserWindow, __dirname }, display) {
+function createScreenshotOverlay({ BrowserWindow, __dirname }: Pick<MainDeps, 'BrowserWindow' | '__dirname'>, display: Display) {
   const overlay = new BrowserWindow({
     ...display.bounds,
     frame: false,
@@ -134,7 +167,7 @@ function createScreenshotOverlay({ BrowserWindow, __dirname }, display) {
   return overlay
 }
 
-function hideScreenshotOverlay(overlay) {
+function hideScreenshotOverlay(overlay: BrowserWindow | null | undefined) {
   if (!overlay || overlay.isDestroyed()) return
   overlay.hide()
 }
@@ -143,7 +176,10 @@ function hideScreenshotOverlay(overlay) {
  * 截图窗口只创建和加载一次，后续截图仅替换会话数据并重新显示。
  * 这是参考 electron-screenshots singleWindow 思路的本项目实现，不引入其 React UI。
  */
-export async function ensureScreenshotOverlay({ BrowserWindow, __dirname }, display) {
+export async function ensureScreenshotOverlay(
+  { BrowserWindow, __dirname }: Pick<MainDeps, 'BrowserWindow' | '__dirname'>,
+  display: Display
+): Promise<BrowserWindow> {
   if (reusableScreenshotOverlay && !reusableScreenshotOverlay.isDestroyed()) {
     reusableScreenshotOverlay.setBounds(display.bounds, false)
     return reusableScreenshotOverlay
@@ -176,13 +212,13 @@ export async function ensureScreenshotOverlay({ BrowserWindow, __dirname }, disp
   return screenshotOverlayReadyPromise
 }
 
-function normalizeOcrText(text) {
+function normalizeOcrText(text: unknown) {
   return String(text || '')
     .replace(/([\p{Script=Han}])\s+(?=[\p{Script=Han}])/gu, '$1')
     .trim()
 }
 
-async function copyFileIfChanged(source, destination) {
+async function copyFileIfChanged(source: string, destination: string) {
   const [sourceInfo, destinationInfo] = await Promise.all([
     stat(source),
     stat(destination).catch(() => null)
@@ -192,8 +228,8 @@ async function copyFileIfChanged(source, destination) {
   }
 }
 
-const OCR_MODELS_CACHE = { value: null }
-function getOcrModels(require) {
+const OCR_MODELS_CACHE: { value: { code: string; source: string }[] | null } = { value: null }
+function getOcrModels(require: NodeJS.Require) {
   if (OCR_MODELS_CACHE.value) return OCR_MODELS_CACHE.value
   const { dirname } = require('node:path')
   OCR_MODELS_CACHE.value = [
@@ -217,11 +253,11 @@ function getOcrModels(require) {
   return OCR_MODELS_CACHE.value
 }
 
-let ocrWorkerPromise = null
-let ocrProgressTarget = null
+let ocrWorkerPromise: Promise<OcrWorker> | null = null
+let ocrProgressTarget: WebContents | null = null
 let ocrBusy = false
 
-async function ensureOcrWorker({ app, require }) {
+async function ensureOcrWorker({ app, require }: Pick<MainDeps, 'app' | 'require'>): Promise<OcrWorker> {
   if (!ocrWorkerPromise) {
     ocrWorkerPromise = (async () => {
       const languageDirectory = join(app.getPath('userData'), 'ocr-data')
@@ -258,8 +294,8 @@ async function ensureOcrWorker({ app, require }) {
   return ocrWorkerPromise
 }
 
-/** 应用退出前终止 OCR worker，供 index.js 的 before-quit 调用。 */
-export function terminateOcrWorker() {
+/** 应用退出前终止 OCR worker，供 index.ts 的 before-quit 调用。 */
+export function terminateOcrWorker(): Promise<unknown> | undefined {
   return ocrWorkerPromise?.then((worker) => worker.terminate()).catch(() => {})
 }
 
@@ -274,17 +310,17 @@ export function terminateOcrWorker() {
 const DEFAULT_CAPTURE_SHORTCUT = 'Control+Shift+A'
 
 /** 当前生效的加速键；null 表示用户主动关闭了全局快捷键。 */
-let captureShortcut = DEFAULT_CAPTURE_SHORTCUT
+let captureShortcut: string | null = DEFAULT_CAPTURE_SHORTCUT
 /** 当前已注册成功的加速键，用于精确注销。null 表示当前没有注册任何键。 */
-let registeredShortcut = null
+let registeredShortcut: string | null = null
 /** 注册失败的提示；渲染端就绪前先攒着，就绪后再送一次。 */
-let pendingShortcutNotice = null
+let pendingShortcutNotice: Record<string, unknown> | null = null
 
-function shortcutSettingsFile(app) {
+function shortcutSettingsFile(app: MainDeps['app']) {
   return join(app.getPath('userData'), 'shortcuts.json')
 }
 
-function readShortcutSettings(app) {
+function readShortcutSettings(app: MainDeps['app']): string | null {
   try {
     const raw = readFileSync(shortcutSettingsFile(app), 'utf8')
     const parsed = JSON.parse(raw)
@@ -296,7 +332,7 @@ function readShortcutSettings(app) {
   return DEFAULT_CAPTURE_SHORTCUT
 }
 
-function writeShortcutSettings(app, accelerator) {
+function writeShortcutSettings(app: MainDeps['app'], accelerator: string | null) {
   try {
     writeFileSync(shortcutSettingsFile(app), JSON.stringify({ capture: accelerator }, null, 2), 'utf8')
     return true
@@ -312,7 +348,7 @@ function writeShortcutSettings(app, accelerator) {
  * Electron 的 register 对畸形字符串会**抛错**而不是返回 false，
  * 不先校验的话用户随手输入的内容会把注册流程打断。
  */
-function isValidAccelerator(accelerator) {
+function isValidAccelerator(accelerator: unknown): accelerator is string {
   if (typeof accelerator !== 'string' || !accelerator.trim()) return false
   const parts = accelerator.split('+').map((p) => p.trim()).filter(Boolean)
   if (parts.length < 2) return false // 全局快捷键必须带修饰键，否则会吃掉普通按键
@@ -323,7 +359,7 @@ function isValidAccelerator(accelerator) {
   return parts.slice(0, -1).every((p) => mods.has(p))
 }
 
-function notifyShortcutStatus(getMainWindow, payload) {
+function notifyShortcutStatus(getMainWindow: MainDeps['getMainWindow'], payload: Record<string, unknown>) {
   const target = getMainWindow()?.webContents
   if (!target || target.isDestroyed() || target.isLoading()) {
     pendingShortcutNotice = payload
@@ -338,7 +374,7 @@ function notifyShortcutStatus(getMainWindow, payload) {
  * 已有覆盖层时直接忽略：连按不能叠出第二层，否则两层覆盖会互相遮挡，
  * 用户既选不中区域也关不掉。screenshotSessions 是覆盖层的唯一真值。
  */
-function triggerCaptureShortcut(getMainWindow) {
+function triggerCaptureShortcut(getMainWindow: MainDeps['getMainWindow']) {
   if (screenshotSessions.size > 0) return
   const mainWindow = getMainWindow()
   if (!mainWindow || mainWindow.isDestroyed()) return
@@ -355,7 +391,10 @@ function triggerCaptureShortcut(getMainWindow) {
  *   · 成功   —— 显示当前生效的组合
  *   · 被占用 —— **明确说"已被其他应用占用"**，不含糊成"注册失败"
  */
-export function registerCaptureShortcut({ app, globalShortcut, getMainWindow }) {
+export function registerCaptureShortcut({
+  globalShortcut,
+  getMainWindow
+}: Pick<MainDeps, 'app' | 'globalShortcut' | 'getMainWindow'>): ShortcutResult {
   // ⚠ 只注销**自己上一次注册的那个**，不要用 unregisterAll()。
   //   unregisterAll 会清掉进程里所有全局快捷键——现在只有一个所以看不出
   //   问题，但将来任何一个新增的全局键都会被这里悄悄清掉。
@@ -395,12 +434,12 @@ export function registerCaptureShortcut({ app, globalShortcut, getMainWindow }) 
   return { ok: true, accelerator: captureShortcut }
 }
 
-export function initCaptureShortcutFromSettings(app) {
+export function initCaptureShortcutFromSettings(app: MainDeps['app']): void {
   captureShortcut = readShortcutSettings(app)
 }
 
-/** 主窗口销毁时一并收掉所有钉图窗口与截图覆盖层，供 index.js 调用。 */
-export function closeAllScreenshotWindows() {
+/** 主窗口销毁时一并收掉所有钉图窗口与截图覆盖层，供 index.ts 调用。 */
+export function closeAllScreenshotWindows(): void {
   pinnedScreenshotSessions.forEach((session) => session.window.close())
   if (reusableScreenshotOverlay && !reusableScreenshotOverlay.isDestroyed()) {
     reusableScreenshotOverlay.destroy()
@@ -421,8 +460,23 @@ export function registerScreenshotHandlers({
   __dirname,
   assertMainWindowSender,
   getMainWindow
-}) {
-  function isScreenshotActionSender(event) {
+}: Pick<
+  MainDeps,
+  | 'ipcMain'
+  | 'dialog'
+  | 'BrowserWindow'
+  | 'clipboard'
+  | 'nativeImage'
+  | 'desktopCapturer'
+  | 'screen'
+  | 'globalShortcut'
+  | 'app'
+  | 'require'
+  | '__dirname'
+  | 'assertMainWindowSender'
+  | 'getMainWindow'
+>): void {
+  function isScreenshotActionSender(event: IpcMainInvokeEvent) {
     const mainWindow = getMainWindow()
     if (mainWindow && event.sender === mainWindow.webContents) return true
     return [...screenshotSessions.values()].some((session) =>
@@ -435,7 +489,7 @@ export function registerScreenshotHandlers({
     const display = screen.getDisplayNearestPoint(cursorPoint)
     const physicalWidth = Math.max(1, Math.round(display.bounds.width * display.scaleFactor))
     const physicalHeight = Math.max(1, Math.round(display.bounds.height * display.scaleFactor))
-    const grabElectron = async () => {
+    const grabElectron = async (): Promise<CaptureSource | null> => {
       const sources = await desktopCapturer.getSources({
         types: ['screen'],
         thumbnailSize: { width: physicalWidth, height: physicalHeight },
@@ -444,7 +498,7 @@ export function registerScreenshotHandlers({
       const source = sources.find((c) => String(c.display_id) === String(display.id)) || sources[0]
       return source ? { thumbnail: source.thumbnail, backend: 'desktopCapturer' } : null
     }
-    const grab = async () => {
+    const grab = async (): Promise<CaptureSource | null> => {
       // macOS 不回退到 desktopCapturer：原生路径负责稳定地保留当前屏幕内容，
       // 并避免 Electron 在 Stage Manager 下产生错误的显示器边界映射。
       if (process.platform === 'darwin') {
@@ -471,7 +525,7 @@ export function registerScreenshotHandlers({
     const sessionId = randomUUID()
     const data = source.data || source.thumbnail.toPNG()
     const overlay = await ensureScreenshotOverlay({ BrowserWindow, __dirname }, display)
-    const session = {
+    const session: ScreenshotSession = {
       data,
       displayBounds: display.bounds,
       imageSize: source.thumbnail.getSize(),
@@ -518,9 +572,9 @@ export function registerScreenshotHandlers({
     if (!session || event.sender !== session.overlay.webContents) {
       throw new Error('截图会话已失效或无权访问')
     }
-    let data
-    let width
-    let height
+    let data: Buffer
+    let width: number
+    let height: number
     if (payload?.data instanceof Uint8Array) {
       if (payload.data.byteLength > 100 * 1024 * 1024) throw new Error('截图数据超过 100 MB')
       const finalImage = nativeImage.createFromBuffer(Buffer.from(payload.data))
@@ -575,7 +629,7 @@ export function registerScreenshotHandlers({
       throw new Error('截图数据无效或超过 100 MB')
     }
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
-    const result = await dialog.showSaveDialog(ownerWindow, {
+    const result = await showSaveDialogFor(dialog, ownerWindow, {
       title: '保存截图',
       defaultPath: `${sanitizeFileBaseName(payload.name, 'screenshot')}.png`,
       filters: [{ name: 'PNG 图片', extensions: ['png'] }]
@@ -637,7 +691,7 @@ export function registerScreenshotHandlers({
     return { status: 'copied', length: text.length }
   })
 
-  function getPinnedScreenshotSession(event, pinId) {
+  function getPinnedScreenshotSession(event: IpcMainInvokeEvent, pinId: string) {
     const session = pinnedScreenshotSessions.get(pinId)
     if (!session || event.sender !== session.window.webContents) {
       throw new Error('钉图会话不存在或无权访问')

@@ -20,7 +20,7 @@
     "build:win:dir": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win dir --x64 --publish=never && node scripts/zip-win-unpacked.mjs",
     "build:win:release": "npm run build:icon && npm run build:tools:win && npm run build && electron-builder --win nsis --x64 --publish always",
     "preview": "electron-vite preview",
-    "typecheck": "tsc -p tsconfig.erp.json",
+    "typecheck": "tsc -p tsconfig.json",
     "lint:css": "stylelint \"src/renderer/styles/**/*.css\" \"src/renderer/erp/**/*.css\" && node scripts/style-report.mjs --check"
   },
   "build": {

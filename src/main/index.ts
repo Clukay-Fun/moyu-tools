@@ -12,16 +12,16 @@ import {
   shell,
   utilityProcess
 } from 'electron'
-import { initUpdater, updateApi } from './updater.js'
-import { getApplicationVersion } from './appVersion.js'
-import { registerBoardHandlers } from './modules/board.js'
-import { registerComWorkerHandlers, terminateComWorker } from './modules/comWorker.js'
-import { registerBarcodeHandlers } from './modules/barcode.js'
-import { registerIllustratorHandlers } from './modules/illustrator.js'
-import { bindOwnerSessionCleanup, registerDropAndOfficeHandlers } from './modules/dropAndOffice.js'
-import { registerDielineHandlers } from './modules/dieline.js'
-import { registerProfileHandlers } from './modules/profile.js'
-import { registerFormatFactoryHandlers } from './modules/formatFactory.js'
+import { initUpdater, updateApi } from './updater'
+import { getApplicationVersion } from './appVersion'
+import { registerBoardHandlers } from './modules/board'
+import { registerComWorkerHandlers, terminateComWorker } from './modules/comWorker'
+import { registerBarcodeHandlers } from './modules/barcode'
+import { registerIllustratorHandlers } from './modules/illustrator'
+import { bindOwnerSessionCleanup, registerDropAndOfficeHandlers } from './modules/dropAndOffice'
+import { registerDielineHandlers } from './modules/dieline'
+import { registerProfileHandlers } from './modules/profile'
+import { registerFormatFactoryHandlers } from './modules/formatFactory'
 import {
   closeAllScreenshotWindows,
   ensureScreenCaptureKitBinary,
@@ -30,13 +30,15 @@ import {
   registerCaptureShortcut,
   registerScreenshotHandlers,
   terminateOcrWorker
-} from './modules/screenshot.js'
+} from './modules/screenshot'
 import { handleMoyuFileProtocol, registerMoyuFileScheme } from './erp/protocol'
 import { state as erpState } from './erp/appState'
 import { registerErpIpc } from './erp/ipc'
 import { syncPsdPluginSettings } from './erp/psdIo'
 import { setErpMainWindowGetter } from './erp/window'
 import { refreshPhotoshopStatus, registerPhotoshopHandlers } from './photoshop'
+import type { BrowserWindowConstructorOptions, IpcMainEvent, IpcMainInvokeEvent } from 'electron'
+import { messageOf } from './lib/deps'
 import { existsSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
@@ -56,7 +58,7 @@ function recordStartupReady() {
     const logPath = join(app.getPath('userData'), 'startup-log.txt')
     writeFileSync(logPath, `${new Date().toISOString()} startup-ready: ${elapsed}ms\n`, { flag: 'a' })
   } catch (error) {
-    console.warn('启动日志写入失败：', error?.message || error)
+    console.warn('启动日志写入失败：', messageOf(error) || error)
   }
 }
 
@@ -67,7 +69,7 @@ ipcMain.on('startup:report-ready', () => {
 // moyu-file:// 必须在 ready 之前注册为特权协议（库存 / 定制的图片与附件）
 registerMoyuFileScheme()
 
-let mainWindow = null
+let mainWindow: BrowserWindow | null = null
 const hasSingleInstanceLock = app.requestSingleInstanceLock()
 if (!hasSingleInstanceLock) {
   app.quit()
@@ -80,7 +82,7 @@ if (!hasSingleInstanceLock) {
   })
 }
 
-function assertMainWindowSender(event) {
+function assertMainWindowSender(event: IpcMainInvokeEvent | IpcMainEvent) {
   if (!mainWindow || event.sender !== mainWindow.webContents) {
     throw new Error('此操作只允许从主窗口发起')
   }
@@ -113,14 +115,14 @@ function resolveWindowIcon() {
 
 /** 顶栏高度与外壳顶栏 CSS 保持一致；Windows 系统按钮的覆盖层也按它对齐。 */
 const TITLEBAR_HEIGHT = 52
-const TITLEBAR_THEMES = {
+const TITLEBAR_THEMES: Record<'light' | 'dark', { color: string; symbolColor: string }> = {
   // 顶栏透明、显露外层底色；这里是浅灰背景（--shell-bg）的值，其他背景由渲染进程按右上角颜色另传
   light: { color: '#EFF0F5', symbolColor: '#252734' },
   dark: { color: '#0B1018', symbolColor: '#EDF3FB' }
 }
 
 /** 无边框标题栏按平台取值：macOS 留红黄绿，Windows 用 overlay 让系统按钮落在右上。 */
-function platformTitleBarOptions() {
+function platformTitleBarOptions(): BrowserWindowConstructorOptions {
   if (process.platform === 'darwin') {
     return {
       titleBarStyle: 'hiddenInset',
@@ -136,8 +138,8 @@ function platformTitleBarOptions() {
   return {}
 }
 
-function createWindow() {
-  mainWindow = new BrowserWindow({
+function createWindow(): BrowserWindow {
+  const win = new BrowserWindow({
     width: 1200,
     height: 780,
     minWidth: 960,
@@ -152,10 +154,11 @@ function createWindow() {
       sandbox: true
     }
   })
+  mainWindow = win
 
   // 主窗口只允许加载本地应用页面；新窗口请求统一拒绝，外部链接必须经过
   // app:open-external 的固定白名单，避免将任意网页带入带有桥接 API 的上下文。
-  mainWindow.webContents.on('will-navigate', (event, url) => {
+  win.webContents.on('will-navigate', (event, url) => {
     let allowed = url.startsWith('file://')
     if (process.env.ELECTRON_RENDERER_URL) {
       try {
@@ -166,7 +169,7 @@ function createWindow() {
     }
     if (!allowed) event.preventDefault()
   })
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+  win.webContents.setWindowOpenHandler(({ url }) => {
     if (ALLOWED_EXTERNAL_URLS.has(url)) void shell.openExternal(url)
     return { action: 'deny' }
   })
@@ -175,24 +178,25 @@ function createWindow() {
   // ⚠ 'restore' 与 'show' 都要接：最小化恢复走 restore，
   //   而截图流程用的是 hide/show，走的是 show，两条路都会让
   //   keyup / mouse:up 这类"结束事件"丢失。
-  for (const evt of ['restore', 'show', 'focus']) {
-    mainWindow.on(evt, () => {
-      if (mainWindow.isDestroyed()) return
-      mainWindow.webContents.send('window:revive')
-    })
+  const revive = () => {
+    if (win.isDestroyed()) return
+    win.webContents.send('window:revive')
   }
+  win.on('restore', revive)
+  win.on('show', revive)
+  win.on('focus', revive)
 
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show()
+  win.once('ready-to-show', () => {
+    win.show()
   })
 
   // 全屏时 macOS 红黄绿 / Windows 三键都会隐藏，渲染层要把顶栏左侧的让位收掉。
-  for (const [eventName, fullscreen] of [['enter-full-screen', true], ['leave-full-screen', false]]) {
-    mainWindow.on(eventName, () => {
-      if (mainWindow.isDestroyed()) return
-      mainWindow.webContents.send('window:fullscreen', fullscreen)
-    })
+  const sendFullscreen = (fullscreen: boolean) => {
+    if (win.isDestroyed()) return
+    win.webContents.send('window:fullscreen', fullscreen)
   }
+  win.on('enter-full-screen', () => sendFullscreen(true))
+  win.on('leave-full-screen', () => sendFullscreen(false))
 
   // 未保存的汇总画布：关闭前确认，三选项与新建/打开完全一致（规格 7.2）。
   //
@@ -202,7 +206,7 @@ function createWindow() {
   // forceClose 标记避免 destroy 后再次触发本处理器造成递归。
   let forceClose = false
   let closing = false
-  mainWindow.on('close', (event) => {
+  win.on('close', (event) => {
     if (forceClose || !boardHasUnsavedChanges) return
     event.preventDefault()
     if (closing) return // 已在处理中，忽略重复的关闭请求
@@ -210,7 +214,7 @@ function createWindow() {
 
     ;(async () => {
       try {
-        const choice = await dialog.showMessageBox(mainWindow, {
+        const choice = await dialog.showMessageBox(win, {
           type: 'warning',
           buttons: ['保存并退出', '不保存并退出', '取消'],
           defaultId: 0,
@@ -227,22 +231,23 @@ function createWindow() {
         }
         forceClose = true
         boardHasUnsavedChanges = false
-        mainWindow.destroy()
+        win.destroy()
       } finally {
         closing = false
       }
     })()
   })
-  mainWindow.on('closed', () => {
+  win.on('closed', () => {
     mainWindow = null
     closeAllScreenshotWindows()
   })
 
   if (process.env.ELECTRON_RENDERER_URL) {
-    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
+    win.loadURL(process.env.ELECTRON_RENDERER_URL)
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    win.loadFile(join(__dirname, '../renderer/index.html'))
   }
+  return win
 }
 
 ipcMain.handle('ping', () => 'pong')
@@ -263,7 +268,7 @@ ipcMain.handle('window:set-titlebar-theme', (event, value) => {
   if (color !== undefined && !/^#[0-9a-f]{6}$/i.test(String(color))) throw new Error('不支持的颜色')
   if (process.platform === 'win32' && mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.setTitleBarOverlay({
-      ...TITLEBAR_THEMES[theme],
+      ...TITLEBAR_THEMES[theme as 'light' | 'dark'],
       ...(color ? { color } : {}),
       height: TITLEBAR_HEIGHT
     })
@@ -315,11 +320,11 @@ ipcMain.handle('app:open-external', async (event, value) => {
 })
 
 // ── 汇总画布项目文件 .moyuboard（F-009 S5）────────────────────
-// 文件 IPC（board:save / board:open / recovery:*）已拆到 ./modules/board.js；
+// 文件 IPC（board:save / board:open / recovery:*）已拆到 ./modules/board.ts；
 // 这里只留下跟 mainWindow 生命周期强耦合的"未保存改动"关闭握手。
 registerBoardHandlers({ ipcMain, dialog, BrowserWindow, app, assertMainWindowSender })
 
-// 格式工厂 IPC（format:*）已拆到 ./modules/formatFactory.js。
+// 格式工厂 IPC（format:*）已拆到 ./modules/formatFactory.ts。
 registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, app, assertMainWindowSender })
 
 // 刀模发送到 Illustrator（dieline:*）：渲染层给 SVG，主进程交给 COM worker 打开。
@@ -328,10 +333,10 @@ registerDielineHandlers({ ipcMain, assertMainWindowSender, app, utilityProcess }
 // 个人头像（profile:*）：系统选图、256px PNG 落盘，经 moyu-file://avatar/ 读取。
 registerProfileHandlers({ ipcMain, dialog, BrowserWindow, app, assertMainWindowSender })
 
-// Office/Adobe COM 联动的公共基础设施（com:probe / com:show-result）已拆到 ./modules/comWorker.js。
+// Office/Adobe COM 联动的公共基础设施（com:probe / com:show-result）已拆到 ./modules/comWorker.ts。
 registerComWorkerHandlers({ ipcMain, shell, app, utilityProcess, assertMainWindowSender })
 
-// 条码/图片文件保存 IPC（barcode:* / image:save-file）已拆到 ./modules/barcode.js。
+// 条码/图片文件保存 IPC（barcode:* / image:save-file）已拆到 ./modules/barcode.ts。
 registerBarcodeHandlers({ ipcMain, dialog, BrowserWindow, clipboard, app, utilityProcess, assertMainWindowSender })
 
 // 公共 Photoshop 服务（photoshop:*）：条码与「定制」共用，启动后后台检测一次。
@@ -341,16 +346,16 @@ registerPhotoshopHandlers(assertMainWindowSender)
 setErpMainWindowGetter(() => mainWindow)
 registerErpIpc()
 
-// Illustrator 批处理 IPC（illustrator:*）已拆到 ./modules/illustrator.js。
+// Illustrator 批处理 IPC（illustrator:*）已拆到 ./modules/illustrator.ts。
 registerIllustratorHandlers({
   ipcMain, dialog, BrowserWindow, app, utilityProcess, assertMainWindowSender, bindOwnerSessionCleanup
 })
 
-// 统一拖入扫描 + Office 转 PDF + PDF 输出位置管理已拆到 ./modules/dropAndOffice.js。
+// 统一拖入扫描 + Office 转 PDF + PDF 输出位置管理已拆到 ./modules/dropAndOffice.ts。
 registerDropAndOfficeHandlers({ ipcMain, dialog, BrowserWindow, shell, app, utilityProcess, assertMainWindowSender })
 
 // 区域截图（含 macOS 原生抓屏、覆盖层、钉图、OCR）+ 全局截图快捷键
-// 已拆到 ./modules/screenshot.js。
+// 已拆到 ./modules/screenshot.ts。
 registerScreenshotHandlers({
   ipcMain,
   dialog,
@@ -375,7 +380,7 @@ registerScreenshotHandlers({
 let boardHasUnsavedChanges = false
 
 /** 关闭流程里等待 renderer 保存结果的握手表。 */
-const pendingCloseSaves = new Map()
+const pendingCloseSaves = new Map<number, (ok: unknown) => void>()
 let closeSaveSeq = 0
 
 /**
@@ -385,7 +390,7 @@ let closeSaveSeq = 0
  * 超时兜底：renderer 卡死时不能让窗口永远关不掉，
  * 但超时按**失败**处理——宁可让用户再点一次，也不能悄悄丢改动。
  */
-function requestRendererSave(timeoutMs = 120000) {
+function requestRendererSave(timeoutMs = 120000): Promise<boolean> {
   const target = mainWindow?.webContents
   if (!target || target.isDestroyed()) return Promise.resolve(false)
   const id = ++closeSaveSeq
@@ -394,7 +399,7 @@ function requestRendererSave(timeoutMs = 120000) {
       pendingCloseSaves.delete(id)
       resolve(false)
     }, timeoutMs)
-    pendingCloseSaves.set(id, (ok) => {
+    pendingCloseSaves.set(id, (ok: unknown) => {
       clearTimeout(timer)
       pendingCloseSaves.delete(id)
       resolve(Boolean(ok))
@@ -420,7 +425,7 @@ if (hasSingleInstanceLock) app.whenReady().then(() => {
     erpState.open()
   } catch (error) {
     // 库存库打不开不影响其他工具；库存 / 定制的请求会各自报错
-    console.error('库存数据库打开失败：', error?.message || error)
+    console.error('库存数据库打开失败：', messageOf(error) || error)
   }
   handleMoyuFileProtocol()
   // 只检测、不启动 Photoshop；结果通过 photoshop:status 广播
@@ -428,7 +433,7 @@ if (hasSingleInstanceLock) app.whenReady().then(() => {
     try {
       syncPsdPluginSettings()
     } catch (error) {
-      console.warn('Photoshop 插件目录设置写入失败：', error?.message || error)
+      console.warn('Photoshop 插件目录设置写入失败：', messageOf(error) || error)
     }
   })
   // macOS 首次截图若在点击后才编译 ScreenCaptureKit 侧车，会额外等待约一秒。
@@ -442,10 +447,9 @@ if (hasSingleInstanceLock) app.whenReady().then(() => {
   // 方便本机预览与 Windows 打包后的品牌视觉保持一致。
   if (process.platform === 'darwin') {
     const dockIcon = resolveWindowIcon()
-    if (dockIcon && !dockIcon.isEmpty()) app.dock.setIcon(dockIcon)
+    if (dockIcon && !dockIcon.isEmpty()) app.dock?.setIcon(dockIcon)
   }
-  createWindow()
-  initUpdater(mainWindow)
+  initUpdater(createWindow())
   // 预先加载隐藏的截图壳。后续点击只更新屏幕数据，不再创建窗口或重跑页面初始化。
   void ensureScreenshotOverlay({ BrowserWindow, __dirname }, screen.getPrimaryDisplay()).catch((error) => {
     console.warn('截图覆盖层预加载失败：', error?.message || error)

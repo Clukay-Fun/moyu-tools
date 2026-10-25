@@ -2,13 +2,14 @@
 // 单例缓存在这个模块里——格式工厂、条码 PNG 密度写入等多处调用方
 // 共用同一份 import()，不会因为各自持有一份 promise 而重复加载。
 
-let sharpModulePromise = null
+const importSharp = () => import('sharp').then((mod) => mod.default)
+let sharpModulePromise: ReturnType<typeof importSharp> | null = null
 export async function loadSharp() {
-  if (!sharpModulePromise) sharpModulePromise = import('sharp').then((mod) => mod.default)
+  if (!sharpModulePromise) sharpModulePromise = importSharp()
   return sharpModulePromise
 }
 
-let tesseractModulePromise = null
+let tesseractModulePromise: Promise<typeof import('tesseract.js')> | null = null
 export async function loadTesseract() {
   if (!tesseractModulePromise) tesseractModulePromise = import('tesseract.js')
   return tesseractModulePromise

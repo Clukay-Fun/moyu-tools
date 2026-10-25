@@ -1,13 +1,52 @@
 import { randomUUID } from 'node:crypto'
 import { copyFile, mkdir, readdir, rm, stat } from 'node:fs/promises'
 import { basename, dirname, extname, join } from 'node:path'
-import { loadSharp } from '../lib/lazyModules.js'
-import { sanitizeFileBaseName } from '../lib/outputPath.js'
-import { runFormatProcess } from '../lib/spawnProcess.js'
+import { loadSharp } from '../lib/lazyModules'
+import { sanitizeFileBaseName } from '../lib/outputPath'
+import { runFormatProcess, type ProcessTask } from '../lib/spawnProcess'
+import { showOpenDialogFor, showSaveDialogFor, type MainDeps } from '../lib/deps'
+import type { App, IpcMainInvokeEvent } from 'electron'
 
 // 音视频/图片格式工厂：文件登记、FFmpeg 调用、批处理进度与取消、结果保存。
 
-export const FORMAT_EXTENSIONS = {
+export type FormatKind = 'video' | 'audio' | 'image'
+
+/** renderer 传来的转换参数，逐项校验后才用 */
+type FormatOptions =
+  | { target?: unknown; quality?: unknown; audioBitrate?: unknown; sampleRate?: unknown; maxWidth?: unknown }
+  | null
+  | undefined
+
+interface FormatInput {
+  id: string
+  ownerId: number
+  path: string
+  name: string
+  size: number
+  kind: FormatKind
+  extension: string
+  dimensions: { width: number; height: number } | null
+}
+
+interface FormatResult {
+  id: string
+  ownerId: number
+  path: string
+  directory: string
+  name: string
+  size: number
+  inputId: string
+  inputName: string
+  metadata: unknown
+}
+
+interface FormatTask extends ProcessTask {
+  id: string
+  ownerId: number
+  cancelled: boolean
+}
+
+export const FORMAT_EXTENSIONS: Record<FormatKind, Set<string>> = {
   video: new Set(['.mp4', '.mov', '.mkv', '.avi', '.webm', '.m4v']),
   audio: new Set(['.mp3', '.wav', '.flac', '.aac', '.m4a', '.ogg', '.opus', '.wma']),
   image: new Set(['.png', '.jpg', '.jpeg', '.webp', '.tif', '.tiff', '.gif', '.avif'])
@@ -23,16 +62,16 @@ const FORMAT_ACTIONS = new Map([
   ['图片压缩', 'image-compress']
 ])
 
-const formatInputSessions = new Map()
-const formatResultSessions = new Map()
-const formatTasks = new Map()
+const formatInputSessions = new Map<string, FormatInput>()
+const formatResultSessions = new Map<string, FormatResult>()
+const formatTasks = new Map<string, FormatTask>()
 const FORMAT_RESULT_RETENTION_MS = 24 * 60 * 60 * 1000
 
-function getFormatResultDirectory(app) {
+function getFormatResultDirectory(app: App) {
   return join(app.getPath('userData'), 'format-results')
 }
 
-async function removeFormatResultFile(result) {
+async function removeFormatResultFile(result: FormatResult) {
   await rm(result.path, { force: true })
   if (!result.directory) return
   try {
@@ -40,13 +79,13 @@ async function removeFormatResultFile(result) {
       await rm(result.directory, { recursive: true, force: true })
     }
   } catch (error) {
-    if (error.code !== 'ENOENT') throw error
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
   }
 }
 
-async function purgeFormatResults(ownerId, inputIds = null) {
+async function purgeFormatResults(ownerId: number, inputIds: unknown[] | null = null) {
   const inputSet = inputIds ? new Set(inputIds) : null
-  const removals = []
+  const removals: Promise<void>[] = []
   for (const [id, result] of formatResultSessions) {
     if (result.ownerId !== ownerId || (inputSet && !inputSet.has(result.inputId))) continue
     formatResultSessions.delete(id)
@@ -59,7 +98,7 @@ async function purgeFormatResults(ownerId, inputIds = null) {
  * 回收窗口销毁后遗留的格式工厂会话和结果文件。
  * 结果只存在 userData 临时目录，不是用户选择的导出文件，因此可以安全清理。
  */
-export function purgeFormatSessions(ownerId) {
+export function purgeFormatSessions(ownerId: number): void {
   for (const [id, input] of formatInputSessions) {
     if (input.ownerId === ownerId) formatInputSessions.delete(id)
   }
@@ -76,13 +115,13 @@ export function purgeFormatSessions(ownerId) {
   }
 }
 
-async function cleanupStaleFormatResults(app) {
+async function cleanupStaleFormatResults(app: App) {
   const root = getFormatResultDirectory(app)
   let entries
   try {
     entries = await readdir(root, { withFileTypes: true })
   } catch (error) {
-    if (error.code !== 'ENOENT') console.warn('[format] 清理旧结果缓存失败:', error.message)
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') console.warn('[format] 清理旧结果缓存失败:', (error as Error).message)
     return
   }
   const cutoff = Date.now() - FORMAT_RESULT_RETENTION_MS
@@ -92,17 +131,17 @@ async function cleanupStaleFormatResults(app) {
       const info = await stat(directory)
       if (info.mtimeMs < cutoff) await rm(directory, { recursive: true, force: true })
     } catch (error) {
-      if (error.code !== 'ENOENT') console.warn('[format] 清理旧结果缓存失败:', error.message)
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') console.warn('[format] 清理旧结果缓存失败:', (error as Error).message)
     }
   }))
 }
 
-async function cleanupOrphanFormatOutputs(directory) {
+async function cleanupOrphanFormatOutputs(directory: string) {
   let entries
   try {
     entries = await readdir(directory, { withFileTypes: true })
   } catch (error) {
-    if (error.code !== 'ENOENT') console.warn('[format] 清理未完成结果失败:', error.message)
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') console.warn('[format] 清理未完成结果失败:', (error as Error).message)
     return
   }
   const retained = new Set(
@@ -116,17 +155,17 @@ async function cleanupOrphanFormatOutputs(directory) {
     try {
       await rm(path, { recursive: entry.isDirectory(), force: true })
     } catch (error) {
-      if (error.code !== 'ENOENT') console.warn('[format] 清理未完成结果失败:', error.message)
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') console.warn('[format] 清理未完成结果失败:', (error as Error).message)
     }
   }))
   try {
     if ((await readdir(directory)).length === 0) await rm(directory, { recursive: true, force: true })
   } catch (error) {
-    if (error.code !== 'ENOENT') console.warn('[format] 清理未完成结果失败:', error.message)
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') console.warn('[format] 清理未完成结果失败:', (error as Error).message)
   }
 }
 
-function getFormatToolPath(app, tool) {
+function getFormatToolPath(app: App, tool: 'ffmpeg' | 'ffprobe') {
   const override = tool === 'ffmpeg'
     ? process.env.MOYU_FFMPEG_PATH
     : process.env.MOYU_FFPROBE_PATH
@@ -140,12 +179,12 @@ function getFormatToolPath(app, tool) {
     : join(app.getAppPath(), 'build', 'ffmpeg', fileName)
 }
 
-function normalizeFormatKind(value) {
-  if (!Object.hasOwn(FORMAT_EXTENSIONS, value)) throw new Error('不支持的格式工厂输入类型')
-  return value
+function normalizeFormatKind(value: unknown): FormatKind {
+  if (typeof value !== 'string' || !Object.hasOwn(FORMAT_EXTENSIONS, value)) throw new Error('不支持的格式工厂输入类型')
+  return value as FormatKind
 }
 
-function getFormatInput(event, inputId) {
+function getFormatInput(event: IpcMainInvokeEvent, inputId: string) {
   const input = formatInputSessions.get(inputId)
   if (!input || input.ownerId !== event.sender.id) {
     throw new Error('格式工厂文件会话不存在或无权访问')
@@ -153,7 +192,7 @@ function getFormatInput(event, inputId) {
   return input
 }
 
-function getFormatResult(event, resultId) {
+function getFormatResult(event: IpcMainInvokeEvent, resultId: string) {
   const result = formatResultSessions.get(resultId)
   if (!result || result.ownerId !== event.sender.id) {
     throw new Error('格式工厂结果会话不存在或无权访问')
@@ -161,7 +200,7 @@ function getFormatResult(event, resultId) {
   return result
 }
 
-export async function registerFormatInput(filePath, ownerId, kind) {
+export async function registerFormatInput(filePath: string, ownerId: number, kind: FormatKind) {
   const extension = extname(filePath).toLowerCase()
   if (!FORMAT_EXTENSIONS[kind].has(extension)) {
     throw new Error(`${basename(filePath)} 不是受支持的${kind === 'video' ? '视频' : kind === 'audio' ? '音频' : '图片'}文件`)
@@ -172,8 +211,8 @@ export async function registerFormatInput(filePath, ownerId, kind) {
   }
 
   const id = randomUUID()
-  let dimensions = null
-  let previewData = null
+  let dimensions: FormatInput['dimensions'] = null
+  let previewData: Uint8Array | null = null
   if (kind === 'image') {
     const metadata = await (await loadSharp())(filePath, { animated: true }).metadata()
     dimensions = {
@@ -188,7 +227,7 @@ export async function registerFormatInput(filePath, ownerId, kind) {
     )
   }
 
-  const input = {
+  const input: FormatInput = {
     id,
     ownerId,
     path: filePath,
@@ -209,7 +248,7 @@ export async function registerFormatInput(filePath, ownerId, kind) {
   }
 }
 
-function sanitizeProcessError(error, paths = []) {
+function sanitizeProcessError(error: unknown, paths: string[] = []) {
   let message = error instanceof Error ? error.message : String(error)
   paths.filter(Boolean).forEach((filePath) => {
     message = message.replaceAll(filePath, basename(filePath))
@@ -238,7 +277,7 @@ function sanitizeProcessError(error, paths = []) {
   return message.slice(-2000)
 }
 
-async function probeFormatMedia(app, input) {
+async function probeFormatMedia(app: App, input: { path: string }) {
   const result = await runFormatProcess(
     getFormatToolPath(app, 'ffprobe'),
     [
@@ -251,8 +290,8 @@ async function probeFormatMedia(app, input) {
     { timeoutMs: 3000 }
   )
   const data = JSON.parse(result.stdout)
-  const video = data.streams?.find((stream) => stream.codec_type === 'video')
-  const audio = data.streams?.find((stream) => stream.codec_type === 'audio')
+  const video = data.streams?.find((stream: { codec_type?: string }) => stream.codec_type === 'video')
+  const audio = data.streams?.find((stream: { codec_type?: string }) => stream.codec_type === 'audio')
   return {
     duration: Number(data.format?.duration) || 0,
     bitrate: Number(data.format?.bit_rate) || 0,
@@ -264,18 +303,18 @@ async function probeFormatMedia(app, input) {
   }
 }
 
-function parseFfmpegTime(value) {
+function parseFfmpegTime(value: unknown) {
   const match = String(value).match(/(\d+):(\d+):(\d+(?:\.\d+)?)/)
   if (!match) return 0
   return Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3])
 }
 
-function buildFfmpegArgs(action, input, outputPath, options) {
+function buildFfmpegArgs(action: string, input: { path: string }, outputPath: string, options: FormatOptions): string[] {
   const target = String(options?.target || '').toLowerCase()
   const quality = Math.min(35, Math.max(18, Number(options?.quality) || 23))
   const bitrate = Math.min(320, Math.max(64, Number(options?.audioBitrate) || 192))
   const sampleRate = [32000, 44100, 48000].includes(Number(options?.sampleRate))
-    ? Number(options.sampleRate)
+    ? Number(options!.sampleRate)
     : 44100
   const maxWidth = Math.min(3840, Math.max(0, Number(options?.maxWidth) || 0))
   const scaleArgs = maxWidth ? ['-vf', `scale='min(${maxWidth},iw)':-2`] : []
@@ -300,7 +339,7 @@ function buildFfmpegArgs(action, input, outputPath, options) {
   throw new Error('不支持的 FFmpeg 任务')
 }
 
-function formatOutputExtension(action, options, input) {
+function formatOutputExtension(action: string, options: FormatOptions, input: { extension: string }): string {
   const target = String(options?.target || '').toLowerCase()
   if (action === 'video-compress') return 'mp4'
   if (['video-convert', 'extract-audio', 'audio-convert', 'image-convert'].includes(action)) {
@@ -312,7 +351,7 @@ function formatOutputExtension(action, options, input) {
   throw new Error('无法确定输出格式')
 }
 
-async function processFormatImage(action, input, outputPath, options) {
+async function processFormatImage(action: string, input: FormatInput, outputPath: string, options: FormatOptions) {
   const target = formatOutputExtension(action, options, input)
   const quality = Math.min(100, Math.max(10, Number(options?.quality) || 82))
   const maxWidth = Math.min(12000, Math.max(0, Number(options?.maxWidth) || 0))
@@ -336,10 +375,10 @@ async function processFormatImage(action, input, outputPath, options) {
   return { width: info.width, height: info.height, format: info.format }
 }
 
-async function registerFormatResult(event, outputPath, input, metadata = null) {
+async function registerFormatResult(event: IpcMainInvokeEvent, outputPath: string, input: FormatInput, metadata: unknown = null) {
   const info = await stat(outputPath)
   const id = randomUUID()
-  const result = {
+  const result: FormatResult = {
     id,
     ownerId: event.sender.id,
     path: outputPath,
@@ -366,7 +405,13 @@ async function registerFormatResult(event, outputPath, input, metadata = null) {
  * src/main/index.js 里、跟其它业务（Illustrator/COM/条码等）交错的
  * 格式工厂代码收拢到一起。
  */
-export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, app, assertMainWindowSender }) {
+export function registerFormatFactoryHandlers({
+  ipcMain,
+  dialog,
+  BrowserWindow,
+  app,
+  assertMainWindowSender
+}: Pick<MainDeps, 'ipcMain' | 'dialog' | 'BrowserWindow' | 'app' | 'assertMainWindowSender'>): void {
   void cleanupStaleFormatResults(app)
 
   ipcMain.handle('format:get-status', async (event) => {
@@ -374,7 +419,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
     let ffmpegReady = false
     let ffmpegMessage = ''
     let ffmpegVersion = ''
-    let missingEncoders = []
+    let missingEncoders: string[] = []
     try {
       const [ffmpegPath, ffprobePath] = [
         getFormatToolPath(app, 'ffmpeg'),
@@ -403,7 +448,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
         }
       }
     } catch (error) {
-      ffmpegMessage = error.message
+      ffmpegMessage = (error as Error).message
     }
     return {
       ffmpegReady,
@@ -420,7 +465,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
     const kind = normalizeFormatKind(payload?.kind)
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
     const extensions = [...FORMAT_EXTENSIONS[kind]].map((extension) => extension.slice(1))
-    const result = await dialog.showOpenDialog(ownerWindow, {
+    const result = await showOpenDialogFor(dialog, ownerWindow, {
       title: `选择${kind === 'video' ? '视频' : kind === 'audio' ? '音频' : '图片'}文件`,
       properties: ['openFile', 'multiSelections'],
       filters: [{ name: '支持的文件', extensions }]
@@ -429,13 +474,13 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
     if (result.filePaths.length > FORMAT_MAX_FILES) {
       throw new Error(`一次最多选择 ${FORMAT_MAX_FILES} 个文件`)
     }
-    const files = []
-    const errors = []
+    const files: Awaited<ReturnType<typeof registerFormatInput>>[] = []
+    const errors: string[] = []
     for (const filePath of result.filePaths) {
       try {
         files.push(await registerFormatInput(filePath, event.sender.id, kind))
       } catch (error) {
-        errors.push(error.message)
+        errors.push((error as Error).message)
       }
     }
     return { status: 'selected', files, errors }
@@ -448,14 +493,14 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
     if (!Array.isArray(paths) || paths.length === 0 || paths.length > FORMAT_MAX_FILES) {
       throw new Error(`一次只能拖入 1–${FORMAT_MAX_FILES} 个文件`)
     }
-    const files = []
-    const errors = []
+    const files: Awaited<ReturnType<typeof registerFormatInput>>[] = []
+    const errors: string[] = []
     for (const filePath of paths) {
       try {
         if (typeof filePath !== 'string' || !filePath) throw new Error('文件路径无效')
         files.push(await registerFormatInput(filePath, event.sender.id, kind))
       } catch (error) {
-        errors.push(error.message)
+        errors.push((error as Error).message)
       }
     }
     return { status: 'selected', files, errors }
@@ -465,7 +510,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
     assertMainWindowSender(event)
     const kind = normalizeFormatKind(payload?.kind)
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
-    const result = await dialog.showOpenDialog(ownerWindow, {
+    const result = await showOpenDialogFor(dialog, ownerWindow, {
       title: '选择批量转换文件夹',
       properties: ['openDirectory']
     })
@@ -475,13 +520,13 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
     const candidates = entries
       .filter((entry) => entry.isFile() && FORMAT_EXTENSIONS[kind].has(extname(entry.name).toLowerCase()))
       .slice(0, FORMAT_MAX_FILES)
-    const files = []
-    const errors = []
+    const files: Awaited<ReturnType<typeof registerFormatInput>>[] = []
+    const errors: string[] = []
     for (const entry of candidates) {
       try {
         files.push(await registerFormatInput(join(directory, entry.name), event.sender.id, kind))
       } catch (error) {
-        errors.push(error.message)
+        errors.push((error as Error).message)
       }
     }
     return {
@@ -496,7 +541,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
     assertMainWindowSender(event)
     const ids = Array.isArray(inputIds) ? inputIds : []
     let removed = 0
-    ids.forEach((id) => {
+    ids.forEach((id: string) => {
       const input = formatInputSessions.get(id)
       if (input?.ownerId === event.sender.id) {
         formatInputSessions.delete(id)
@@ -515,7 +560,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
     if (!inputIds.length || inputIds.length > FORMAT_MAX_FILES) {
       throw new Error(`任务文件数量必须在 1–${FORMAT_MAX_FILES} 之间`)
     }
-    const inputs = inputIds.map((id) => getFormatInput(event, id))
+    const inputs: FormatInput[] = inputIds.map((id: string) => getFormatInput(event, id))
     const expectedKind = action.startsWith('video') || action === 'extract-audio'
       ? 'video'
       : action.startsWith('audio')
@@ -531,7 +576,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
       ? payload.taskId
       : randomUUID()
     if (formatTasks.has(taskId)) throw new Error('已有同名格式转换任务正在执行')
-    const task = {
+    const task: FormatTask = {
       id: taskId,
       ownerId: event.sender.id,
       cancelled: false,
@@ -540,8 +585,8 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
     formatTasks.set(taskId, task)
     const outputDirectory = join(getFormatResultDirectory(app), randomUUID())
     await mkdir(outputDirectory, { recursive: true })
-    const results = []
-    const errors = []
+    const results: unknown[] = []
+    const errors: { inputId: string; name: string; message: string }[] = []
 
     try {
       for (const [index, input] of inputs.entries()) {
@@ -561,7 +606,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
         })
 
         try {
-          let metadata
+          let metadata: unknown
           if (input.kind === 'image') {
             metadata = await processFormatImage(action, input, outputPath, payload?.options)
             event.sender.send('format:progress', {
@@ -585,7 +630,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
               onStderr: (chunk) => {
                 stderrBuffer = `${stderrBuffer}${chunk}`.slice(-2000)
                 const matches = [...stderrBuffer.matchAll(/time=(\d+:\d+:\d+(?:\.\d+)?)/g)]
-                const seconds = matches.length ? parseFfmpegTime(matches.at(-1)[1]) : 0
+                const seconds = matches.length ? parseFfmpegTime(matches.at(-1)![1]) : 0
                 const fileProgress = sourceMetadata.duration
                   ? Math.min(0.99, seconds / sourceMetadata.duration)
                   : 0
@@ -604,7 +649,7 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
           }
           results.push(await registerFormatResult(event, outputPath, input, metadata))
         } catch (error) {
-          if (error.message === 'TASK_CANCELLED') {
+          if ((error as Error | null)?.message === 'TASK_CANCELLED') {
             return { status: 'cancelled', taskId, results, errors }
           }
           errors.push({
@@ -651,13 +696,13 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
     assertMainWindowSender(event)
     const ids = Array.isArray(resultIds) ? resultIds : []
     if (!ids.length || ids.length > FORMAT_MAX_FILES) throw new Error('没有可保存的转换结果')
-    const results = ids.map((id) => getFormatResult(event, id))
+    const results = ids.map((id: string) => getFormatResult(event, id))
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
 
     if (results.length === 1) {
       const result = results[0]
       const extension = extname(result.name).slice(1)
-      const selection = await dialog.showSaveDialog(ownerWindow, {
+      const selection = await showSaveDialogFor(dialog, ownerWindow, {
         title: '保存格式转换结果',
         defaultPath: result.name,
         filters: [{ name: `${extension.toUpperCase()} 文件`, extensions: [extension] }]
@@ -667,13 +712,13 @@ export function registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, 
       return { status: 'saved', saved: 1, path: selection.filePath }
     }
 
-    const selection = await dialog.showOpenDialog(ownerWindow, {
+    const selection = await showOpenDialogFor(dialog, ownerWindow, {
       title: '选择格式转换结果保存文件夹',
       properties: ['openDirectory', 'createDirectory', 'promptToCreate']
     })
     if (selection.canceled || !selection.filePaths[0]) return { status: 'cancelled', saved: 0 }
     const directory = selection.filePaths[0]
-    const usedNames = new Map()
+    const usedNames = new Map<string, number>()
     for (const [index, result] of results.entries()) {
       const key = result.name.toLocaleLowerCase('en-US')
       const occurrence = (usedNames.get(key) || 0) + 1

@@ -1,3 +1,4 @@
+// @ts-check
 import { mailerTemplate } from './mailer.js'
 import { rsc0201Template } from './rsc0201.js'
 import { lidBaseTemplate } from './lidbase.js'
@@ -11,6 +12,7 @@ export const DIELINE_TEMPLATES = Object.freeze([
   tuckMailerTemplate, tuckEndTemplate, reverseTuckTemplate, cosmeticBoxTemplate, carryHandleTemplate
 ])
 
+/** @param {unknown} id */
 export function getTemplate(id) {
   return DIELINE_TEMPLATES.find((template) => template.id === id) || null
 }

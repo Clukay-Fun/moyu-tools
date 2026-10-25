@@ -1,6 +1,6 @@
-import { app, shell } from 'electron'
-import { getApplicationVersion } from './appVersion.js'
-import updater from 'electron-updater'
+import { app, shell, type BrowserWindow } from 'electron'
+import { getApplicationVersion } from './appVersion'
+import updater, { type UpdateInfo } from 'electron-updater'
 const { autoUpdater } = updater
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -11,12 +11,36 @@ const RELEASES_PAGE = 'https://github.com/Clukay-Fun/moyu-tools/releases'
 const PREFS_PATH = join(app.getPath('userData'), 'updates.json')
 const DEFAULT_PREFS = { autoCheck: true }
 
-let mainWindow = null
+type UpdateStatus =
+  | 'idle'
+  | 'checking'
+  | 'available'
+  | 'up-to-date'
+  | 'downloading'
+  | 'downloaded'
+  | 'error'
+  | 'portable'
+  | 'unsupported'
+
+interface UpdateState {
+  status: UpdateStatus
+  currentVersion: string
+  availableVersion: string | null
+  releaseNotes: string | null
+  progress: { percent: number; transferred: number; total: number } | null
+  lastCheckedAt: number | null
+  autoCheck: boolean
+  promptOnAvailable: boolean
+  portable: boolean
+  message: string | null
+}
+
+let mainWindow: BrowserWindow | null = null
 let prefs = { ...DEFAULT_PREFS }
 let checking = false
 let downloading = false
 
-const state = {
+const state: UpdateState = {
   status: 'idle',
   currentVersion: getApplicationVersion(),
   availableVersion: null,
@@ -39,7 +63,7 @@ function loadPrefs() {
   return { ...DEFAULT_PREFS }
 }
 
-function savePrefs(next) {
+function savePrefs(next: Partial<typeof DEFAULT_PREFS>) {
   prefs = { ...prefs, ...next }
   try {
     writeFileSync(PREFS_PATH, JSON.stringify(prefs), 'utf8')
@@ -54,12 +78,12 @@ function emit() {
   }
 }
 
-function patch(next) {
+function patch(next: Partial<UpdateState>) {
   Object.assign(state, next)
   emit()
 }
 
-function normalizeNotes(notes) {
+function normalizeNotes(notes: UpdateInfo['releaseNotes']): string {
   if (!notes) return ''
   if (typeof notes === 'string') return notes
   if (Array.isArray(notes)) {
@@ -68,8 +92,8 @@ function normalizeNotes(notes) {
   return ''
 }
 
-function normalizeUpdateError(error, fallback) {
-  const message = String(error?.message || error || '').trim()
+function normalizeUpdateError(error: unknown, fallback: string): string {
+  const message = String((error as { message?: unknown } | null)?.message || error || '').trim()
   const normalized = message.toLowerCase()
   if (normalized.includes('err_proxy_connection_failed') || normalized.includes('proxy connection failed')) {
     return '无法连接更新服务器，请检查系统代理设置或网络连接后重试'
@@ -87,7 +111,7 @@ function isUpdateable() {
   return process.platform === 'win32' && app.isPackaged && !process.env.PORTABLE_EXECUTABLE_DIR
 }
 
-function doCheck(source = 'manual') {
+function doCheck(source: 'manual' | 'startup' = 'manual') {
   if (!isUpdateable()) {
     patch({
       status: state.portable ? 'portable' : 'unsupported',
@@ -109,7 +133,7 @@ function doCheck(source = 'manual') {
   return { ok: true }
 }
 
-export function initUpdater(window) {
+export function initUpdater(window: BrowserWindow): void {
   mainWindow = window
   prefs = loadPrefs()
   state.autoCheck = prefs.autoCheck
@@ -163,7 +187,7 @@ export function initUpdater(window) {
 export const updateApi = {
   getState: () => state,
   getSettings: () => ({ autoCheck: state.autoCheck, portable: state.portable }),
-  setAutoCheck: (enabled) => {
+  setAutoCheck: (enabled: unknown) => {
     savePrefs({ autoCheck: Boolean(enabled) })
     patch({ autoCheck: prefs.autoCheck })
     return { autoCheck: prefs.autoCheck }

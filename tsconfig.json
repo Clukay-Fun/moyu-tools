@@ -9,7 +9,8 @@
     "noEmit": true,
     "skipLibCheck": true,
     "isolatedModules": true,
-    "allowJs": false,
+    "allowJs": true,
+    "checkJs": false,
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
@@ -17,5 +18,5 @@
       "@erp/*": ["src/renderer/erp/*"]
     }
   },
-  "include": ["src/main/erp/**/*.ts", "src/main/photoshop.ts", "src/preload/erp.ts", "src/shared/**/*.ts", "src/renderer/erp/**/*.ts", "src/renderer/erp/**/*.tsx"]
+  "include": ["src/main/**/*.ts", "src/preload/**/*.ts", "src/shared/**/*.ts", "src/renderer/erp/**/*.ts", "src/renderer/erp/**/*.tsx", "src/renderer/**/*.js"]
 }

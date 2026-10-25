@@ -1,17 +1,21 @@
 import { randomUUID } from 'node:crypto'
 import { lstat, mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { basename, dirname, extname, join } from 'node:path'
-import { writeFileAtomic } from '../lib/atomicWrite.js'
-import { assertOutputFile, availableOutputPath, sanitizeFileBaseName } from '../lib/outputPath.js'
+import { writeFileAtomic } from '../lib/atomicWrite'
+import { assertOutputFile, availableOutputPath, sanitizeFileBaseName } from '../lib/outputPath'
 import {
   FORMAT_EXTENSIONS,
   FORMAT_MAX_FILE_BYTES,
   FORMAT_MAX_FILES,
   purgeFormatSessions,
-  registerFormatInput
-} from './formatFactory.js'
-import { ILLUSTRATOR_MAX_BYTES, purgeIllustratorSessions, registerIllustratorInput } from './illustrator.js'
-import { registerComResult, runComCommand } from './comWorker.js'
+  registerFormatInput,
+  type FormatKind
+} from './formatFactory'
+import { ILLUSTRATOR_MAX_BYTES, purgeIllustratorSessions, registerIllustratorInput } from './illustrator'
+import { registerComResult, runComCommand } from './comWorker'
+import { messageOf, showOpenDialogFor, showSaveDialogFor, type MainDeps } from '../lib/deps'
+import { ownValue } from '../lib/ownKey'
+import type { IpcMainInvokeEvent, WebContents } from 'electron'
 
 // 统一拖入扫描（F-017：文件夹 / 混合拖入）+ Office 转 PDF + PDF 工具的输出位置管理。
 // 这三块放一个模块，是因为它们共用同一套"临时会话表"（dropFileSessions /
@@ -23,7 +27,19 @@ import { registerComResult, runComCommand } from './comWorker.js'
 // 不向 renderer 暴露任何目录读取 API：renderer 侧模块（PDF / 画布）通过不透明的
 // fileId 取回字节，fileId 由扫描会话按 sender 注册，读取时校验归属。
 
-const PDF_OUTPUT_TYPES = {
+type OfficeKind = 'word' | 'excel' | 'powerpoint'
+type PdfOutputMode = 'file' | 'directory'
+
+interface DropRegionConfig {
+  extensions: string[]
+  maxFiles: number
+  maxBytes: number
+  maxTotalBytes?: number | null
+  /** 主进程接管的区域登记自己的会话；null 表示 renderer 侧模块，按 fileId 取字节 */
+  register: ((filePath: string, ownerId: number) => Promise<unknown>) | null
+}
+
+const PDF_OUTPUT_TYPES: Record<string, { extension: string; filterName: string }> = {
   pdf: { extension: 'pdf', filterName: 'PDF 文档' },
   png: { extension: 'png', filterName: 'PNG 图片' },
   jpeg: { extension: 'jpg', filterName: 'JPEG 图片' },
@@ -39,9 +55,9 @@ const DROP_CANVAS_MAX_TOTAL = 300 * 1024 * 1024
 
 // renderer 侧模块（PDF / 画布）的临时读取会话：fileId -> { ownerId, path, name }。
 // 读取后即销毁；未消费的会话设超时回收，并在 sender 销毁时统一清理。
-const dropFileSessions = new Map()
+const dropFileSessions = new Map<string, { ownerId: number; path: string; name: string }>()
 const DROP_FILE_SESSION_TTL = 5 * 60 * 1000
-const PDF_DEFAULT_OUTPUT_DIRECTORIES = Object.freeze({
+const PDF_DEFAULT_OUTPUT_DIRECTORIES: Readonly<Record<string, string>> = Object.freeze({
   jpeg: 'JPEG',
   png: 'PNG',
   split: 'PDF-Pages',
@@ -49,12 +65,15 @@ const PDF_DEFAULT_OUTPUT_DIRECTORIES = Object.freeze({
   images: 'Images'
 })
 // 每个 sender 仅绑定一次 destroyed 清理，避免连续拖入累积监听器。
-const boundDropDestroyListeners = new Set()
+const boundDropDestroyListeners = new Set<number>()
 
-const officeInputSessions = new Map()
-const pdfOutputSessions = new Map()
+const officeInputSessions = new Map<
+  string,
+  { id: string; ownerId: number; kind: OfficeKind; path: string; name: string; size: number }
+>()
+const pdfOutputSessions = new Map<string, { id: string; ownerId: number; mode: PdfOutputMode; path: string }>()
 
-function getPdfOutputSession(event, sessionId, mode) {
+function getPdfOutputSession(event: IpcMainInvokeEvent, sessionId: string, mode: PdfOutputMode) {
   const session = pdfOutputSessions.get(sessionId)
   if (!session || session.ownerId !== event.sender.id || session.mode !== mode) {
     throw new Error('PDF 输出位置会话不存在、已失效或类型不匹配')
@@ -62,7 +81,7 @@ function getPdfOutputSession(event, sessionId, mode) {
   return session
 }
 
-function purgeOwnerSessions(ownerId) {
+function purgeOwnerSessions(ownerId: number) {
   for (const [id, entry] of dropFileSessions) {
     if (entry.ownerId === ownerId) dropFileSessions.delete(id)
   }
@@ -76,7 +95,7 @@ function purgeOwnerSessions(ownerId) {
   purgeIllustratorSessions(ownerId)
 }
 
-export function bindOwnerSessionCleanup(sender) {
+export function bindOwnerSessionCleanup(sender: WebContents): void {
   const ownerId = sender.id
   if (boundDropDestroyListeners.has(ownerId)) return
   boundDropDestroyListeners.add(ownerId)
@@ -86,7 +105,7 @@ export function bindOwnerSessionCleanup(sender) {
   })
 }
 
-async function registerOfficeDropInput(filePath, ownerId, kind) {
+async function registerOfficeDropInput(filePath: string, ownerId: number, kind: OfficeKind) {
   const info = await stat(filePath)
   if (!info.isFile() || info.size > ILLUSTRATOR_MAX_BYTES) {
     throw new Error('Office 文件无效或超过 2 GB')
@@ -103,19 +122,19 @@ async function registerOfficeDropInput(filePath, ownerId, kind) {
   return { id, name: basename(filePath), size: info.size, kind }
 }
 
-function officeKindConfig(kind) {
-  const configs = {
+function officeKindConfig(kind: unknown): { label: string; extensions: string[] } {
+  const configs: Record<OfficeKind, { label: string; extensions: string[] }> = {
     word: { label: 'Word', extensions: ['doc', 'docx', 'docm', 'rtf'] },
     excel: { label: 'Excel', extensions: ['xls', 'xlsx', 'xlsm', 'xlsb'] },
     powerpoint: { label: 'PowerPoint', extensions: ['ppt', 'pptx', 'pptm'] }
   }
-  const config = configs[kind]
+  const config = ownValue(configs, kind)
   if (!config) throw new Error('不支持的 Office 文件类型')
   return config
 }
 
-function registerDefaultPdfOutput(ownerId, sourcePath, outputKind) {
-  const childDirectory = PDF_DEFAULT_OUTPUT_DIRECTORIES[outputKind]
+function registerDefaultPdfOutput(ownerId: number, sourcePath: string, outputKind: unknown) {
+  const childDirectory = ownValue(PDF_DEFAULT_OUTPUT_DIRECTORIES, outputKind)
   if (!childDirectory) throw new Error('不支持的 PDF 默认输出目录')
   const id = randomUUID()
   const outputPath = join(dirname(sourcePath), childDirectory)
@@ -136,8 +155,11 @@ export function registerDropAndOfficeHandlers({
   app,
   utilityProcess,
   assertMainWindowSender
-}) {
-  const DROP_REGION_CONFIG = {
+}: Pick<
+  MainDeps,
+  'ipcMain' | 'dialog' | 'BrowserWindow' | 'shell' | 'app' | 'utilityProcess' | 'assertMainWindowSender'
+>): void {
+  const DROP_REGION_CONFIG: Record<string, (action: unknown) => DropRegionConfig> = {
     illustrator: () => ({
       extensions: ['.ai'],
       maxFiles: 500,
@@ -145,12 +167,13 @@ export function registerDropAndOfficeHandlers({
       register: registerIllustratorInput
     }),
     format: (kind) => {
-      if (!FORMAT_EXTENSIONS[kind]) throw new Error('不支持的格式工厂输入类型')
+      const extensions = ownValue(FORMAT_EXTENSIONS, kind)
+      if (!extensions) throw new Error('不支持的格式工厂输入类型')
       return {
-        extensions: [...FORMAT_EXTENSIONS[kind]],
+        extensions: [...extensions],
         maxFiles: FORMAT_MAX_FILES,
         maxBytes: FORMAT_MAX_FILE_BYTES,
-        register: (filePath, ownerId) => registerFormatInput(filePath, ownerId, kind)
+        register: (filePath, ownerId) => registerFormatInput(filePath, ownerId, kind as FormatKind)
       }
     },
     pdf: (action) => {
@@ -190,15 +213,25 @@ export function registerDropAndOfficeHandlers({
     })
   }
 
-  function resolveDropConfig(region, action) {
-    const factory = DROP_REGION_CONFIG[region]
+  function resolveDropConfig(region: unknown, action: unknown) {
+    const factory = ownValue(DROP_REGION_CONFIG, region)
     if (!factory) throw new Error('不支持的拖入区域')
     const config = factory(action)
     if (!config) throw new Error('拖入区域缺少配置')
     return config
   }
 
-  async function scanDroppedPaths({ paths, region, action, ownerId }) {
+  async function scanDroppedPaths({
+    paths,
+    region,
+    action,
+    ownerId
+  }: {
+    paths: string[]
+    region: unknown
+    action: unknown
+    ownerId: number
+  }) {
     const config = resolveDropConfig(region, action)
     const { extensions, maxFiles, maxBytes, maxTotalBytes = null, register } = config
     // 统一规范化为带点形式，兼容 officeKindConfig 返回的无点扩展名（doc/xls 等）。
@@ -209,13 +242,13 @@ export function registerDropAndOfficeHandlers({
       })
     )
 
-    const collected = []
+    const collected: { path: string; name: string; size: number }[] = []
     let totalBytes = 0
     let skipped = 0
     let truncated = false
-    const errors = []
+    const errors: string[] = []
 
-    async function walk(current) {
+    async function walk(current: string) {
       if (collected.length >= maxFiles) {
         truncated = true
         return
@@ -224,7 +257,7 @@ export function registerDropAndOfficeHandlers({
       try {
         info = await lstat(current)
       } catch (error) {
-        errors.push(`${basename(current)}：${error.message}`)
+        errors.push(`${basename(current)}：${messageOf(error)}`)
         return
       }
       // 跳过符号链接（含符号链接目录），避免循环扫描。
@@ -237,7 +270,7 @@ export function registerDropAndOfficeHandlers({
         try {
           entries = await readdir(current, { withFileTypes: true })
         } catch (error) {
-          errors.push(`${basename(current)}：${error.message}`)
+          errors.push(`${basename(current)}：${messageOf(error)}`)
           return
         }
         for (const entry of entries) {
@@ -274,7 +307,7 @@ export function registerDropAndOfficeHandlers({
       await walk(root)
     }
 
-    const files = []
+    const files: unknown[] = []
     for (const item of collected) {
       try {
         if (register) {
@@ -287,7 +320,7 @@ export function registerDropAndOfficeHandlers({
           files.push({ id, name: item.name, size: item.size })
         }
       } catch (error) {
-        errors.push(`${item.name}：${error.message}`)
+        errors.push(`${item.name}：${messageOf(error)}`)
       }
     }
 
@@ -351,7 +384,7 @@ export function registerDropAndOfficeHandlers({
     assertMainWindowSender(event)
     const config = officeKindConfig(kind)
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
-    const result = await dialog.showOpenDialog(ownerWindow, {
+    const result = await showOpenDialogFor(dialog, ownerWindow, {
       title: `选择 ${config.label} 文件`,
       filters: [{ name: `${config.label} 文档`, extensions: config.extensions }],
       properties: ['openFile']
@@ -397,22 +430,22 @@ export function registerDropAndOfficeHandlers({
 
   ipcMain.handle('pdf:choose-output', async (event, payload) => {
     assertMainWindowSender(event)
-    const mode = payload?.mode === 'directory' ? 'directory' : 'file'
+    const mode: PdfOutputMode = payload?.mode === 'directory' ? 'directory' : 'file'
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
-    let outputPath
+    let outputPath: string
 
     if (mode === 'directory') {
-      const result = await dialog.showOpenDialog(ownerWindow, {
+      const result = await showOpenDialogFor(dialog, ownerWindow, {
         title: '选择 PDF 工具输出文件夹',
         properties: ['openDirectory', 'createDirectory', 'promptToCreate']
       })
       if (result.canceled || !result.filePaths[0]) return { status: 'cancelled' }
       outputPath = result.filePaths[0]
     } else {
-      const fileType = PDF_OUTPUT_TYPES[payload?.type]
+      const fileType = ownValue(PDF_OUTPUT_TYPES, payload?.type)
       if (!fileType) throw new Error('不支持的 PDF 输出类型')
       const safeBaseName = sanitizeFileBaseName(payload?.name, 'pdf-output')
-      const result = await dialog.showSaveDialog(ownerWindow, {
+      const result = await showSaveDialogFor(dialog, ownerWindow, {
         title: `选择 ${fileType.filterName} 输出位置`,
         defaultPath: `${safeBaseName}.${fileType.extension}`,
         filters: [{ name: fileType.filterName, extensions: [fileType.extension] }]
@@ -433,7 +466,7 @@ export function registerDropAndOfficeHandlers({
 
   ipcMain.handle('pdf:save-file', async (event, payload) => {
     assertMainWindowSender(event)
-    const fileType = PDF_OUTPUT_TYPES[payload?.type]
+    const fileType = ownValue(PDF_OUTPUT_TYPES, payload?.type)
     const data = payload?.data instanceof Uint8Array
       ? Buffer.from(payload.data)
       : null
@@ -453,7 +486,7 @@ export function registerDropAndOfficeHandlers({
 
   ipcMain.handle('pdf:save-files', async (event, payload) => {
     assertMainWindowSender(event)
-    const fileType = PDF_OUTPUT_TYPES[payload?.type]
+    const fileType = ownValue(PDF_OUTPUT_TYPES, payload?.type)
 
     if (
       !fileType ||
@@ -464,14 +497,16 @@ export function registerDropAndOfficeHandlers({
       throw new Error('PDF 批量输出数量必须在 1–500 之间')
     }
 
-    const normalizedFiles = payload.files.map((file) => {
+    const normalizedFiles: { name: string; data: Buffer }[] = payload.files.map((
+      file: { data?: unknown; name?: unknown } | null
+    ) => {
       if (!(file?.data instanceof Uint8Array)) {
         throw new Error('PDF 批量输出包含无效文件数据')
       }
 
       return {
-        name: sanitizeFileBaseName(file.name, 'pdf-output'),
-        data: Buffer.from(file.data)
+        name: sanitizeFileBaseName(file?.name, 'pdf-output'),
+        data: Buffer.from(file!.data as Uint8Array)
       }
     })
     const totalBytes = normalizedFiles.reduce((total, file) => total + file.data.byteLength, 0)
@@ -483,8 +518,8 @@ export function registerDropAndOfficeHandlers({
     const destination = getPdfOutputSession(event, payload?.destinationId, 'directory')
     const directory = destination.path
     await mkdir(directory, { recursive: true })
-    const usedNames = new Map()
-    const reservedOutputPaths = new Set()
+    const usedNames = new Map<string, number>()
+    const reservedOutputPaths = new Set<string>()
 
     for (const [index, file] of normalizedFiles.entries()) {
       const nameKey = file.name.toLocaleLowerCase('en-US')

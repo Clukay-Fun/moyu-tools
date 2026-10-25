@@ -1,19 +1,30 @@
 import { randomUUID } from 'node:crypto'
 import { readdir, stat } from 'node:fs/promises'
 import { basename, dirname, extname, join } from 'node:path'
-import { assertOutputFile, availableOutputPath } from '../lib/outputPath.js'
-import { cancelComCommand, registerComResult, runComCommand } from './comWorker.js'
+import { assertOutputFile, availableOutputPath } from '../lib/outputPath'
+import { cancelComCommand, registerComResult, runComCommand } from './comWorker'
+import { messageOf, showOpenDialogFor, type MainDeps } from '../lib/deps'
+import type { IpcMainInvokeEvent } from 'electron'
 
 // Illustrator 批处理（导出 PDF / 最小化 PDF / 文字转曲）。
-// registerIllustratorInput / ILLUSTRATOR_MAX_BYTES 也被 index.js 的统一拖入
+// registerIllustratorInput / ILLUSTRATOR_MAX_BYTES 也被 dropAndOffice.ts 的统一拖入
 // 扫描（DROP_REGION_CONFIG.illustrator）复用，所以要导出，不能只在本模块内用。
 
 export const ILLUSTRATOR_MAX_BYTES = 2 * 1024 * 1024 * 1024
 
-const illustratorInputSessions = new Map()
-const activeIllustratorTasks = new Map()
+interface IllustratorInput {
+  id: string
+  ownerId: number
+  path: string
+  name: string
+  size: number
+}
+export type IllustratorInputInfo = Pick<IllustratorInput, 'id' | 'name' | 'size'>
 
-function illustratorSession(event, inputId) {
+const illustratorInputSessions = new Map<string, IllustratorInput>()
+const activeIllustratorTasks = new Map<number, string>()
+
+function illustratorSession(event: IpcMainInvokeEvent, inputId: string) {
   const input = illustratorInputSessions.get(inputId)
   if (!input || input.ownerId !== event.sender.id) {
     throw new Error('Illustrator 文件会话不存在或无权访问')
@@ -21,7 +32,7 @@ function illustratorSession(event, inputId) {
   return input
 }
 
-export async function registerIllustratorInput(filePath, ownerId) {
+export async function registerIllustratorInput(filePath: string, ownerId: number): Promise<IllustratorInputInfo> {
   if (extname(filePath).toLowerCase() !== '.ai') {
     throw new Error(`${basename(filePath)} 不是 Illustrator 文件`)
   }
@@ -46,7 +57,11 @@ export async function registerIllustratorInput(filePath, ownerId) {
   return { id, name: input.name, size: input.size }
 }
 
-async function collectIllustratorFolder(directory, ownerId, output = []) {
+async function collectIllustratorFolder(
+  directory: string,
+  ownerId: number,
+  output: IllustratorInputInfo[] = []
+): Promise<IllustratorInputInfo[]> {
   if (output.length >= 500) return output
   const entries = await readdir(directory, { withFileTypes: true })
   for (const entry of entries) {
@@ -65,8 +80,8 @@ async function collectIllustratorFolder(directory, ownerId, output = []) {
   return output
 }
 
-/** 供 index.js 的 purgeOwnerSessions 在 sender 销毁时一并回收。 */
-export function purgeIllustratorSessions(ownerId) {
+/** 供 dropAndOffice.ts 的 purgeOwnerSessions 在 sender 销毁时一并回收。 */
+export function purgeIllustratorSessions(ownerId: number): void {
   for (const [id, entry] of illustratorInputSessions) {
     if (entry.ownerId === ownerId) illustratorInputSessions.delete(id)
   }
@@ -80,18 +95,21 @@ export function registerIllustratorHandlers({
   utilityProcess,
   assertMainWindowSender,
   bindOwnerSessionCleanup
-}) {
+}: Pick<
+  MainDeps,
+  'ipcMain' | 'dialog' | 'BrowserWindow' | 'app' | 'utilityProcess' | 'assertMainWindowSender' | 'bindOwnerSessionCleanup'
+>): void {
   ipcMain.handle('illustrator:pick-files', async (event) => {
     assertMainWindowSender(event)
     bindOwnerSessionCleanup(event.sender)
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
-    const result = await dialog.showOpenDialog(ownerWindow, {
+    const result = await showOpenDialogFor(dialog, ownerWindow, {
       title: '选择 Illustrator 文件',
       filters: [{ name: 'Adobe Illustrator', extensions: ['ai'] }],
       properties: ['openFile', 'multiSelections']
     })
     if (result.canceled) return []
-    const files = []
+    const files: IllustratorInputInfo[] = []
     for (const filePath of result.filePaths.slice(0, 500)) {
       files.push(await registerIllustratorInput(filePath, event.sender.id))
     }
@@ -104,14 +122,14 @@ export function registerIllustratorHandlers({
     if (!Array.isArray(paths) || paths.length === 0 || paths.length > 500) {
       throw new Error('一次只能拖入 1–500 个 Illustrator 文件')
     }
-    const files = []
-    const errors = []
+    const files: IllustratorInputInfo[] = []
+    const errors: unknown[] = []
     for (const filePath of paths) {
       try {
         if (typeof filePath !== 'string' || !filePath) throw new Error('文件路径无效')
         files.push(await registerIllustratorInput(filePath, event.sender.id))
       } catch (error) {
-        errors.push(error.message)
+        errors.push((error as Error).message)
       }
     }
     return { status: 'selected', files, errors }
@@ -121,7 +139,7 @@ export function registerIllustratorHandlers({
     assertMainWindowSender(event)
     bindOwnerSessionCleanup(event.sender)
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
-    const result = await dialog.showOpenDialog(ownerWindow, {
+    const result = await showOpenDialogFor(dialog, ownerWindow, {
       title: '选择 Illustrator 文件夹',
       properties: ['openDirectory']
     })
@@ -153,11 +171,11 @@ export function registerIllustratorHandlers({
       throw new Error('已有 Illustrator 任务正在执行')
     }
 
-    const inputs = ids.map((id) => illustratorSession(event, id))
-    let outputDirectory = null
+    const inputs = ids.map((id: string) => illustratorSession(event, id))
+    let outputDirectory: string | null = null
     if (!payload.sameDirectory) {
       const ownerWindow = BrowserWindow.fromWebContents(event.sender)
-      const selection = await dialog.showOpenDialog(ownerWindow, {
+      const selection = await showOpenDialogFor(dialog, ownerWindow, {
         title: '选择 Illustrator 输出文件夹',
         properties: ['openDirectory', 'createDirectory', 'promptToCreate']
       })
@@ -165,11 +183,11 @@ export function registerIllustratorHandlers({
       outputDirectory = selection.filePaths[0]
     }
 
-    const files = []
+    const files: { inputPath: string; outputPath: string; name: string }[] = []
     // 同批不同来源文件夹里可能有同名文件（如两个 logo.ai），若合流到同一个
     // 输出目录，这一批里没有谁先写盘，磁盘检查看谁都"不存在"——必须靠这个
     // 跨迭代共享的 reserved 集合互相占位，否则后一个会静默盖掉前一个的结果。
-    const reservedOutputPaths = new Set()
+    const reservedOutputPaths = new Set<string>()
     for (const input of inputs) {
       const sourceBase = basename(input.path, extname(input.path))
       const directory = outputDirectory || dirname(input.path)
@@ -189,7 +207,7 @@ export function registerIllustratorHandlers({
     const taskId = randomUUID()
     activeIllustratorTasks.set(event.sender.id, taskId)
     try {
-      const result = await runComCommand(
+      const result: { outputs: { outputPath: string; name: string }[] } = await runComCommand(
         { app, utilityProcess },
         event,
         'illustrator-batch',
@@ -206,7 +224,7 @@ export function registerIllustratorHandlers({
       const outputs = result.outputs.map((output) => registerComResult(event.sender.id, output.outputPath))
       return { status: 'completed', outputs }
     } catch (error) {
-      if (error.message === 'TASK_CANCELLED') return { status: 'cancelled', outputs: [] }
+      if (messageOf(error) === 'TASK_CANCELLED') return { status: 'cancelled', outputs: [] }
       throw error
     } finally {
       activeIllustratorTasks.delete(event.sender.id)

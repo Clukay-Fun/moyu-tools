@@ -1,4 +1,16 @@
-import { spawn } from 'node:child_process'
+import { spawn, type ChildProcess } from 'node:child_process'
+
+/** 可取消的任务：执行期间挂上子进程，取消时由调用方 kill 并置 cancelled */
+export interface ProcessTask {
+  process?: ChildProcess | null
+  cancelled?: boolean
+}
+
+export interface RunProcessOptions {
+  timeoutMs?: number
+  task?: ProcessTask
+  onStderr?: (chunk: string) => void
+}
 
 /**
  * 通用子进程执行封装：超时兜底、stdout/stderr 环形缓冲、可选取消（task.cancelled）。
@@ -6,7 +18,11 @@ import { spawn } from 'node:child_process'
  * 不是格式工厂专属——macOS 开发环境下的 ScreenCaptureKit 侧车编译/调用
  * 也复用这同一个封装，属于跟具体业务无关的进程执行基础设施。
  */
-export function runFormatProcess(command, args, options = {}) {
+export function runFormatProcess(
+  command: string,
+  args: string[],
+  options: RunProcessOptions = {}
+): Promise<{ stdout: string; stderr: string }> {
   const {
     timeoutMs = 2 * 60 * 60 * 1000,
     task,
@@ -31,10 +47,10 @@ export function runFormatProcess(command, args, options = {}) {
     }, timeoutMs)
     child.stdout.setEncoding('utf8')
     child.stderr.setEncoding('utf8')
-    child.stdout.on('data', (chunk) => {
+    child.stdout.on('data', (chunk: string) => {
       stdout = `${stdout}${chunk}`.slice(-2 * 1024 * 1024)
     })
-    child.stderr.on('data', (chunk) => {
+    child.stderr.on('data', (chunk: string) => {
       stderr = `${stderr}${chunk}`.slice(-2 * 1024 * 1024)
       onStderr?.(chunk)
     })

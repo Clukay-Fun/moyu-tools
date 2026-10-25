@@ -1,15 +1,23 @@
 import { randomUUID } from 'node:crypto'
 import { mkdir, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { loadSharp } from '../lib/lazyModules.js'
-import { assertOutputFile, sanitizeFileBaseName } from '../lib/outputPath.js'
-import { registerComResult, runComCommand } from './comWorker.js'
+import { loadSharp } from '../lib/lazyModules'
+import { assertOutputFile, sanitizeFileBaseName } from '../lib/outputPath'
+import { registerComResult, runComCommand } from './comWorker'
+import { showOpenDialogFor, showSaveDialogFor, type MainDeps } from '../lib/deps'
+import { ownValue } from '../lib/ownKey'
 
 // 条码文件落盘（单个/批量保存、复制矢量到剪贴板、转 Illustrator/Photoshop）。
 // image:save-file 不是条码专属（编辑后的截图/图片另存为），但同样是
 // "小文件 + 保存对话框"的模式，体量太小不值得单独开一个模块，放在这里。
 
-const BARCODE_FILE_TYPES = {
+interface BarcodeFileType {
+  extension: string
+  filterName: string
+  encoding: BufferEncoding | null
+}
+
+const BARCODE_FILE_TYPES: Record<string, BarcodeFileType> = {
   svg: {
     extension: 'svg',
     filterName: 'SVG 矢量图',
@@ -22,7 +30,7 @@ const BARCODE_FILE_TYPES = {
   }
 }
 
-const IMAGE_FILE_TYPES = {
+const IMAGE_FILE_TYPES: Record<string, { extension: string; filterName: string }> = {
   png: {
     extension: 'png',
     filterName: 'PNG 图片'
@@ -44,8 +52,12 @@ const IMAGE_FILE_TYPES = {
 // 仅在渲染层显式声明 density 时写入（零售合规码），通用六码不受影响。
 // 写入失败必须抛错：若静默降级，保存会报成功但文件仍是 96 DPI，
 // 与"PNG 元数据 density=300"的验收标准直接冲突。
-async function withBarcodePngDensity(data, fileType, density) {
-  if (fileType?.extension !== 'png' || !density) return data
+async function withBarcodePngDensity(
+  data: string | Buffer,
+  fileType: BarcodeFileType,
+  density: unknown
+): Promise<string | Buffer> {
+  if (fileType?.extension !== 'png' || typeof data === 'string' || !density) return data
 
   const value = Number(density)
   if (!Number.isFinite(value) || value <= 0 || value > 4800) {
@@ -60,8 +72,10 @@ async function withBarcodePngDensity(data, fileType, density) {
   }
 }
 
-function normalizeBarcodeData(type, rawData) {
-  const fileType = BARCODE_FILE_TYPES[type]
+function normalizeBarcodeData(type: 'svg', rawData: unknown): { data: string; fileType: BarcodeFileType }
+function normalizeBarcodeData(type: unknown, rawData: unknown): { data: string | Buffer; fileType: BarcodeFileType }
+function normalizeBarcodeData(type: unknown, rawData: unknown): { data: string | Buffer; fileType: BarcodeFileType } {
+  const fileType = ownValue(BARCODE_FILE_TYPES, type)
 
   if (!fileType || !['string', 'object'].includes(typeof rawData)) {
     throw new Error('不支持的条码文件数据')
@@ -78,10 +92,21 @@ function normalizeBarcodeData(type, rawData) {
     throw new Error('条码文件格式与数据不匹配')
   }
 
-  return { data, fileType }
+  return { data: data as string | Buffer, fileType }
 }
 
-export function registerBarcodeHandlers({ ipcMain, dialog, BrowserWindow, clipboard, app, utilityProcess, assertMainWindowSender }) {
+export function registerBarcodeHandlers({
+  ipcMain,
+  dialog,
+  BrowserWindow,
+  clipboard,
+  app,
+  utilityProcess,
+  assertMainWindowSender
+}: Pick<
+  MainDeps,
+  'ipcMain' | 'dialog' | 'BrowserWindow' | 'clipboard' | 'app' | 'utilityProcess' | 'assertMainWindowSender'
+>): void {
   // Spike / 正式链路：把条码 SVG 交给 Illustrator，递归解组后（可选）执行 app.copy()。
   // mode='inspect' 只返回结构统计；mode='copy' 额外全选并复制到 Illustrator 原生剪贴板。
   // ⚠ 仅 Windows + 已安装 Illustrator 可用；"复制后未编组"只对 Illustrator 承诺。
@@ -123,7 +148,7 @@ export function registerBarcodeHandlers({ ipcMain, dialog, BrowserWindow, clipbo
       throw new Error('条码 SVG 超过 20 MB')
     }
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
-    const selection = await dialog.showSaveDialog(ownerWindow, {
+    const selection = await showSaveDialogFor(dialog, ownerWindow, {
       title: '保存 EPS 条码',
       defaultPath: `${sanitizeFileBaseName(payload?.name, 'barcode')}.eps`,
       filters: [{ name: 'EPS 矢量图', extensions: ['eps'] }]
@@ -205,7 +230,7 @@ export function registerBarcodeHandlers({ ipcMain, dialog, BrowserWindow, clipbo
     const safeBaseName = sanitizeFileBaseName(payload.name, 'barcode')
     const defaultPath = `${safeBaseName}.${fileType.extension}`
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
-    const result = await dialog.showSaveDialog(ownerWindow, {
+    const result = await showSaveDialogFor(dialog, ownerWindow, {
       title: `保存 ${fileType.extension.toUpperCase()} 条码`,
       defaultPath,
       filters: [
@@ -230,7 +255,9 @@ export function registerBarcodeHandlers({ ipcMain, dialog, BrowserWindow, clipbo
       throw new Error('批量条码数量必须在 1–500 之间')
     }
 
-    const normalizedFiles = payload.files.map((file) => {
+    const normalizedFiles: { data: string | Buffer; fileType: BarcodeFileType; name: string }[] = payload.files.map((
+      file: { data?: unknown; name?: unknown } | null
+    ) => {
       const normalized = normalizeBarcodeData(payload.type, file?.data)
       return {
         ...normalized,
@@ -244,7 +271,7 @@ export function registerBarcodeHandlers({ ipcMain, dialog, BrowserWindow, clipbo
     }
 
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
-    const result = await dialog.showOpenDialog(ownerWindow, {
+    const result = await showOpenDialogFor(dialog, ownerWindow, {
       title: '选择批量条码保存文件夹',
       properties: ['openDirectory', 'createDirectory', 'promptToCreate']
     })
@@ -254,8 +281,8 @@ export function registerBarcodeHandlers({ ipcMain, dialog, BrowserWindow, clipbo
     }
 
     const directory = result.filePaths[0]
-    const usedNames = new Map()
-    const errors = []
+    const usedNames = new Map<string, number>()
+    const errors: { index: number; name: string; message: string }[] = []
     let saved = 0
 
     // 逐个 try/catch 而不是整批一次失败就抛出：磁盘中途满了、某个文件名在
@@ -291,7 +318,7 @@ export function registerBarcodeHandlers({ ipcMain, dialog, BrowserWindow, clipbo
 
   ipcMain.handle('image:save-file', async (event, payload) => {
     assertMainWindowSender(event)
-    const fileType = IMAGE_FILE_TYPES[payload?.type]
+    const fileType = ownValue(IMAGE_FILE_TYPES, payload?.type)
     const data = payload?.data instanceof Uint8Array
       ? Buffer.from(payload.data)
       : null
@@ -306,7 +333,7 @@ export function registerBarcodeHandlers({ ipcMain, dialog, BrowserWindow, clipbo
 
     const safeBaseName = sanitizeFileBaseName(payload.name, 'edited-image')
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
-    const result = await dialog.showSaveDialog(ownerWindow, {
+    const result = await showSaveDialogFor(dialog, ownerWindow, {
       title: `保存 ${fileType.filterName}`,
       defaultPath: `${safeBaseName}.${fileType.extension}`,
       filters: [

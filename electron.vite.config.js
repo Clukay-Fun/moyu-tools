@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 import { spritePlugin } from './scripts/icons/sprite-plugin.mjs'
 
-// 库存 / 定制（原 ajuan-erp）是 TypeScript + React，只在这些目录里生效；moyu 其余代码仍是原生 JS。
+// 主进程、preload、库存 / 定制（原 ajuan-erp）是 TypeScript；原工具箱界面仍是原生 JS。下面的别名只给 TS 部分用。
 const erpAlias = {
   '@shared': resolve(__dirname, 'src/shared'),
   '@erp': resolve(__dirname, 'src/renderer/erp')

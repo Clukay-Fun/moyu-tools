@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { mkdir, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { runComCommand } from './comWorker.js'
+import { runComCommand } from './comWorker'
+import type { MainDeps } from '../lib/deps'
 
 // 刀模发送到 Illustrator：渲染层用与 2D / PDF 同源的路径生成 SVG，
 // 主进程只做数据校验，再交给受控 COM worker 打开（与条码同一条链路）。
@@ -9,7 +10,7 @@ import { runComCommand } from './comWorker.js'
 
 const MAX_SVG_BYTES = 20 * 1024 * 1024
 
-function normalizeSvg(payload) {
+function normalizeSvg(payload: { data?: unknown } | null | undefined): string {
   const data = payload?.data
   if (typeof data !== 'string' || !data.trim().startsWith('<?xml') && !data.trim().startsWith('<svg')) {
     throw new Error('不支持的刀模 SVG 数据')
@@ -27,7 +28,12 @@ function normalizeSvg(payload) {
   return data
 }
 
-export function registerDielineHandlers({ ipcMain, assertMainWindowSender, app, utilityProcess }) {
+export function registerDielineHandlers({
+  ipcMain,
+  assertMainWindowSender,
+  app,
+  utilityProcess
+}: Pick<MainDeps, 'ipcMain' | 'assertMainWindowSender' | 'app' | 'utilityProcess'>): void {
   ipcMain.handle('dieline:send-illustrator', async (event, payload) => {
     assertMainWindowSender(event)
     const svg = normalizeSvg(payload)

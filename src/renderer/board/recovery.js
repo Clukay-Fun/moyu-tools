@@ -1,3 +1,4 @@
+// @ts-check
 // 汇总画布 · 崩溃恢复快照调度（U5 / 规格 7.3）
 //
 // 纯逻辑：不碰 DOM、不碰 IPC，时钟与写盘都由外部注入，
@@ -14,11 +15,12 @@ export const RECOVERY_MAX_WAIT_MS = 30000
 
 export class RecoveryScheduler {
   /**
-   * @param {object} deps
-   *   write()      实际落盘，返回 Promise
-   *   now()        当前毫秒，默认 Date.now
-   *   setTimer/clearTimer  定时器注入，默认 setTimeout/clearTimeout
-   *   onError(e)   写盘失败回调；失败不能打断用户操作
+   * @param {object} [deps]
+   * @param {() => Promise<unknown>} [deps.write] 实际落盘
+   * @param {() => number} [deps.now] 当前毫秒，默认 Date.now
+   * @param {(fn: () => void, ms: number) => unknown} [deps.setTimer] 定时器注入，默认 setTimeout
+   * @param {(handle: any) => void} [deps.clearTimer] 默认 clearTimeout
+   * @param {(error: unknown) => void} [deps.onError] 写盘失败回调；失败不能打断用户操作
    */
   constructor({ write, now, setTimer, clearTimer, onError } = {}) {
     this.write = write || (() => Promise.resolve())
@@ -60,8 +62,9 @@ export class RecoveryScheduler {
   #arm() {
     if (this.timer !== null) this.clearTimer(this.timer)
     const at = this.now()
-    const untilDebounce = this.lastChangeAt + RECOVERY_DEBOUNCE_MS - at
-    const untilMaxWait = this.firstChangeAt + RECOVERY_MAX_WAIT_MS - at
+    // 只在 schedule() 记下变更后才会排期，这两个时间此时都已有值
+    const untilDebounce = (this.lastChangeAt ?? at) + RECOVERY_DEBOUNCE_MS - at
+    const untilMaxWait = (this.firstChangeAt ?? at) + RECOVERY_MAX_WAIT_MS - at
     const delay = Math.max(0, Math.min(untilDebounce, untilMaxWait))
     this.dueTo = untilMaxWait <= untilDebounce ? 'max-wait' : 'debounce'
     this.timer = this.setTimer(() => this.#fire(), delay)
@@ -162,6 +165,7 @@ export const RECOVERY_VERSION = 1
 
 /**
  * 判断一份恢复记录是否可用。
+ * @param {any} record IPC 读回的记录，逐项校验
  * @returns {{ ok: boolean, reason?: string }}
  */
 export function inspectRecovery(record) {

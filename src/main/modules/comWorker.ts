@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { basename, join } from 'node:path'
+import type { App, UtilityProcess, WebContents } from 'electron'
+import type { MainDeps } from '../lib/deps'
 
 // Office / Adobe（Illustrator、Photoshop）COM 联动的公共基础设施：
 // utilityProcess 子进程生命周期、请求-响应/进度转发、结果文件的"在文件夹中显示"会话。
@@ -10,24 +12,55 @@ import { basename, join } from 'node:path'
 // winax 调用 COM，这条链路本机（macOS）无法运行验证，只能靠代码走查
 // 保证从 src/main/index.js 原样搬过来的逻辑没有变化。
 
-const comPendingRequests = new Map()
-const comResultSessions = new Map()
-let comWorker = null
+type ComDeps = Pick<MainDeps, 'app' | 'utilityProcess'>
+type ComEvent = { sender: WebContents }
+
+interface ComPendingRequest {
+  sender: WebContents
+  progressChannel: string
+  // worker 是不经构建的 .cjs，结果结构由各命令的调用方自己约定
+  resolve: (result: any) => void
+  reject: (error: unknown) => void
+  timer: NodeJS.Timeout
+}
+
+/** worker 发回主进程的消息（resources/com-worker.cjs） */
+interface ComWorkerMessage {
+  id?: string
+  type?: 'progress' | 'result'
+  completed?: number
+  total?: number
+  name?: string
+  message?: string
+  ok?: boolean
+  result?: unknown
+  error?: string
+}
+
+export interface ComCommandOptions {
+  id?: string
+  timeoutMs?: number
+  progressChannel?: string
+}
+
+const comPendingRequests = new Map<string, ComPendingRequest>()
+const comResultSessions = new Map<string, { id: string; ownerId: number; path: string; name: string }>()
+let comWorker: UtilityProcess | null = null
 let comWorkerStderr = ''
 
-function comWorkerPath(app) {
+function comWorkerPath(app: App) {
   return app.isPackaged
     ? join(process.resourcesPath, 'workers', 'com-worker.cjs')
     : join(app.getAppPath(), 'resources', 'com-worker.cjs')
 }
 
-function winaxModulePath(app) {
+function winaxModulePath(app: App) {
   return app.isPackaged
     ? join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'winax')
     : join(app.getAppPath(), 'node_modules', 'winax')
 }
 
-function rejectComRequests(error) {
+function rejectComRequests(error: unknown) {
   for (const pending of comPendingRequests.values()) {
     clearTimeout(pending.timer)
     pending.reject(error)
@@ -35,7 +68,7 @@ function rejectComRequests(error) {
   comPendingRequests.clear()
 }
 
-function ensureComWorker({ app, utilityProcess }) {
+function ensureComWorker({ app, utilityProcess }: ComDeps): UtilityProcess {
   if (process.platform !== 'win32') {
     throw new Error('Office 与 Adobe 联动仅支持 Windows')
   }
@@ -51,11 +84,12 @@ function ensureComWorker({ app, utilityProcess }) {
   })
   comWorker = child
   comWorkerStderr = ''
-  child.stderr?.on('data', (chunk) => {
+  child.stderr?.on('data', (chunk: Buffer | string) => {
     comWorkerStderr = `${comWorkerStderr}${chunk}`.slice(-4000)
   })
-  child.on('message', (message) => {
-    const pending = comPendingRequests.get(message?.id)
+  child.on('message', (message: ComWorkerMessage | null) => {
+    if (!message?.id) return
+    const pending = comPendingRequests.get(message.id)
     if (!pending) return
     if (message.type === 'progress') {
       if (!pending.sender.isDestroyed()) {
@@ -90,7 +124,13 @@ function ensureComWorker({ app, utilityProcess }) {
   return child
 }
 
-export function runComCommand({ app, utilityProcess }, event, command, payload, options = {}) {
+export function runComCommand(
+  { app, utilityProcess }: ComDeps,
+  event: ComEvent,
+  command: string,
+  payload: unknown,
+  options: ComCommandOptions = {}
+): Promise<any> {
   if (comPendingRequests.size) {
     throw new Error('已有 Office 或 Adobe 任务正在执行，请等待当前任务完成')
   }
@@ -124,7 +164,7 @@ export function runComCommand({ app, utilityProcess }, event, command, payload, 
   })
 }
 
-export function cancelComCommand(id) {
+export function cancelComCommand(id: string): boolean {
   if (comWorker && comPendingRequests.has(id)) {
     comWorker.postMessage({ type: 'cancel', id })
     return true
@@ -133,14 +173,14 @@ export function cancelComCommand(id) {
 }
 
 /** 应用退出前杀掉残留的 COM worker 子进程，不然会变成孤儿进程。 */
-export function terminateComWorker() {
+export function terminateComWorker(): void {
   if (comWorker) {
     comWorker.kill()
     comWorker = null
   }
 }
 
-export function registerComResult(ownerId, filePath) {
+export function registerComResult(ownerId: number, filePath: string): { id: string; name: string } {
   const id = randomUUID()
   comResultSessions.set(id, {
     id,
@@ -151,7 +191,13 @@ export function registerComResult(ownerId, filePath) {
   return { id, name: basename(filePath) }
 }
 
-export function registerComWorkerHandlers({ ipcMain, shell, app, utilityProcess, assertMainWindowSender }) {
+export function registerComWorkerHandlers({
+  ipcMain,
+  shell,
+  app,
+  utilityProcess,
+  assertMainWindowSender
+}: Pick<MainDeps, 'ipcMain' | 'shell' | 'app' | 'utilityProcess' | 'assertMainWindowSender'>): void {
   ipcMain.handle('com:probe', async (event) => {
     assertMainWindowSender(event)
     return runComCommand({ app, utilityProcess }, event, 'probe', {})

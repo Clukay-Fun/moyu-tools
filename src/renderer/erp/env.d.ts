@@ -1,17 +1,9 @@
-import type { ErpApi } from '@shared/erp/ipc'
-import type { PhotoshopStatus } from '@shared/photoshop'
+import type { MoyuApi } from '../../preload/index'
 
-// window.api 由 src/preload/index.js 暴露；这里只声明库存 / 定制用到的部分
+// window.api 由 src/preload/index.ts 暴露，类型也从那里取，不在这里另抄一份
 declare global {
   interface Window {
-    api: {
-      erp: ErpApi
-      photoshop: {
-        getStatus(): Promise<PhotoshopStatus>
-        redetect(): Promise<PhotoshopStatus>
-        onStatus(handler: (status: PhotoshopStatus) => void): () => void
-      }
-    }
+    api: MoyuApi
   }
 }
 

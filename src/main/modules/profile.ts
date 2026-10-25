@@ -1,6 +1,8 @@
 import { mkdir, rename, stat, unlink, writeFile } from 'node:fs/promises'
 import { extname, join } from 'node:path'
-import { loadSharp } from '../lib/lazyModules.js'
+import { loadSharp } from '../lib/lazyModules'
+import type { App, IpcMainInvokeEvent, OpenDialogOptions } from 'electron'
+import type { MainDeps } from '../lib/deps'
 
 // 头像 / 应用 Logo / 背景图：只接受系统选图对话框返回的本地文件，主进程用 sharp 重新编码后落盘，
 // 原文件里的元数据和非图像内容都不会带过来；SVG 等矢量格式不收。
@@ -15,15 +17,17 @@ const ALLOWED_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp'])
 const LOGO_FILE = 'logo.png'
 const BACKGROUND_FILE = 'background.webp'
 
-function profileDirectory(app) {
+type ProfileImageInfo = { status: 'none' } | { status: 'ok'; url: string }
+
+function profileDirectory(app: App) {
   return join(app.getPath('userData'), 'profile')
 }
 
-export function profileAvatarPath(app) {
+export function profileAvatarPath(app: App): string {
   return join(profileDirectory(app), 'avatar.png')
 }
 
-async function fileInfo(app, name, host) {
+async function fileInfo(app: App, name: string, host: string): Promise<ProfileImageInfo> {
   const file = join(profileDirectory(app), name)
   try {
     const info = await stat(file)
@@ -31,12 +35,12 @@ async function fileInfo(app, name, host) {
     // mtime 作为查询串：换图后不会被 Chromium 的图片缓存挡住
     return { status: 'ok', url: `moyu-file://${host}/${name}?v=${Math.round(info.mtimeMs)}` }
   } catch (error) {
-    if (error?.code === 'ENOENT') return { status: 'none' }
+    if ((error as NodeJS.ErrnoException | null)?.code === 'ENOENT') return { status: 'none' }
     throw error
   }
 }
 
-async function brandInfo(app) {
+async function brandInfo(app: App) {
   const [logo, background] = await Promise.all([
     fileInfo(app, LOGO_FILE, 'brand'),
     fileInfo(app, BACKGROUND_FILE, 'brand')
@@ -45,9 +49,14 @@ async function brandInfo(app) {
 }
 
 /** 系统选图 → 校验扩展名与大小；取消返回 null */
-async function pickImage(dialog, BrowserWindow, event, { title, maxBytes, label }) {
+async function pickImage(
+  dialog: MainDeps['dialog'],
+  BrowserWindow: MainDeps['BrowserWindow'],
+  event: IpcMainInvokeEvent,
+  { title, maxBytes, label }: { title: string; maxBytes: number; label: string }
+): Promise<string | null> {
   const owner = BrowserWindow.fromWebContents(event.sender)
-  const options = {
+  const options: OpenDialogOptions = {
     title,
     properties: ['openFile'],
     filters: [{ name: '图片', extensions: ['png', 'jpg', 'jpeg', 'webp'] }]
@@ -65,7 +74,7 @@ async function pickImage(dialog, BrowserWindow, event, { title, maxBytes, label 
 }
 
 /** 先写临时文件再改名：写到一半崩溃也不会留下半张图 */
-async function saveProfileFile(app, name, buffer) {
+async function saveProfileFile(app: App, name: string, buffer: Buffer) {
   const directory = profileDirectory(app)
   await mkdir(directory, { recursive: true })
   const target = join(directory, name)
@@ -74,13 +83,13 @@ async function saveProfileFile(app, name, buffer) {
   await rename(temporary, target)
 }
 
-async function removeProfileFile(app, name) {
+async function removeProfileFile(app: App, name: string) {
   await unlink(join(profileDirectory(app), name)).catch((error) => {
     if (error?.code !== 'ENOENT') throw error
   })
 }
 
-async function avatarInfo(app) {
+async function avatarInfo(app: App): Promise<ProfileImageInfo> {
   const file = profileAvatarPath(app)
   try {
     const info = await stat(file)
@@ -91,12 +100,18 @@ async function avatarInfo(app) {
       url: `moyu-file://avatar/avatar.png?v=${Math.round(info.mtimeMs)}`
     }
   } catch (error) {
-    if (error?.code === 'ENOENT') return { status: 'none' }
+    if ((error as NodeJS.ErrnoException | null)?.code === 'ENOENT') return { status: 'none' }
     throw error
   }
 }
 
-export function registerProfileHandlers({ ipcMain, dialog, BrowserWindow, app, assertMainWindowSender }) {
+export function registerProfileHandlers({
+  ipcMain,
+  dialog,
+  BrowserWindow,
+  app,
+  assertMainWindowSender
+}: Pick<MainDeps, 'ipcMain' | 'dialog' | 'BrowserWindow' | 'app' | 'assertMainWindowSender'>): void {
   ipcMain.handle('profile:get-avatar', async (event) => {
     assertMainWindowSender(event)
     return avatarInfo(app)
@@ -105,7 +120,7 @@ export function registerProfileHandlers({ ipcMain, dialog, BrowserWindow, app, a
   ipcMain.handle('profile:choose-avatar', async (event) => {
     assertMainWindowSender(event)
     const owner = BrowserWindow.fromWebContents(event.sender)
-    const options = {
+    const options: OpenDialogOptions = {
       title: '选择头像',
       properties: ['openFile'],
       filters: [{ name: '图片', extensions: ['png', 'jpg', 'jpeg', 'webp'] }]
