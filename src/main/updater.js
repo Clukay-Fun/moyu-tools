@@ -63,7 +63,7 @@ function normalizeNotes(notes) {
   if (!notes) return ''
   if (typeof notes === 'string') return notes
   if (Array.isArray(notes)) {
-    return notes.map((n) => (typeof n === 'string' ? n : n?.notes || '')).join('\n\n')
+    return notes.map((n) => (typeof n === 'string' ? n : n?.note || '')).join('\n\n')
   }
   return ''
 }
