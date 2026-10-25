@@ -694,6 +694,11 @@ export function createPsdJob(db: Db, paths: PsdPaths, input: PsdJobCreateInput):
 
   const staging = join(paths.bridgeDir, 'staging', String(id))
   const inbox = join(paths.bridgeDir, 'inbox', `${id}.json`)
+  // 任务 id 可能被重用（恢复了较早的备份）：先清掉桥接目录里同编号的旧文件，免得新任务读到旧结果
+  rmSync(staging, { recursive: true, force: true })
+  for (const folder of ['processing', 'done', 'failed']) {
+    rmSync(join(paths.bridgeDir, folder, `${id}.json`), { force: true })
+  }
   try {
     mkdirSync(staging, { recursive: true })
     copyFileSync(template.source_path, join(staging, 'template.psd'))
@@ -944,7 +949,11 @@ export function syncPsdCutoutResults(db: Db, paths: PsdPaths): void {
 export function cancelPsdCutoutJob(db: Db, paths: PsdPaths, jobId: number): void {
   const row = db.prepare(`SELECT * FROM psd_cutout_jobs WHERE id = ?`).get(jobId) as CutoutRow | undefined
   if (!row) throw new ServiceError('NOT_FOUND', '抠图任务不存在')
-  if (row.status !== 'ready') throw new ServiceError('VALIDATION', '只有待确认的抠图结果可以取消')
+  // 排队 / 处理中也能取消：Photoshop 没接手或中途崩溃时，素材不会一直卡在「抠图中」。
+  // 插件之后若仍交回结果，syncPsdCutoutResults 见到已取消的任务会把文件清掉。
+  if (!['queued', 'running', 'ready'].includes(row.status)) {
+    throw new ServiceError('VALIDATION', '这个抠图任务已经结束')
+  }
   const outputPath = row.output_path || resolvePsdBridgeOutputPath(paths.bridgeDir, row.output_file)
   if (existsSync(outputPath)) unlinkSync(outputPath)
   rmSync(join(paths.bridgeDir, 'staging', cutoutTaskKey(jobId)), { recursive: true, force: true })

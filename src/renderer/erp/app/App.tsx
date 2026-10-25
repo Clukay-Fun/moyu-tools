@@ -16,7 +16,7 @@ import { HostProvider, type ErpHost } from './host'
 import { useEntityDrawers } from './entityDrawers'
 import { unwrap, errorMessage } from '@erp/lib/api'
 import { emitDataChanged } from '@erp/lib/dataEvents'
-import { refreshPsdBoard, subscribePsdBoard } from '@erp/lib/psdBoardFeed'
+import { subscribePsdBoard } from '@erp/lib/psdBoardFeed'
 import type { PsdBoard, PsdJobStatus } from '@shared/erp/psd'
 import { INVENTORY_ROUTES, type RouteKey } from './routes'
 import { OverviewPage } from '@erp/pages/OverviewPage'
@@ -129,7 +129,7 @@ function Routed({
   )
 }
 
-/** 订阅共享看板（全应用唯一的轮询）：无论在摸鱼哪个工具，定制任务完成 / 失败都弹提示 */
+/** 订阅共享看板（全应用唯一的轮询）：用过定制之后，无论在摸鱼哪个工具，定制任务完成 / 失败都弹提示 */
 function PsdJobNotifier(): null {
   const toast = useToast()
   const jobStatus = useRef<Map<number, PsdJobStatus> | null>(null)
@@ -151,9 +151,8 @@ function PsdJobNotifier(): null {
         }
       }
     }
-    const unsubscribe = subscribePsdBoard(onBoard, false)
-    refreshPsdBoard().catch(() => {})
-    return unsubscribe
+    // 只订阅、不主动拉：轮询从第一次打开定制页开始（见 psdBoardFeed），拉到的第一份看板作为基线
+    return subscribePsdBoard(onBoard, false)
   }, [toast])
   return null
 }

@@ -2,12 +2,12 @@
  * 描述: 定制 › 素材库视图 (AssetLibraryView)
  * 主要功能:
  *   - 狗图 / 名字图二级切换，显示数量、导入与素材网格；导入入口只在顶部一处，跟随当前分类
- *   - 每个素材可抠白底、查看抠图结果、删除（引用检查由页面统一处理）
+ *   - 每个素材可抠白底、查看抠图结果、取消排队或卡住的抠图、删除（引用检查由页面统一处理）
  *   - 生成时使用素材原图；缩略图只用于浏览
  */
 
 import { useMemo, useState, type ReactElement } from 'react'
-import { ImagePlus, Plus, Trash2, Wand2 } from 'lucide-react'
+import { ImagePlus, Plus, Trash2, Wand2, X } from 'lucide-react'
 import type { PsdAsset, PsdAssetKind, PsdBoard } from '@shared/erp/psd'
 import { Button, EmptyState, IconButton, SegmentedControl } from '@erp/components/ui'
 import { unwrap } from '@erp/lib/api'
@@ -106,12 +106,21 @@ export function AssetLibraryView({
                     <Button variant="secondary" size="sm" onClick={() => onReviewCutout(cutout.id)}>
                       查看结果
                     </Button>
+                  ) : pending ? (
+                    // Photoshop 没接手或中途崩溃时，用它把素材从「抠图中」解出来
+                    <IconButton
+                      label="取消抠图"
+                      icon={<X size={14} />}
+                      size="sm"
+                      disabled={busy}
+                      onClick={() => void onAct(() => unwrap(window.api.erp.psd.cancelCutout(cutout.id)), '已取消抠图')}
+                    />
                   ) : (
                     <IconButton
-                      label={pending ? '抠白底处理中' : '抠白底'}
+                      label="抠白底"
                       icon={<Wand2 size={14} />}
                       size="sm"
-                      disabled={busy || !!pending}
+                      disabled={busy}
                       onClick={() => void onAct(() => unwrap(window.api.erp.psd.createCutout(asset.id)), '已开始抠白底')}
                     />
                   )}

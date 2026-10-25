@@ -5,6 +5,8 @@
  *   - 有订阅者要求快速刷新（定制页在前台、任务弹窗打开）或有任务在排队 / 运行时 1.5 秒一次，否则 10 秒一次
  *   - 操作接口返回的新看板用 publishPsdBoard() 推给所有订阅者，不必等下一次轮询
  *   - 内容与上一份相同时不通知订阅者，避免每次轮询都让页面（包括常驻在后台的定制页）重新渲染
+ *   - 第一次打开定制页之前不轮询：getBoard 会在「文稿」里建桥接目录并扫描文件，
+ *     只打开过设置、从没用过定制的人不该付这个代价（任务只能在定制页创建，之前也没有要提醒的任务）
  */
 
 import { useCallback, useEffect, useState } from 'react'
@@ -21,6 +23,7 @@ let last: PsdBoard | null = null
 let lastJson = ''
 let inflight: Promise<PsdBoard> | null = null
 let timer: number | null = null
+let armed = false
 
 function hasWork(board: PsdBoard | null): boolean {
   if (!board) return false
@@ -36,7 +39,7 @@ function nextDelay(): number {
 function schedule(): void {
   if (timer !== null) window.clearTimeout(timer)
   timer = null
-  if (listeners.size === 0) return
+  if (listeners.size === 0 || !armed) return
   timer = window.setTimeout(() => {
     timer = null
     refreshPsdBoard()
@@ -58,6 +61,13 @@ export function publishPsdBoard(board: PsdBoard): void {
   schedule()
 }
 
+/** 开始后台轮询（定制页第一次打开时调用；之后整个会话都保持） */
+export function armPsdBoardFeed(): void {
+  if (armed) return
+  armed = true
+  schedule()
+}
+
 /** 当前缓存的看板（还没拉到时为 null） */
 export function currentPsdBoard(): PsdBoard | null {
   return last
@@ -71,6 +81,7 @@ export function resetPsdBoardFeedForTest(): void {
   last = null
   lastJson = ''
   inflight = null
+  armed = false
 }
 
 /** 立即拉一次；并发调用共用同一个请求 */

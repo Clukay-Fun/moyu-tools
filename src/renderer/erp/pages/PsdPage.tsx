@@ -15,7 +15,7 @@ import { useNav } from '@erp/app/navigation'
 import { useHost } from '@erp/app/host'
 import { usePageActive } from '@erp/app/usePageActive'
 import { unwrap, errorMessage } from '@erp/lib/api'
-import { usePsdBoard } from '@erp/lib/psdBoardFeed'
+import { armPsdBoardFeed, usePsdBoard } from '@erp/lib/psdBoardFeed'
 import { ProductionView } from '@erp/features/psd/ProductionView'
 import { TemplatesView } from '@erp/features/psd/TemplatesView'
 import { AssetLibraryView } from '@erp/features/psd/AssetLibraryView'
@@ -62,6 +62,7 @@ export function PsdPage(): ReactElement {
   // 切到定制页时立即补拉一次；之后由共享轮询源按 1.5 秒刷新，切走后回落到低频
   useEffect(() => {
     if (!active) return
+    armPsdBoardFeed()
     refreshBoard().catch((err: unknown) => toast(errorMessage(err), 'error'))
   }, [active, refreshBoard, toast])
 
