@@ -58,6 +58,9 @@ export function applyMovement(db: Db, input: ApplyMovementInput): void {
     // 减少库存按当前平均成本结转；清零时把成本余额一并清掉，避免残留舍入误差。
     unitCostE4 = input.kind === 'void' ? input.unitCostE4 : before > 0 ? costValueBefore / BigInt(before) : 0n
     costDelta = after === 0 ? -costValueBefore : BigInt(input.quantityDelta) * unitCostE4
+    // 作废入库按原单价冲回；其间若已按平均成本出过库、又以更低单价入过库，原价冲回会超过当前成本余额。
+    // 冲回最多扣到 0，库存成本和之后的平均成本都不会变成负数。
+    if (costDelta < -costValueBefore) costDelta = -costValueBefore
   }
 
   const now = nowIso()

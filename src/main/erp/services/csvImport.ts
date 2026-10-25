@@ -98,7 +98,7 @@ function executionOrder(parsed: ParsedRow[]): number[] {
 
 /** 解析并逐行校验，模拟库存变化。不写库。 */
 export function previewImport(db: Db, text: string, ctx: PreviewContext): CsvImportPreview & { parsed: ParsedRow[] } {
-  const { records } = parseRecords(text)
+  const { records, legacy } = parseRecords(text)
   const products = listProducts(db)
   const defaultProduct = products.find((p) => p.isActive) ?? products[0]
   if (!defaultProduct) throw new ServiceError('NOT_FOUND', '没有商品')
@@ -137,8 +137,9 @@ export function previewImport(db: Db, text: string, ctx: PreviewContext): CsvImp
     }
 
     if (cells.length > CSV_COLUMNS.length) fail(`列数过多（${cells.length} 列）`)
-    const product = productCode ? byCode.get(productCode) : defaultProduct
-    if (!product) fail(`商品编码不存在：「${productCode}」`)
+    // 只有旧模板（没有商品编码列）才归到第一个商品；新模板留空算错，不能悄悄记到别的商品上
+    const product = productCode ? byCode.get(productCode) : legacy ? defaultProduct : undefined
+    if (!product) fail(productCode ? `商品编码不存在：「${productCode}」` : '商品编码不能为空')
     else if (!product.isActive) fail(`商品「${product.code}」已停用`)
     const skuId = product?.defaultSku.id ?? null
     const type = TYPE_MAP[typeText.trim().toLowerCase()] ?? null
@@ -197,13 +198,19 @@ export function previewImport(db: Db, text: string, ctx: PreviewContext): CsvImp
   })
 
   // 字段全部合法时才模拟库存；否则库存不足的提示没有意义
-  // 期初必须是最早的日期
-  const opening = parsed.find((p) => p.row.type === 'opening' && p.row.status !== 'error')
-  if (opening) {
-    const earlier = parsed.find((p) => p !== opening && p.row.status !== 'error' && p.row.docDate < opening.row.docDate)
+  // 每个商品的期初必须是该商品最早的日期（同日期初先执行）
+  for (const opening of parsed) {
+    if (opening.row.type !== 'opening' || opening.row.status === 'error' || opening.skuId === null) continue
+    const earlier = parsed.find(
+      (p) =>
+        p !== opening &&
+        p.skuId === opening.skuId &&
+        p.row.status !== 'error' &&
+        p.row.docDate < opening.row.docDate
+    )
     if (earlier) {
       opening.row.messages.push(
-        `期初日期必须早于或等于其他所有行（第 ${earlier.row.line} 行是 ${earlier.row.docDate}）`
+        `期初日期必须早于或等于该商品的其他行（第 ${earlier.row.line} 行是 ${earlier.row.docDate}）`
       )
       opening.row.status = 'error'
     }

@@ -7,9 +7,10 @@ const PREFIX: Record<DocumentType, string> = { inbound: 'RK', outbound: 'CK', op
 export function nextDocNo(db: Db, type: DocumentType, docDate: string): string {
   const day = docDate.replaceAll('-', '')
   const prefix = `${PREFIX[type]}${day}-`
-  const row = db.prepare(`SELECT MAX(doc_no) AS m FROM documents WHERE doc_no LIKE ?`).get(`${prefix}%`) as {
-    m: string | null
-  }
-  const last = row.m ? Number(row.m.slice(prefix.length)) : 0
+  // 序号按数字取最大：按字符串比较时 "1000" < "999"，过了 999 会一直生成重复单号
+  const row = db
+    .prepare(`SELECT MAX(CAST(substr(doc_no, ?) AS INTEGER)) AS m FROM documents WHERE doc_no LIKE ?`)
+    .get(prefix.length + 1, `${prefix}%`) as { m: number | null }
+  const last = row.m ?? 0
   return `${prefix}${String(last + 1).padStart(3, '0')}`
 }

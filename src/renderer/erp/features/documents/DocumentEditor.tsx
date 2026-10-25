@@ -290,10 +290,11 @@ export function DocumentEditor({ mode }: { mode: EditorMode }): React.JSX.Elemen
       ? await unwrap(window.api.erp.documents.updateDraft(existing.id, input))
       : await unwrap(window.api.erp.documents.createDraft(input))
     setExisting(d)
+    // 逐个上传，成功一个就从待传列表移除一个：中途失败时，已经传上去的不会在下次保存时再传一遍
     for (const f of pendingFiles) {
       await unwrap(window.api.erp.attachments.add(d.id, { fileName: f.name, mime: f.type, data: await f.arrayBuffer() }))
+      setPendingFiles((cur) => cur.filter((x) => x !== f))
     }
-    setPendingFiles([])
     if (type === 'outbound') writeLastChannel(channelId)
     return d
   }
