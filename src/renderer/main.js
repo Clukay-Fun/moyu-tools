@@ -10,6 +10,7 @@ import { initFormatFactory } from './modules/formatFactory.js'
 import { initUpdatePanel } from './modules/updatePanel.js'
 import { initDieline } from './modules/dieline.js'
 import { initBackgroundSettings } from './modules/background.js'
+import { initBrandSettings } from './modules/brand.js'
 import { ImageEditorModal } from './board/editor/modal.js'
 import { RecoveryScheduler } from './board/recovery.js'
 import { cleanIpcError, illustratorFailureHint, isComCancelled } from './comErrors.js'
@@ -51,8 +52,11 @@ window.api?.onFullscreenChange?.((fullscreen) => {
 
 const appLogoUrl = new URL('../../assets/app-icon.png', import.meta.url).href
 
-document.querySelectorAll('[data-app-logo]').forEach((image) => {
-  image.src = appLogoUrl
+// 应用品牌（设置 › 通用）：名称、两处标语首帧前恢复；自定义 Logo 等主进程回话后再换上
+const brandSettings = initBrandSettings({
+  defaultLogoUrl: appLogoUrl,
+  notify: (message) => showToast(message),
+  errorText: cleanIpcError
 })
 
 const barcodeTypes = {
@@ -353,9 +357,10 @@ const searchFeatures = [
   ['PSD 模板', '定制', 'custom', '模板', 'Photoshop 模板 槽位'],
   ['定制素材库', '定制', 'custom', '素材库', '狗图 名字图 抠图 白底'],
   ['头像', '设置', 'more', 'general', '通用 个人 头像'],
+  ['应用品牌', '设置', 'more', 'general', 'Logo 应用名称 顶部标语 欢迎页标语'],
   ['截图快捷键', '设置', 'more', 'shortcut', '快捷键 热键 区域截图'],
   ['主题与强调色', '设置', 'more', 'appearance', '外观 深色 浅色 颜色'],
-  ['背景与毛玻璃', '设置', 'more', 'appearance', '外观 背景 渐变 透明度 模糊'],
+  ['背景与毛玻璃', '设置', 'more', 'appearance', '外观 背景 渐变 透明度 模糊 背景图片 壁纸'],
   ['数据目录', '设置', 'more', 'storage', '存储 数据库 回收目录'],
   ['备份与恢复', '设置', 'more', 'data', '数据管理 备份 恢复 销售渠道 示例数据 CSV 模板 清空'],
   ['Photoshop 连接', '设置', 'more', 'photoshop', 'PS 插件 UXP CEP 桥接目录 导出目录'],
@@ -439,7 +444,6 @@ const searchTrigger = document.querySelector('#search-trigger')
 const searchWrap = document.querySelector('#search-wrap')
 const searchDialog = document.querySelector('#search-dialog')
 const homePage = document.querySelector('#page-home')
-const homeSlogan = document.querySelector('#home-slogan')
 const toast = document.querySelector('#toast')
 let toastTimer
 
@@ -521,7 +525,8 @@ function resetHomeParallax() {
 
 function captureHomeBounds() {
   homePointer.bounds = homePage.getBoundingClientRect()
-  homePointer.sloganBounds = homeSlogan.getBoundingClientRect()
+  // 欢迎页标语可以设为空（元素会被拿掉），这时视差直接不动
+  homePointer.sloganBounds = document.querySelector('#home-slogan')?.getBoundingClientRect() ?? { width: 0, height: 0 }
 }
 
 function moveHomeParallax(event) {
@@ -2551,13 +2556,24 @@ backgroundSettings = initBackgroundSettings({
   onChange: () => {
     syncTitleBar()
     syncBackgroundSummary()
-  }
+  },
+  notify: (message) => showToast(message),
+  errorText: cleanIpcError
+})
+
+// 以磁盘上的文件为准：Logo 和背景图被删掉或换过时，这里纠正首帧用的旧地址
+window.api?.profile?.getBrand?.().then((brand) => {
+  brandSettings.setLogo(brand?.logo)
+  backgroundSettings.setImage(brand?.background)
+}).catch((error) => {
+  console.warn('读取应用品牌失败：', error?.message || error)
 })
 
 // 外观 › 背景样式：平时只显示当前样式名，点「调整」再展开单选和颜色
 function syncBackgroundSummary() {
   const summary = document.querySelector('#bg-mode-summary')
-  const option = document.querySelector(`input[name="bg-mode"][value="${document.body.dataset.bg}"]`)
+  // 跟用户选的样式走：图片读不出来时界面暂用默认渐变，但摘要仍写「自定义背景图片」，状态行另有说明
+  const option = document.querySelector('input[name="bg-mode"]:checked')
   if (summary && option) summary.textContent = option.parentElement.textContent.trim()
 }
 
@@ -2746,7 +2762,7 @@ if (aboutPlatform) {
 }
 
 window.api.getAppInfo().then((info) => {
-  document.title = `摸鱼工具箱 v${info.version}`
+  brandSettings.setVersion(info.version)
   document.querySelector('#app-version').textContent = `v${info.version}`
 }).catch(() => {
   document.querySelector('#app-version').textContent = '版本信息不可用'

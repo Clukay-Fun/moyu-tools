@@ -21,7 +21,13 @@ contextBridge.exposeInMainWorld(
     profile: {
       getAvatar: () => ipcRenderer.invoke('profile:get-avatar'),
       chooseAvatar: () => ipcRenderer.invoke('profile:choose-avatar'),
-      clearAvatar: () => ipcRenderer.invoke('profile:clear-avatar')
+      clearAvatar: () => ipcRenderer.invoke('profile:clear-avatar'),
+      // 应用品牌：Logo 与背景图，同样只经系统选图对话框
+      getBrand: () => ipcRenderer.invoke('profile:get-brand'),
+      chooseLogo: () => ipcRenderer.invoke('profile:choose-logo'),
+      clearLogo: () => ipcRenderer.invoke('profile:clear-logo'),
+      chooseBackground: () => ipcRenderer.invoke('profile:choose-background'),
+      clearBackground: () => ipcRenderer.invoke('profile:clear-background')
     },
 
     onWindowRevive: (handler) => {

@@ -15,7 +15,7 @@ export function registerMoyuFileScheme(): void {
 }
 
 /**
- * 本地图片只开放五类：单据附件、已导入素材、桥接 outputs 里的预览、抠图结果、个人头像。
+ * 本地图片只开放六类：单据附件、已导入素材、桥接 outputs 里的预览、抠图结果、个人头像、应用 Logo 与背景图。
  * 每个 resolver 自己做目录收口（`..`、绝对路径会被拒绝），其他 host 一律 404。
  */
 function resolveMoyuFile(host: string, rel: string): string | null {
@@ -27,6 +27,11 @@ function resolveMoyuFile(host: string, rel: string): string | null {
   if (host === 'avatar') {
     if (rel !== 'avatar.png') return null
     return join(app.getPath('userData'), 'profile', 'avatar.png')
+  }
+  // 应用 Logo 与背景图：同一目录下的两个固定文件
+  if (host === 'brand') {
+    if (rel !== 'logo.png' && rel !== 'background.webp') return null
+    return join(app.getPath('userData'), 'profile', rel)
   }
   return null
 }

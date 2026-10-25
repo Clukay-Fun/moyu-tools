@@ -21,6 +21,9 @@
     </svg>
 
     <div class="window-shell">
+      <!-- 自定义背景图片：只在「自定义背景图片」样式下显示；模糊和遮罩只作用在这一层 -->
+      <div class="bg-image" aria-hidden="true"></div>
+
       <!-- 旧版背景光斑：只在「旧版紫蓝青渐变」背景下显示 -->
       <div class="orbs" aria-hidden="true">
         <div class="orb orb-1"></div>
@@ -812,6 +815,34 @@
                           <button class="m-btn m-btn--md" id="profile-clear-avatar" type="button">恢复默认</button>
                         </div>
                       </div>
+
+                      <h2 class="settings-group-title">应用品牌</h2>
+                      <div class="m-card settings-group">
+                        <div class="setting-row">
+                          <span class="setting-label">应用 Logo<small>显示在「更新与关于」里；和个人头像分开保存。PNG / JPG / WebP，最大 5 MB</small></span>
+                          <div class="setting-row-control">
+                            <span class="about-logo"><img data-app-logo alt="" /></span>
+                            <button class="m-btn m-btn--md" id="brand-choose-logo" type="button">更换 Logo</button>
+                            <button class="m-btn m-btn--md" id="brand-clear-logo" type="button">恢复默认</button>
+                          </div>
+                        </div>
+                        <div class="setting-row">
+                          <label class="setting-label" for="brand-name">应用名称<small>用在窗口标题和「更新与关于」里</small></label>
+                          <input class="brand-text-input" id="brand-name" type="text" spellcheck="false" />
+                        </div>
+                        <div class="setting-row">
+                          <label class="setting-label" for="brand-top-slogan">顶部标语<small>显示在右上角计时器左边；留空则不显示</small></label>
+                          <input class="brand-text-input" id="brand-top-slogan" type="text" spellcheck="false" />
+                        </div>
+                        <div class="setting-row">
+                          <label class="setting-label" for="brand-home-slogan">欢迎页标语<small>首页中间的大字；留空则首页不显示文字</small></label>
+                          <input class="brand-text-input" id="brand-home-slogan" type="text" spellcheck="false" />
+                        </div>
+                        <div class="setting-row">
+                          <span class="setting-label">恢复默认文字<small>应用名称和两处标语换回默认，不影响 Logo</small></span>
+                          <button class="m-btn m-btn--md" id="brand-reset-text" type="button">恢复默认</button>
+                        </div>
+                      </div>
                     </section>
 
                     <!-- ══ F-16 · 全局截图快捷键 ══
@@ -919,6 +950,29 @@
                             <label><input type="radio" name="bg-mode" value="plain" />浅灰色背景</label>
                             <label><input type="radio" name="bg-mode" value="gradient" />自定义渐变背景</label>
                             <label><input type="radio" name="bg-mode" value="solid" />自定义纯色背景</label>
+                            <label><input type="radio" name="bg-mode" value="image" />自定义背景图片</label>
+                          </div>
+                          <div class="bg-image-fields" id="bg-image-fields" hidden>
+                            <div class="bg-image-file">
+                              <span class="bg-image-preview" id="bg-image-preview" aria-hidden="true"></span>
+                              <span class="bg-image-status" id="bg-image-status">还没有图片</span>
+                              <button class="m-btn m-btn--md" id="bg-image-choose" type="button">上传图片</button>
+                              <button class="m-btn m-btn--md" id="bg-image-clear" type="button">删除图片</button>
+                            </div>
+                            <div class="bg-image-fit" role="radiogroup" aria-label="图片显示方式">
+                              <span>显示方式</span>
+                              <label><input type="radio" name="bg-image-fit" value="cover" checked />铺满</label>
+                              <label><input type="radio" name="bg-image-fit" value="contain" />完整显示</label>
+                              <label><input type="radio" name="bg-image-fit" value="center" />原始尺寸居中</label>
+                            </div>
+                            <label class="bg-slider">
+                              <span>遮罩不透明度</span><output id="bg-image-dim-value" for="bg-image-dim">20%</output>
+                              <input type="range" id="bg-image-dim" min="0" max="80" value="20" />
+                            </label>
+                            <label class="bg-slider">
+                              <span>图片模糊程度</span><output id="bg-image-blur-value" for="bg-image-blur">0px</output>
+                              <input type="range" id="bg-image-blur" min="0" max="40" value="0" />
+                            </label>
                           </div>
                           <div class="bg-colors" id="bg-colors">
                             <label class="bg-color-field">
@@ -949,14 +1003,14 @@
                           </div>
                         </div>
                         <div class="setting-row">
-                          <label class="setting-label" for="bg-blur">背景模糊程度<small>工作区、导航和弹出层共用</small></label>
+                          <label class="setting-label" for="bg-blur">毛玻璃模糊程度<small>工作区、导航和弹出层共用；和背景图片模糊分开调</small></label>
                           <div class="setting-row-control setting-slider">
                             <input type="range" id="bg-blur" min="0" max="30" value="26" />
                             <output id="bg-blur-value" for="bg-blur">26px</output>
                           </div>
                         </div>
                         <div class="setting-row">
-                          <span class="setting-label">恢复默认<small>背景、颜色、方向、不透明度和模糊都回到旧版紫蓝青渐变</small></span>
+                          <span class="setting-label">恢复默认<small>背景、颜色、方向、不透明度和模糊都回到旧版紫蓝青渐变；已上传的背景图片保留，可再切回</small></span>
                           <button class="m-btn m-btn--md" id="bg-reset" type="button">恢复默认</button>
                         </div>
                       </div>
@@ -1032,7 +1086,7 @@
                         <div class="setting-row">
                           <span class="setting-label about-name">
                             <span class="about-logo"><img data-app-logo alt="" /></span>
-                            <span>摸鱼工具箱<small>干活快一点，摸鱼久一点</small></span>
+                            <span><span data-app-name>摸鱼工具箱</span><small data-app-tagline>干活快一点，摸鱼久一点</small></span>
                           </span>
                           <b class="setting-value" id="app-version">正在读取…</b>
                         </div>

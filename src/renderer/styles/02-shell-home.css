@@ -9,7 +9,8 @@
 /* ══ 背景模式（设置 › 外观 › 背景与毛玻璃，modules/background.js 写 body[data-bg] 与 --app-bg-*）══
    classic  旧版光斑 + 白纱（默认，b8e8e7b 原样）
    plain    浅灰纯底，中性描边，不做背景模糊
-   gradient / solid  自定义颜色；深色主题下只混入 22%，不把浅色直接铺满（与 background.js 的 DARK_MIX 一致） */
+   gradient / solid  自定义颜色；深色主题下只混入 22%，不把浅色直接铺满（与 background.js 的 DARK_MIX 一致）
+   image    自定义背景图片：独立的 .bg-image 层，图片模糊与遮罩只作用在这层，毛玻璃参数照旧 */
 body {
   --app-bg: var(--background);
   --app-bg-tone-start: var(--app-bg-start);
@@ -40,6 +41,36 @@ body[data-bg="gradient"] {
 
 body[data-bg="solid"] {
   --app-bg: var(--app-bg-tone-start);
+}
+
+/* 图片底下仍是主题底色：完整显示 / 原始尺寸留出的边、遮罩都跟着深浅主题走 */
+.bg-image {
+  position: absolute;
+  inset: 0;
+  display: none;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+body[data-bg="image"] .bg-image {
+  display: block;
+}
+
+/* 模糊会把边缘晕成半透明：图片层往外多铺两倍模糊半径，裁掉发灰的边 */
+.bg-image::before {
+  position: absolute;
+  inset: calc(var(--bg-image-blur, 0px) * -2);
+  background: var(--app-bg-image, none) center / var(--bg-image-size, cover) no-repeat;
+  content: "";
+  filter: blur(var(--bg-image-blur, 0px));
+}
+
+.bg-image::after {
+  position: absolute;
+  inset: 0;
+  background: var(--background);
+  content: "";
+  opacity: var(--bg-image-dim, 0.2);
 }
 
 .orbs {
