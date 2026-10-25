@@ -768,17 +768,7 @@ function openErpSettings(target) {
 // 进入设置时一级栏和二级栏让位给设置导航（body.settings-mode），右侧一次只显示一个分类。
 // 「返回应用」切回进入前的模块：各工具页面的 DOM 一直在，只切 .active，上传队列和输入都不会丢。
 const SETTINGS_PAGES = ['general', 'shortcut', 'appearance', 'storage', 'data', 'photoshop', 'about']
-const SETTINGS_PAGE_KEY = 'moyu.settingsPage'
 let settingsReturnModule = 'home'
-
-function savedSettingsPage() {
-  try {
-    const page = localStorage.getItem(SETTINGS_PAGE_KEY)
-    return SETTINGS_PAGES.includes(page) ? page : 'general'
-  } catch {
-    return 'general'
-  }
-}
 
 function showSettingsPage(page, animate = false) {
   if (!SETTINGS_PAGES.includes(page)) page = 'general'
@@ -793,11 +783,6 @@ function showSettingsPage(page, animate = false) {
     item.setAttribute('aria-current', active ? 'page' : 'false')
   })
   document.querySelector('#settings-scroll')?.scrollTo({ top: 0, behavior: 'instant' })
-  try {
-    localStorage.setItem(SETTINGS_PAGE_KEY, page)
-  } catch {
-    // 记不住上次的分类也不影响使用
-  }
   if (animate) animatePageEntry(shown)
 }
 
@@ -875,8 +860,8 @@ function activateModule(module, action = '', animate = false) {
     if (page.id === `page-${module}`) activePage = page
     page.classList.toggle('active', page.id === `page-${module}`)
   })
-  // 设置：进入时回到上次看的分类；搜索、定制页带着分类名进来时直接切过去
-  if (module === 'more' && (changed || action)) showSettingsPage(action || savedSettingsPage())
+  // 设置：每次进入都从「通用」开始，不记上次的分类；搜索、定制页带着分类名进来时直接切过去
+  if (module === 'more' && (changed || action)) showSettingsPage(action || 'general')
   if (animate && changed) animatePageEntry(activePage)
 
   const erpCommand = action.startsWith('cmd:') ? action.slice(4) : ''
