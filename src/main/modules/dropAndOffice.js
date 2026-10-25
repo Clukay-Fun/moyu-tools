@@ -513,6 +513,9 @@ export function registerDropAndOfficeHandlers({
       throw new Error('没有可打开的输出位置')
     }
     if (payload.directory) {
+      // openPath 会用系统默认程序打开：只放行真实目录，不能让传进来的可执行文件被运行
+      const info = await stat(payload.path).catch(() => null)
+      if (!info?.isDirectory()) throw new Error('输出文件夹不存在')
       const error = await shell.openPath(payload.path)
       if (error) throw new Error(error)
     } else {
