@@ -1,7 +1,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--erp-space-3);
+  gap: var(--erp-space-4);
   height: 100%;
   width: 100%;
   min-width: 0;
@@ -16,17 +16,16 @@
   background: var(--erp-bg-surface);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow), var(--shadow-small);
   overflow: hidden;
 }
 
-/* 筛选条优先一行；放不下时换行，开单与更多始终靠右。只有搜索框会压缩，其余控件保持原宽 */
+/* 固定两行筛选，不带底色和外框，左右边界与表格卡片对齐 */
 .toolbar {
   --erp-control-h: 36px;
   display: flex;
   flex-direction: column;
   gap: var(--erp-space-2-5);
-  padding: var(--erp-space-4);
-  border-bottom: 1px solid var(--erp-border-subtle);
   flex-shrink: 0;
 }
 

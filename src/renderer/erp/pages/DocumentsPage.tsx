@@ -186,47 +186,48 @@ export function DocumentsPage(): React.JSX.Element {
     <div className={styles.container}>
       <h1 className="srOnly">单据</h1>
 
-      <main className={styles.mainPanel}>
-        {/* 固定两行：上行类型 / 状态筛选 + 开单操作，下行日期 / 搜索 / 数量 */}
-        <div className={styles.toolbar}>
-          <div className={styles.toolRow}>
-            <div className={styles.filterGroups}>
-              <SegmentedControl options={TYPE_OPTIONS} value={type} onChange={setType} />
-              <SegmentedControl
-                options={[
-                  { value: 'all', label: '全部' },
-                  { value: 'draft', label: '草稿', count: draftCount || undefined },
-                  { value: 'confirmed', label: '已生效' },
-                  { value: 'voided', label: '已作废' }
-                ]}
-                value={status}
-                onChange={(v) => setStatus(v as StatusFilter)}
-              />
-            </div>
-            <div className={styles.toolActions}>
-              <NewDocumentButton />
-              <Menu
-                align="end"
-                trigger={<IconButton label="更多" icon={<MoreVertical size={16} />} variant="secondary" />}
-                items={moreItems}
-              />
-            </div>
+      {/* 固定两行，直接排在工作区背景上：上行类型 / 状态筛选 + 开单操作，下行日期 / 搜索 / 数量 */}
+      <div className={styles.toolbar}>
+        <div className={styles.toolRow}>
+          <div className={styles.filterGroups}>
+            <SegmentedControl options={TYPE_OPTIONS} value={type} onChange={setType} />
+            <SegmentedControl
+              options={[
+                { value: 'all', label: '全部' },
+                { value: 'draft', label: '草稿', count: draftCount || undefined },
+                { value: 'confirmed', label: '已生效' },
+                { value: 'voided', label: '已作废' }
+              ]}
+              value={status}
+              onChange={(v) => setStatus(v as StatusFilter)}
+            />
           </div>
-          <div className={styles.toolRow}>
-            <DateRangePicker value={range} onChange={setRange} />
-            <div className={styles.search}>
-              <Search size={14} className={styles.searchIcon} />
-              <Input
-                ref={searchRef}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="单号 / 订单号 / 渠道 / 备注"
-              />
-            </div>
-            <span className={styles.count}>{loading ? '正在筛选…' : `共 ${total} 张`}</span>
+          <div className={styles.toolActions}>
+            <NewDocumentButton />
+            <Menu
+              align="end"
+              trigger={<IconButton label="更多" icon={<MoreVertical size={16} />} variant="secondary" />}
+              items={moreItems}
+            />
           </div>
         </div>
+        <div className={styles.toolRow}>
+          <DateRangePicker value={range} onChange={setRange} />
+          <div className={styles.search}>
+            <Search size={14} className={styles.searchIcon} />
+            <Input
+              ref={searchRef}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="单号 / 订单号 / 渠道 / 备注"
+            />
+          </div>
+          <span className={styles.count}>{loading ? '正在筛选…' : `共 ${total} 张`}</span>
+        </div>
+      </div>
 
+      {/* 表格卡片：表头、内容、空状态、底部计数 */}
+      <main className={styles.mainPanel}>
         {error && <p className={styles.error}>读取失败：{error}</p>}
         {docs && total > docs.length && (
           <p className={styles.truncated} role="status">
