@@ -18,6 +18,12 @@
 8. 不使用 CDN 作为核心运行依赖；运行资源经 npm 或 `assets/` 本地交付。
 9. 不提交缓存、构建产物、用户私有素材、凭证、本地计划文档或测试代码。
 
+## 代码语言
+
+- 主进程（`src/main`）、preload、`src/shared`、库存 / 定制界面（`src/renderer/erp`）一律 TypeScript，`npm run typecheck` 全量严格检查；新文件不再写 `.js`。
+- 原工具箱界面（`src/renderer` 下 `erp/` 以外）保持原生 JS + DOM，改动时不要求顺带改写成 TS 或 React；文件顶部有 `// @ts-check` 的也纳入 `typecheck`，改这些文件要保持检查通过。新写的界面模块优先加 `// @ts-check`。
+- `resources/` 下由子进程直接加载的 `.cjs`（如 `com-worker.cjs`）不经构建，保持 CommonJS。
+
 ## 验证
 
 - 日常改动：相关 harness、静态检查和 `npm run build`。
