@@ -32,6 +32,8 @@ interface UpdatePrefs {
   lastRunVersion?: string
   /** 已提示过「已更新到」的版本 */
   celebratedVersion?: string
+  /** 勾了「本版本不再提示」的版本：启动检查发现它时不再弹窗 */
+  skippedVersion?: string
 }
 
 type UpdateStatus =
@@ -51,10 +53,13 @@ interface UpdateState {
   currentVersion: string
   availableVersion: string | null
   releaseNotes: string | null
+  /** 发布时间（更新源给的 ISO 字符串），没有就是 null */
+  releaseDate: string | null
   progress: { percent: number; transferred: number; total: number; bytesPerSecond: number } | null
   lastCheckedAt: number | null
   autoCheck: boolean
-  promptOnAvailable: boolean
+  /** 每决定弹一次「发现新版本」就加 1；渲染进程看到新值才弹 */
+  promptId: number
   portable: boolean
   message: string | null
   /** 出错时的原始信息（已去掉用户目录），设置页折叠显示 */
@@ -68,6 +73,8 @@ interface UpdateState {
 let getWindow: () => BrowserWindow | null = () => null
 let prefs: UpdatePrefs = { ...DEFAULT_PREFS }
 let checking = false
+/** 这次检查从哪来：启动时的自动检查要看「本版本不再提示」，手动检查总是弹 */
+let checkSource: 'manual' | 'startup' | null = null
 let downloading = false
 /** 这次下载是启动时自动复用缓存触发的：完成后不再提醒 */
 let resumingPending = false
@@ -79,10 +86,11 @@ const state: UpdateState = {
   currentVersion: getApplicationVersion(),
   availableVersion: null,
   releaseNotes: null,
+  releaseDate: null,
   progress: null,
   lastCheckedAt: null,
   autoCheck: DEFAULT_PREFS.autoCheck,
-  promptOnAvailable: false,
+  promptId: 0,
   portable: false,
   message: null,
   errorDetail: null,
@@ -224,7 +232,8 @@ function doCheck(source: 'manual' | 'startup' = 'manual') {
   // 已下载好的更新不要被一次重新检查冲掉安装入口
   if (state.status === 'downloaded') return { ok: false, message: '更新已下载，可在设置中重启安装' }
   checking = true
-  patch({ status: 'checking', message: null, errorDetail: null, errorStage: null, promptOnAvailable: source === 'startup' })
+  checkSource = source
+  patch({ status: 'checking', message: null, errorDetail: null, errorStage: null })
   autoUpdater
     .checkForUpdates()
     .catch((err) => fail('check', err, '检查更新失败'))
@@ -248,8 +257,7 @@ function startDownload(resume = false) {
     progress: { percent: 0, transferred: 0, total: 0, bytesPerSecond: 0 },
     message: null,
     errorDetail: null,
-    errorStage: null,
-    promptOnAvailable: false
+    errorStage: null
   })
   setTaskbarProgress()
   autoUpdater
@@ -328,22 +336,26 @@ export function initUpdater(windowGetter: () => BrowserWindow | null): void {
   autoUpdater.autoInstallOnAppQuit = false
   autoUpdater.on('checking-for-update', () => patch({ status: 'checking' }))
   autoUpdater.on('update-available', (info) => {
+    const version = info?.version || null
+    // 上次已经同意下载这个版本：复用缓存（缓存失效会重新下载），不再弹「发现新版本」
+    const resume = Boolean(version) && version === prefs.pendingVersion
+    const prompt = !resume && Boolean(version) && (checkSource === 'manual' || version !== prefs.skippedVersion)
+    checkSource = null
     patch({
       status: 'available',
-      availableVersion: info?.version || null,
+      availableVersion: version,
       releaseNotes: normalizeNotes(info?.releaseNotes),
+      releaseDate: info?.releaseDate || null,
       lastCheckedAt: Date.now(),
-      message: null
+      message: null,
+      promptId: prompt ? state.promptId + 1 : state.promptId
     })
-    // 上次已经同意下载这个版本：复用缓存（缓存失效会重新下载），不再弹「发现新版本」
-    if (info?.version && info.version === prefs.pendingVersion) {
-      state.promptOnAvailable = false
-      startDownload(true)
-    }
+    if (resume) startDownload(true)
   })
-  autoUpdater.on('update-not-available', (info) =>
-    patch({ status: 'up-to-date', availableVersion: info?.version || null, lastCheckedAt: Date.now(), message: null, promptOnAvailable: false })
-  )
+  autoUpdater.on('update-not-available', (info) => {
+    checkSource = null
+    patch({ status: 'up-to-date', availableVersion: info?.version || null, lastCheckedAt: Date.now(), message: null })
+  })
   autoUpdater.on('download-progress', (p: ProgressInfo) =>
     patchProgress({
       percent: Math.floor(Number(p?.percent) || 0),
@@ -412,13 +424,21 @@ export const updateApi = {
     setImmediate(() => autoUpdater.quitAndInstall(true, true))
     return { ok: true }
   },
+  /** 「本版本不再提示」：只认当前发现的那个版本，渲染进程不能随便写一个进来 */
+  skipVersion: (version: unknown) => {
+    if (typeof version !== 'string' || version !== state.availableVersion) return { ok: false }
+    savePrefs({ skippedVersion: version })
+    return { ok: true }
+  },
   dismissJustUpdated: () => {
     if (state.justUpdated) savePrefs({ celebratedVersion: state.justUpdated.version })
     state.justUpdated = null
     return { ok: true }
   },
+  /** 发现了新版本就打开它的发布页（手动下载），否则打开发布列表 */
   openReleases: () => {
-    shell.openExternal(RELEASES_PAGE)
+    const version = state.availableVersion
+    shell.openExternal(version && /^[\w.-]+$/.test(version) ? `${RELEASES_PAGE}/tag/v${version}` : RELEASES_PAGE)
     return { ok: true }
   }
 }

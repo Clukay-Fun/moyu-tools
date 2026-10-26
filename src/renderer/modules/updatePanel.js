@@ -32,8 +32,10 @@ export function initUpdatePanel({
    * 主进程那份"关闭前确认"（mainWindow.on('close')），因为不能假设
    * electron-updater 内部一定会走 BrowserWindow 的 close 事件。
    */
+  const isBusy = () => state.pdfBusy || isIllustratorBusy() || isFormatFactoryBusy() || isBarcodeBusy() || isRegionCaptureBusy()
+
   async function confirmInstallPreflight() {
-    if (state.pdfBusy || isIllustratorBusy() || isFormatFactoryBusy() || isBarcodeBusy() || isRegionCaptureBusy()) {
+    if (isBusy()) {
       showToast('有任务正在处理中，请等待完成后再安装更新')
       return false
     }
@@ -54,10 +56,17 @@ export function initUpdatePanel({
     primary: document.querySelector('#update-primary'),
     secondary: document.querySelector('#update-secondary'),
     dialog: document.querySelector('#update-available-dialog'),
+    dialogTag: document.querySelector('#update-dialog-tag'),
     dialogTitle: document.querySelector('#update-dialog-title'),
     dialogDescription: document.querySelector('#update-dialog-description'),
+    dialogDateItem: document.querySelector('#update-dialog-date-item'),
+    dialogDate: document.querySelector('#update-dialog-date'),
     dialogNotes: document.querySelector('#update-dialog-notes'),
+    dialogEmpty: document.querySelector('#update-dialog-empty'),
+    dialogSkip: document.querySelector('#update-dialog-skip'),
+    dialogClose: document.querySelector('#update-dialog-close'),
     dialogLater: document.querySelector('#update-dialog-later'),
+    dialogManual: document.querySelector('#update-dialog-manual'),
     dialogDownload: document.querySelector('#update-dialog-download'),
     hint: document.querySelector('#update-hint'),
     progress: document.querySelector('#update-progress'),
@@ -82,10 +91,15 @@ export function initUpdatePanel({
     doneOk: document.querySelector('#update-done-ok')
   }
   if (!el.current) return
-  let promptedVersion = null
+  // 已弹过的 promptId：主进程每决定弹一次就加 1
+  let promptedId = 0
+  let promptTimer = 0
+  /** 弹窗正在展示的版本：关掉时据此记「本版本不再提示」 */
+  let dialogVersion = null
   let doneShown = false
   let toastTimer = 0
   const TOAST_MS = 7000
+  const BUSY_RETRY_MS = 3000
 
   const allowedNoteTags = new Set(['H2', 'H3', 'H4', 'P', 'UL', 'OL', 'LI', 'STRONG', 'B', 'EM', 'I', 'CODE', 'PRE', 'BR'])
   const blockedNoteTags = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'SVG', 'MATH', 'FORM', 'INPUT', 'BUTTON', 'TEXTAREA', 'IMG'])
@@ -115,7 +129,19 @@ export function initUpdatePanel({
       target.classList.add('is-plain')
       return
     }
+    // 发布说明开头常是「更新内容」标题，对话框自己已经有标题了，去掉重复的这一行
+    const first = body.firstElementChild
+    if (first && /^H[2-4]$/.test(first.tagName) && /^(更新内容|更新日志)$/.test((first.textContent || '').trim())) first.remove()
     for (const child of body.childNodes) appendSafeNoteNode(target, child)
+    if (!target.textContent?.trim()) target.hidden = true
+  }
+
+  /** 发布时间按界面日期格式显示；拿不到或解析不了就返回空，整项隐藏 */
+  const fmtDate = (iso) => {
+    const date = iso ? new Date(iso) : null
+    if (!date || Number.isNaN(date.getTime())) return ''
+    const pad = (n) => String(n).padStart(2, '0')
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
   }
 
   const fmtTime = (ts) => {
@@ -141,10 +167,11 @@ export function initUpdatePanel({
     }
   }
 
-  /** 顶栏胶囊：只在下载中 / 已下载 / 失败 / 安装中出现 */
+  /** 顶栏胶囊：只在发现更新 / 下载中 / 已下载 / 失败 / 安装中出现 */
   function renderPill(s) {
     if (!el.pill) return
     const view = {
+      available: ['download', '发现更新'],
       downloading: ['download', s.progress?.total ? `更新 ${s.progress.percent}%` : '更新下载中'],
       downloaded: ['update', '重启更新'],
       error: ['warning', '更新失败'],
@@ -217,25 +244,53 @@ export function initUpdatePanel({
       case 'unsupported': p.hidden = true; break
       default: p.textContent = '检查更新'
     }
-    if (s.status === 'available' && s.promptOnAvailable && s.availableVersion !== promptedVersion && el.dialog) {
-      promptedVersion = s.availableVersion
-      el.dialogTitle.textContent = `发现新版本 v${s.availableVersion}`
-      el.dialogDescription.textContent = `当前版本 v${s.currentVersion}，可下载新版本并在准备好后安装。`
-      renderNotes(el.dialogNotes, s.releaseNotes)
-      el.dialog.showModal()
-      el.dialogLater.focus()
+    if (s.status !== 'available') {
+      window.clearTimeout(promptTimer)
+      if (el.dialog?.open) el.dialog.close()
+    } else if (s.promptId > promptedId) {
+      schedulePrompt(s)
     }
     if (s.justUpdated && !doneShown && el.doneDialog) showJustUpdated(s.justUpdated)
+  }
+
+  /** 有文件任务在跑时先不弹，只留顶栏「发现更新」，空下来再弹 */
+  function schedulePrompt(s) {
+    window.clearTimeout(promptTimer)
+    if (!el.dialog || el.dialog.open) return
+    if (isBusy() || document.querySelector('dialog[open]')) {
+      promptTimer = window.setTimeout(() => {
+        window.api.update.getState().then((next) => { if (next.status === 'available' && next.promptId > promptedId) schedulePrompt(next) }).catch(() => {})
+      }, BUSY_RETRY_MS)
+      return
+    }
+    promptedId = s.promptId
+    showPrompt(s)
+  }
+
+  function showPrompt(s) {
+    dialogVersion = s.availableVersion
+    el.dialogTag.textContent = `v${s.availableVersion}`
+    el.dialogTitle.textContent = `发现新版本 ${s.availableVersion}`
+    el.dialogDescription.textContent = `当前版本 v${s.currentVersion}，可下载最新版本。`
+    const date = fmtDate(s.releaseDate)
+    el.dialogDateItem.hidden = !date
+    el.dialogDate.textContent = date
+    renderNotes(el.dialogNotes, s.releaseNotes)
+    el.dialogEmpty.hidden = !el.dialogNotes.hidden
+    el.dialogSkip.checked = false
+    el.dialog.showModal()
+    el.dialogLater.focus()
   }
 
   /** 重启后确认已经是新版本：只提示一次，关掉就告诉主进程记下 */
   function showJustUpdated({ version, notes }) {
     doneShown = true
     el.doneTitle.textContent = `摸鱼工具箱已更新至 v${version}`
+    // 更新内容默认展开；没有内容时整块和按钮都不出现
     renderNotes(el.doneNotes, notes)
-    el.doneNotes.hidden = true
-    el.doneNotesToggle.hidden = !String(notes || '').trim()
-    el.doneNotesToggle.textContent = '查看更新内容'
+    el.doneNotesToggle.hidden = el.doneNotes.hidden
+    el.doneNotesToggle.textContent = '收起更新内容'
+    el.doneNotesToggle.setAttribute('aria-expanded', 'true')
     el.doneDialog.showModal()
     el.doneOk.focus()
   }
@@ -290,16 +345,24 @@ export function initUpdatePanel({
   el.doneNotesToggle?.addEventListener('click', () => {
     el.doneNotes.hidden = !el.doneNotes.hidden
     el.doneNotesToggle.textContent = el.doneNotes.hidden ? '查看更新内容' : '收起更新内容'
+    el.doneNotesToggle.setAttribute('aria-expanded', String(!el.doneNotes.hidden))
   })
   el.doneOk?.addEventListener('click', () => el.doneDialog.close())
   el.doneDialog?.addEventListener('close', () => { void window.api.update.dismissJustUpdated() })
   el.autocheck.addEventListener('change', async () => {
     await window.api.update.setAutoCheck(el.autocheck.checked)
   })
-  el.dialogLater?.addEventListener('click', () => el.dialog.close())
+  // X、稍后、Esc 都是「先不下载」；勾了「本版本不再提示」才记下跳过。点「下载更新」不算跳过
+  el.dialogClose?.addEventListener('click', () => el.dialog.close('later'))
+  el.dialogLater?.addEventListener('click', () => el.dialog.close('later'))
+  el.dialogManual?.addEventListener('click', () => { void window.api.update.openReleases() })
   el.dialogDownload?.addEventListener('click', () => {
-    el.dialog.close()
+    el.dialog.close('download')
     void downloadUpdate()
+  })
+  el.dialog?.addEventListener('close', () => {
+    if (el.dialog.returnValue !== 'download' && el.dialogSkip.checked && dialogVersion) void window.api.update.skipVersion(dialogVersion)
+    el.dialog.returnValue = ''
   })
 
   window.api.update.onState(render)

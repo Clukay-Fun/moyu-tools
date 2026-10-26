@@ -218,18 +218,98 @@
 .update-notes p { margin: 6px 0; }
 .update-notes ul, .update-notes ol { margin: 6px 0; padding-left: 22px; }
 .update-notes li + li { margin-top: 4px; }
-.update-available-dialog { width: min(480px, calc(100vw - 32px)); max-height: calc(100vh - 32px); margin: auto; padding: 22px; }
-.update-available-dialog[open] {
+/* 更新相关的两个对话框：发现新版本（宽，带更新日志）和已更新至（窄） */
+.update-dialog { max-height: calc(100vh - 40px); margin: auto; padding: 22px; }
+.update-dialog[open] {
   transition: opacity var(--dur-panel) var(--ease-out), transform var(--dur-spring-land) var(--ease-spring-land);
 }
-.update-available-dialog[open]::backdrop { transition: background-color var(--dur-panel) var(--ease-out); }
+.update-dialog[open]::backdrop { transition: background-color var(--dur-panel) var(--ease-out); }
 @starting-style {
-  .update-available-dialog[open] { opacity: 0; transform: translateY(8px) scale(0.97); }
-  .update-available-dialog[open]::backdrop { background-color: transparent; }
+  .update-dialog[open] { opacity: 0; transform: translateY(8px) scale(0.97); }
+  .update-dialog[open]::backdrop { background-color: transparent; }
 }
-.update-available-dialog > h2 { margin: 0 0 8px; font-size: 20px; }
-.update-available-dialog > p { margin: 0 0 14px; color: var(--muted); font-size: var(--fs-body); }
-.update-available-dialog .update-notes { max-height: min(240px, 35vh); }
+.update-done { width: min(600px, calc(100vw - 40px)); }
+.update-dialog h2 { font-size: 20px; }
+.update-done > h2 { margin: 0 0 8px; }
+.update-done > p { margin: 0 0 14px; color: var(--muted); font-size: var(--fs-body); }
+.update-done .update-notes { max-height: min(300px, 40vh); }
+
+/* 发现新版本：头部和底部固定，窗口再矮也只让更新日志滚动 */
+.update-prompt[open] {
+  display: flex;
+  width: min(700px, calc(100vw - 40px));
+  max-height: min(85vh, calc(100vh - 40px));
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.update-prompt-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--sp-4);
+}
+.update-prompt-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: var(--r-md);
+  color: var(--accent);
+  background: var(--accent-10);
+}
+.update-prompt-icon .ic { width: 20px; height: 20px; }
+.update-prompt-heading { display: grid; justify-items: start; gap: var(--sp-1); min-width: 0; }
+.update-prompt-tag {
+  padding: 1px var(--sp-2);
+  border-radius: var(--r-full);
+  color: var(--accent);
+  background: var(--accent-10);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.update-prompt-heading h2 { margin: 0; font-weight: 600; }
+.update-prompt-heading p { margin: 0; color: var(--muted); font-size: var(--fs-body); }
+.update-prompt-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--sp-3);
+  margin: 0;
+}
+.update-prompt-meta > div {
+  display: grid;
+  gap: 2px;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface-inner);
+}
+.update-prompt-meta > div[hidden] { display: none; }
+.update-prompt-meta dt { color: var(--faint); font-size: var(--fs-md); }
+.update-prompt-meta dd { margin: 0; font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+.update-prompt-log { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; gap: var(--sp-3); }
+.update-prompt-log h3 { margin: 0; font-size: var(--fs-body); font-weight: 600; }
+.update-prompt .update-notes { min-height: 0; max-height: 300px; margin: 0; flex: 1 1 auto; }
+.update-prompt .update-notes[hidden],
+.update-prompt-empty[hidden] { display: none; }
+.update-prompt-empty { margin: 0; color: var(--muted); font-size: var(--fs-body); }
+.update-prompt-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3) var(--sp-5);
+}
+.update-prompt-foot .update-dialog-actions { margin-top: 0; }
+.update-prompt-skip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--muted);
+  font-size: var(--fs-body);
+  cursor: pointer;
+}
+.update-prompt-skip input { width: 15px; height: 15px; margin: 0; accent-color: var(--accent); }
 .update-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 .update-actions { display: flex; gap: 8px; }
 .update-actions .m-btn[hidden] { display: none; }

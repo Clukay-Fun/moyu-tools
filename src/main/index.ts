@@ -302,6 +302,10 @@ ipcMain.handle('update:install', (event) => {
   assertMainWindowSender(event)
   return updateApi.install()
 })
+ipcMain.handle('update:skip-version', (event, version) => {
+  assertMainWindowSender(event)
+  return updateApi.skipVersion(version)
+})
 ipcMain.handle('update:dismiss-just-updated', (event) => {
   assertMainWindowSender(event)
   return updateApi.dismissJustUpdated()

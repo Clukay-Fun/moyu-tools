@@ -1281,21 +1281,40 @@
         </section>
       </div>
 
-      <dialog class="m-dialog update-available-dialog" id="update-available-dialog" aria-labelledby="update-dialog-title">
-        <h2 id="update-dialog-title">发现新版本</h2>
-        <p id="update-dialog-description"></p>
-        <div class="update-notes" id="update-dialog-notes" hidden></div>
-        <div class="update-dialog-actions">
-          <button class="m-btn" id="update-dialog-later" type="button">稍后</button>
-          <button class="m-btn m-btn--primary" id="update-dialog-download" type="button">下载更新</button>
-        </div>
+      <dialog class="m-dialog update-dialog update-prompt" id="update-available-dialog" aria-labelledby="update-dialog-title" aria-describedby="update-dialog-description">
+        <header class="update-prompt-head">
+          <span class="update-prompt-icon" aria-hidden="true"><svg class="ic" focusable="false"><use href="#ic-update"></use></svg></span>
+          <div class="update-prompt-heading">
+            <span class="update-prompt-tag" id="update-dialog-tag"></span>
+            <h2 id="update-dialog-title">发现新版本</h2>
+            <p id="update-dialog-description"></p>
+          </div>
+          <button class="m-btn m-btn--quiet m-btn--icon m-btn--sm" id="update-dialog-close" type="button" aria-label="关闭"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-close"></use></svg></button>
+        </header>
+        <dl class="update-prompt-meta">
+          <div id="update-dialog-date-item"><dt>发布时间</dt><dd id="update-dialog-date"></dd></div>
+          <div><dt>更新状态</dt><dd>新版本可下载</dd></div>
+        </dl>
+        <section class="update-prompt-log" aria-labelledby="update-dialog-log-title">
+          <h3 id="update-dialog-log-title">更新日志</h3>
+          <div class="update-notes" id="update-dialog-notes"></div>
+          <p class="update-prompt-empty" id="update-dialog-empty" hidden>本次更新暂无详细说明</p>
+        </section>
+        <footer class="update-prompt-foot">
+          <label class="update-prompt-skip"><input id="update-dialog-skip" type="checkbox" />本版本不再提示</label>
+          <div class="update-dialog-actions">
+            <button class="m-btn" id="update-dialog-later" type="button">稍后</button>
+            <button class="m-btn" id="update-dialog-manual" type="button">手动下载</button>
+            <button class="m-btn m-btn--primary" id="update-dialog-download" type="button">下载更新</button>
+          </div>
+        </footer>
       </dialog>
-      <dialog class="m-dialog update-available-dialog" id="update-done-dialog" aria-labelledby="update-done-title">
+      <dialog class="m-dialog update-dialog update-done" id="update-done-dialog" aria-labelledby="update-done-title">
         <h2 id="update-done-title">摸鱼工具箱已更新</h2>
         <p>更新已完成，可以继续使用。</p>
         <div class="update-notes" id="update-done-notes" hidden></div>
         <div class="update-dialog-actions">
-          <button class="m-btn" id="update-done-notes-toggle" type="button" hidden>查看更新内容</button>
+          <button class="m-btn" id="update-done-notes-toggle" type="button" aria-controls="update-done-notes" hidden>收起更新内容</button>
           <button class="m-btn m-btn--primary" id="update-done-ok" type="button">知道了</button>
         </div>
       </dialog>

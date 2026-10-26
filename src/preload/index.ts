@@ -201,6 +201,7 @@ const api = Object.freeze({
     download: () => ipcRenderer.invoke('update:download'),
     install: () => ipcRenderer.invoke('update:install'),
     openReleases: () => ipcRenderer.invoke('update:open-releases'),
+    skipVersion: (version: unknown) => ipcRenderer.invoke('update:skip-version', version),
     dismissJustUpdated: () => ipcRenderer.invoke('update:dismiss-just-updated'),
     onState: (handler: Listener) => {
       const listener = (_event: IpcRendererEvent, payload: unknown) => handler(payload)
