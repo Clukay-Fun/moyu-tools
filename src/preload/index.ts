@@ -117,6 +117,9 @@ const api = Object.freeze({
     return () => void ipcRenderer.removeListener('format:progress', listener)
   },
 
+  // ── 视频转二维码（qr:*）：封面只回传重新编码后的 data: 图片 ──
+  fetchVideoCover: (url: unknown) => ipcRenderer.invoke('qr:fetch-cover', { url }),
+
   // ── PDF 工具（pdf:*）─────────────────────────────────────────
   choosePdfOutput: (payload: unknown) => ipcRenderer.invoke('pdf:choose-output', payload),
   createDefaultPdfOutput: (file: File, outputKind: unknown) => {

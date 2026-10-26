@@ -22,6 +22,7 @@ import { bindOwnerSessionCleanup, registerDropAndOfficeHandlers } from './module
 import { registerDielineHandlers } from './modules/dieline'
 import { registerProfileHandlers } from './modules/profile'
 import { registerFormatFactoryHandlers } from './modules/formatFactory'
+import { registerVideoQrHandlers } from './modules/videoQr'
 import {
   closeAllScreenshotWindows,
   ensureScreenCaptureKitBinary,
@@ -326,6 +327,9 @@ registerBoardHandlers({ ipcMain, dialog, BrowserWindow, app, assertMainWindowSen
 
 // 格式工厂 IPC（format:*）已拆到 ./modules/formatFactory.ts。
 registerFormatFactoryHandlers({ ipcMain, dialog, BrowserWindow, app, assertMainWindowSender })
+
+// 视频转二维码的封面预览（qr:fetch-cover）：读网页 og:image 或用 ffmpeg 截一帧，重新编码后以 data: 返回。
+registerVideoQrHandlers({ ipcMain, app, assertMainWindowSender })
 
 // 刀模发送到 Illustrator（dieline:*）：渲染层给 SVG，主进程交给 COM worker 打开。
 registerDielineHandlers({ ipcMain, assertMainWindowSender, app, utilityProcess })

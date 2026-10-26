@@ -680,24 +680,21 @@
                   <section class="m-card video-qr-source" aria-labelledby="video-qr-title">
                     <header class="video-qr-heading">
                       <h2 id="video-qr-title">视频转二维码</h2>
-                      <p>扫码即可访问视频。二维码里只存链接，视频放在你自己选的网站或网盘上。</p>
+                      <p>扫码即可访问视频。二维码里只存视频链接；封面和标题会联网读取这个网页。</p>
                     </header>
-                    <div class="video-qr-field">
-                      <span class="video-qr-label">视频来源</span>
-                      <div class="m-segmented m-segmented--sm video-qr-source-switch" role="tablist" aria-label="视频来源">
-                        <button type="button" role="tab" aria-selected="true">视频链接</button>
-                        <button type="button" role="tab" aria-selected="false" disabled>本地视频</button>
-                      </div>
-                      <small class="video-qr-note">本地视频需要先上传到视频存储服务，后续版本支持。</small>
-                    </div>
                     <label class="video-qr-field">
                       <span class="video-qr-label">视频访问地址</span>
                       <input type="text" id="video-qr-url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://example.com/video" aria-describedby="video-qr-message" />
                     </label>
                     <p class="video-qr-message" id="video-qr-message" role="status" aria-live="polite"></p>
                     <div class="video-qr-field">
-                      <span class="video-qr-label">链接信息</span>
+                      <span class="video-qr-label">视频信息</span>
+                      <div class="video-qr-cover" id="video-qr-cover" hidden>
+                        <img id="video-qr-cover-image" alt="视频封面" hidden />
+                        <span id="video-qr-cover-note"></span>
+                      </div>
                       <dl class="video-qr-info" id="video-qr-info" hidden>
+                        <div><dt>标题</dt><dd id="video-qr-title-value"></dd></div>
                         <div><dt>网站</dt><dd data-info="site"></dd></div>
                         <div><dt>类型</dt><dd data-info="kind"></dd></div>
                         <div><dt>协议</dt><dd data-info="protocol"></dd></div>

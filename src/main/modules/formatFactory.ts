@@ -165,7 +165,7 @@ async function cleanupOrphanFormatOutputs(directory: string) {
   }
 }
 
-function getFormatToolPath(app: App, tool: 'ffmpeg' | 'ffprobe') {
+export function getFormatToolPath(app: App, tool: 'ffmpeg' | 'ffprobe') {
   const override = tool === 'ffmpeg'
     ? process.env.MOYU_FFMPEG_PATH
     : process.env.MOYU_FFPROBE_PATH

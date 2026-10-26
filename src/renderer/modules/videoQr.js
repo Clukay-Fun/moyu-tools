@@ -1,8 +1,8 @@
 // @ts-check
 // 视频转二维码（视频模块的二级工具）。
 //
-// 只把视频链接编码成二维码：编码在本页完成，不联网、不访问链接；
-// 保存走条码已有的 barcode:save-file（主进程弹对话框、写文件）。
+// 只把视频链接编码成二维码：编码在本页完成、不联网；保存走条码已有的 barcode:save-file。
+// 封面和标题由主进程联网读取（qr:fetch-cover），链接停稳一会儿才读，同一链接只读一次。
 // 输入时实时预览；点「生成二维码」后才锁定导出内容，之后改了链接要「重新生成」。
 
 import { cleanIpcError } from '../comErrors.js'
@@ -30,6 +30,8 @@ const PNG_SIZES = [512, 1024, 2048]
 const PNG_DPI = 300
 const SVG_SIZE_RANGE = /** @type {const} */ ([10, 500])
 const PREVIEW_DELAY_MS = 150
+// 输入停下多久才去联网读封面，避免每敲一个字就请求一次
+const COVER_DELAY_MS = 800
 
 /**
  * @template {Element} T
@@ -126,6 +128,10 @@ export function initVideoQr({ showToast }) {
   const urlInput = /** @type {HTMLInputElement} */ ($('#video-qr-url'))
   const message = $('#video-qr-message')
   const info = /** @type {HTMLElement} */ ($('#video-qr-info'))
+  const cover = /** @type {HTMLElement} */ ($('#video-qr-cover'))
+  const coverImage = /** @type {HTMLImageElement} */ ($('#video-qr-cover-image'))
+  const coverNote = $('#video-qr-cover-note')
+  const titleValue = $('#video-qr-title-value')
   const infoEmpty = /** @type {HTMLElement} */ ($('#video-qr-info-empty'))
   const preview = /** @type {HTMLElement} */ ($('#video-qr-preview'))
   const previewEmpty = /** @type {HTMLElement} */ ($('#video-qr-empty'))
@@ -147,6 +153,11 @@ export function initVideoQr({ showToast }) {
   let generatedUrl = ''
   let busyCount = 0
   let previewTimer = 0
+  let coverTimer = 0
+  /** 已显示（或正在读）的封面对应的链接；晚到的旧结果对不上就丢掉 */
+  let coverUrl = ''
+  /** @type {Map<string, { image: string, note: string, title: string }>} */
+  const coverCache = new Map()
 
   eccSelect.value = style.ecc
   pngSizeSelect.value = String(style.pngSize)
@@ -207,6 +218,53 @@ export function initVideoQr({ showToast }) {
     })
     info.hidden = false
     infoEmpty.hidden = true
+    showCover(href)
+  }
+
+  /**
+   * @param {{ image: string, note: string, title: string }} result
+   */
+  function paintCover(result) {
+    cover.hidden = false
+    coverImage.hidden = !result.image
+    if (result.image) coverImage.src = result.image
+    else coverImage.removeAttribute('src')
+    coverNote.textContent = result.note
+    titleValue.textContent = result.title || '—'
+    titleValue.setAttribute('title', result.title)
+  }
+
+  /** @param {string} href */
+  function showCover(href) {
+    if (href === coverUrl) return
+    coverUrl = href
+    window.clearTimeout(coverTimer)
+    const cached = coverCache.get(href)
+    if (cached) {
+      paintCover(cached)
+      return
+    }
+    paintCover({ image: '', note: '正在读取封面…', title: '读取中…' })
+    coverTimer = window.setTimeout(async () => {
+      /** @type {{ image: string, note: string, title: string }} */
+      let result
+      try {
+        const response = await window.api.fetchVideoCover(href)
+        result = response?.status === 'ok'
+          ? { image: response.image, note: '', title: response.title || '' }
+          : { image: '', note: response?.reason || '没有读到封面', title: response?.title || '' }
+      } catch (error) {
+        result = { image: '', note: cleanIpcError(error instanceof Error ? error.message : String(error)), title: '' }
+      }
+      coverCache.set(href, result)
+      if (coverUrl === href) paintCover(result)
+    }, COVER_DELAY_MS)
+  }
+
+  function clearCover() {
+    window.clearTimeout(coverTimer)
+    coverUrl = ''
+    cover.hidden = true
   }
 
   function clearPreview() {
@@ -216,6 +274,7 @@ export function initVideoQr({ showToast }) {
     spec.textContent = ''
     info.hidden = true
     infoEmpty.hidden = false
+    clearCover()
   }
 
   /** 校验 → 预览 → 提示。提示按严重程度只留一条。 */
