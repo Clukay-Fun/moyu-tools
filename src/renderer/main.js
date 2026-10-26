@@ -2801,7 +2801,8 @@ initUpdatePanel({
   isFormatFactoryBusy: () => formatFactoryModule.isBusy(),
   isBarcodeBusy: () => barcodeModule.isBusy(),
   isRegionCaptureBusy: () => regionCaptureBusy,
-  getBoardController: () => boardController
+  getBoardController: () => boardController,
+  openUpdateSettings: () => activateModule('more', 'about')
 })
 
 let colorDragging = false

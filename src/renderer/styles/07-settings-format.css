@@ -209,6 +209,7 @@
 .update-notice-copy p { margin: 0; font-size: var(--fs-body); line-height: 1.5; }
 .update-notice-copy .update-last { margin-top: 4px; color: var(--faint); font-size: var(--fs-md); }
 #update-status[data-status="up-to-date"] > .ic { color: var(--success); }
+#update-status[data-status="error"] > .ic { color: var(--danger); }
 
 .update-notes { margin-top: 8px; padding: 10px 12px; background: rgba(127, 127, 127, 0.12); border-radius: 10px; font-size: var(--fs-body); line-height: 1.5; max-height: 160px; overflow: auto; }
 .update-notes.is-plain { white-space: pre-wrap; }
@@ -226,11 +227,130 @@
   .update-available-dialog[open] { opacity: 0; transform: translateY(8px) scale(0.97); }
   .update-available-dialog[open]::backdrop { background-color: transparent; }
 }
-.update-available-dialog h2 { margin: 0 0 8px; font-size: 20px; }
+.update-available-dialog > h2 { margin: 0 0 8px; font-size: 20px; }
 .update-available-dialog > p { margin: 0 0 14px; color: var(--muted); font-size: var(--fs-body); }
 .update-available-dialog .update-notes { max-height: min(240px, 35vh); }
 .update-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 .update-actions { display: flex; gap: 8px; }
+.update-actions .m-btn[hidden] { display: none; }
+
+.update-notice-copy .update-hint {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: var(--fs-md);
+}
+
+.update-progress {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.update-progress[hidden],
+.update-hint[hidden],
+.update-error-detail[hidden] {
+  display: none;
+}
+
+.update-progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: var(--fs-md);
+  font-variant-numeric: tabular-nums;
+}
+
+.update-progress-head b {
+  color: var(--foreground);
+  font-size: var(--fs-lg);
+}
+
+.update-progress-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: var(--hairline);
+}
+
+.update-progress-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width var(--dur-hover) linear;
+}
+
+.update-error-detail {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: var(--fs-md);
+}
+
+.update-error-detail summary {
+  width: fit-content;
+  cursor: pointer;
+}
+
+.update-error-detail pre {
+  max-height: 120px;
+  margin: 6px 0 0;
+  padding: 8px 10px;
+  overflow: auto;
+  border-radius: var(--r-md);
+  background: var(--hairline);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 下载完成提醒：右下角，不遮挡操作，不带遮罩 */
+.update-toast {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: var(--z-toast);
+  display: grid;
+  width: min(330px, calc(100vw - 40px));
+  gap: 6px;
+  padding: 14px 16px;
+  /* 浮在页面内容上，毛玻璃太透会和底下的文字叠在一起 */
+  background: var(--card-solid);
+  box-shadow: var(--shadow-panel);
+}
+
+.update-toast[hidden] {
+  display: none;
+}
+
+.update-toast b {
+  padding-right: 28px;
+  color: var(--foreground);
+  font-size: var(--fs-body);
+}
+
+.update-toast p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+}
+
+.update-toast-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.update-toast-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
 
 .about-name {
   display: flex;

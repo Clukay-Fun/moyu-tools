@@ -201,10 +201,23 @@ const api = Object.freeze({
     download: () => ipcRenderer.invoke('update:download'),
     install: () => ipcRenderer.invoke('update:install'),
     openReleases: () => ipcRenderer.invoke('update:open-releases'),
+    dismissJustUpdated: () => ipcRenderer.invoke('update:dismiss-just-updated'),
     onState: (handler: Listener) => {
       const listener = (_event: IpcRendererEvent, payload: unknown) => handler(payload)
       ipcRenderer.on('update:state', listener)
       return () => void ipcRenderer.removeListener('update:state', listener)
+    },
+    // 下载完成提醒（每个版本主进程只发一次）
+    onDownloadedToast: (handler: Listener) => {
+      const listener = (_event: IpcRendererEvent, payload: unknown) => handler(payload)
+      ipcRenderer.on('update:downloaded-toast', listener)
+      return () => void ipcRenderer.removeListener('update:downloaded-toast', listener)
+    },
+    // 点系统通知后要求打开「设置 › 更新与关于」
+    onOpenSettings: (handler: Listener) => {
+      const listener = () => handler()
+      ipcRenderer.on('update:open-settings', listener)
+      return () => void ipcRenderer.removeListener('update:open-settings', listener)
     }
   },
 

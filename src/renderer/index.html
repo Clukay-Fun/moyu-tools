@@ -50,6 +50,7 @@
 
           <div class="topbar-right">
             <span class="slogan">干活快一点，摸鱼久一点</span>
+            <button class="update-pill" id="update-pill" type="button" hidden aria-label="查看更新"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-download"></use></svg><span id="update-pill-text"></span></button>
             <div class="mochi"><i></i><span>摸鱼中</span><time id="mochi-time">00:00</time></div>
           </div>
 
@@ -1146,6 +1147,15 @@
                           <svg class="ic" aria-hidden="true"><use href="#ic-info"></use></svg>
                           <div class="update-notice-copy">
                             <p id="update-status-text">正在读取更新状态…</p>
+                            <p class="update-hint" id="update-hint" hidden></p>
+                            <div class="update-progress" id="update-progress" hidden>
+                              <div class="update-progress-head"><b id="update-progress-percent">0%</b><span id="update-progress-size"></span></div>
+                              <div class="update-progress-track" role="progressbar" aria-label="更新下载进度" aria-valuemin="0" aria-valuemax="100" id="update-progress-bar"><span id="update-progress-fill"></span></div>
+                            </div>
+                            <details class="update-error-detail" id="update-error-detail" hidden>
+                              <summary>错误详情</summary>
+                              <pre id="update-error-text"></pre>
+                            </details>
                             <p class="update-last">上次检查：<span id="update-last">—</span></p>
                             <div class="update-notes" id="update-notes" hidden></div>
                           </div>
@@ -1280,7 +1290,25 @@
           <button class="m-btn m-btn--primary" id="update-dialog-download" type="button">下载更新</button>
         </div>
       </dialog>
+      <dialog class="m-dialog update-available-dialog" id="update-done-dialog" aria-labelledby="update-done-title">
+        <h2 id="update-done-title">摸鱼工具箱已更新</h2>
+        <p>更新已完成，可以继续使用。</p>
+        <div class="update-notes" id="update-done-notes" hidden></div>
+        <div class="update-dialog-actions">
+          <button class="m-btn" id="update-done-notes-toggle" type="button" hidden>查看更新内容</button>
+          <button class="m-btn m-btn--primary" id="update-done-ok" type="button">知道了</button>
+        </div>
+      </dialog>
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <section class="m-card update-toast" id="update-toast" role="status" aria-live="polite" aria-labelledby="update-toast-title" hidden>
+        <button class="m-btn m-btn--quiet m-btn--icon m-btn--sm update-toast-close" id="update-toast-close" type="button" aria-label="关闭"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-close"></use></svg></button>
+        <b id="update-toast-title">更新已下载完成</b>
+        <p id="update-toast-text"></p>
+        <div class="update-toast-actions">
+          <button class="m-btn m-btn--sm" id="update-toast-later" type="button">稍后</button>
+          <button class="m-btn m-btn--sm m-btn--primary" id="update-toast-view" type="button">查看更新</button>
+        </div>
+      </section>
     </div>
 
     <div class="m-backdrop search-wrap" id="search-wrap">

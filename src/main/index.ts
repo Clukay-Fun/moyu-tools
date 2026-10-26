@@ -302,6 +302,10 @@ ipcMain.handle('update:install', (event) => {
   assertMainWindowSender(event)
   return updateApi.install()
 })
+ipcMain.handle('update:dismiss-just-updated', (event) => {
+  assertMainWindowSender(event)
+  return updateApi.dismissJustUpdated()
+})
 ipcMain.handle('update:open-releases', (event) => {
   assertMainWindowSender(event)
   return updateApi.openReleases()
@@ -453,7 +457,9 @@ if (hasSingleInstanceLock) app.whenReady().then(() => {
     const dockIcon = resolveWindowIcon()
     if (dockIcon && !dockIcon.isEmpty()) app.dock?.setIcon(dockIcon)
   }
-  initUpdater(createWindow())
+  createWindow()
+  // 传取值函数：macOS 关窗后重建主窗口时，更新状态和任务栏进度跟着新窗口走
+  initUpdater(() => mainWindow)
   // 预先加载隐藏的截图壳。后续点击只更新屏幕数据，不再创建窗口或重跑页面初始化。
   void ensureScreenshotOverlay({ BrowserWindow, __dirname }, screen.getPrimaryDisplay()).catch((error) => {
     console.warn('截图覆盖层预加载失败：', error?.message || error)
