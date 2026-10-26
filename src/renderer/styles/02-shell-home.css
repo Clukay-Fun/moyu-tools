@@ -483,7 +483,7 @@ body[data-fullscreen="true"] .topbar {
 }
 
 /* 一级导航：无框。不铺底色、不描边、不加阴影，直接压在窗口背景上，和顶栏连成一个 L 形底层。
-   宽度 --shell-bar（56px）；40 的按钮居中，两侧各 8px。
+   宽度 --shell-bar（48px）；40 的按钮居中，两侧各 4px。
    模块列表单独滚动，头像固定在底部，窗口再矮也不会被挤出去。 */
 .rail {
   position: relative;
