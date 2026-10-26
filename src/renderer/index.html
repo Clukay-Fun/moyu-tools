@@ -676,6 +676,96 @@
                   <div class="format-progress-track"><span id="format-progress-fill"></span></div>
                   <button class="m-btn" id="format-save-results" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-save"></use></svg>保存到文件夹</button>
                 </div>
+                <div class="video-qr" id="video-qr" hidden>
+                  <section class="m-card video-qr-source" aria-labelledby="video-qr-title">
+                    <header class="video-qr-heading">
+                      <h2 id="video-qr-title">视频转二维码</h2>
+                      <p>扫码即可访问视频。二维码里只存链接，视频放在你自己选的网站或网盘上。</p>
+                    </header>
+                    <div class="video-qr-field">
+                      <span class="video-qr-label">视频来源</span>
+                      <div class="m-segmented m-segmented--sm video-qr-source-switch" role="tablist" aria-label="视频来源">
+                        <button type="button" role="tab" aria-selected="true">视频链接</button>
+                        <button type="button" role="tab" aria-selected="false" disabled>本地视频</button>
+                      </div>
+                      <small class="video-qr-note">本地视频需要先上传到视频存储服务，后续版本支持。</small>
+                    </div>
+                    <label class="video-qr-field">
+                      <span class="video-qr-label">视频访问地址</span>
+                      <input type="text" id="video-qr-url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://example.com/video" aria-describedby="video-qr-message" />
+                    </label>
+                    <p class="video-qr-message" id="video-qr-message" role="status" aria-live="polite"></p>
+                    <div class="video-qr-field">
+                      <span class="video-qr-label">链接信息</span>
+                      <dl class="video-qr-info" id="video-qr-info" hidden>
+                        <div><dt>网站</dt><dd data-info="site"></dd></div>
+                        <div><dt>类型</dt><dd data-info="kind"></dd></div>
+                        <div><dt>协议</dt><dd data-info="protocol"></dd></div>
+                        <div><dt>长度</dt><dd data-info="length"></dd></div>
+                      </dl>
+                      <div class="m-empty video-qr-info-empty" id="video-qr-info-empty">输入有效链接后显示</div>
+                    </div>
+                    <div class="video-qr-field">
+                      <span class="video-qr-label">访问设置</span>
+                      <dl class="video-qr-info">
+                        <div><dt>扫码行为</dt><dd>打开视频链接</dd></div>
+                        <div><dt>二维码有效期</dt><dd>取决于视频链接</dd></div>
+                      </dl>
+                    </div>
+                  </section>
+                  <section class="m-card video-qr-output" aria-label="二维码">
+                    <div class="artboard video-qr-artboard">
+                      <div class="video-qr-preview" id="video-qr-preview" role="img" aria-label="二维码预览" hidden></div>
+                      <div class="m-empty" id="video-qr-empty">二维码将在这里显示</div>
+                    </div>
+                    <p class="video-qr-spec" id="video-qr-spec"></p>
+                    <details class="video-qr-style" id="video-qr-style">
+                      <summary>二维码样式</summary>
+                      <div class="video-qr-style-body">
+                        <div class="video-qr-field">
+                          <span class="video-qr-label">颜色</span>
+                          <div class="video-qr-color-row">
+                            <div class="m-segmented m-segmented--sm" role="radiogroup" aria-label="二维码颜色" id="video-qr-color-mode">
+                              <button type="button" role="radio" aria-checked="true" data-color-mode="black">黑色</button>
+                              <button type="button" role="radio" aria-checked="false" data-color-mode="accent">强调色</button>
+                              <button type="button" role="radio" aria-checked="false" data-color-mode="custom">自定义</button>
+                            </div>
+                            <input type="color" id="video-qr-color" value="#000000" aria-label="自定义颜色" hidden />
+                          </div>
+                        </div>
+                        <label class="video-qr-field">
+                          <span class="video-qr-label">容错等级</span>
+                          <select id="video-qr-ecc">
+                            <option value="L">L · 约 7%（码点最少）</option>
+                            <option value="M" selected>M · 约 15%（推荐）</option>
+                            <option value="Q">Q · 约 25%</option>
+                            <option value="H">H · 约 30%（最耐污损）</option>
+                          </select>
+                        </label>
+                        <div class="video-qr-size-row">
+                          <label class="video-qr-field">
+                            <span class="video-qr-label">PNG 尺寸</span>
+                            <select id="video-qr-png-size">
+                              <option value="512">512 px</option>
+                              <option value="1024" selected>1024 px</option>
+                              <option value="2048">2048 px</option>
+                            </select>
+                          </label>
+                          <label class="video-qr-field">
+                            <span class="video-qr-label">SVG 尺寸</span>
+                            <span class="m-field-unit"><input type="number" id="video-qr-svg-size" min="10" max="500" step="1" value="50" aria-label="SVG 尺寸（毫米）" /><em>mm</em></span>
+                          </label>
+                        </div>
+                      </div>
+                    </details>
+                    <div class="video-qr-actions">
+                      <button class="m-btn m-btn--primary video-qr-generate" id="video-qr-generate" type="button" disabled>生成二维码</button>
+                      <button class="m-btn" id="video-qr-save-png" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-save"></use></svg>保存 PNG</button>
+                      <button class="m-btn" id="video-qr-save-svg" type="button" disabled><svg class="ic" aria-hidden="true"><use href="#ic-save"></use></svg>保存 SVG</button>
+                      <button class="m-btn" id="video-qr-copy-link" type="button" disabled>复制链接</button>
+                    </div>
+                  </section>
+                </div>
               </section>
 
               <section class="page page-dieline" id="page-dieline">

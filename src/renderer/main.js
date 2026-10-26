@@ -7,6 +7,7 @@ import { initIllustrator } from './modules/illustrator.js'
 import { initBarcode } from './modules/barcode.js'
 import { initPdfTools } from './modules/pdf.js'
 import { initFormatFactory } from './modules/formatFactory.js'
+import { initVideoQr } from './modules/videoQr.js'
 import { initUpdatePanel } from './modules/updatePanel.js'
 import { initDieline } from './modules/dieline.js'
 import { initBackgroundSettings } from './modules/background.js'
@@ -227,7 +228,8 @@ const submenuData = {
       items: [
         ['视频转换', 'VID', '#6978e6'],
         ['视频压缩', 'ZIP', '#e88c32'],
-        ['抽取音频', 'MP3', '#59a6ae']
+        ['抽取音频', 'MP3', '#59a6ae'],
+        ['视频转二维码', 'QR', '#5b8def']
       ]
     },
     {
@@ -338,6 +340,7 @@ const searchFeatures = [
   ['视频转换', '格式工厂', 'video', '视频转换', 'FFmpeg MP4 MKV WebM'],
   ['视频压缩', '格式工厂', 'video', '视频压缩', 'FFmpeg CRF 体积'],
   ['抽取音频', '格式工厂', 'video', '抽取音频', '视频 MP3 WAV'],
+  ['视频转二维码', '格式工厂', 'video', '视频转二维码', '二维码 QR 视频链接 扫码 网址 分享'],
   ['音频转换', '格式工厂', 'video', '音频转换', 'MP3 AAC WAV FLAC'],
   ['图片转换', '格式工厂', 'video', '图片转换', 'sharp JPG PNG WebP AVIF TIFF GIF'],
   ['图片压缩', '格式工厂', 'video', '图片压缩', 'sharp 批量 质量'],
@@ -434,6 +437,21 @@ const state = {
 // 才出现的函数声明（会被提升），这里提前引用是安全的——只要不在模块顶层
 // 立即调用它们（这里没有，initFormatFactory 内部只是注册事件监听）。
 const formatFactoryModule = initFormatFactory({ state, renderSubmenu, showToast, bindFileDropZone, droppedFilePaths })
+const videoQrModule = initVideoQr({ showToast })
+
+const VIDEO_QR_ACTION = '视频转二维码'
+
+// 视频转二维码不是格式工厂的转换任务，用自己的面板；切过去时格式工厂的文件列表和任务原样保留
+function selectVideoAction(action, indicatorFromTop = null) {
+  if (action === VIDEO_QR_ACTION) {
+    state.selections.video = action
+    renderSubmenu('video', indicatorFromTop)
+    videoQrModule.show()
+    return
+  }
+  videoQrModule.hide()
+  formatFactoryModule.setFormatAction(action, indicatorFromTop)
+}
 
 const submenu = document.querySelector('#submenu')
 const settingsNav = document.querySelector('#settings-nav')
@@ -885,7 +903,7 @@ function activateModule(module, action = '', animate = false) {
     activateUnifiedCanvas()
     if (action) requestImageTool(action)
   } else if (module === 'video') {
-    formatFactoryModule.setFormatAction(state.selections.video)
+    selectVideoAction(state.selections.video)
   } else if (module === 'dieline') {
     dielineModule?.activate()
   } else if (module === 'erp' || module === 'custom') {
@@ -906,7 +924,7 @@ function chooseSubmenu(module, action, animate = false) {
     ? submenu.querySelector('.submenu-item.on')?.offsetTop ?? null
     : null
   if (module === 'video') {
-    formatFactoryModule.setFormatAction(action, previousTop)
+    selectVideoAction(action, previousTop)
     if (animate && changed) animateEntry(document.querySelector('#page-video'), { duration: 160, distance: 5 })
     return
   }

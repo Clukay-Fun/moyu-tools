@@ -16,6 +16,15 @@
 - 许可证：MIT。
 - 许可证文件：`licenses/opentype.js-MIT.txt`。
 
+## qrcode-generator 2.0.4
+
+- 用途：「视频转二维码」在渲染进程本地把链接编码成二维码码点矩阵，不联网。
+- 许可证：MIT
+- Copyright (c) 2009 Kazuhiko Arase
+- npm integrity：`sha512-mZSiP6RnbHl4xL2Ap5HfkjLnmxfKcPWpWe/c+5XxCuetEenqmNFf1FH/ftXPCtFG5/TDobjsjz6sSNL0Sr8Z9g==`
+- 许可证文件：`licenses/qrcode-generator-MIT.txt`
+- 「QR Code」是 DENSO WAVE INCORPORATED 的注册商标。
+
 ## qpdf-run 0.2.1
 
 - 用途：在 Electron 渲染进程的 Web Worker 中运行 QPDF WebAssembly，为 PDF 提供加密与解密能力。

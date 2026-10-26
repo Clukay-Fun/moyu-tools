@@ -49,6 +49,9 @@ const IMAGE_FILE_TYPES: Record<string, { extension: string; filterName: string }
   }
 }
 
+// 保存对话框标题里的名称；视频转二维码复用这条保存链路
+const SAVE_LABELS: Record<string, string> = { barcode: '条码', qr: '二维码' }
+
 // 仅在渲染层显式声明 density 时写入（零售合规码），通用六码不受影响。
 // 写入失败必须抛错：若静默降级，保存会报成功但文件仍是 96 DPI，
 // 与"PNG 元数据 density=300"的验收标准直接冲突。
@@ -231,7 +234,7 @@ export function registerBarcodeHandlers({
     const defaultPath = `${safeBaseName}.${fileType.extension}`
     const ownerWindow = BrowserWindow.fromWebContents(event.sender)
     const result = await showSaveDialogFor(dialog, ownerWindow, {
-      title: `保存 ${fileType.extension.toUpperCase()} 条码`,
+      title: `保存 ${fileType.extension.toUpperCase()} ${ownValue(SAVE_LABELS, payload?.label) ?? '条码'}`,
       defaultPath,
       filters: [
         {

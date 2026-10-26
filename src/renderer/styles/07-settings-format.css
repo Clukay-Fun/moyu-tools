@@ -1178,3 +1178,225 @@ body[data-bg="image"] .bg-preview {
   gap: 8px;
   cursor: pointer;
 }
+
+/* ══ 视频转二维码：视频模块的一个二级工具，选中时替换格式工厂的三块区域 ══ */
+#page-video.is-qr > :not(.video-qr) {
+  display: none;
+}
+
+.video-qr {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  gap: var(--sp-4);
+  align-items: start;
+}
+
+.video-qr[hidden],
+.video-qr-info[hidden],
+.video-qr-preview[hidden],
+.video-qr-info-empty[hidden],
+#video-qr-empty[hidden] {
+  display: none;
+}
+
+.video-qr-source,
+.video-qr-output {
+  display: grid;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+}
+
+.video-qr-heading h2 {
+  margin: 0;
+  color: var(--foreground);
+  font-size: var(--fs-lg);
+}
+
+.video-qr-heading p {
+  margin: 4px 0 0;
+  color: var(--faint);
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+
+.video-qr-field {
+  display: grid;
+  min-width: 0;
+  gap: var(--sp-2);
+}
+
+.video-qr-label {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.video-qr-source-switch {
+  width: min(100%, 240px);
+}
+
+.video-qr-note {
+  color: var(--faint);
+  font-size: var(--fs-sm);
+}
+
+#video-qr-url {
+  width: 100%;
+  height: var(--field-h);
+  padding: 0 var(--field-pad-x);
+  border-radius: var(--field-radius);
+  font-family: var(--font-mono);
+  font-size: var(--field-font-size);
+}
+
+.video-qr-message {
+  min-height: 18px;
+  margin: calc(var(--sp-2) * -1) 2px 0;
+  color: var(--faint);
+  font-size: var(--fs-sm);
+}
+
+.video-qr-message.error {
+  color: var(--danger);
+}
+
+.video-qr-message.warning {
+  color: var(--warning);
+}
+
+.video-qr-info {
+  display: grid;
+  margin: 0;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--border-neutral);
+  border-radius: var(--r-md);
+}
+
+.video-qr-info > div {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+
+.video-qr-info > div + div {
+  border-top: 1px solid var(--border-neutral);
+}
+
+.video-qr-info dt {
+  flex: none;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.video-qr-info dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.video-qr-info-empty {
+  min-height: 80px;
+  border: 1px dashed var(--border-neutral);
+  border-radius: var(--r-md);
+  font-size: var(--fs-sm);
+}
+
+.video-qr-artboard {
+  /* 正方形；矮窗口里跟着视口高度缩，导出按钮留在首屏 */
+  width: min(100%, max(220px, 100vh - 380px));
+  height: auto;
+  min-height: 0;
+  justify-self: center;
+  aspect-ratio: 1;
+  padding: var(--sp-5);
+}
+
+.video-qr-preview {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-qr-preview svg {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+}
+
+.video-qr-preview.is-draft {
+  opacity: 0.45;
+}
+
+.video-qr-spec {
+  min-height: 18px;
+  margin: calc(var(--sp-2) * -1) 2px 0;
+  color: var(--faint);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.video-qr-style {
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--hairline);
+}
+
+.video-qr-style summary {
+  width: fit-content;
+  color: var(--foreground);
+  font-size: var(--fs-md);
+  font-weight: 750;
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.video-qr-style-body {
+  display: grid;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+}
+
+.video-qr-color-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.video-qr-color-row .m-segmented {
+  flex: 1;
+}
+
+.video-qr-size-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+
+.video-qr-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+
+.video-qr-generate {
+  grid-column: 1 / -1;
+}
+
+/* 窗口最小 960 宽时两栏仍并排；只有更窄（缩放后）才上下排 */
+@media (max-width: 900px) {
+  .video-qr {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

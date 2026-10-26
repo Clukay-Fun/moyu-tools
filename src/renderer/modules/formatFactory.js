@@ -82,9 +82,12 @@ export function initFormatFactory({ state, renderSubmenu, showToast, bindFileDro
     sharpReady: false,
     engineDetail: ''
   }
+  // 最后一次选中的转换工具。视频模块里还有不属于格式工厂的工具（视频转二维码），
+  // 选中它时 state.selections.video 不是这里的动作，所以格式工厂只认自己记的这一项
+  let formatAction = '视频转换'
 
   function formatConfig() {
-    return formatActionConfigs[state.selections.video] || formatActionConfigs.视频转换
+    return formatActionConfigs[formatAction] || formatActionConfigs.视频转换
   }
 
   function formatSize(bytes) {
@@ -129,7 +132,7 @@ export function initFormatFactory({ state, renderSubmenu, showToast, bindFileDro
       detail.title = error || ''
       size.textContent = formatSize(input.size)
       target.textContent = formatOptions.querySelector('#format-target')?.selectedOptions?.[0]?.textContent
-        || (state.selections.video.includes('压缩') ? '原格式' : '—')
+        || (formatAction.includes('压缩') ? '原格式' : '—')
       if (error) {
         status.textContent = '导出失败'
         status.classList.add('error')
@@ -168,7 +171,7 @@ export function initFormatFactory({ state, renderSubmenu, showToast, bindFileDro
     const config = formatConfig()
     const isImage = config.kind === 'image'
     const qualityLabel = isImage ? '质量' : 'CRF（越低越清晰）'
-    const qualityValue = isImage ? 82 : state.selections.video === '视频压缩' ? 28 : 23
+    const qualityValue = isImage ? 82 : formatAction === '视频压缩' ? 28 : 23
     const qualityMin = isImage ? 10 : 18
     const qualityMax = isImage ? 100 : 35
     const target = config.targets
@@ -180,7 +183,7 @@ export function initFormatFactory({ state, renderSubmenu, showToast, bindFileDro
       </label>
     `
       : ''
-    const audioOptions = ['视频转换', '视频压缩', '抽取音频', '音频转换'].includes(state.selections.video)
+    const audioOptions = ['视频转换', '视频压缩', '抽取音频', '音频转换'].includes(formatAction)
       ? `
       <label>音频码率 <b id="format-bitrate-value">192 kbps</b>
         <input id="format-audio-bitrate" type="range" min="64" max="320" step="32" value="192" />
@@ -224,6 +227,7 @@ export function initFormatFactory({ state, renderSubmenu, showToast, bindFileDro
   function setFormatAction(action, indicatorFromTop = null) {
     if (!formatActionConfigs[action]) return
     const previousKind = formatConfig().kind
+    formatAction = action
     state.selections.video = action
     const config = formatConfig()
     document.querySelector('#format-action-title').textContent = `${action}设置`
@@ -353,7 +357,7 @@ export function initFormatFactory({ state, renderSubmenu, showToast, bindFileDro
     try {
       const response = await window.api.runFormatTask({
         taskId: formatState.taskId,
-        action: state.selections.video,
+        action: formatAction,
         inputIds: formatState.inputs.map((input) => input.id),
         options: currentFormatOptions()
       })
