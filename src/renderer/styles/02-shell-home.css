@@ -144,8 +144,10 @@ body[data-bg="classic"] .panel {
 }
 
 /* 拖拽区不认层级：盖在顶栏上的弹层（抽屉、对话框、菜单、遮罩）若不声明 no-drag，
-   落在顶栏内的部分点不动，只会拖动窗口。 */
-:is(.modal-layer, .m-menu, #overlay-layer, .toast, [data-base-ui-portal]) {
+   落在顶栏内的部分点不动，只会拖动窗口。
+   反过来，no-drag 也不认 pointer-events / 透明：#overlay-layer 是常驻的全屏透明容器，
+   给它本身标 no-drag 会把整条顶栏的拖拽区挖掉。所以只标它里面真正弹出来的东西。 */
+:is(.modal-layer, .m-menu, #overlay-layer > *, .toast, [data-base-ui-portal]) {
   -webkit-app-region: no-drag;
 }
 
