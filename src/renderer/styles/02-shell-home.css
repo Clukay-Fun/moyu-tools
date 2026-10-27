@@ -29,12 +29,6 @@ body[data-bg="plain"] {
   --glass-highlight: 0 0 transparent;
 }
 
-/* 浅灰底上白色描边看不见，换成中性色（深色主题本来就是中性描边） */
-body[data-bg="plain"]:not([data-theme="dark"]) {
-  --glass-border: rgba(140, 150, 170, 0.18);
-  --control-border: rgba(140, 150, 170, 0.36);
-}
-
 body[data-bg="gradient"] {
   --app-bg: linear-gradient(var(--app-bg-angle), var(--app-bg-tone-start), var(--app-bg-tone-end));
 }

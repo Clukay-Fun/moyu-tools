@@ -1,7 +1,7 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: var(--erp-space-4);
+  gap: var(--erp-space-3);
 }
 
 .toolbar {

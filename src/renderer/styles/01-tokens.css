@@ -35,7 +35,7 @@ body {
   /* 输入框、下拉、步进器 */
   --field-h: var(--control-height);
   --field-pad-x: 10px;
-  --field-radius: var(--r-sm);
+  --field-radius: var(--r-md);
   --field-font-size: var(--fs-md);
   --field-fg: var(--foreground);
   --field-bg: var(--control-bg);
@@ -66,6 +66,9 @@ body {
   --card-bg: var(--surface-inner);
   --card-border: var(--glass-border);
   --card-shadow: var(--glass-highlight);
+  /* 卡片标题：比正文（13–14）大一档；卡片里的分组小标题仍用 --fs-md */
+  --card-title-size: var(--fs-lg);
+  --card-title-weight: 650;
 
   /* 弹出菜单 */
   --menu-radius: var(--r-md);

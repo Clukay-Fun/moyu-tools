@@ -68,7 +68,7 @@
 /* 概览 KPI：名称 → 32px 数值 → 说明，最小高 128（《综合页》概览原型） */
 .statCard.large {
   min-height: 128px;
-  padding: 18px 20px 15px;
+  padding: var(--erp-space-4);
   gap: 0;
 }
 

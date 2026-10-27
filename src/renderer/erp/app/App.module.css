@@ -6,7 +6,7 @@
   display: flex;
 }
 
-/* 库存 / 定制页面唯一的一层内边距：左右 24（窄窗口 16），宽度跟着工作区走，不另设上限 */
+/* 库存 / 定制页面唯一的一层内边距：左右 20（窄窗口 16），和工具模块一致；宽度跟着工作区走，不另设上限 */
 .pageLayer {
   position: absolute;
   inset: 0;
@@ -16,7 +16,7 @@
   box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--erp-space-4) var(--erp-space-6) var(--erp-space-5);
+  padding: var(--erp-space-4) var(--erp-space-5) var(--erp-space-5);
 }
 
 .pageLayer[hidden] {

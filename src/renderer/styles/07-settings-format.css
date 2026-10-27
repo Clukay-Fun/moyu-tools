@@ -211,7 +211,7 @@
 #update-status[data-status="up-to-date"] > .ic { color: var(--success); }
 #update-status[data-status="error"] > .ic { color: var(--danger); }
 
-.update-notes { margin-top: 8px; padding: 10px 12px; background: rgba(127, 127, 127, 0.12); border-radius: 10px; font-size: var(--fs-body); line-height: 1.5; max-height: 160px; overflow: auto; }
+.update-notes { margin-top: 8px; padding: 10px 12px; background: rgba(127, 127, 127, 0.12); border-radius: var(--r-md); font-size: var(--fs-body); line-height: 1.5; max-height: 160px; overflow: auto; }
 .update-notes.is-plain { white-space: pre-wrap; }
 .update-notes h2, .update-notes h3, .update-notes h4 { margin: 8px 0 4px; font-size: var(--fs-body); }
 .update-notes h2:first-child, .update-notes h3:first-child, .update-notes h4:first-child { margin-top: 0; }
@@ -785,7 +785,8 @@
   margin: 0;
   padding: 15px 18px 0;
   color: var(--foreground);
-  font-size: var(--fs-lg);
+  font-size: var(--card-title-size);
+  font-weight: var(--card-title-weight);
 }
 
 .format-file-head,
@@ -915,7 +916,8 @@
 
 .format-control-heading b {
   color: var(--foreground);
-  font-size: var(--fs-lg);
+  font-size: var(--card-title-size);
+  font-weight: var(--card-title-weight);
 }
 
 .format-control-heading p {
@@ -1008,6 +1010,8 @@
   margin: auto -16px -16px;
   padding: 12px 16px 16px;
   border-top: 1px solid var(--hairline);
+  /* 卡片不裁切（下拉要溢出），底栏贴到卡片边上时自己跟着卡片圆角收口 */
+  border-radius: 0 0 calc(var(--card-radius) - 1px) calc(var(--card-radius) - 1px);
   background: var(--card-thick);
   backdrop-filter: blur(18px);
 }

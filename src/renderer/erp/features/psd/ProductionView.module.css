@@ -1,7 +1,7 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: var(--erp-space-4);
+  gap: var(--erp-space-3);
   min-height: 0;
 }
 
@@ -64,8 +64,8 @@
 }
 .sectionTitle {
   margin: 0;
-  font-size: var(--erp-font-size-md);
-  font-weight: var(--erp-font-weight-semibold);
+  font-size: var(--card-title-size);
+  font-weight: var(--card-title-weight);
   color: var(--erp-text-primary);
 }
 .count {

@@ -51,20 +51,21 @@
   /* 书签阴影往左、上下散；抽屉主体的阴影更轻，且只往右下（负扩散），不压到书签上 */
   --drawer-shadow: -5px 3px 16px rgba(40, 50, 85, 0.06);
   --drawer-body-shadow: 6px 4px 18px -6px rgba(30, 40, 65, 0.05);
-  /* 书签与内容之间的竖线：--glass-border 是白色，压在白色毛玻璃上看不见，单独用中性灰 */
+  /* 书签与内容之间的竖线：比卡片描边再深一点，分隔抽屉和内容 */
   --drawer-divider: rgba(120, 130, 155, 0.28);
   /* 框线与阴影层级：只有工作区一层柔和外阴影；内部内容框只用描边 + 顶部高光；弹窗和下拉另有阴影 */
-  --glass-border: rgba(255, 255, 255, 0.58);
+  /* 浅色描边统一用中性灰：白色半透明压在浅色毛玻璃上看不见。顶部白高光（--glass-highlight）保留质感 */
+  --glass-border: rgba(140, 150, 170, 0.24);
   --glass-shadow: 0 4px 20px rgba(30, 40, 65, 0.06);
   /* 顶部 1px 白高光（旧版 --glass-rim），浅灰背景下关掉 */
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  --frame-radius: 12px;
+  --frame-radius: 16px;
   --panel: rgba(255, 255, 255, 0.27);
   --card: rgba(255, 255, 255, 0.14);
   --card-thin: rgba(255, 255, 255, 0.13);
   --card-thick: rgba(255, 255, 255, 0.38);
   --card-solid: rgba(247, 248, 251, 0.97);
-  --border: rgba(255, 255, 255, 0.58);
+  --border: rgba(140, 150, 170, 0.24);
   --hairline: rgba(20, 22, 40, 0.08);
   --foreground: #252734;
   --muted: #707387;
@@ -89,7 +90,7 @@
   --accent-default: #6978e6;
   --canvas-line-light: #dce1eb;
   --canvas-line-dark: #253348;
-  /* 可见的中性描边：--border / --control-border 在浅色下是白色半透明，浅底上看不见 */
+  /* 更深一档的中性描边：需要比卡片描边更明显的地方用 */
   --border-neutral: color-mix(in srgb, var(--foreground) 13%, transparent);
   --border-neutral-hover: color-mix(in srgb, var(--foreground) 22%, transparent);
   /* 浮层专用底色。--card 是给大面板用的，做到 0.2 才够通透；
@@ -100,8 +101,8 @@
   --control-bg: rgba(255, 255, 255, 0.2);
   --control-bg-hover: rgba(255, 255, 255, 0.36);
   --control-bg-active: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.12);
-  /* 旧版的白色半透明描边；浅灰背景下看不见，在 02-shell-home.css 里换成中性色 */
-  --control-border: rgba(255, 255, 255, 0.58);
+  /* 输入框、下拉等控件的描边：比卡片描边深，能看出可输入的边界 */
+  --control-border: rgba(140, 150, 170, 0.4);
   /* 浅色按钮不画边线（边框透明占位，尺寸不变），靠更白的底色 + 轻投影区分；深色沿用控件边框和底色 */
   --button-border: transparent;
   --button-bg: rgba(255, 255, 255, 0.62);

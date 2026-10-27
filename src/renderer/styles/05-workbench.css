@@ -33,10 +33,10 @@
 }
 
 .pdf-list-title {
-  padding: 11px 14px 0;
+  padding: 13px 14px 0;
   color: var(--foreground);
-  font-size: var(--fs-md);
-  font-weight: 650;
+  font-size: var(--card-title-size);
+  font-weight: var(--card-title-weight);
 }
 
 .file-head {
@@ -745,8 +745,8 @@
 .barcode-grid .control-card > .label,
 .barcode-export-section > .label {
   color: var(--foreground);
-  font-size: var(--fs-md);
-  font-weight: 750;
+  font-size: var(--card-title-size);
+  font-weight: var(--card-title-weight);
   letter-spacing: 0;
   text-transform: none;
 }

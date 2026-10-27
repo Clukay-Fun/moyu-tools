@@ -38,7 +38,7 @@ body {
   /* 圆角：与摸鱼控件 / 卡片一致 */
   --erp-radius-xs: 6px;
   --erp-radius-sm: var(--r-sm);
-  --erp-radius-control: var(--r-sm);
+  --erp-radius-control: var(--r-md);
   --erp-radius-md: var(--r-md);
   --erp-radius-lg: var(--radius);
   --erp-radius-full: var(--r-full);

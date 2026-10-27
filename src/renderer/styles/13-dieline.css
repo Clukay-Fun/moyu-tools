@@ -20,7 +20,7 @@
 .dieline-params {
   min-width: 0;
   min-height: 0;
-  border-radius: 16px;
+  border-radius: var(--card-radius);
   background: var(--card);
 }
 
@@ -266,7 +266,7 @@
   align-items: center;
   gap: 8px;
   padding: 5px 8px;
-  border-radius: 10px;
+  border-radius: var(--r-md);
   background: color-mix(in srgb, var(--card) 70%, transparent);
   backdrop-filter: blur(6px);
   color: var(--muted);
