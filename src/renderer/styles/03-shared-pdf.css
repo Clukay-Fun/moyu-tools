@@ -81,7 +81,7 @@
 }
 
 .pdf-watermark-controls-title {
-  margin-bottom: 13px;
+  margin: 0 0 13px;
   color: var(--foreground);
   font-size: var(--fs-lg);
   font-weight: 700;

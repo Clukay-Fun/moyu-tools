@@ -120,14 +120,15 @@
                 <h1 id="home-slogan" class="home-slogan" data-text="干活快一点，摸鱼久一点">干活快一点，摸鱼久一点</h1>
               </section>
 
-              <section class="page" id="page-pdf">
+              <section class="page" id="page-pdf" aria-labelledby="pdf-tools-title">
+                <h1 class="sr-only" id="pdf-tools-title">PDF 工具</h1>
                 <div class="toolbar toolbar-wrap">
                   <button class="m-btn" id="pdf-add-files" type="button"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-add"></use></svg> 上传 PDF</button>
                   <button class="m-btn" id="pdf-clear-files" type="button"><svg class="ic" aria-hidden="true"><use href="#ic-clear"></use></svg>清空</button>
                   <div class="pdf-options" id="pdf-options"></div>
                 </div>
                 <div class="m-card file-list pdf-drop-zone" id="pdf-drop-zone">
-                  <div class="pdf-list-title">文件列表</div>
+                  <h2 class="pdf-list-title">文件列表</h2>
                   <div class="file-head">
                     <span class="cell-name">文件名</span><span class="cell-pages">页数</span>
                     <span class="cell-size">大小</span><span class="cell-progress">状态</span>
@@ -164,7 +165,7 @@
                     </section>
                   </div>
                   <aside class="m-card pdf-watermark-controls">
-                    <div class="pdf-watermark-controls-title">水印设置</div>
+                    <h2 class="pdf-watermark-controls-title">水印设置</h2>
                     <section class="pdf-watermark-mode-section">
                       <h3>水印类型</h3>
                       <div class="m-segmented pdf-watermark-mode" role="group" aria-label="水印类型">
@@ -925,6 +926,17 @@
                         <div class="setting-row">
                           <label class="setting-label" for="brand-home-slogan">欢迎页标语<small>首页中间的大字；留空则首页不显示文字</small></label>
                           <input class="brand-text-input" id="brand-home-slogan" type="text" spellcheck="false" />
+                        </div>
+                        <div class="setting-row">
+                          <span class="setting-label" id="brand-home-slogan-size-label">首页标语字号<small id="brand-home-slogan-size-hint">可设为 36–120 px；留空则使用自适应字号</small></span>
+                          <div class="setting-row-control brand-home-slogan-size-control">
+                            <span class="m-stepper">
+                              <button id="brand-home-slogan-size-dec" type="button" aria-label="减小首页标语字号">−</button>
+                              <input id="brand-home-slogan-size" type="number" min="36" max="120" step="1" placeholder="自动" aria-labelledby="brand-home-slogan-size-label" aria-describedby="brand-home-slogan-size-hint" />
+                              <button id="brand-home-slogan-size-inc" type="button" aria-label="增大首页标语字号">+</button>
+                            </span>
+                            <span aria-hidden="true">px</span>
+                          </div>
                         </div>
                         <div class="setting-row">
                           <span class="setting-label">恢复默认文字<small>应用名称和两处标语换回默认，不影响 Logo</small></span>

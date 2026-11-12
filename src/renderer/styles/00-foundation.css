@@ -12,6 +12,8 @@
   --accent-b: 230;
   --accent: rgb(var(--accent-r), var(--accent-g), var(--accent-b));
   --slogan-gradient: linear-gradient(105deg, #8b7cff 0%, #a887f4 18%, #d79cf6 23%, #a887f4 28%, #6676f6 38%, #5ba9f8 62%, #63d6dd 82%, #8fdfe0 100%);
+  --home-slogan-size: clamp(46px, 4.6vw, 76px);
+  --home-slogan-custom-size: var(--home-slogan-size);
   --accent-10: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.1);
   --accent-18: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.18);
   --accent-28: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.28);

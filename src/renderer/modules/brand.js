@@ -18,16 +18,24 @@ const LIMITS = { name: 24, topSlogan: 40, homeSlogan: 30 }
 export const BRAND_DEFAULTS = Object.freeze({
   name: '摸鱼工具箱',
   topSlogan: '干活快一点，摸鱼久一点',
-  homeSlogan: '干活快一点，摸鱼久一点'
+  homeSlogan: '干活快一点，摸鱼久一点',
+  homeSloganFontSize: null
 })
 
 // 没存过的字段用默认值；存过空字符串的标语就是用户要的「不显示」
 function normalize(raw = {}) {
   const text = (key) => (typeof raw[key] === 'string' ? raw[key].trim().slice(0, LIMITS[key]) : BRAND_DEFAULTS[key])
+  const hasCustomHomeSloganFontSize = raw.homeSloganFontSize !== undefined && raw.homeSloganFontSize !== null && raw.homeSloganFontSize !== ''
+  const savedFontSize = hasCustomHomeSloganFontSize
+    ? Number(raw.homeSloganFontSize)
+    : raw.homeSloganLarge === true ? 84 : null
   return {
     name: text('name') || BRAND_DEFAULTS.name,
     topSlogan: text('topSlogan'),
-    homeSlogan: text('homeSlogan')
+    homeSlogan: text('homeSlogan'),
+    homeSloganFontSize: Number.isFinite(savedFontSize)
+      ? Math.min(120, Math.max(36, Math.round(savedFontSize)))
+      : null
   }
 }
 
@@ -47,6 +55,7 @@ export function initBrandSettings({ defaultLogoUrl, notify = () => {}, errorText
   const nameInput = document.querySelector('#brand-name')
   const topInput = document.querySelector('#brand-top-slogan')
   const homeInput = document.querySelector('#brand-home-slogan')
+  const homeSloganFontSizeInput = document.querySelector('#brand-home-slogan-size')
   const topSlogan = document.querySelector('.topbar .slogan')
   const homePage = document.querySelector('#page-home')
   const homeSlogan = document.querySelector('#home-slogan')
@@ -60,6 +69,10 @@ export function initBrandSettings({ defaultLogoUrl, notify = () => {}, errorText
 
   function apply() {
     document.title = version ? `${settings.name} v${version}` : settings.name
+    if (homePage) {
+      if (settings.homeSloganFontSize === null) homePage.style.removeProperty('--home-slogan-custom-size')
+      else homePage.style.setProperty('--home-slogan-custom-size', `${settings.homeSloganFontSize}px`)
+    }
     document.querySelectorAll('[data-app-name]').forEach((node) => { node.textContent = settings.name })
     for (const node of [topSlogan, ...document.querySelectorAll('[data-app-tagline]')]) {
       if (!node) continue
@@ -85,6 +98,7 @@ export function initBrandSettings({ defaultLogoUrl, notify = () => {}, errorText
     if (nameInput && document.activeElement !== nameInput) nameInput.value = settings.name
     if (topInput && document.activeElement !== topInput) topInput.value = settings.topSlogan
     if (homeInput && document.activeElement !== homeInput) homeInput.value = settings.homeSlogan
+    if (homeSloganFontSizeInput) homeSloganFontSizeInput.value = settings.homeSloganFontSize ?? ''
   }
 
   function update(patch) {
@@ -107,8 +121,38 @@ export function initBrandSettings({ defaultLogoUrl, notify = () => {}, errorText
     input.addEventListener('blur', render)
   }
 
+  function commitHomeSloganFontSize(rawValue) {
+    if (rawValue === '') {
+      update({ homeSloganFontSize: null })
+    } else {
+      const size = Number(rawValue)
+      if (!Number.isFinite(size)) {
+        render()
+        return
+      }
+      update({ homeSloganFontSize: Math.min(120, Math.max(36, Math.round(size))) })
+    }
+    render()
+  }
+
+  function stepHomeSloganFontSize(delta) {
+    const adaptiveSize = homeSlogan?.isConnected
+      ? Number.parseFloat(getComputedStyle(homeSlogan).fontSize)
+      : Math.min(76, Math.max(46, window.innerWidth * 0.046))
+    const currentSize = settings.homeSloganFontSize ?? adaptiveSize
+    const nextSize = Math.min(120, Math.max(36, Math.round(currentSize + delta)))
+    update({ homeSloganFontSize: nextSize })
+    render()
+  }
+
+  homeSloganFontSizeInput?.addEventListener('change', () => {
+    commitHomeSloganFontSize(homeSloganFontSizeInput.value)
+  })
+  document.querySelector('#brand-home-slogan-size-dec')?.addEventListener('click', () => stepHomeSloganFontSize(-1))
+  document.querySelector('#brand-home-slogan-size-inc')?.addEventListener('click', () => stepHomeSloganFontSize(1))
+
   document.querySelector('#brand-reset-text')?.addEventListener('click', () => {
-    update({ ...BRAND_DEFAULTS })
+    update({ ...BRAND_DEFAULTS, homeSloganFontSize: settings.homeSloganFontSize })
     render()
     notify('应用名称和标语已恢复默认')
   })

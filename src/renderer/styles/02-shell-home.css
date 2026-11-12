@@ -984,7 +984,7 @@ body.home-active .pages {
   margin: 0;
   color: transparent;
   font-family: "PingFang SC", "SF Pro Display", "Microsoft YaHei", sans-serif;
-  font-size: clamp(46px, 4.6vw, 76px);
+  font-size: var(--home-slogan-custom-size);
   font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.15;

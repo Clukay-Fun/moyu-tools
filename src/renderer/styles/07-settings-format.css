@@ -1325,6 +1325,8 @@ body[data-bg="image"] .bg-preview {
   font-size: var(--field-font-size);
 }
 
+.brand-home-slogan-size-control .m-stepper { width: 136px; }
+
 /* ── 外观 › 自定义背景图片 ── */
 .bg-image-fields {
   display: grid;

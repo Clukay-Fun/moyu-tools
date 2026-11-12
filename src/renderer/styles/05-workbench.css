@@ -33,6 +33,7 @@
 }
 
 .pdf-list-title {
+  margin: 0;
   padding: 13px 14px 0;
   color: var(--foreground);
   font-size: var(--card-title-size);
