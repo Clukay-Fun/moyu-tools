@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/renderer/index.html"
+        ],
+        "createdAt": "2026-10-26T02:03:45.739Z",
+        "reason": "model triage: avatar/app-logo <img> tags (lines 102, 898, 914, 1178) get src at runtime from profile/brand modules; pre-existing, not part of the video-QR change"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/renderer/styles/02-shell-home.css"
+        ],
+        "createdAt": "2026-11-12T02:31:15.832Z",
+        "reason": "User requested the homepage slogan keep its colorful gradient; this heading effect is part of the approved home visual."
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "src/renderer/index.html"
+        ],
+        "createdAt": "2026-11-12T02:34:30.865Z",
+        "reason": "False positive from aggregating separate app pages: homepage title is 46–76px, settings page title 24px, group headings 15px, and body text 13px, so a stronger heading step exists."
+      }
+    ]
+  }
+}
