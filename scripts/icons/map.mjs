@@ -72,6 +72,7 @@ export const ICON_MAP = {
   'align-center': 'align-center',
   'align-right': 'align-right',
   'chevron-down': 'chevron-down',
+  'more-horizontal': 'ellipsis',
   warning: 'triangle-alert',
   info: 'info',
   keyboard: 'keyboard',

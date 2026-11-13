@@ -104,7 +104,7 @@ select option {
 .m-stepper {
   display: grid;
   height: var(--field-h);
-  grid-template-columns: var(--field-h) minmax(0, 1fr) var(--field-h);
+  grid-template-columns: var(--field-stepper-button-w) minmax(0, 1fr) var(--field-stepper-button-w);
   overflow: hidden;
   border: 1px solid var(--field-border);
   border-radius: var(--field-radius);
@@ -117,6 +117,24 @@ select option {
   color: var(--foreground);
   font-size: var(--fs-lg);
   cursor: pointer;
+}
+
+/* 数值优先：缩窄加减区，为完整尺寸及小数留出空间。 */
+.m-stepper--value {
+  --field-stepper-button-w: var(--field-stepper-value-button-w);
+  --field-font-size: var(--field-stepper-value-font-size);
+  --field-pad-x: var(--field-stepper-value-pad-x);
+}
+
+.m-stepper--value input[type="number"] {
+  appearance: textfield;
+  font-variant-numeric: tabular-nums;
+}
+
+.m-stepper--value input::-webkit-inner-spin-button,
+.m-stepper--value input::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
 }
 
 .m-stepper input,

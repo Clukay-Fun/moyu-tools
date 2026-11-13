@@ -37,6 +37,10 @@ body {
   --field-pad-x: 10px;
   --field-radius: var(--r-md);
   --field-font-size: var(--fs-md);
+  --field-stepper-button-w: var(--field-h);
+  --field-stepper-value-button-w: calc(var(--sp-4) * 2);
+  --field-stepper-value-font-size: var(--fs-lg);
+  --field-stepper-value-pad-x: var(--sp-1);
   --field-fg: var(--foreground);
   --field-bg: var(--control-bg);
   --field-bg-hover: var(--control-bg-hover);

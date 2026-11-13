@@ -2,6 +2,7 @@ import JsBarcode from 'jsbarcode'
 import { parse as parseOpenType } from 'opentype.js'
 import { isRetailType, renderRetailBarcode, computeRetailGeometry } from '../retailBarcode.js'
 import { cleanIpcError, illustratorFailureHint, isComCancelled } from '../comErrors.js'
+import { initUpcaSizeControls } from './upcaSize.js'
 import {
   isGenericType, renderGenericBarcode, computeGenericGeometry, genericRasterSize, resolveGenericTypeName,
   CODE39_DEFAULTS, CODABAR_DEFAULTS, MSI_DEFAULTS
@@ -25,14 +26,25 @@ import {
  * @param {object} deps.barcodeTypes 条码类型配置表（跟顶部导航菜单共用同一份真值）
  * @param {object} deps.barcodeFonts 条码 HRI 字体配置表
  */
-export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
+export function initBarcode({
+  state,
+  showToast,
+  barcodeTypes,
+  barcodeFonts,
+  registerPopover,
+  openPopover,
+  closePopover,
+  isPopoverOpen
+}) {
   // 零售合规码 HRI 固定字体（GS1 §5.2.5 禁止粗/斜/细/窄体，不随用户选择变化）
   const RETAIL_HRI_FONT_KEY = 'ocrb'
   let barcodeRenderedValue = ''
   let barcodeRenderedType = ''
+  let barcodeRenderedUpcaConfig = null
   const parsedBarcodeFonts = new Map()
 
   const barcodeInput = document.querySelector('#barcode-value')
+  const barcodeArtboard = document.querySelector('#barcode-svg').closest('.artboard')
   const barcodeCompactSummary = document.querySelector('#barcode-compact-summary')
   const barcodeAdvancedSettings = document.querySelector('#barcode-advanced-settings')
   const barcodeSettingsTitle = document.querySelector('#barcode-settings-title')
@@ -164,7 +176,15 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     return frozen || source()
   }
 
-  function renderBarcodeSvg(svgElement, value, typeName = state.selections.bc, itf14Preset = null, prepared = null, genericOptions = null) {
+  function renderBarcodeSvg(
+    svgElement,
+    value,
+    typeName = state.selections.bc,
+    itf14Preset = null,
+    prepared = null,
+    genericOptions = null,
+    upcaOptions = null
+  ) {
     const type = barcodeTypes[typeName]
     if (!type) throw new Error('不支持的条码类型')
 
@@ -187,7 +207,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
 
     // 零售合规码制走 GS1 几何引擎；其余六种维持 JsBarcode 通用渲染。
     if (isRetailType(typeName)) {
-      renderRetailBarcode(svgElement, typeName, value)
+      renderRetailBarcode(svgElement, typeName, value, typeName === 'UPC-A' ? upcaOptions : null)
       // 零售合规码固定常规 OCR-B：GS1 §5.2.5 禁止粗/斜/细/窄体，
       // 不受用户字体下拉框（OCRB I/III/IV）影响。
       outlineBarcodeText(svgElement, RETAIL_HRI_FONT_KEY)
@@ -222,7 +242,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     return `${typeName} 输入无效：${type?.hint || '请检查长度与字符'}。`
   }
 
-  function renderBarcodeCompactSummary(typeName) {
+  function renderBarcodeCompactSummary(typeName, upcaOptions = null) {
     const parts = [typeName]
     if (barcodeRenderedValue) parts.push(`${barcodeRenderedValue.length} 位`)
 
@@ -236,9 +256,12 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
         const raster = itf14RasterSize(state.itf14Preset || ITF14_DEFAULT_PRESET, barcodeRenderedValue || null)
         parts.push(`${geometry.widthMm.toFixed(2)} × ${geometry.heightMm.toFixed(2)} mm`, `${raster.dpi} DPI`)
       } else if (isRetailType(typeName)) {
-        const geometry = computeRetailGeometry(typeName)
-        const raster = retailRasterSize(typeName)
-        parts.push(`${geometry.widthMm.toFixed(2)} × ${geometry.heightMm.toFixed(2)} mm`, `${raster.dpi} DPI`)
+        const geometry = computeRetailGeometry(typeName, typeName === 'UPC-A' ? upcaOptions : null)
+        const raster = retailRasterSize(typeName, typeName === 'UPC-A' ? upcaOptions : null)
+        parts.push(`${geometry.widthMm.toFixed(2)} × ${geometry.heightMm.toFixed(2)} mm`)
+        parts.push(typeName === 'UPC-A' && upcaOptions
+          ? `${raster.pixelWidth} × ${raster.pixelHeight} px · ${raster.dpi} DPI`
+          : `${raster.dpi} DPI`)
       } else if (isGenericType(typeName) && barcodeRenderedValue) {
         const options = genericOptionsFor(typeName)
         const geometry = computeGenericGeometry(typeName, barcodeRenderedValue, options)
@@ -254,7 +277,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
 
   // 生产合规参数报告：SVG/EPS 为精确标称值，PNG 为整数像素量化后的实际值，
   // 二者必须分别标注，不得混称（GS1 尺寸口径）。
-  function renderBarcodeSpecReport(typeName) {
+  function renderBarcodeSpecReport(typeName, upcaOptions = null, upcaConfig = null) {
     // GS1-128：模块网格 + Syntax Engine 校验，报告口径独立
     if (isGs1128Type(typeName)) {
       if (!gs1128Prepared) {
@@ -435,20 +458,25 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
       return
     }
 
-    const geometry = computeRetailGeometry(typeName)
-    const raster = retailRasterSize(typeName)
+    const geometry = computeRetailGeometry(typeName, typeName === 'UPC-A' ? upcaOptions : null)
+    const raster = retailRasterSize(typeName, typeName === 'UPC-A' ? upcaOptions : null)
     // 版式未锁定的码制：**保留全部已锁定参数**，只把合规结论标为待定。
     // （早前的提前 return 会把条高/静区/尺寸一并藏掉，反而丢失有效信息。）
     const pending = geometry.spec.hri.placementPending === true
+    const customUpca = typeName === 'UPC-A' && Boolean(upcaOptions)
 
     const rows = [
-      pending
-        ? ['合规状态', '待定 · 符号外首位数字水平位置需 ISO/IEC 15420 确认（本版未采购该规范），当前为版式实现值，不标注生产合规']
-        : ['规范', 'GS1 GenSpecs 26.0.0 · Table 5-44 · 零售 POS'],
-      ...(pending ? [['已锁定依据', 'GS1 GenSpecs 26.0.0 · Table 5-44（条空、静区、条高、Table 5-10 补偿）']] : []),
-      ['放大系数', '标准 100%'],
+      customUpca
+        ? ['尺寸状态', '自定义尺寸，需打样验证扫描效果；该尺寸不作生产合规承诺']
+        : pending
+          ? ['合规状态', '待定 · 符号外首位数字水平位置需 ISO/IEC 15420 确认（本版未采购该规范），当前为版式实现值，不标注生产合规']
+          : ['规范', 'GS1 GenSpecs 26.0.0 · Table 5-44 · 零售 POS'],
+      ...(pending && !customUpca ? [['已锁定依据', 'GS1 GenSpecs 26.0.0 · Table 5-44（条空、静区、条高、Table 5-10 补偿）']] : []),
+      ['放大系数', typeName === 'UPC-A'
+        ? `宽度 ${(geometry.widthMm / UPC_A_DEFAULT_WIDTH_MM * 100).toFixed(0)}%${upcaConfig?.mode === 'independent' ? ' · 独立调整' : ' · 等比缩放'}`
+        : '标准 100%'],
       ['SVG / EPS', `${geometry.widthMm.toFixed(2)} × ${geometry.heightMm.toFixed(2)} mm · X=${geometry.x.toFixed(3)} mm`],
-      ['PNG', `${raster.actualWidthMm.toFixed(2)} mm · ${raster.pixelWidth} × ${raster.pixelHeight} px · ${raster.dpi} DPI · X=${raster.actualXMm.toFixed(4)} mm`],
+      ['PNG', `${raster.actualWidthMm.toFixed(2)} × ${raster.actualHeightMm.toFixed(2)} mm · ${raster.pixelWidth} × ${raster.pixelHeight} px · ${raster.dpi} DPI · X=${raster.actualXMm.toFixed(4)} mm`],
       ['条高 / 静区', `${geometry.spec.barHeightMm.toFixed(2)} mm · 左右各 ${(geometry.spec.quietLeftX * geometry.x).toFixed(2)} mm`],
       ['HRI 字体', '常规 OCR-B（固定）']
     ]
@@ -469,6 +497,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
   // 回调才允许写入 DOM 与状态，落后的请求一律丢弃。
   let barcodeRequestSeq = 0
   let barcodeBatchRequestSeq = 0
+  let barcodeBatchSaveSeq = 0
   // 当前预览所依据的 GS1-128 校验结果，是参数报告与全部导出路径的唯一数据源。
   let gs1128Prepared = null
 
@@ -479,6 +508,107 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     'EAN-8': 7,
     'ITF-14': 13
   }
+  const UPC_A_DEFAULT_WIDTH_MM = computeRetailGeometry('UPC-A').widthMm
+
+  // 只随预览容器变化计算默认尺寸的显示比例；尺寸参数变化不会触发重新适配。
+  // CSS 像素尺寸放在容器上，不写入 SVG，避免污染毫米单位的导出和 Adobe 联动。
+  function updateBarcodePreviewSize() {
+    const scaled = state.selections.bc === 'UPC-A'
+    barcodeArtboard.classList.toggle('artboard--scaled', scaled)
+    if (!scaled || !barcodeSvg.hasAttribute('viewBox')) return
+    const defaults = computeRetailGeometry('UPC-A')
+    const style = getComputedStyle(barcodeArtboard)
+    const width = barcodeArtboard.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+    const height = barcodeArtboard.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)
+    if (width <= 0 || height <= 0) return
+    const pixelsPerMm = Math.min(width * 0.8 / defaults.widthMm, height * 0.8 / defaults.heightMm)
+    const viewBox = barcodeSvg.viewBox.baseVal
+    barcodeArtboard.style.setProperty('--barcode-preview-width', `${viewBox.width * pixelsPerMm}px`)
+    barcodeArtboard.style.setProperty('--barcode-preview-height', `${viewBox.height * pixelsPerMm}px`)
+  }
+
+  new ResizeObserver(updateBarcodePreviewSize).observe(barcodeArtboard)
+
+  // 仅改变预览容器的显示变换，SVG 几何及导出数据保持原始尺寸。
+  let previewZoom = 1
+  let previewOffsetX = 0
+  let previewOffsetY = 0
+  function applyPreviewZoom() {
+    barcodeArtboard.style.setProperty('--barcode-preview-zoom', String(previewZoom))
+    barcodeArtboard.style.setProperty('--barcode-preview-x', `${previewOffsetX}px`)
+    barcodeArtboard.style.setProperty('--barcode-preview-y', `${previewOffsetY}px`)
+  }
+  barcodeArtboard.addEventListener('wheel', (event) => {
+    if (!event.deltaY || !barcodeSvg.hasAttribute('viewBox')) return
+    event.preventDefault()
+    const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? barcodeArtboard.clientHeight : 1)
+    const nextZoom = Math.min(8, Math.max(0.1, previewZoom * Math.exp(-delta * 0.002)))
+    const rect = barcodeSvg.getBoundingClientRect()
+    const ratio = nextZoom / previewZoom
+    previewOffsetX += (event.clientX - rect.left - rect.width / 2) * (1 - ratio)
+    previewOffsetY += (event.clientY - rect.top - rect.height / 2) * (1 - ratio)
+    previewZoom = nextZoom
+    applyPreviewZoom()
+  }, { passive: false })
+  barcodeArtboard.addEventListener('dblclick', () => {
+    previewZoom = 1
+    previewOffsetX = 0
+    previewOffsetY = 0
+    applyPreviewZoom()
+  })
+  let previewDrag = null
+  let previewSpaceHeld = false
+  let previewHovered = false
+  function syncPreviewCursor() {
+    barcodeArtboard.style.cursor = previewDrag ? 'grabbing' : previewSpaceHeld ? 'grab' : ''
+  }
+  barcodeArtboard.addEventListener('pointerenter', () => { previewHovered = true })
+  barcodeArtboard.addEventListener('pointerleave', () => { previewHovered = false })
+  document.addEventListener('keydown', (event) => {
+    if (event.code !== 'Space' || !previewHovered) return
+    if (event.defaultPrevented || (event.target instanceof Element && event.target.closest('button, input, textarea, select, a[href], [role="button"], [role="tab"], [role="checkbox"], [role="radio"], [contenteditable]'))) return
+    event.preventDefault()
+    previewSpaceHeld = true
+    syncPreviewCursor()
+  })
+  document.addEventListener('keyup', (event) => {
+    if (event.code !== 'Space') return
+    previewSpaceHeld = false
+    syncPreviewCursor()
+  })
+  window.addEventListener('blur', () => {
+    previewSpaceHeld = false
+    if (previewDrag) endPreviewDrag({ pointerId: previewDrag.pointerId })
+    syncPreviewCursor()
+  })
+  barcodeArtboard.addEventListener('pointerdown', (event) => {
+    if (event.button !== 1 && !(event.button === 0 && previewSpaceHeld)) return
+    event.preventDefault()
+    previewDrag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY }
+    barcodeArtboard.setPointerCapture(event.pointerId)
+    barcodeArtboard.style.cursor = 'grabbing'
+  })
+  barcodeArtboard.addEventListener('pointermove', (event) => {
+    if (!previewDrag || previewDrag.pointerId !== event.pointerId) return
+    previewOffsetX += event.clientX - previewDrag.x
+    previewOffsetY += event.clientY - previewDrag.y
+    previewDrag.x = event.clientX
+    previewDrag.y = event.clientY
+    applyPreviewZoom()
+  })
+  function endPreviewDrag(event) {
+    if (!previewDrag || previewDrag.pointerId !== event.pointerId) return
+    previewDrag = null
+    syncPreviewCursor()
+    if (barcodeArtboard.hasPointerCapture(event.pointerId)) barcodeArtboard.releasePointerCapture(event.pointerId)
+  }
+  barcodeArtboard.addEventListener('pointerup', endPreviewDrag)
+  barcodeArtboard.addEventListener('pointercancel', endPreviewDrag)
+  barcodeArtboard.addEventListener('lostpointercapture', endPreviewDrag)
+  barcodeArtboard.addEventListener('auxclick', (event) => {
+    if (event.button === 1) event.preventDefault()
+  })
+  barcodeArtboard.title = '滚轮或双指滑动缩放，按住空格拖动或中键拖动，双击恢复默认视图'
 
   // 当前预览是否达到可导出状态：补零预览阶段为 false，导出控件保持禁用。
   let barcodeExportReady = false
@@ -489,20 +619,67 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
   // 保存/导出到一半被强制退出重启会留下写了一半的文件。
   let barcodeOperationCount = 0
 
+  function invalidateBarcodeBatchForUpcaSize() {
+    barcodeBatchRequestSeq += 1
+    const hadBatch = state.barcodeBatchItems.length > 0 || generateBarcodeBatchButton.disabled
+    state.barcodeBatchItems = []
+    barcodeBatchSaveFailures.svg = null
+    barcodeBatchSaveFailures.png = null
+    barcodeBatchList.replaceChildren()
+    setBarcodeBatchExportEnabled(false)
+    generateBarcodeBatchButton.disabled = false
+    generateBarcodeBatchButton.textContent = '批量生成'
+    if (hadBatch) barcodeBatchSummary.textContent = 'UPC-A 尺寸已改变，请重新批量生成。'
+  }
+
+  function handleUpcaSizeChange(change) {
+    if (!change.valid) {
+      invalidateBarcodeBatchForUpcaSize()
+      setBarcodeExportEnabled(false)
+      if (state.selections.bc === 'UPC-A') {
+        const detail = change.error || '请修正宽度和总高度后再导出。'
+        setBarcodeMessage(`UPC-A 尺寸无效：${detail}`, 'error')
+      }
+      return
+    }
+
+    if (change.geometryChanged || change.becameValid || change.configurationChanged) {
+      if (change.geometryChanged || change.becameValid) invalidateBarcodeBatchForUpcaSize()
+      if (state.selections.bc === 'UPC-A') void generateBarcode(false)
+    }
+  }
+
+  const upcaSize = initUpcaSizeControls({
+    onChange: handleUpcaSizeChange,
+    showToast,
+    registerPopover,
+    openPopover,
+    closePopover,
+    isPopoverOpen
+  })
+
   async function generateBarcode(notifyError = true) {
     // 保留原始输入用于字符校验：trim 前的首尾空格也应算非法字符，不能被静默接受。
     const rawInput = barcodeInput.value
     const raw = rawInput.trim()
     const typeName = state.selections.bc
+    barcodeArtboard.classList.toggle('artboard--scaled', typeName === 'UPC-A')
     barcodeCompactSummary.textContent = `${typeName} · 等待有效输入`
     // 任何一次生成（含切换类型、非 GS1-128 类型）都推进序号，
     // 以作废仍在飞行中的旧 GS1-128 校验请求。
     const token = ++barcodeRequestSeq
     setBarcodeInputInvalid(false)
 
+    if (typeName === 'UPC-A' && !upcaSize.isValid()) {
+      barcodeExportReady = false
+      setBarcodeExportEnabled(false)
+      return false
+    }
+
     barcodeSvg.replaceChildren()
     barcodeRenderedValue = ''
     barcodeRenderedType = ''
+    barcodeRenderedUpcaConfig = null
     barcodeExportReady = false
     gs1128Prepared = null
     setBarcodeExportEnabled(false)
@@ -557,14 +734,19 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
       if (token !== barcodeRequestSeq) return false
     }
 
+    const upcaConfig = typeName === 'UPC-A' ? upcaSize.getCurrent() : null
+    const upcaOptions = typeName === 'UPC-A' ? upcaSize.getRenderOptions() : null
+
     try {
-      renderBarcodeSvg(barcodeSvg, value, typeName, null, prepared, genericOptionsFor(typeName))
+      renderBarcodeSvg(barcodeSvg, value, typeName, null, prepared, genericOptionsFor(typeName), upcaOptions)
+      updateBarcodePreviewSize()
       if (token !== barcodeRequestSeq) return false
       gs1128Prepared = prepared
       barcodeRenderedValue = value
       barcodeRenderedType = typeName
-      renderBarcodeSpecReport(typeName)
-      renderBarcodeCompactSummary(typeName)
+      barcodeRenderedUpcaConfig = upcaConfig
+      renderBarcodeSpecReport(typeName, upcaOptions, upcaConfig)
+      renderBarcodeCompactSummary(typeName, upcaOptions)
       if (isRetailPreview) {
         // 补零结果只用于预览：保存 / 复制 / EPS / Adobe 联动等导出控件保持禁用。
         setBarcodeExportEnabled(false)
@@ -689,6 +871,15 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
       }
 
       const path = font.getPath(value, x, originY, fontSize, { kerning: true })
+      // opentype 的小数序列化会把接近零的科学计数法拼成非法指数，产生 NaN。
+      // 先按最终 SVG 的精度量化坐标（例如 1e-16 → 0），保持所有输出同源。
+      for (const command of path.commands) {
+        for (const key of ['x', 'y', 'x1', 'y1', 'x2', 'y2']) {
+          if (typeof command[key] !== 'number') continue
+          if (!Number.isFinite(command[key])) throw new Error('条码数字轮廓坐标无效')
+          command[key] = Number(command[key].toFixed(3))
+        }
+      }
       const pathNode = document.createElementNS('http://www.w3.org/2000/svg', 'path')
       pathNode.setAttribute('d', path.toPathData(3))
       pathNode.setAttribute(
@@ -721,28 +912,59 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
 
   // 零售合规码的 PNG 栅格化 DPI（内定，不暴露参数）。
   const RETAIL_PNG_DPI = 300
+  const MAX_BARCODE_RASTER_EDGE_PX = 16_384
+  const MAX_BARCODE_RASTER_PIXELS = 16_777_216
 
   /**
    * 计算零售码 PNG 的目标像素尺寸。
    * 模块宽量化为整数像素以保证边缘锐利，再按同一比例等比缩放整幅，
    * 因此 PNG 的实际 X 与总宽会略大于标称值（须按量化后的实际值报告）。
    */
-  function retailRasterSize(typeName) {
-    const { x, widthMm, heightMm, totalModules } = computeRetailGeometry(typeName)
+  function retailRasterSize(typeName, upcaOptions = null) {
+    const { x, widthMm, heightMm, totalModules } = computeRetailGeometry(
+      typeName,
+      typeName === 'UPC-A' ? upcaOptions : null
+    )
+    if (typeName === 'UPC-A' && upcaOptions) {
+      const pixelWidth = Math.max(1, Math.round((widthMm / 25.4) * RETAIL_PNG_DPI))
+      const pixelHeight = Math.max(1, Math.round(pixelWidth * heightMm / widthMm))
+      const pixelsPerMm = pixelWidth / widthMm
+      return {
+        pixelWidth,
+        pixelHeight,
+        modulePx: x * pixelsPerMm,
+        actualXMm: (x * pixelsPerMm * 25.4) / RETAIL_PNG_DPI,
+        actualWidthMm: (pixelWidth * 25.4) / RETAIL_PNG_DPI,
+        actualHeightMm: (pixelHeight * 25.4) / RETAIL_PNG_DPI,
+        nominalWidthMm: widthMm,
+        nominalHeightMm: heightMm,
+        dpi: RETAIL_PNG_DPI
+      }
+    }
     const modulePx = Math.max(1, Math.round((x / 25.4) * RETAIL_PNG_DPI))
     const pxPerMm = modulePx / x
+    const pixelHeight = Math.round(heightMm * pxPerMm)
     return {
       pixelWidth: totalModules * modulePx,
-      pixelHeight: Math.round(heightMm * pxPerMm),
+      pixelHeight,
       modulePx,
       actualXMm: (modulePx * 25.4) / RETAIL_PNG_DPI,
       actualWidthMm: (totalModules * modulePx * 25.4) / RETAIL_PNG_DPI,
+      actualHeightMm: (pixelHeight * 25.4) / RETAIL_PNG_DPI,
       nominalWidthMm: widthMm,
+      nominalHeightMm: heightMm,
       dpi: RETAIL_PNG_DPI
     }
   }
 
-  function barcodeRasterTargetFor(typeName, value = barcodeRenderedValue, itf14Preset = null, prepared = null, genericOptions = null) {
+  function barcodeRasterTargetFor(
+    typeName,
+    value = barcodeRenderedValue,
+    itf14Preset = null,
+    prepared = null,
+    genericOptions = null,
+    upcaOptions = null
+  ) {
     if (isGenericType(typeName)) {
       return value ? genericRasterSize(typeName, value, genericOptionsFor(typeName, genericOptions)) : null
     }
@@ -753,10 +975,49 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     if (isItf14Type(typeName)) {
       return itf14RasterSize(itf14Preset || state.itf14Preset || ITF14_DEFAULT_PRESET, value || null)
     }
-    return isRetailType(typeName) ? retailRasterSize(typeName) : null
+    return isRetailType(typeName) ? retailRasterSize(typeName, typeName === 'UPC-A' ? upcaOptions : null) : null
+  }
+
+  function captureCurrentBarcodeArtifact() {
+    if (!hasCurrentBarcode()) return null
+    const typeName = state.selections.bc
+    const value = barcodeRenderedValue
+    const upcaOptions = typeName === 'UPC-A' ? upcaSize.getRenderOptions() : null
+    const raster = barcodeRasterTargetFor(
+      typeName,
+      value,
+      state.itf14Preset || ITF14_DEFAULT_PRESET,
+      gs1128Prepared,
+      genericOptionsFor(typeName),
+      upcaOptions
+    )
+    return {
+      typeName,
+      value,
+      svgText: serializeBarcodeSvg(),
+      raster,
+      upcaOptions
+    }
+  }
+
+  function assertRasterTargetWithinLimits(target) {
+    const width = Number(target?.pixelWidth)
+    const height = Number(target?.pixelHeight)
+    if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height) || width <= 0 || height <= 0) {
+      throw new Error('条码 PNG 的目标像素尺寸无效，已取消栅格化。')
+    }
+    if (width > MAX_BARCODE_RASTER_EDGE_PX || height > MAX_BARCODE_RASTER_EDGE_PX ||
+        width > MAX_BARCODE_RASTER_PIXELS / height) {
+      throw new Error(
+        `条码 PNG 尺寸 ${width} × ${height} px 超出安全上限（单边最多 ${MAX_BARCODE_RASTER_EDGE_PX} px，总像素最多 ${MAX_BARCODE_RASTER_PIXELS}）。请缩小条码尺寸后重试。`
+      )
+    }
   }
 
   function svgToPngBytes(svgText, target = null) {
+    // 目标尺寸来自自定义 UPC-A 几何；先检查，避免分配 Image 或 Canvas 像素缓冲。
+    if (target) assertRasterTargetWithinLimits(target)
+
     return new Promise((resolve, reject) => {
       const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' })
       const objectUrl = URL.createObjectURL(blob)
@@ -805,7 +1066,8 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
   }
 
   async function saveBarcode(type) {
-    if (!hasCurrentBarcode()) {
+    const artifact = captureCurrentBarcodeArtifact()
+    if (!artifact) {
       setBarcodeMessage('内容已改变，请先重新生成条码。', 'error')
       return
     }
@@ -817,15 +1079,14 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     barcodeOperationCount += 1
 
     try {
-      const svgText = serializeBarcodeSvg()
       const data = type === 'svg'
-        ? svgText
-        : await svgToPngBytes(svgText, barcodeRasterTargetFor(state.selections.bc))
+        ? artifact.svgText
+        : await svgToPngBytes(artifact.svgText, artifact.raster)
       const result = await window.api.saveBarcodeFile({
         type,
-        name: `${state.selections.bc}-${barcodeRenderedValue}`,
+        name: `${artifact.typeName}-${artifact.value}`,
         data,
-        density: barcodeRasterTargetFor(state.selections.bc)?.dpi
+        density: artifact.raster?.dpi
       })
 
       if (result.status === 'saved') {
@@ -837,16 +1098,19 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     } catch (error) {
       const reason = cleanIpcError(error instanceof Error ? error.message : String(error))
       setBarcodeMessage(`保存失败：${reason}`, 'error')
-      showToast('条码保存失败，请检查目标位置是否可写')
+      showToast(reason.includes('超出安全上限') || reason.includes('目标像素尺寸无效')
+        ? reason
+        : '条码保存失败，请检查目标位置是否可写')
     } finally {
       barcodeOperationCount -= 1
       button.textContent = originalLabel
-      setBarcodeExportEnabled(true)
+      setBarcodeExportEnabled(hasCurrentBarcode())
     }
   }
 
   async function copyBarcodeVector() {
-    if (!hasCurrentBarcode()) {
+    const artifact = captureCurrentBarcodeArtifact()
+    if (!artifact) {
       setBarcodeMessage('当前内容还不能生成有效条码。', 'error')
       return
     }
@@ -855,7 +1119,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     copyBarcodeVectorButton.textContent = '复制中…'
 
     try {
-      await window.api.copyBarcodeVector(serializeBarcodeSvg())
+      await window.api.copyBarcodeVector(artifact.svgText)
       setBarcodeMessage('条码矢量图已复制到剪贴板。', 'success')
       showToast('条码矢量图已复制')
     } catch (error) {
@@ -869,12 +1133,18 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
   }
 
   function hasCurrentBarcode() {
-    return Boolean(
+    const current = Boolean(
       barcodeExportReady &&
       barcodeRenderedValue &&
       barcodeInput.value.trim() === barcodeRenderedValue &&
       barcodeRenderedType === state.selections.bc
     )
+    if (!current) return false
+    if (state.selections.bc !== 'UPC-A') return true
+    if (!upcaSize.isValid() || !barcodeRenderedUpcaConfig) return false
+    const dimensions = upcaSize.getCurrent()
+    return Math.abs(dimensions.widthMm - barcodeRenderedUpcaConfig.widthMm) < 1e-9 &&
+      Math.abs(dimensions.heightMm - barcodeRenderedUpcaConfig.heightMm) < 1e-9
   }
 
   /**
@@ -888,7 +1158,8 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
    */
   async function copyBarcodeUngrouped() {
     const button = copyBarcodeUngroupedButton
-    if (!hasCurrentBarcode()) {
+    const artifact = captureCurrentBarcodeArtifact()
+    if (!artifact) {
       setBarcodeMessage('内容已改变，请先重新生成条码。', 'error')
       return
     }
@@ -900,7 +1171,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
 
     try {
       const result = await window.api.illustratorUngroupedCopy({
-        data: serializeBarcodeSvg(),
+        data: artifact.svgText,
         mode: 'copy'
       })
       const fields = result?.fields || {}
@@ -942,7 +1213,8 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
   }
 
   async function runBarcodeCom(action, button) {
-    if (!hasCurrentBarcode()) {
+    const artifact = captureCurrentBarcodeArtifact()
+    if (!artifact) {
       setBarcodeMessage('内容已改变，请先重新生成条码。', 'error')
       return
     }
@@ -961,20 +1233,19 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     barcodeOperationCount += 1
 
     try {
-      const svgText = serializeBarcodeSvg()
       let result
       if (action === 'eps') {
         result = await window.api.exportBarcodeEps({
-          name: `${state.selections.bc}-${barcodeRenderedValue}`,
-          data: svgText
+          name: `${artifact.typeName}-${artifact.value}`,
+          data: artifact.svgText
         })
       } else if (action === 'illustrator') {
-        result = await window.api.openBarcodeInIllustrator({ data: svgText })
+        result = await window.api.openBarcodeInIllustrator({ data: artifact.svgText })
       } else {
-        const png = await svgToPngBytes(svgText, barcodeRasterTargetFor(state.selections.bc))
+        const png = await svgToPngBytes(artifact.svgText, artifact.raster)
         result = await window.api.openBarcodeInPhotoshop({
           data: png,
-          density: barcodeRasterTargetFor(state.selections.bc)?.dpi
+          density: artifact.raster?.dpi
         })
       }
 
@@ -1051,6 +1322,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     generateBarcodeBatchButton.disabled = false
     generateBarcodeBatchButton.textContent = '批量生成'
     state.selections.bc = typeName
+    upcaSize.setVisibleForType(typeName)
     barcodeInput.inputMode = type.inputMode
     barcodeInput.maxLength = type.maxLength
     barcodeInput.placeholder = type.hint
@@ -1139,6 +1411,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
 
   async function generateBarcodeBatch() {
     const values = parseBatchValues(barcodeBatchInput.value)
+    const batchType = state.selections.bc
 
     if (values.length === 0) {
       barcodeBatchSummary.textContent = '请先输入至少一个编码。'
@@ -1151,6 +1424,11 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
       return
     }
 
+    if (batchType === 'UPC-A' && !upcaSize.isValid()) {
+      barcodeBatchSummary.textContent = '请先修正 UPC-A 尺寸，再生成批量条码。'
+      return
+    }
+
     state.barcodeBatchItems = []
     barcodeBatchSaveFailures.svg = null
     barcodeBatchSaveFailures.png = null
@@ -1159,9 +1437,9 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     generateBarcodeBatchButton.disabled = true
     generateBarcodeBatchButton.textContent = '正在生成…'
     const requestId = ++barcodeBatchRequestSeq
-    const batchType = state.selections.bc
     const batchItf14Preset = isItf14Type(batchType) ? state.itf14Preset : null
     const batchGenericOptions = genericOptionsFor(batchType)
+    const batchUpcaOptions = batchType === 'UPC-A' ? upcaSize.getRenderOptions() : null
     const fragment = document.createDocumentFragment()
     let validCount = 0
 
@@ -1181,13 +1459,14 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
         // 后续导出只用这份结果，不重新校验、不共用上一条的数据。
         const prepared = isGs1128Type(batchType) ? await prepareGs1128(value) : null
         if (requestId !== barcodeBatchRequestSeq) return
-        renderBarcodeSvg(svg, value, batchType, itf14Preset, prepared, genericOptions)
+        renderBarcodeSvg(svg, value, batchType, itf14Preset, prepared, genericOptions, batchUpcaOptions)
         item = {
           value,
           type: batchType,
           itf14Preset,
           prepared,
           genericOptions,
+          upcaOptions: batchUpcaOptions,
           valid: true,
           svg
         }
@@ -1200,6 +1479,7 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
           itf14Preset,
           prepared: null,
           genericOptions,
+          upcaOptions: batchUpcaOptions,
           valid: false,
           error: (isGs1128Type(batchType) || isGenericType(batchType)) && error instanceof Error
             ? error.message
@@ -1220,7 +1500,11 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     if (requestId !== barcodeBatchRequestSeq) return
     barcodeBatchList.append(fragment)
     const invalidCount = values.length - validCount
-    barcodeBatchSummary.textContent = `已生成 ${validCount} 条${invalidCount ? `，${invalidCount} 条输入无效` : ''}。`
+    const dimensions = batchType === 'UPC-A'
+      ? computeRetailGeometry(batchType, batchUpcaOptions)
+      : null
+    const sizeSummary = dimensions ? ` · ${dimensions.widthMm.toFixed(2)} × ${dimensions.heightMm.toFixed(2)} mm` : ''
+    barcodeBatchSummary.textContent = `已生成 ${validCount} 条${invalidCount ? `，${invalidCount} 条输入无效` : ''}${sizeSummary}。`
     setBarcodeBatchExportEnabled(validCount > 0)
     generateBarcodeBatchButton.disabled = false
     generateBarcodeBatchButton.textContent = '批量生成'
@@ -1242,6 +1526,8 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
     }
 
     const button = type === 'svg' ? saveBarcodeBatchSvgButton : saveBarcodeBatchPngButton
+    const batchRequest = barcodeBatchRequestSeq
+    const saveRequest = ++barcodeBatchSaveSeq
     const originalLabel = button.textContent
     setBarcodeBatchExportEnabled(false)
     generateBarcodeBatchButton.disabled = true
@@ -1256,19 +1542,23 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
           name: safeBarcodeFileName(item.type, item.value, index),
           data: type === 'svg'
             ? svgText
-            : await svgToPngBytes(svgText, barcodeRasterTargetFor(item.type, item.value, item.itf14Preset, item.prepared, item.genericOptions))
+            : await svgToPngBytes(svgText, barcodeRasterTargetFor(item.type, item.value, item.itf14Preset, item.prepared, item.genericOptions, item.upcaOptions))
         })
-        barcodeBatchSummary.textContent = `正在准备 ${index + 1} / ${validItems.length}…`
+        if (batchRequest === barcodeBatchRequestSeq && saveRequest === barcodeBatchSaveSeq) {
+          barcodeBatchSummary.textContent = `正在准备 ${index + 1} / ${validItems.length}…`
+        }
         if ((index + 1) % 10 === 0) await nextFrame()
       }
 
       const stopProgress = window.api.onBarcodeSaveProgress((progress) => {
-        barcodeBatchSummary.textContent = `正在保存 ${progress.completed} / ${progress.total} · ${progress.name}`
+        if (batchRequest === barcodeBatchRequestSeq && saveRequest === barcodeBatchSaveSeq) {
+          barcodeBatchSummary.textContent = `正在保存 ${progress.completed} / ${progress.total} · ${progress.name}`
+        }
       })
 
       try {
         const batchDensities = new Set(
-          validItems.map((item) => barcodeRasterTargetFor(item.type, item.value, item.itf14Preset, item.prepared, item.genericOptions)?.dpi ?? 0)
+          validItems.map((item) => barcodeRasterTargetFor(item.type, item.value, item.itf14Preset, item.prepared, item.genericOptions, item.upcaOptions)?.dpi ?? 0)
         )
         const result = await window.api.saveBarcodeFiles({
           type,
@@ -1278,31 +1568,39 @@ export function initBarcode({ state, showToast, barcodeTypes, barcodeFonts }) {
         })
         if (result.status === 'saved') {
           if (result.failed > 0) {
-            // 记录失败项，索引对应的是这次实际发送的 files/validItems 顺序。
-            barcodeBatchSaveFailures[type] = result.errors.map((error) => validItems[error.index]).filter(Boolean)
-            barcodeBatchSummary.textContent =
-              `已保存 ${result.saved} 个，失败 ${result.failed} 个（再次点击“保存 ${type.toUpperCase()}”可只重试失败项）。`
+            if (batchRequest === barcodeBatchRequestSeq) {
+              // 记录失败项，索引对应的是这次实际发送的 files/validItems 顺序。
+              barcodeBatchSaveFailures[type] = result.errors.map((error) => validItems[error.index]).filter(Boolean)
+              barcodeBatchSummary.textContent =
+                `已保存 ${result.saved} 个，失败 ${result.failed} 个（再次点击“保存 ${type.toUpperCase()}”可只重试失败项）。`
+            }
             showToast(`批量保存部分失败：${result.saved} 成功 / ${result.failed} 失败`)
-          } else {
+          } else if (batchRequest === barcodeBatchRequestSeq) {
             barcodeBatchSaveFailures[type] = null
             barcodeBatchSummary.textContent = `已保存 ${result.saved} 个 ${type.toUpperCase()} 文件。`
             showToast(`批量条码已保存：${result.saved} 个文件`)
+          } else {
+            showToast(`已按开始时的条码规格保存 ${result.saved} 个文件`)
           }
         } else {
-          barcodeBatchSummary.textContent = '已取消批量保存。'
+          if (batchRequest === barcodeBatchRequestSeq) barcodeBatchSummary.textContent = '已取消批量保存。'
         }
       } finally {
         stopProgress()
       }
     } catch (error) {
       const reason = cleanIpcError(error instanceof Error ? error.message : String(error))
-      barcodeBatchSummary.textContent = `批量保存失败：${reason}`
+      if (batchRequest === barcodeBatchRequestSeq) barcodeBatchSummary.textContent = `批量保存失败：${reason}`
       showToast('批量条码保存失败')
     } finally {
       barcodeOperationCount -= 1
-      button.textContent = originalLabel
-      generateBarcodeBatchButton.disabled = false
-      setBarcodeBatchExportEnabled(validItems.length > 0)
+      if (saveRequest === barcodeBatchSaveSeq) {
+        button.textContent = originalLabel
+        if (batchRequest === barcodeBatchRequestSeq) {
+          generateBarcodeBatchButton.disabled = false
+          setBarcodeBatchExportEnabled(state.barcodeBatchItems.some((item) => item.valid))
+        }
+      }
     }
   }
 

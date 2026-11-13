@@ -2283,7 +2283,16 @@ window.api.onScreenshotOcrProgress((progress) => {
 let screenshotResizeTimer
 
 const illustratorModule = initIllustrator({ showToast, bindFileDropZone, droppedFilePaths })
-const barcodeModule = initBarcode({ state, showToast, barcodeTypes, barcodeFonts })
+const barcodeModule = initBarcode({
+  state,
+  showToast,
+  barcodeTypes,
+  barcodeFonts,
+  registerPopover,
+  openPopover,
+  closePopover,
+  isPopoverOpen
+})
 const pdfModule = initPdfTools({
   state,
   showToast,

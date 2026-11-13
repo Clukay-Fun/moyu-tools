@@ -413,6 +413,78 @@
                         </div>
                       </details>
                     </div>
+                    <div class="m-card control-card barcode-upca-size-card" id="upca-size-card" hidden>
+                      <div class="upca-size-card-header">
+                        <span class="label">尺寸与预设</span>
+                        <button class="m-btn m-btn--quiet m-btn--sm" id="upca-size-reset" type="button">恢复默认</button>
+                      </div>
+                      <div class="upca-preset-row">
+                        <span class="upca-size-label">预设</span>
+                        <div class="upca-preset-controls">
+                          <button class="m-select upca-preset-trigger" id="upca-preset-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="upca-preset-menu">默认尺寸</button>
+                          <button class="m-btn m-btn--quiet m-btn--icon" id="upca-preset-actions-trigger" type="button" aria-label="预设操作" aria-haspopup="menu" aria-expanded="false" aria-controls="upca-preset-actions-menu"><svg class="ic" aria-hidden="true" focusable="false"><use href="#ic-more-horizontal"></use></svg></button>
+                        </div>
+                      </div>
+                      <div class="m-menu app-menu upca-preset-menu" id="upca-preset-menu" role="listbox" aria-label="UPC-A 尺寸预设" hidden>
+                        <div role="group" aria-label="默认尺寸">
+                          <button type="button" role="option" data-upca-preset-id="default" aria-selected="true">默认尺寸 · 100%</button>
+                        </div>
+                        <hr />
+                        <div role="group" aria-label="我的预设">
+                          <strong>我的预设</strong>
+                          <div id="upca-preset-items"></div>
+                          <p id="upca-preset-empty">暂无自建预设</p>
+                        </div>
+                      </div>
+                      <div class="m-menu app-menu upca-preset-actions-menu" id="upca-preset-actions-menu" role="menu" aria-label="预设操作" hidden>
+                        <button type="button" role="menuitem" data-upca-preset-action="rename">重命名</button>
+                        <button type="button" role="menuitem" data-upca-preset-action="delete">删除</button>
+                      </div>
+                      <div class="upca-size-preset-status" id="upca-size-status" role="status" aria-live="polite" hidden></div>
+                      <div class="upca-size-storage-status" id="upca-storage-status" role="status" aria-live="polite"></div>
+                      <div class="upca-size-control">
+                        <span class="upca-size-label">快捷档位</span>
+                        <div class="m-segmented m-segmented--sm upca-size-presets" id="upca-size-presets" role="group" aria-label="UPC-A 快捷尺寸">
+                          <button type="button" data-upca-scale="0.8" aria-pressed="false">80%</button>
+                          <button type="button" data-upca-scale="1" aria-pressed="true" aria-label="100%，默认尺寸">100%</button>
+                          <button type="button" data-upca-scale="1.5" aria-pressed="false">150%</button>
+                          <button type="button" data-upca-scale="2" aria-pressed="false">200%</button>
+                        </div>
+                      </div>
+                      <div class="upca-size-control">
+                        <span class="upca-size-label">调整方式</span>
+                        <div class="m-segmented m-segmented--sm" id="upca-size-mode" role="group" aria-label="尺寸调整方式">
+                          <button type="button" data-upca-mode="proportional" aria-pressed="true">等比缩放</button>
+                          <button type="button" data-upca-mode="independent" aria-pressed="false">独立调整</button>
+                        </div>
+                      </div>
+                      <div class="upca-size-fields">
+                        <div class="upca-size-field">
+                          <label for="upca-width-mm">宽度 mm</label>
+                          <span class="m-stepper m-stepper--value">
+                            <button type="button" aria-label="宽度减少 0.01 毫米" data-upca-step="width" data-direction="-1">−</button>
+                            <input id="upca-width-mm" type="number" step="0.01" value="37.29" inputmode="decimal" aria-describedby="upca-size-help upca-width-error" />
+                            <button type="button" aria-label="宽度增加 0.01 毫米" data-upca-step="width" data-direction="1">+</button>
+                          </span>
+                          <small class="upca-size-error" id="upca-width-error" hidden></small>
+                        </div>
+                        <div class="upca-size-field">
+                          <label for="upca-height-mm">总高度 mm</label>
+                          <span class="m-stepper m-stepper--value">
+                            <button type="button" aria-label="总高度减少 0.01 毫米" data-upca-step="height" data-direction="-1">−</button>
+                            <input id="upca-height-mm" type="number" step="0.01" value="25.93" inputmode="decimal" aria-describedby="upca-size-help upca-height-error" />
+                            <button type="button" aria-label="总高度增加 0.01 毫米" data-upca-step="height" data-direction="1">+</button>
+                          </span>
+                          <small class="upca-size-error" id="upca-height-error" hidden></small>
+                        </div>
+                      </div>
+                      <small id="upca-size-help">含左右静区及下方数字</small>
+                      <p class="barcode-message preview upca-size-warning" id="upca-size-warning" role="status" aria-live="polite" hidden>自定义尺寸，需打样验证扫描效果</p>
+                      <div class="upca-preset-actions">
+                        <button class="m-btn" id="upca-preset-save-as" type="button">另存为预设</button>
+                        <button class="m-btn" id="upca-preset-update" type="button" disabled>更新预设</button>
+                      </div>
+                    </div>
                     <div class="m-card control-card barcode-export-card">
                       <div class="barcode-export-section">
                         <span class="label">导出</span>
@@ -985,6 +1057,21 @@
                           <kbd class="setting-keys" data-keys="Shift+Mod+N">⇧⌘N</kbd>
                         </div>
                       </div>
+                      <h2 class="settings-group-title">条码预览</h2>
+                      <div class="m-card settings-group">
+                        <div class="setting-row">
+                          <span class="setting-label">缩放预览<small>鼠标停在条码预览区，以鼠标位置为中心缩放</small></span>
+                          <span class="setting-keys">滚轮 / 触控板双指上下滑动</span>
+                        </div>
+                        <div class="setting-row">
+                          <span class="setting-label">移动预览<small>按住空格后，按住鼠标左键或触控板拖动</small></span>
+                          <span class="setting-keys">空格 + 拖动 / 按住中键拖动</span>
+                        </div>
+                        <div class="setting-row">
+                          <span class="setting-label">恢复预览<small>恢复默认缩放比例和位置；以上操作仅影响预览</small></span>
+                          <span class="setting-keys">双击预览区</span>
+                        </div>
+                      </div>
                     </section>
 
                     <section class="settings-page" data-settings-page="appearance" aria-labelledby="settings-title-appearance" hidden>
@@ -1329,6 +1416,18 @@
           <button class="m-btn" id="update-done-notes-toggle" type="button" aria-controls="update-done-notes" hidden>收起更新内容</button>
           <button class="m-btn m-btn--primary" id="update-done-ok" type="button">知道了</button>
         </div>
+      </dialog>
+      <dialog class="m-dialog upca-preset-dialog" id="upca-preset-dialog" aria-labelledby="upca-preset-dialog-title">
+        <form id="upca-preset-form" novalidate>
+          <h2 id="upca-preset-dialog-title">另存为预设</h2>
+          <label for="upca-preset-name">预设名称</label>
+          <input id="upca-preset-name" type="text" maxlength="40" autocomplete="off" aria-describedby="upca-preset-name-error" />
+          <small id="upca-preset-name-error" role="status" aria-live="polite" hidden></small>
+          <div class="upca-preset-dialog-actions">
+            <button class="m-btn" id="upca-preset-cancel" type="button">取消</button>
+            <button class="m-btn m-btn--primary" type="submit">保存</button>
+          </div>
+        </form>
       </dialog>
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
       <section class="m-card update-toast" id="update-toast" role="status" aria-live="polite" aria-labelledby="update-toast-title" hidden>

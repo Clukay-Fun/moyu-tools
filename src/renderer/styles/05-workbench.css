@@ -538,6 +538,10 @@
 }
 
 .artboard {
+  --barcode-preview-x: 0px;
+  --barcode-preview-y: 0px;
+  --barcode-preview-zoom: 1;
+  overflow: hidden;
   display: flex;
   height: clamp(220px, 34vh, 420px);
   min-height: 220px;
@@ -553,12 +557,32 @@
 }
 
 .artboard svg {
+  transform: translate(var(--barcode-preview-x, 0px), var(--barcode-preview-y, 0px)) scale(var(--barcode-preview-zoom, 1));
+  transform-origin: center;
   display: block;
   width: 80%;
   height: auto;
   max-height: 80%;
   overflow: visible;
   filter: drop-shadow(0 7px 14px rgba(35, 39, 65, 0.08));
+}
+
+/* 默认尺寸决定预览比例，参数改变不再自动缩回相同占比。 */
+.artboard--scaled {
+  --barcode-preview-width: auto;
+  --barcode-preview-height: auto;
+
+  align-items: safe center;
+  justify-content: safe center;
+  overflow: hidden;
+  contain: size;
+}
+
+.artboard--scaled svg {
+  width: var(--barcode-preview-width);
+  height: var(--barcode-preview-height);
+  max-height: none;
+  flex: none;
 }
 
 .barcode-message {
@@ -819,11 +843,118 @@
 
 .control-column {
   align-self: start;
+  min-height: 0;
+  max-height: calc(100% - var(--h-sm) - var(--sp-1) - var(--sp-1) - var(--sp-4) + 4px);
   margin-top: calc(var(--h-sm) + var(--sp-1) + var(--sp-1) + var(--sp-4) - 4px);
+  overflow-y: auto;
+  padding-right: var(--sp-1);
 }
 
 .control-card {
   padding: var(--sp-4);
+}
+
+.barcode-upca-size-card[hidden] {
+  display: none;
+}
+
+.barcode-upca-size-card {
+  gap: var(--sp-3);
+  container-type: inline-size;
+}
+
+.upca-size-card-header,
+.upca-preset-controls,
+.upca-preset-actions {
+  display: grid;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.upca-size-card-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.upca-preset-controls {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.upca-preset-row,
+.upca-size-control,
+.upca-size-field {
+  display: grid;
+  min-width: 0;
+  gap: var(--sp-2);
+}
+
+.upca-size-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+
+.upca-size-field .m-stepper,
+.upca-preset-trigger {
+  width: 100%;
+  min-width: 0;
+}
+
+.upca-size-presets {
+  width: 100%;
+}
+
+.upca-size-presets > button {
+  min-width: 0;
+  padding-inline: var(--sp-1);
+}
+
+.upca-size-error,
+.upca-size-warning,
+.upca-size-storage-status {
+  margin: 0;
+}
+
+.upca-preset-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.upca-preset-actions > button {
+  min-width: 0;
+}
+
+.upca-preset-menu {
+  min-width: 200px;
+}
+
+.upca-preset-menu [role="group"],
+.upca-preset-menu #upca-preset-items {
+  display: grid;
+  gap: var(--sp-1);
+}
+
+.upca-preset-menu [role="group"] > strong,
+.upca-preset-menu [role="group"] > p {
+  margin: var(--sp-1) var(--sp-2);
+}
+
+.upca-preset-dialog {
+  width: min(420px, calc(100vw - var(--sp-5) - var(--sp-5)));
+}
+
+.upca-preset-dialog form,
+.upca-preset-dialog-actions {
+  display: grid;
+  gap: var(--sp-3);
+}
+
+.upca-preset-dialog form > input {
+  width: 100%;
+}
+
+.upca-preset-dialog-actions {
+  grid-auto-flow: column;
+  justify-content: end;
+  margin-top: var(--sp-2);
 }
 
 .barcode-font-picker,
@@ -893,6 +1024,13 @@
   .control-column {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    max-height: none;
     margin-top: 0;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .barcode-upca-size-card {
+    grid-column: 1 / -1;
   }
 }

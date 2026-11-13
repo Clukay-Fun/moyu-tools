@@ -29,6 +29,24 @@
         ],
         "createdAt": "2026-11-12T02:34:30.865Z",
         "reason": "False positive from aggregating separate app pages: homepage title is 46–76px, settings page title 24px, group headings 15px, and body text 13px, so a stronger heading step exists."
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "docs/ui/catalog.html"
+        ],
+        "createdAt": "2026-11-13T04:41:21.019Z",
+        "reason": "User confirmed: the catalog previews the approved home slogan gradient"
+      },
+      {
+        "rule": "em-dash-overuse",
+        "value": "*",
+        "files": [
+          "docs/ui/catalog.html"
+        ],
+        "createdAt": "2026-11-13T05:06:01.761Z",
+        "reason": "Catalog CSS variable examples use double hyphens; the prose counter misreads them as dashes."
       }
     ]
   }

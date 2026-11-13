@@ -193,9 +193,24 @@ export function encodeRetailModules(typeName, value) {
 }
 
 /** 计算该码制的标准几何（毫米）。 */
-export function computeRetailGeometry(typeName) {
-  const spec = RETAIL_SPECS[typeName]
+/** @param {string} typeName @param {{widthMm?: number, heightMm?: number} | null} [options] */
+export function computeRetailGeometry(typeName, options = null) {
+  let spec = RETAIL_SPECS[typeName]
   if (!spec) throw new Error(`${typeName} 不是零售合规码制`)
+
+  if (typeName === 'UPC-A' && options) {
+    const defaultWidth = (spec.quietLeftX + spec.dataModules + spec.quietRightX) * spec.xDimensionMm
+    const defaultHeight = spec.barHeightMm + spec.hri.gapX * spec.xDimensionMm + spec.hri.capHeightMm
+    const width = Number(options.widthMm ?? defaultWidth)
+    const height = Number(options.heightMm ?? defaultHeight * width / defaultWidth)
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) throw new Error('尺寸必须为大于零的有效数字')
+    const scale = width / defaultWidth
+    const x = spec.xDimensionMm * scale
+    const capHeightMm = spec.hri.capHeightMm * scale
+    const barHeightMm = height - spec.hri.gapX * x - capHeightMm
+    if (barHeightMm <= 0 || barHeightMm + spec.guardExtendX * x > height) throw new Error('总高度不足以容纳条形、护栏和数字')
+    spec = { ...spec, xDimensionMm: x, barHeightMm, hri: { ...spec.hri, capHeightMm } }
+  }
 
   const x = spec.xDimensionMm
   const totalModules = spec.quietLeftX + spec.dataModules + spec.quietRightX
@@ -262,9 +277,10 @@ export function buildBars(spec, modules, text, x, symbolStartMm, barBottomMm, gu
  * 文本以 <text> 写入（含 font-size，单位与 viewBox 一致即 mm），
  * 由调用方的 outlineBarcodeText() 统一转为路径。
  */
-export function renderRetailBarcode(svgElement, typeName, value) {
+/** @param {SVGSVGElement} svgElement @param {string} typeName @param {string} value @param {{widthMm?: number, heightMm?: number} | null} [options] */
+export function renderRetailBarcode(svgElement, typeName, value, options = null) {
   const { modules, text } = encodeRetailModules(typeName, value)
-  const geometry = computeRetailGeometry(typeName)
+  const geometry = computeRetailGeometry(typeName, options)
   const { spec, x, widthMm, heightMm, symbolStartMm, barBottomMm, guardBottomMm, hriBaselineMm } =
     geometry
 
