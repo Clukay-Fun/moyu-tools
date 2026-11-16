@@ -521,6 +521,7 @@ export function initUpcaSizeControls({
   }
 
   readPresets()
+  setDraftFields()
   renderPresetItems()
   updateView()
   registerPopover(presetMenu, presetTrigger, { align: 'left' })

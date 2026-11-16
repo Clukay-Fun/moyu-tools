@@ -8,7 +8,7 @@
 // 设计要点：
 //   1. JsBarcode 只作编码器（取 95 位模块串），不参与任何布局；
 //   2. 唯一几何真值以毫米表达，SVG viewBox 即 mm 坐标系；
-//   3. 本模块不暴露任何用户可调参数，Factor 固定 100%。
+//   3. UPC-A 支持尺寸调整，默认白底尺寸采用用户提供的 AI 参考稿。
 //
 // ⚠ 深层导入：jsbarcode 内部路径，非公开稳定 API，版本锁死 3.12.3。
 //   文件末尾为 `exports.default = UPC`（CommonJS + __esModule），
@@ -198,13 +198,15 @@ export function computeRetailGeometry(typeName, options = null) {
   let spec = RETAIL_SPECS[typeName]
   if (!spec) throw new Error(`${typeName} 不是零售合规码制`)
 
-  if (typeName === 'UPC-A' && options) {
-    const defaultWidth = (spec.quietLeftX + spec.dataModules + spec.quietRightX) * spec.xDimensionMm
-    const defaultHeight = spec.barHeightMm + spec.hri.gapX * spec.xDimensionMm + spec.hri.capHeightMm
-    const width = Number(options.widthMm ?? defaultWidth)
-    const height = Number(options.heightMm ?? defaultHeight * width / defaultWidth)
+  if (typeName === 'UPC-A') {
+    // upc标准(2).ai 第一页白底：98.14 × 73.44 pt。
+    const defaultWidth = 34.62161111111111
+    const defaultHeight = 25.908
+    const standardWidth = (spec.quietLeftX + spec.dataModules + spec.quietRightX) * spec.xDimensionMm
+    const width = Number(options?.widthMm ?? defaultWidth)
+    const height = Number(options?.heightMm ?? defaultHeight * width / defaultWidth)
     if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) throw new Error('尺寸必须为大于零的有效数字')
-    const scale = width / defaultWidth
+    const scale = width / standardWidth
     const x = spec.xDimensionMm * scale
     const capHeightMm = spec.hri.capHeightMm * scale
     const barHeightMm = height - spec.hri.gapX * x - capHeightMm

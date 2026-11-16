@@ -925,7 +925,7 @@ export function initBarcode({
       typeName,
       typeName === 'UPC-A' ? upcaOptions : null
     )
-    if (typeName === 'UPC-A' && upcaOptions) {
+    if (typeName === 'UPC-A') {
       const pixelWidth = Math.max(1, Math.round((widthMm / 25.4) * RETAIL_PNG_DPI))
       const pixelHeight = Math.max(1, Math.round(pixelWidth * heightMm / widthMm))
       const pixelsPerMm = pixelWidth / widthMm
