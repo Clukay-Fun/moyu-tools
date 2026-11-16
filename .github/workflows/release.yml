@@ -95,7 +95,6 @@ jobs:
             echo "::error::Release tag must point to a commit already merged into main"
             exit 1
           fi
-          echo "commit=$TAG_SHA" >> "$GITHUB_OUTPUT"
           echo "safe_to_cleanup=true" >> "$GITHUB_OUTPUT"
 
       - name: Checkout release tag source
@@ -210,7 +209,7 @@ jobs:
           test -s "release/moyu-tools-${TAG}-windows-x64-setup.exe"
           test -s release/latest.yml
           RELEASE_ID=$(gh api --method POST repos/Clukay-Fun/moyu-tools/releases \
-            -f tag_name="$TAG" -f target_commitish="${{ steps.tag_guard.outputs.commit }}" -f name="$TAG" \
+            -f tag_name="$TAG" -f target_commitish="$GITHUB_SHA" -f name="$TAG" \
             -f body="$BODY" \
             -F draft=true -F prerelease=false --jq '.id' | tr -d '\r')
           test -n "$RELEASE_ID"
