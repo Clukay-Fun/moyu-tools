@@ -149,6 +149,17 @@ function illustratorUngroupedCopyScript(inputPath, mode) {
           if (parentType !== 'Layer') continue;   // 跳过复合路径子路径 / 组内成员
           topLevel++;
 
+          // 复制时保留满幅白底以保护静区，但它不是条形，不能计入矩形条数。
+          var fullBleedWhiteBackground = false;
+          if (item.typename === 'PathItem' && item.filled) {
+            try {
+              var fill = item.fillColor;
+              fullBleedWhiteBackground = fill.typename === 'RGBColor' &&
+                fill.red > 250 && fill.green > 250 && fill.blue > 250 &&
+                item.width >= container.width - 1 && item.height >= container.height - 1;
+            } catch (e) { fullBleedWhiteBackground = false; }
+          }
+
           if (item.typename === 'CompoundPathItem') {
             glyphLike++;
             var subs = 0;
@@ -157,7 +168,7 @@ function illustratorUngroupedCopyScript(inputPath, mode) {
           } else if (item.typename === 'PathItem') {
             var pts = 0;
             try { pts = item.pathPoints.length; } catch (e) { pts = 0; }
-            if (pts === 4) rectLike++; else if (pts > 4) glyphLike++;
+            if (pts === 4 && !fullBleedWhiteBackground) rectLike++; else if (pts > 4) glyphLike++;
           }
         }
         report[prefix + 'Groups'] = container.groupItems.length;
@@ -170,20 +181,9 @@ function illustratorUngroupedCopyScript(inputPath, mode) {
       doc = app.open(new File(${input}));
       report.ungroupPasses = ungroupAll(doc);
 
-      // 删白色满幅背景
-      var removed = 0;
-      for (var m = doc.pathItems.length - 1; m >= 0; m--) {
-        var item = doc.pathItems[m];
-        var white = false;
-        try {
-          white = item.filled && item.fillColor.typename === 'RGBColor' &&
-            item.fillColor.red > 250 && item.fillColor.green > 250 && item.fillColor.blue > 250;
-        } catch (e) { white = false; }
-        if (white && item.width >= doc.width - 1 && item.height >= doc.height - 1) {
-          item.remove(); removed++;
-        }
-      }
-      report.removedBackground = removed;
+      // 保留满幅白底：它承载静区，并使对象范围与标称总宽高一致。
+      // 沿用报告字段，兼容现有调用方。
+      report.removedBackground = 0;
       report.docWidthPt = doc.width;
       report.docHeightPt = doc.height;
       survey(doc, 'before');
