@@ -2,6 +2,12 @@ name: release-windows
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing version tag to build and publish
+        required: true
+        type: string
 permissions:
   contents: write
 concurrency:
@@ -36,8 +42,11 @@ jobs:
       - name: Validate release tag and package versions
         id: bump
         shell: bash
+        env:
+          REQUESTED_TAG: ${{ inputs.release_tag }}
         run: |
-          TAG="${GITHUB_REF_NAME}"
+          TAG="$REQUESTED_TAG"
+          if [ -z "$TAG" ]; then TAG="$GITHUB_REF_NAME"; fi
           VERSION="${TAG#v}"
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
           LOCK_VERSION=$(node -p "require('./package-lock.json').version")
@@ -79,11 +88,22 @@ jobs:
           fi
 
           git fetch origin main --quiet
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD; then
+          MAIN_SHA=$(git rev-parse FETCH_HEAD)
+          git fetch origin "refs/tags/$TAG:refs/tags/$TAG" --quiet
+          TAG_SHA=$(git rev-parse "$TAG^{commit}")
+          if ! git merge-base --is-ancestor "$TAG_SHA" "$MAIN_SHA"; then
             echo "::error::Release tag must point to a commit already merged into main"
             exit 1
           fi
+          echo "commit=$TAG_SHA" >> "$GITHUB_OUTPUT"
           echo "safe_to_cleanup=true" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout release tag source
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.bump.outputs.tag }}
+        run: git checkout --detach "$RELEASE_TAG"
 
       - name: Install dependencies (clean)
         run: npm ci
@@ -190,7 +210,7 @@ jobs:
           test -s "release/moyu-tools-${TAG}-windows-x64-setup.exe"
           test -s release/latest.yml
           RELEASE_ID=$(gh api --method POST repos/Clukay-Fun/moyu-tools/releases \
-            -f tag_name="$TAG" -f target_commitish="$GITHUB_SHA" -f name="$TAG" \
+            -f tag_name="$TAG" -f target_commitish="${{ steps.tag_guard.outputs.commit }}" -f name="$TAG" \
             -f body="$BODY" \
             -F draft=true -F prerelease=false --jq '.id' | tr -d '\r')
           test -n "$RELEASE_ID"
