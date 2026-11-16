@@ -136,6 +136,19 @@ function illustratorUngroupedCopyScript(inputPath, mode) {
         return guard;
       }
 
+      // 解组时 moveBefore 会改变叠放顺序；复制前将满幅白底明确沉到底层。
+      function sendBackgroundToBack(container) {
+        for (var index = container.pathItems.length - 1; index >= 0; index--) {
+          var background = container.pathItems[index];
+          if (background.parent.typename !== 'Layer') continue;
+          var isWhite = background.filled && background.fillColor.typename === 'RGBColor' &&
+            background.fillColor.red > 250 && background.fillColor.green > 250 && background.fillColor.blue > 250;
+          if (isWhite && background.width >= container.width - 1 && background.height >= container.height - 1) {
+            background.zOrder(ZOrderMethod.SENDTOBACK);
+          }
+        }
+      }
+
       // 结构统计：只数**顶层独立对象**。
       // ⚠ Document.pathItems 会把 CompoundPathItem 的子路径也算进去，
       //   若直接遍历它再叠加 compoundPathItems，数字会被重复计数（DigitLike 虚高）。
@@ -180,6 +193,7 @@ function illustratorUngroupedCopyScript(inputPath, mode) {
 
       doc = app.open(new File(${input}));
       report.ungroupPasses = ungroupAll(doc);
+      sendBackgroundToBack(doc);
 
       // 保留满幅白底：它承载静区，并使对象范围与标称总宽高一致。
       // 沿用报告字段，兼容现有调用方。
@@ -203,6 +217,7 @@ function illustratorUngroupedCopyScript(inputPath, mode) {
         // 粘贴后可能仍带外层组：先如实统计，再解组统计，两者都回报
         survey(pastedDoc, 'pasted');
         report.pastedUngroupPasses = ungroupAll(pastedDoc);
+        sendBackgroundToBack(pastedDoc);
         survey(pastedDoc, 'pastedAfterUngroup');
       }
     } catch (err) {
