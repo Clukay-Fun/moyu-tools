@@ -463,21 +463,27 @@ export function initBarcode({
     // 版式未锁定的码制：**保留全部已锁定参数**，只把合规结论标为待定。
     // （早前的提前 return 会把条高/静区/尺寸一并藏掉，反而丢失有效信息。）
     const pending = geometry.spec.hri.placementPending === true
-    const customUpca = typeName === 'UPC-A' && Boolean(upcaOptions)
+    const customerSample = typeName === 'UPC-A' && upcaOptions?.profile === 'customer-sample'
+    const customUpca = typeName === 'UPC-A' && Boolean(upcaOptions) && !customerSample
+    const baseWidthMm = customerSample
+      ? computeRetailGeometry('UPC-A', { profile: 'customer-sample' }).widthMm
+      : UPC_A_DEFAULT_WIDTH_MM
 
     const rows = [
-      customUpca
-        ? ['尺寸状态', '自定义尺寸，需打样验证扫描效果；该尺寸不作生产合规承诺']
-        : pending
+      customerSample
+        ? ['版式预设', '客户样稿 · 按参考稿排版，不按 GS1 尺寸声明']
+        : customUpca
+          ? ['尺寸状态', 'GS1 标准基准上的自定义尺寸，需打样验证扫描效果']
+          : pending
           ? ['合规状态', '待定 · 符号外首位数字水平位置需 ISO/IEC 15420 确认（本版未采购该规范），当前为版式实现值，不标注生产合规']
           : ['规范', 'GS1 GenSpecs 26.0.0 · Table 5-44 · 零售 POS'],
       ...(pending && !customUpca ? [['已锁定依据', 'GS1 GenSpecs 26.0.0 · Table 5-44（条空、静区、条高、Table 5-10 补偿）']] : []),
       ['放大系数', typeName === 'UPC-A'
-        ? `宽度 ${(geometry.widthMm / UPC_A_DEFAULT_WIDTH_MM * 100).toFixed(0)}%${upcaConfig?.mode === 'independent' ? ' · 独立调整' : ' · 等比缩放'}`
+        ? `宽度 ${(geometry.widthMm / baseWidthMm * 100).toFixed(0)}%${upcaConfig?.mode === 'independent' ? ' · 独立调整' : ' · 等比缩放'}`
         : '标准 100%'],
       ['SVG / EPS', `${geometry.widthMm.toFixed(2)} × ${geometry.heightMm.toFixed(2)} mm · X=${geometry.x.toFixed(3)} mm`],
       ['PNG', `${raster.actualWidthMm.toFixed(2)} × ${raster.actualHeightMm.toFixed(2)} mm · ${raster.pixelWidth} × ${raster.pixelHeight} px · ${raster.dpi} DPI · X=${raster.actualXMm.toFixed(4)} mm`],
-      ['条高 / 静区', `${geometry.spec.barHeightMm.toFixed(2)} mm · 左右各 ${(geometry.spec.quietLeftX * geometry.x).toFixed(2)} mm`],
+      ['条高 / 静区', `${geometry.spec.barHeightMm.toFixed(2)} mm · 左 ${(geometry.spec.quietLeftX * geometry.x).toFixed(2)} mm · 右 ${(geometry.spec.quietRightX * geometry.x).toFixed(2)} mm`],
       ['HRI 字体', '常规 OCR-B（固定）']
     ]
 

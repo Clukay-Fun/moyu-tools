@@ -8,7 +8,7 @@
 // 设计要点：
 //   1. JsBarcode 只作编码器（取 95 位模块串），不参与任何布局；
 //   2. 唯一几何真值以毫米表达，SVG viewBox 即 mm 坐标系；
-//   3. UPC-A 支持尺寸调整，默认白底尺寸采用用户提供的 AI 参考稿。
+//   3. UPC-A 默认遵循 GS1；另提供按客户 AI 参考稿排版的命名预设。
 //
 // ⚠ 深层导入：jsbarcode 内部路径，非公开稳定 API，版本锁死 3.12.3。
 //   文件末尾为 `exports.default = UPC`（CommonJS + __esModule），
@@ -21,6 +21,7 @@ import * as eanConstants from 'jsbarcode/bin/barcodes/EAN_UPC/constants.js'
 const UPC = UPCModule.default || UPCModule
 const EAN13 = EAN13Module.default || EAN13Module
 const EAN8 = EAN8Module.default || EAN8Module
+const UPC_A_CUSTOMER_SAMPLE = 'customer-sample'
 // 首位数字决定 EAN-13 左侧 6 位用 L(Number Set A) 还是 G(Number Set B)，
 // 直接影响 Table 5-10 的补偿方向，必须按位取用。
 const EAN13_STRUCTURE = eanConstants.EAN13_STRUCTURE || eanConstants.default?.EAN13_STRUCTURE
@@ -192,46 +193,82 @@ export function encodeRetailModules(typeName, value) {
   return { modules: data, text }
 }
 
-/** 计算该码制的标准几何（毫米）。 */
-/** @param {string} typeName @param {{widthMm?: number, heightMm?: number} | null} [options] */
+/** 计算该码制的几何（毫米）；UPC-A 可选择 GS1 或客户样稿基准。 */
+/** @param {string} typeName @param {{widthMm?: number, heightMm?: number, profile?: string} | null} [options] */
 export function computeRetailGeometry(typeName, options = null) {
   let spec = RETAIL_SPECS[typeName]
   if (!spec) throw new Error(`${typeName} 不是零售合规码制`)
 
+  let customerSample = false
+  let symbolStartMm = spec.quietLeftX * spec.xDimensionMm
+  let barTopMm = 0
+  let heightMm = 0
   if (typeName === 'UPC-A') {
-    // upc标准(2).ai 第一页白底：98.14 × 73.44 pt。
-    const defaultWidth = 34.62161111111111
-    const defaultHeight = 25.908
+    customerSample = options?.profile === UPC_A_CUSTOMER_SAMPLE
+    const sampleWidth = 98.14 * 25.4 / 72
+    const sampleHeight = 73.44 * 25.4 / 72
     const standardWidth = (spec.quietLeftX + spec.dataModules + spec.quietRightX) * spec.xDimensionMm
+    const standardHeight = spec.barHeightMm + spec.hri.gapX * spec.xDimensionMm + spec.hri.capHeightMm
+    const defaultWidth = customerSample ? sampleWidth : standardWidth
+    const defaultHeight = customerSample ? sampleHeight : standardHeight
     const width = Number(options?.widthMm ?? defaultWidth)
     const height = Number(options?.heightMm ?? defaultHeight * width / defaultWidth)
     if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) throw new Error('尺寸必须为大于零的有效数字')
-    const scale = width / standardWidth
-    const x = spec.xDimensionMm * scale
-    const capHeightMm = spec.hri.capHeightMm * scale
-    const barHeightMm = height - spec.hri.gapX * x - capHeightMm
-    if (barHeightMm <= 0 || barHeightMm + spec.guardExtendX * x > height) throw new Error('总高度不足以容纳条形、护栏和数字')
-    spec = { ...spec, xDimensionMm: x, barHeightMm, hri: { ...spec.hri, capHeightMm } }
+    if (customerSample) {
+      // 以用户提供的「upc标准 (1).ai」第一页白底为基准，仅作为客户样稿版式。
+      const scale = width / sampleWidth
+      const x = 0.30825 * scale
+      const capHeightMm = 2.56 * scale
+      const barHeightMm = height - (sampleHeight - 22.272 + 0.747) * scale
+      if (barHeightMm <= 0) throw new Error('总高度不足以容纳客户样稿条形与数字')
+      symbolStartMm = 2.428 * scale
+      barTopMm = 0.747 * scale
+      const quietLeftX = symbolStartMm / x
+      const quietRightX = (width - symbolStartMm - spec.dataModules * x) / x
+      spec = {
+        ...spec,
+        quietLeftX,
+        quietRightX,
+        xDimensionMm: x,
+        barHeightMm,
+        hri: { ...spec.hri, capHeightMm }
+      }
+      heightMm = height
+    } else {
+      const scale = width / standardWidth
+      const x = spec.xDimensionMm * scale
+      const capHeightMm = spec.hri.capHeightMm * scale
+      const barHeightMm = height - spec.hri.gapX * x - capHeightMm
+      if (barHeightMm <= 0 || barHeightMm + spec.guardExtendX * x > height) throw new Error('总高度不足以容纳条形、护栏和数字')
+      symbolStartMm = spec.quietLeftX * x
+      spec = { ...spec, xDimensionMm: x, barHeightMm, hri: { ...spec.hri, capHeightMm } }
+      heightMm = height
+    }
   }
 
   const x = spec.xDimensionMm
   const totalModules = spec.quietLeftX + spec.dataModules + spec.quietRightX
-  const symbolStartMm = spec.quietLeftX * x
   const barBottomMm = spec.barHeightMm
   const guardBottomMm = barBottomMm + spec.guardExtendX * x
   const hriTopMm = barBottomMm + spec.hri.gapX * x
-  const hriBaselineMm = hriTopMm + spec.hri.capHeightMm
+  const hriBaselineMm = customerSample
+    ? heightMm - 0.69 * (x / 0.30825)
+    : hriTopMm + spec.hri.capHeightMm
 
   return {
     spec,
     x,
     totalModules,
-    widthMm: totalModules * x,
-    heightMm: hriBaselineMm,
+    widthMm: typeName === 'UPC-A' ? Number(options?.widthMm ?? (customerSample
+      ? 98.14 * 25.4 / 72
+      : totalModules * 0.33)) : totalModules * x,
+    heightMm: typeName === 'UPC-A' ? heightMm : hriBaselineMm,
     symbolStartMm,
+    barTopMm,
     barBottomMm,
     guardBottomMm,
-    hriBaselineMm
+    hriBaselineMm,
+    profile: customerSample ? UPC_A_CUSTOMER_SAMPLE : 'gs1'
   }
 }
 
@@ -279,12 +316,13 @@ export function buildBars(spec, modules, text, x, symbolStartMm, barBottomMm, gu
  * 文本以 <text> 写入（含 font-size，单位与 viewBox 一致即 mm），
  * 由调用方的 outlineBarcodeText() 统一转为路径。
  */
-/** @param {SVGSVGElement} svgElement @param {string} typeName @param {string} value @param {{widthMm?: number, heightMm?: number} | null} [options] */
+/** @param {SVGSVGElement} svgElement @param {string} typeName @param {string} value @param {{widthMm?: number, heightMm?: number, profile?: string} | null} [options] */
 export function renderRetailBarcode(svgElement, typeName, value, options = null) {
   const { modules, text } = encodeRetailModules(typeName, value)
   const geometry = computeRetailGeometry(typeName, options)
-  const { spec, x, widthMm, heightMm, symbolStartMm, barBottomMm, guardBottomMm, hriBaselineMm } =
+  const { spec, x, widthMm, heightMm, symbolStartMm, barTopMm, barBottomMm, guardBottomMm, hriBaselineMm } =
     geometry
+  const customerSample = typeName === 'UPC-A' && geometry.profile === UPC_A_CUSTOMER_SAMPLE
 
   const svgNs = 'http://www.w3.org/2000/svg'
   svgElement.replaceChildren()
@@ -305,7 +343,7 @@ export function renderRetailBarcode(svgElement, typeName, value, options = null)
   for (const bar of buildBars(spec, modules, text, x, symbolStartMm, barBottomMm, guardBottomMm)) {
     const rect = document.createElementNS(svgNs, 'rect')
     rect.setAttribute('x', String(bar.x))
-    rect.setAttribute('y', '0')
+    rect.setAttribute('y', String(barTopMm))
     rect.setAttribute('width', String(bar.width))
     rect.setAttribute('height', String(bar.height))
     rect.setAttribute('fill', '#000000')
@@ -318,11 +356,13 @@ export function renderRetailBarcode(svgElement, typeName, value, options = null)
     if (content == null) return
     const node = document.createElementNS(svgNs, 'text')
     node.setAttribute('x', String(xMm))
-    node.setAttribute('y', String(hriBaselineMm))
+    node.setAttribute('y', String(customerSample
+      ? hriBaselineMm + (edge ? 0.26 * x / 0.30825 : 0)
+      : hriBaselineMm))
     node.setAttribute('text-anchor', 'middle')
     // 写入目标**字形高度**而非 em size（opentype 的 fontSize 是 em），
     // 由 outlineBarcodeText() 按字体 metrics 反算。
-    node.setAttribute('data-cap-height', String(spec.hri.capHeightMm))
+    node.setAttribute('data-cap-height', String(spec.hri.capHeightMm * (customerSample && edge ? 0.78 : 1)))
     node.setAttribute('fill', '#000000')
     node.setAttribute('data-anchor-edge', edge || 'center')
     // 仅 UPC-A 定义了「符号外数字最大墨宽 4X、超出等比缩小」。
@@ -342,8 +382,9 @@ export function renderRetailBarcode(svgElement, typeName, value, options = null)
 
   // 符号外首位。UPC-A 用规范值 outsideEdgeGapX；
   // EAN-13 水平位置未锁定，用 provisional 值（**非规范值**，见 spec 注释）。
-  const outsideFirstOffsetX =
-    spec.hri.outsideEdgeGapX ?? spec.hri.outsideFirstProvisionalOffsetX ?? 0
+  const outsideFirstOffsetX = customerSample
+    ? 3.28
+    : (spec.hri.outsideEdgeGapX ?? spec.hri.outsideFirstProvisionalOffsetX ?? 0)
   addDigit(layout.outsideFirst, symbolStartMm - outsideFirstOffsetX * x, 'right')
 
   for (const item of layout.left) addDigit(item.digit, charCenterMm(item.charIndex, leftStart))
@@ -352,7 +393,7 @@ export function renderRetailBarcode(svgElement, typeName, value, options = null)
   // 符号外末位：左边缘位于右护栏右侧 outsideEdgeGapX
   addDigit(
     layout.outsideLast,
-    symbolStartMm + spec.dataModules * x + (spec.hri.outsideEdgeGapX ?? 0) * x,
+    symbolStartMm + spec.dataModules * x + (customerSample ? 3.25 : (spec.hri.outsideEdgeGapX ?? 0)) * x,
     'left'
   )
 

@@ -4,14 +4,22 @@ import { computeRetailGeometry } from '../retailBarcode.js'
 
 const UPC_A = 'UPC-A'
 const DEFAULT_ID = 'default'
+const CUSTOMER_SAMPLE_ID = 'customer-sample'
+const DEFAULT_NAME = 'GS1 标准'
+const CUSTOMER_SAMPLE_NAME = '客户样稿'
+const RESERVED_PRESET_NAMES = new Set([DEFAULT_NAME.toLocaleLowerCase(), CUSTOMER_SAMPLE_NAME.toLocaleLowerCase(), '默认尺寸'])
 const STORAGE_KEY = 'moyu.upca-size-presets.v1'
 const STORAGE_VERSION = 1
 const DEFAULT_GEOMETRY = computeRetailGeometry(UPC_A)
+const CUSTOMER_SAMPLE_GEOMETRY = computeRetailGeometry(UPC_A, { profile: CUSTOMER_SAMPLE_ID })
 const DEFAULT_WIDTH_MM = DEFAULT_GEOMETRY.widthMm
 const DEFAULT_HEIGHT_MM = DEFAULT_GEOMETRY.heightMm
+const CUSTOMER_SAMPLE_WIDTH_MM = CUSTOMER_SAMPLE_GEOMETRY.widthMm
+const CUSTOMER_SAMPLE_HEIGHT_MM = CUSTOMER_SAMPLE_GEOMETRY.heightMm
 
 /** @typedef {'proportional' | 'independent'} UpcaMode */
-/** @typedef {{ mode: UpcaMode, widthMm: number, heightMm: number }} UpcaDimensions */
+/** @typedef {'gs1' | 'customer-sample'} UpcaProfile */
+/** @typedef {{ mode: UpcaMode, profile: UpcaProfile, widthMm: number, heightMm: number }} UpcaDimensions */
 /** @typedef {UpcaDimensions & { id: string, name: string, version: number }} UpcaPreset */
 /** @typedef {UpcaDimensions & { presetId: string, presetName: string }} UpcaConfig */
 /** @typedef {{ valid: boolean, geometryChanged: boolean, becameValid: boolean, configurationChanged: boolean, config: UpcaConfig, error?: string }} UpcaChange */
@@ -34,18 +42,21 @@ function normalizePreset(value) {
   const record = asRecord(value)
   if (!record) return null
   const mode = record.mode === 'independent' ? 'independent' : record.mode === 'proportional' ? 'proportional' : null
+  const profile = record.profile === CUSTOMER_SAMPLE_ID
+    ? CUSTOMER_SAMPLE_ID
+    : record.profile == null || record.profile === 'gs1' ? 'gs1' : null
   const widthMm = Number(record.widthMm)
   const heightMm = Number(record.heightMm)
   const id = typeof record.id === 'string' ? record.id.trim() : ''
   const name = typeof record.name === 'string' ? record.name.trim() : ''
-  if (!mode || !id || !name || !Number.isFinite(widthMm) || widthMm <= 0 || !Number.isFinite(heightMm) || heightMm <= 0) return null
+  if (!mode || !profile || !id || !name || !Number.isFinite(widthMm) || widthMm <= 0 || !Number.isFinite(heightMm) || heightMm <= 0) return null
   if (record.version !== STORAGE_VERSION) return null
   try {
-    computeRetailGeometry(UPC_A, { widthMm, heightMm })
+    computeRetailGeometry(UPC_A, { profile, widthMm, heightMm })
   } catch {
     return null
   }
-  return { id, name, mode, widthMm, heightMm, version: STORAGE_VERSION }
+  return { id, name, mode, profile, widthMm, heightMm, version: STORAGE_VERSION }
 }
 
 /** @param {number} value */
@@ -58,9 +69,9 @@ function sameNumber(a, b) {
   return Math.abs(a - b) < 1e-9
 }
 
-/** @param {{ widthMm: number, heightMm: number }} a @param {{ widthMm: number, heightMm: number }} b */
+/** @param {{ profile: UpcaProfile, widthMm: number, heightMm: number }} a @param {{ profile: UpcaProfile, widthMm: number, heightMm: number }} b */
 function sameDimensions(a, b) {
-  return sameNumber(a.widthMm, b.widthMm) && sameNumber(a.heightMm, b.heightMm)
+  return a.profile === b.profile && sameNumber(a.widthMm, b.widthMm) && sameNumber(a.heightMm, b.heightMm)
 }
 
 /** @param {unknown} error */
@@ -127,7 +138,7 @@ export function initUpcaSizeControls({
   /** @type {string} */
   let selectedPresetId = DEFAULT_ID
   /** @type {UpcaDimensions} */
-  let current = { mode: 'proportional', widthMm: DEFAULT_WIDTH_MM, heightMm: DEFAULT_HEIGHT_MM }
+  let current = { mode: 'proportional', profile: /** @type {UpcaProfile} */ ('gs1'), widthMm: DEFAULT_WIDTH_MM, heightMm: DEFAULT_HEIGHT_MM }
   /** @type {{ width: string, height: string }} */
   let draft = { width: formatMm(DEFAULT_WIDTH_MM), height: formatMm(DEFAULT_HEIGHT_MM) }
   let draftValid = true
@@ -141,7 +152,19 @@ export function initUpcaSizeControls({
   }
 
   function selectedName() {
-    return selectedPreset()?.name || '默认尺寸'
+    if (selectedPresetId === CUSTOMER_SAMPLE_ID) return CUSTOMER_SAMPLE_NAME
+    const preset = selectedPreset()
+    if (!preset) return DEFAULT_NAME
+    return RESERVED_PRESET_NAMES.has(preset.name.toLocaleLowerCase()) ? `${preset.name}（自建）` : preset.name
+  }
+
+  /** @param {UpcaPreset} preset */
+  function presetLabel(preset) {
+    return RESERVED_PRESET_NAMES.has(preset.name.toLocaleLowerCase()) ? `${preset.name}（自建）` : preset.name
+  }
+
+  function baseGeometry(profile = current.profile) {
+    return profile === CUSTOMER_SAMPLE_ID ? CUSTOMER_SAMPLE_GEOMETRY : DEFAULT_GEOMETRY
   }
 
   function currentConfig() {
@@ -166,7 +189,8 @@ export function initUpcaSizeControls({
       const validPresets = /** @type {UpcaPreset[]} */ (loaded)
       const ids = new Set(validPresets.map((preset) => preset.id))
       const names = new Set(validPresets.map((preset) => preset.name.toLocaleLowerCase()))
-      if (ids.size !== validPresets.length || names.size !== validPresets.length || names.has('默认尺寸')) {
+      if (ids.size !== validPresets.length || ids.has(DEFAULT_ID) || ids.has(CUSTOMER_SAMPLE_ID) ||
+          names.size !== validPresets.length || names.has('默认尺寸')) {
         throw new Error('预设名称或编号重复，未覆盖原数据')
       }
       presets = validPresets
@@ -206,24 +230,34 @@ export function initUpcaSizeControls({
 
   function isDirty() {
     const saved = selectedPreset()
-    const baseline = saved || {
-      mode: 'proportional',
-      widthMm: DEFAULT_WIDTH_MM,
-      heightMm: DEFAULT_HEIGHT_MM
-    }
+    const baseline = saved || (selectedPresetId === CUSTOMER_SAMPLE_ID
+      ? {
+          mode: 'proportional',
+          profile: /** @type {UpcaProfile} */ (CUSTOMER_SAMPLE_ID),
+          widthMm: CUSTOMER_SAMPLE_WIDTH_MM,
+          heightMm: CUSTOMER_SAMPLE_HEIGHT_MM
+        }
+      : {
+          mode: 'proportional',
+          profile: /** @type {UpcaProfile} */ ('gs1'),
+          widthMm: DEFAULT_WIDTH_MM,
+          heightMm: DEFAULT_HEIGHT_MM
+        })
     return current.mode !== baseline.mode || !sameDimensions(current, baseline)
   }
 
   function isDefaultGeometry() {
-    return sameNumber(current.widthMm, DEFAULT_WIDTH_MM) && sameNumber(current.heightMm, DEFAULT_HEIGHT_MM)
+    return current.profile === 'gs1' && sameNumber(current.widthMm, DEFAULT_WIDTH_MM) && sameNumber(current.heightMm, DEFAULT_HEIGHT_MM)
   }
 
   function needsScanWarning() {
     if (!draftValid) return false
-    const widthScale = current.widthMm / DEFAULT_WIDTH_MM
-    const heightScale = current.heightMm / DEFAULT_HEIGHT_MM
+    if (current.profile === CUSTOMER_SAMPLE_ID) return true
+    const baseline = baseGeometry()
+    const widthScale = current.widthMm / baseline.widthMm
+    const heightScale = current.heightMm / baseline.heightMm
     const geometry = computeRetailGeometry(UPC_A, current)
-    const shortenedBars = geometry.spec.barHeightMm < DEFAULT_GEOMETRY.spec.barHeightMm * widthScale - 1e-9
+    const shortenedBars = geometry.spec.barHeightMm < baseline.spec.barHeightMm * widthScale - 1e-9
     return widthScale < 0.8 || widthScale > 2 || heightScale < 0.8 || heightScale > 2 || shortenedBars
   }
 
@@ -235,18 +269,22 @@ export function initUpcaSizeControls({
       item.setAttribute('role', 'option')
       item.dataset.upcaPresetId = preset.id
       item.setAttribute('aria-selected', String(preset.id === selectedPresetId))
-      item.textContent = `${preset.name}${preset.id === selectedPresetId ? ' ✓' : ''}`
-      item.title = preset.name
+      const label = presetLabel(preset)
+      item.textContent = `${label}${preset.id === selectedPresetId ? ' ✓' : ''}`
+      item.title = label
       fragment.append(item)
     }
     presetItems.replaceChildren(fragment)
     presetEmpty.hidden = presets.length > 0
     const defaultItem = presetMenu.querySelector('[data-upca-preset-id="default"]')
     defaultItem?.setAttribute('aria-selected', String(selectedPresetId === DEFAULT_ID))
+    const sampleItem = presetMenu.querySelector(`[data-upca-preset-id="${CUSTOMER_SAMPLE_ID}"]`)
+    sampleItem?.setAttribute('aria-selected', String(selectedPresetId === CUSTOMER_SAMPLE_ID))
     const rename = presetActionsMenu.querySelector('[data-upca-preset-action="rename"]')
     const remove = presetActionsMenu.querySelector('[data-upca-preset-action="delete"]')
-    if (rename instanceof HTMLButtonElement) rename.disabled = selectedPresetId === DEFAULT_ID
-    if (remove instanceof HTMLButtonElement) remove.disabled = selectedPresetId === DEFAULT_ID
+    const isBuiltIn = selectedPresetId === DEFAULT_ID || selectedPresetId === CUSTOMER_SAMPLE_ID
+    if (rename instanceof HTMLButtonElement) rename.disabled = isBuiltIn
+    if (remove instanceof HTMLButtonElement) remove.disabled = isBuiltIn
   }
 
   function updateView() {
@@ -257,7 +295,9 @@ export function initUpcaSizeControls({
       ? ''
       : selectedPresetId === DEFAULT_ID
         ? ''
-        : '已保存预设'
+        : selectedPresetId === CUSTOMER_SAMPLE_ID
+          ? '客户样稿基准'
+          : '已保存预设'
     sizeStatus.textContent = statusText
     sizeStatus.hidden = !statusText
     storageStatus.textContent = storageError
@@ -265,9 +305,10 @@ export function initUpcaSizeControls({
     for (const button of quickButtons) {
       if (!(button instanceof HTMLButtonElement)) continue
       const scale = Number(button.dataset.upcaScale)
+      const baseline = baseGeometry()
       const selected = draftValid && current.mode === 'proportional' &&
-        sameNumber(current.widthMm, DEFAULT_WIDTH_MM * scale) &&
-        sameNumber(current.heightMm, DEFAULT_HEIGHT_MM * scale)
+        sameNumber(current.widthMm, baseline.widthMm * scale) &&
+        sameNumber(current.heightMm, baseline.heightMm * scale)
       button.setAttribute('aria-pressed', String(selected))
       button.disabled = !draftValid
     }
@@ -277,6 +318,9 @@ export function initUpcaSizeControls({
       button.disabled = !draftValid
     }
 
+    warning.textContent = current.profile === CUSTOMER_SAMPLE_ID
+      ? '客户样稿版式不按 GS1 尺寸声明；用于对齐样稿，量产前请确认并打样验证。'
+      : '自定义尺寸，需打样验证扫描效果'
     warning.hidden = !needsScanWarning()
     saveAsButton.disabled = !draftValid
     const currentPreset = selectedPreset()
@@ -294,6 +338,7 @@ export function initUpcaSizeControls({
     let heightMm = Number(heightRaw)
     let widthMessage = ''
     let heightMessage = ''
+    const baseline = baseGeometry()
 
     if (current.mode === 'proportional') {
       const value = Number(rawValue)
@@ -302,12 +347,12 @@ export function initUpcaSizeControls({
         else heightMessage = '总高度必须是大于 0 的有效数字。'
       } else if (field === 'width') {
         widthMm = value
-        heightMm = value * DEFAULT_HEIGHT_MM / DEFAULT_WIDTH_MM
+        heightMm = value * baseline.heightMm / baseline.widthMm
         draft.height = formatMm(heightMm)
         heightInput.value = draft.height
       } else {
         heightMm = value
-        widthMm = value * DEFAULT_WIDTH_MM / DEFAULT_HEIGHT_MM
+        widthMm = value * baseline.widthMm / baseline.heightMm
         draft.width = formatMm(widthMm)
         widthInput.value = draft.width
       }
@@ -326,7 +371,7 @@ export function initUpcaSizeControls({
     }
 
     try {
-      computeRetailGeometry(UPC_A, { widthMm, heightMm })
+      computeRetailGeometry(UPC_A, { profile: current.profile, widthMm, heightMm })
     } catch (error) {
       heightMessage = explainError(error)
       setFieldError(widthInput, widthError, '')
@@ -340,7 +385,7 @@ export function initUpcaSizeControls({
     setFieldError(widthInput, widthError, '')
     setFieldError(heightInput, heightError, '')
     const previous = { ...current }
-    current = { mode: current.mode, widthMm, heightMm }
+    current = { mode: current.mode, profile: current.profile, widthMm, heightMm }
     draftValid = true
     const geometryChanged = !sameDimensions(previous, current)
     updateView()
@@ -352,7 +397,7 @@ export function initUpcaSizeControls({
   /** @param {UpcaDimensions} config @param {string} presetId */
   function applyConfiguration(config, presetId) {
     try {
-      computeRetailGeometry(UPC_A, { widthMm: config.widthMm, heightMm: config.heightMm })
+      computeRetailGeometry(UPC_A, { profile: config.profile, widthMm: config.widthMm, heightMm: config.heightMm })
     } catch (error) {
       showToast(`无法应用此尺寸预设：${explainError(error)}。已保留当前尺寸。`)
       return false
@@ -361,7 +406,7 @@ export function initUpcaSizeControls({
     const wasValid = draftValid
     const previous = { ...current }
     const previousPresetId = selectedPresetId
-    current = { mode: config.mode, widthMm: config.widthMm, heightMm: config.heightMm }
+    current = { mode: config.mode, profile: config.profile, widthMm: config.widthMm, heightMm: config.heightMm }
     selectedPresetId = presetId
     draft = { width: formatMm(current.widthMm), height: formatMm(current.heightMm) }
     draftValid = true
@@ -370,7 +415,7 @@ export function initUpcaSizeControls({
     setDraftFields()
     updateView()
     const geometryChanged = !sameDimensions(previous, current)
-    const configurationChanged = previous.mode !== current.mode || previousPresetId !== selectedPresetId
+    const configurationChanged = previous.mode !== current.mode || previous.profile !== current.profile || previousPresetId !== selectedPresetId
     if (geometryChanged || !wasValid || configurationChanged) {
       onChange({ valid: true, geometryChanged, becameValid: !wasValid, configurationChanged, config: currentConfig() })
     }
@@ -378,7 +423,16 @@ export function initUpcaSizeControls({
   }
 
   function applyDefault() {
-    applyConfiguration({ mode: 'proportional', widthMm: DEFAULT_WIDTH_MM, heightMm: DEFAULT_HEIGHT_MM }, DEFAULT_ID)
+    applyConfiguration({ mode: 'proportional', profile: 'gs1', widthMm: DEFAULT_WIDTH_MM, heightMm: DEFAULT_HEIGHT_MM }, DEFAULT_ID)
+  }
+
+  function applyCustomerSample() {
+    applyConfiguration({
+      mode: 'proportional',
+      profile: CUSTOMER_SAMPLE_ID,
+      widthMm: CUSTOMER_SAMPLE_WIDTH_MM,
+      heightMm: CUSTOMER_SAMPLE_HEIGHT_MM
+    }, CUSTOMER_SAMPLE_ID)
   }
 
   /** @param {string} message */
@@ -415,8 +469,8 @@ export function initUpcaSizeControls({
       presetNameInput.focus()
       return false
     }
-    if (name.toLocaleLowerCase() === '默认尺寸') {
-      renderNameError('“默认尺寸”是内置预设名称，请换一个名称。')
+    if (RESERVED_PRESET_NAMES.has(name.toLocaleLowerCase())) {
+      renderNameError('此名称已用于内置预设，请换一个名称。')
       presetNameInput.focus()
       presetNameInput.select()
       return false
@@ -449,6 +503,7 @@ export function initUpcaSizeControls({
         id: newPresetId(),
         name,
         mode: current.mode,
+        profile: current.profile,
         widthMm: current.widthMm,
         heightMm: current.heightMm,
         version: STORAGE_VERSION
@@ -468,6 +523,7 @@ export function initUpcaSizeControls({
     const updated = {
       ...existing,
       mode: current.mode,
+      profile: current.profile,
       widthMm: current.widthMm,
       heightMm: current.heightMm
     }
@@ -548,6 +604,7 @@ export function initUpcaSizeControls({
     if (!(item instanceof HTMLButtonElement)) return
     const id = item.dataset.upcaPresetId
     if (id === DEFAULT_ID) applyDefault()
+    else if (id === CUSTOMER_SAMPLE_ID) applyCustomerSample()
     else {
       const preset = presets.find((entry) => entry.id === id)
       if (preset) applyConfiguration(preset, preset.id)
@@ -653,10 +710,12 @@ export function initUpcaSizeControls({
     button.addEventListener('click', () => {
       const scale = Number(button.dataset.upcaScale)
       if (!draftValid || !Number.isFinite(scale) || scale <= 0) return
+      const baseline = baseGeometry()
       applyConfiguration({
         mode: 'proportional',
-        widthMm: DEFAULT_WIDTH_MM * scale,
-        heightMm: DEFAULT_HEIGHT_MM * scale
+        profile: current.profile,
+        widthMm: baseline.widthMm * scale,
+        heightMm: baseline.heightMm * scale
       }, selectedPresetId)
     })
   }
@@ -666,10 +725,11 @@ export function initUpcaSizeControls({
     button.addEventListener('click', () => {
       const mode = button.dataset.upcaMode
       if (!draftValid || (mode !== 'proportional' && mode !== 'independent')) return
+      const baseline = baseGeometry()
       const heightMm = mode === 'proportional'
-        ? current.widthMm * DEFAULT_HEIGHT_MM / DEFAULT_WIDTH_MM
+        ? current.widthMm * baseline.heightMm / baseline.widthMm
         : current.heightMm
-      applyConfiguration({ mode, widthMm: current.widthMm, heightMm }, selectedPresetId)
+      applyConfiguration({ mode, profile: current.profile, widthMm: current.widthMm, heightMm }, selectedPresetId)
     })
   }
 
@@ -682,7 +742,11 @@ export function initUpcaSizeControls({
     setVisibleForType,
     isValid: () => draftValid,
     getCurrent: currentConfig,
-    getRenderOptions: () => isDefaultGeometry() ? null : { widthMm: current.widthMm, heightMm: current.heightMm },
+    getRenderOptions: () => isDefaultGeometry() ? null : {
+      profile: current.profile,
+      widthMm: current.widthMm,
+      heightMm: current.heightMm
+    },
     getStatusName: selectedName
   }
 }
