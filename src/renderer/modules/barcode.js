@@ -43,6 +43,7 @@ export function initBarcode({
   let barcodeRenderedUpcaConfig = null
   const parsedBarcodeFonts = new Map()
 
+  const upcaShowBackground = document.querySelector('#upca-show-background')
   const barcodeInput = document.querySelector('#barcode-value')
   const barcodeArtboard = document.querySelector('#barcode-svg').closest('.artboard')
   const barcodeCompactSummary = document.querySelector('#barcode-compact-summary')
@@ -183,7 +184,8 @@ export function initBarcode({
     itf14Preset = null,
     prepared = null,
     genericOptions = null,
-    upcaOptions = null
+    upcaOptions = null,
+    showBackground = true
   ) {
     const type = barcodeTypes[typeName]
     if (!type) throw new Error('不支持的条码类型')
@@ -207,7 +209,7 @@ export function initBarcode({
 
     // 零售合规码制走 GS1 几何引擎；其余六种维持 JsBarcode 通用渲染。
     if (isRetailType(typeName)) {
-      renderRetailBarcode(svgElement, typeName, value, typeName === 'UPC-A' ? upcaOptions : null)
+      renderRetailBarcode(svgElement, typeName, value, typeName === 'UPC-A' ? { ...upcaOptions, showBackground } : null)
       // 零售合规码固定常规 OCR-B：GS1 §5.2.5 禁止粗/斜/细/窄体，
       // 不受用户字体下拉框（OCRB I/III/IV）影响。
       outlineBarcodeText(svgElement, RETAIL_HRI_FONT_KEY)
@@ -625,7 +627,7 @@ export function initBarcode({
   // 保存/导出到一半被强制退出重启会留下写了一半的文件。
   let barcodeOperationCount = 0
 
-  function invalidateBarcodeBatchForUpcaSize() {
+  function invalidateBarcodeBatchForUpcaSize(reason = '尺寸') {
     barcodeBatchRequestSeq += 1
     const hadBatch = state.barcodeBatchItems.length > 0 || generateBarcodeBatchButton.disabled
     state.barcodeBatchItems = []
@@ -635,7 +637,7 @@ export function initBarcode({
     setBarcodeBatchExportEnabled(false)
     generateBarcodeBatchButton.disabled = false
     generateBarcodeBatchButton.textContent = '批量生成'
-    if (hadBatch) barcodeBatchSummary.textContent = 'UPC-A 尺寸已改变，请重新批量生成。'
+    if (hadBatch) barcodeBatchSummary.textContent = `UPC-A ${reason}已改变，请重新批量生成。`
   }
 
   function handleUpcaSizeChange(change) {
@@ -662,6 +664,11 @@ export function initBarcode({
     openPopover,
     closePopover,
     isPopoverOpen
+  })
+
+  upcaShowBackground.addEventListener('change', () => {
+    invalidateBarcodeBatchForUpcaSize('白底设置')
+    void generateBarcode(false)
   })
 
   async function generateBarcode(notifyError = true) {
@@ -744,7 +751,7 @@ export function initBarcode({
     const upcaOptions = typeName === 'UPC-A' ? upcaSize.getRenderOptions() : null
 
     try {
-      renderBarcodeSvg(barcodeSvg, value, typeName, null, prepared, genericOptionsFor(typeName), upcaOptions)
+      renderBarcodeSvg(barcodeSvg, value, typeName, null, prepared, genericOptionsFor(typeName), upcaOptions, upcaShowBackground.checked)
       updateBarcodePreviewSize()
       if (token !== barcodeRequestSeq) return false
       gs1128Prepared = prepared
@@ -1001,6 +1008,7 @@ export function initBarcode({
       typeName,
       value,
       svgText: serializeBarcodeSvg(),
+      showBackground: typeName !== 'UPC-A' || upcaShowBackground.checked,
       raster,
       upcaOptions
     }
@@ -1020,7 +1028,7 @@ export function initBarcode({
     }
   }
 
-  function svgToPngBytes(svgText, target = null) {
+  function svgToPngBytes(svgText, target = null, showBackground = true) {
     // 目标尺寸来自自定义 UPC-A 几何；先检查，避免分配 Image 或 Canvas 像素缓冲。
     if (target) assertRasterTargetWithinLimits(target)
 
@@ -1043,8 +1051,10 @@ export function initBarcode({
 
           canvas.width = width
           canvas.height = height
-          context.fillStyle = '#ffffff'
-          context.fillRect(0, 0, width, height)
+          if (showBackground) {
+            context.fillStyle = '#ffffff'
+            context.fillRect(0, 0, width, height)
+          }
           context.drawImage(image, 0, 0, width, height)
           URL.revokeObjectURL(objectUrl)
 
@@ -1087,7 +1097,7 @@ export function initBarcode({
     try {
       const data = type === 'svg'
         ? artifact.svgText
-        : await svgToPngBytes(artifact.svgText, artifact.raster)
+        : await svgToPngBytes(artifact.svgText, artifact.raster, artifact.showBackground)
       const result = await window.api.saveBarcodeFile({
         type,
         name: `${artifact.typeName}-${artifact.value}`,
@@ -1248,7 +1258,7 @@ export function initBarcode({
       } else if (action === 'illustrator') {
         result = await window.api.openBarcodeInIllustrator({ data: artifact.svgText })
       } else {
-        const png = await svgToPngBytes(artifact.svgText, artifact.raster)
+        const png = await svgToPngBytes(artifact.svgText, artifact.raster, artifact.showBackground)
         result = await window.api.openBarcodeInPhotoshop({
           data: png,
           density: artifact.raster?.dpi
@@ -1445,6 +1455,7 @@ export function initBarcode({
     const requestId = ++barcodeBatchRequestSeq
     const batchItf14Preset = isItf14Type(batchType) ? state.itf14Preset : null
     const batchGenericOptions = genericOptionsFor(batchType)
+    const showBackground = batchType !== 'UPC-A' || upcaShowBackground.checked
     const batchUpcaOptions = batchType === 'UPC-A' ? upcaSize.getRenderOptions() : null
     const fragment = document.createDocumentFragment()
     let validCount = 0
@@ -1465,7 +1476,7 @@ export function initBarcode({
         // 后续导出只用这份结果，不重新校验、不共用上一条的数据。
         const prepared = isGs1128Type(batchType) ? await prepareGs1128(value) : null
         if (requestId !== barcodeBatchRequestSeq) return
-        renderBarcodeSvg(svg, value, batchType, itf14Preset, prepared, genericOptions, batchUpcaOptions)
+        renderBarcodeSvg(svg, value, batchType, itf14Preset, prepared, genericOptions, batchUpcaOptions, showBackground)
         item = {
           value,
           type: batchType,
@@ -1473,6 +1484,7 @@ export function initBarcode({
           prepared,
           genericOptions,
           upcaOptions: batchUpcaOptions,
+          showBackground,
           valid: true,
           svg
         }
@@ -1548,7 +1560,7 @@ export function initBarcode({
           name: safeBarcodeFileName(item.type, item.value, index),
           data: type === 'svg'
             ? svgText
-            : await svgToPngBytes(svgText, barcodeRasterTargetFor(item.type, item.value, item.itf14Preset, item.prepared, item.genericOptions, item.upcaOptions))
+            : await svgToPngBytes(svgText, barcodeRasterTargetFor(item.type, item.value, item.itf14Preset, item.prepared, item.genericOptions, item.upcaOptions), item.showBackground)
         })
         if (batchRequest === barcodeBatchRequestSeq && saveRequest === barcodeBatchSaveSeq) {
           barcodeBatchSummary.textContent = `正在准备 ${index + 1} / ${validItems.length}…`

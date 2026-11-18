@@ -321,7 +321,7 @@ export function buildBars(spec, modules, text, x, symbolStartMm, barBottomMm, gu
  * 文本以 <text> 写入（含 font-size，单位与 viewBox 一致即 mm），
  * 由调用方的 outlineBarcodeText() 统一转为路径。
  */
-/** @param {SVGSVGElement} svgElement @param {string} typeName @param {string} value @param {{widthMm?: number, heightMm?: number, profile?: string} | null} [options] */
+/** @param {SVGSVGElement} svgElement @param {string} typeName @param {string} value @param {{widthMm?: number, heightMm?: number, profile?: string, showBackground?: boolean} | null} [options] */
 export function renderRetailBarcode(svgElement, typeName, value, options = null) {
   const { modules, text } = encodeRetailModules(typeName, value)
   const geometry = computeRetailGeometry(typeName, options)
@@ -336,13 +336,15 @@ export function renderRetailBarcode(svgElement, typeName, value, options = null)
   svgElement.setAttribute('height', `${heightMm}mm`)
   svgElement.setAttribute('viewBox', `0 0 ${widthMm} ${heightMm}`)
 
-  const background = document.createElementNS(svgNs, 'rect')
-  background.setAttribute('x', '0')
-  background.setAttribute('y', '0')
-  background.setAttribute('width', String(widthMm))
-  background.setAttribute('height', String(heightMm))
-  background.setAttribute('fill', '#ffffff')
-  svgElement.append(background)
+  if (typeName !== 'UPC-A' || options?.showBackground !== false) {
+    const background = document.createElementNS(svgNs, 'rect')
+    background.setAttribute('x', '0')
+    background.setAttribute('y', '0')
+    background.setAttribute('width', String(widthMm))
+    background.setAttribute('height', String(heightMm))
+    background.setAttribute('fill', '#ffffff')
+    svgElement.append(background)
+  }
 
   // 条：逐段生成（含 Table 5-10 补偿）
   for (const bar of buildBars(spec, modules, text, x, symbolStartMm, barBottomMm, guardBottomMm)) {
