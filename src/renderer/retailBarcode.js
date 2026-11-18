@@ -25,6 +25,8 @@ const UPC_A_CUSTOMER_SAMPLE = 'customer-sample'
 const UPC_A_CUSTOMER_SHORT = 'customer-short'
 const CUSTOMER_LAYOUTS = {
   [UPC_A_CUSTOMER_SAMPLE]: { width: 98.14 * 25.4 / 72, height: 25.908, x: 0.30825, left: 2.428, top: 0.747, bottom: 22.272, cap: 2.56, digitInset: 0.69, outerDrop: 0.26, leftGap: 3.28, rightGap: 3.25 },
+  "customer-b": { width: 78.512 * 25.4 / 72, height: 20.7264, x: 0.243065, left: 2.159, top: 0.60325, bottom: 17.41276, cap: 2.02107, digitInset: 0.98683, outerDrop: 0.20732, leftGap: 3.278, rightGap: 3.25 },
+  "customer-c": { width: 196.28 * 25.4 / 72, height: 51.816, x: 0.6126, left: 5.14844, top: 1.24813, bottom: 44.61792, cap: 5.09588, digitInset: 1.33209, outerDrop: 0.52278, leftGap: 3.28, rightGap: 3.25 },
   [UPC_A_CUSTOMER_SHORT]: { width: 88.556 * 25.4 / 72, height: 7.366, x: 0.280384, left: 2.0877, top: 0.4812, bottom: 4.0432, cap: 2.33, digitInset: 0.638, outerDrop: 0.239, leftGap: 3.28, rightGap: 3.25 }
 }
 // 首位数字决定 EAN-13 左侧 6 位用 L(Number Set A) 还是 G(Number Set B)，

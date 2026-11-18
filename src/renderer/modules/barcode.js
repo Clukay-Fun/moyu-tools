@@ -473,7 +473,7 @@ export function initBarcode({
 
     const rows = [
       customerSample
-        ? ['版式预设', `${geometry.profile === 'customer-short' ? '客户矮版' : '客户样稿'} · 按参考稿排版，不按 GS1 尺寸声明`]
+        ? ['版式预设', '按对应档位的参考稿排版，不按 GS1 尺寸声明']
         : customUpca
           ? ['尺寸状态', 'GS1 标准基准上的自定义尺寸，需打样验证扫描效果']
           : pending
@@ -518,19 +518,19 @@ export function initBarcode({
   }
   const UPC_A_DEFAULT_WIDTH_MM = computeRetailGeometry('UPC-A').widthMm
 
-  // 只随预览容器变化计算默认尺寸的显示比例；尺寸参数变化不会触发重新适配。
+  // 用当前条码边界适配预览区。
   // CSS 像素尺寸放在容器上，不写入 SVG，避免污染毫米单位的导出和 Adobe 联动。
   function updateBarcodePreviewSize() {
     const scaled = state.selections.bc === 'UPC-A'
     barcodeArtboard.classList.toggle('artboard--scaled', scaled)
     if (!scaled || !barcodeSvg.hasAttribute('viewBox')) return
-    const defaults = computeRetailGeometry('UPC-A')
     const style = getComputedStyle(barcodeArtboard)
     const width = barcodeArtboard.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
     const height = barcodeArtboard.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)
     if (width <= 0 || height <= 0) return
-    const pixelsPerMm = Math.min(width * 0.8 / defaults.widthMm, height * 0.8 / defaults.heightMm)
     const viewBox = barcodeSvg.viewBox.baseVal
+    if (viewBox.width <= 0 || viewBox.height <= 0) return
+    const pixelsPerMm = Math.min(width * 0.8 / viewBox.width, height * 0.8 / viewBox.height)
     barcodeArtboard.style.setProperty('--barcode-preview-width', `${viewBox.width * pixelsPerMm}px`)
     barcodeArtboard.style.setProperty('--barcode-preview-height', `${viewBox.height * pixelsPerMm}px`)
   }
@@ -558,12 +558,13 @@ export function initBarcode({
     previewZoom = nextZoom
     applyPreviewZoom()
   }, { passive: false })
-  barcodeArtboard.addEventListener('dblclick', () => {
+  function resetBarcodePreviewView() {
     previewZoom = 1
     previewOffsetX = 0
     previewOffsetY = 0
     applyPreviewZoom()
-  })
+  }
+  barcodeArtboard.addEventListener('dblclick', resetBarcodePreviewView)
   let previewDrag = null
   let previewSpaceHeld = false
   let previewHovered = false
@@ -653,7 +654,10 @@ export function initBarcode({
 
     if (change.geometryChanged || change.becameValid || change.configurationChanged) {
       if (change.geometryChanged || change.becameValid) invalidateBarcodeBatchForUpcaSize()
-      if (state.selections.bc === 'UPC-A') void generateBarcode(false)
+      if (state.selections.bc === 'UPC-A') {
+        if (change.geometryChanged || change.configurationChanged) resetBarcodePreviewView()
+        void generateBarcode(false)
+      }
     }
   }
 

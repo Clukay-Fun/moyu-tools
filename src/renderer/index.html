@@ -427,9 +427,7 @@
                       </div>
                       <div class="m-menu app-menu upca-preset-menu" id="upca-preset-menu" role="listbox" aria-label="UPC-A 尺寸预设" hidden>
                         <div role="group" aria-label="内置预设">
-                          <button type="button" role="option" data-upca-preset-id="default" aria-selected="true">GS1 标准 · 100%</button>
-                          <button type="button" role="option" data-upca-preset-id="customer-sample" aria-selected="false">客户样稿 · 100%</button>
-                          <button type="button" role="option" data-upca-preset-id="customer-short" aria-selected="false">客户矮版 · 100%</button>
+                          <button type="button" role="option" data-upca-preset-id="default" aria-selected="true">GS1 标准</button>
                         </div>
                         <hr />
                         <div role="group" aria-label="我的预设">
@@ -442,15 +440,14 @@
                         <button type="button" role="menuitem" data-upca-preset-action="rename">重命名</button>
                         <button type="button" role="menuitem" data-upca-preset-action="delete">删除</button>
                       </div>
-                      <div class="upca-size-preset-status" id="upca-size-status" role="status" aria-live="polite" hidden></div>
                       <div class="upca-size-storage-status" id="upca-storage-status" role="status" aria-live="polite"></div>
                       <div class="upca-size-control">
                         <span class="upca-size-label">快捷档位</span>
                         <div class="m-segmented m-segmented--sm upca-size-presets" id="upca-size-presets" role="group" aria-label="UPC-A 快捷尺寸">
-                          <button type="button" data-upca-scale="0.8" aria-pressed="false">80%</button>
-                          <button type="button" data-upca-scale="1" aria-pressed="true" aria-label="100%，默认尺寸">100%</button>
-                          <button type="button" data-upca-scale="1.5" aria-pressed="false">150%</button>
-                          <button type="button" data-upca-scale="2" aria-pressed="false">200%</button>
+                          <button type="button" data-upca-tier="A" aria-label="客户样稿 A" aria-pressed="false">A</button>
+                          <button type="button" data-upca-tier="B" aria-label="客户样稿 B" aria-pressed="false">B</button>
+                          <button type="button" data-upca-tier="C" aria-label="客户样稿 C" aria-pressed="false">C</button>
+                          <button type="button" data-upca-tier="D" aria-label="客户矮版 D" aria-pressed="false">D</button>
                         </div>
                       </div>
                       <div class="upca-size-control">
@@ -480,7 +477,7 @@
                           <small class="upca-size-error" id="upca-height-error" hidden></small>
                         </div>
                       </div>
-                      <label class="barcode-check"><input type="checkbox" id="upca-show-background" checked /> 显示白底</label>
+                      <label class="barcode-check"><input type="checkbox" id="upca-show-background" checked /><span>显示白底</span></label>
                       <small id="upca-size-help">含左右静区及下方数字</small>
                       <p class="barcode-message preview upca-size-warning" id="upca-size-warning" role="status" aria-live="polite" hidden>自定义尺寸，需打样验证扫描效果</p>
                       <div class="upca-preset-actions">

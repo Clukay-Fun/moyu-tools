@@ -540,17 +540,18 @@
       </div>
       <div class="cat-item">
         <dl class="cat-meta">
-          <dt>UPC-A 尺寸与预设</dt><dd>按业务顺序组合 <code>.m-select</code>、<code>.m-segmented</code>、<code>.m-stepper--value</code> 和 <code>.m-btn</code>；数值优先步进器缩窄加减区、放大数字并隐藏原生微调箭头，保留方向键调整；参数错误用 <code>aria-invalid</code>，右栏空间不足时由模块布局容器滚动。条码预览以默认尺寸为显示基准，尺寸调整实时改变画面大小；滚轮或触控板双指上下滑动缩放，按住空格拖动或按住中键拖动可移动画面，双击恢复默认视图。焦点在按钮或输入控件上时保留控件的空格键行为；预览缩放与位移不写入导出 SVG。现用模块：条码 › UPC-A</dd>
+          <dt>UPC-A 尺寸与预设</dt><dd>按业务顺序组合 <code>.m-select</code>、<code>.m-segmented</code>、<code>.m-stepper--value</code> 和 <code>.m-btn</code>；GS1 标准尺寸保持默认，另有客户参考稿 A／B／C／D 四个固定档位，客户档明确标注不按 GS1 尺寸声明。切换档位时条码自动适配预览区；滚轮或触控板双指上下滑动缩放，按住空格拖动或按住中键拖动可移动画面，双击恢复默认视图。焦点在按钮或输入控件上时保留控件的空格键行为；预览缩放与位移不写入导出 SVG。现用模块：条码 › UPC-A</dd>
         </dl>
         <div class="cat-pair">
           <div class="cat-stage" data-theme="light">
             <span class="cat-label">浅色 · UPC-A 参数卡</span>
             <div class="m-card control-card barcode-upca-size-card">
-              <div class="upca-size-card-header"><span class="label">尺寸与预设</span><button class="m-btn m-btn--quiet m-btn--sm" type="button">恢复默认</button></div>
-              <div class="upca-preset-row"><span class="upca-size-label">预设</span><div class="upca-preset-controls"><button class="m-select upca-preset-trigger" type="button">默认尺寸</button><button class="m-btn m-btn--quiet m-btn--icon" type="button" aria-label="预设操作"><svg class="ic" aria-hidden="true"><use href="#ic-more-horizontal"></use></svg></button></div></div>
-              <div class="upca-size-control"><span class="upca-size-label">快捷档位</span><div class="m-segmented m-segmented--sm upca-size-presets"><button type="button" aria-pressed="false">80%</button><button type="button" aria-pressed="true">100% 默认</button><button type="button" aria-pressed="false">150%</button><button type="button" aria-pressed="false">200%</button></div></div>
+              <div class="upca-size-card-header"><span class="label">尺寸与预设</span><button class="m-btn m-btn--quiet m-btn--sm" type="button">恢复 GS1 默认</button></div>
+              <div class="upca-preset-row"><span class="upca-size-label">预设</span><div class="upca-preset-controls"><button class="m-select upca-preset-trigger" type="button">GS1 标准</button><button class="m-btn m-btn--quiet m-btn--icon" type="button" aria-label="预设操作"><svg class="ic" aria-hidden="true"><use href="#ic-more-horizontal"></use></svg></button></div></div>
+              <div class="upca-size-control"><span class="upca-size-label">快捷档位</span><div class="m-segmented m-segmented--sm upca-size-presets"><button type="button" aria-pressed="false">A</button><button type="button" aria-pressed="false">B</button><button type="button" aria-pressed="false">C</button><button type="button" aria-pressed="false">D</button></div></div>
               <div class="upca-size-control"><span class="upca-size-label">调整方式</span><div class="m-segmented m-segmented--sm"><button type="button" aria-pressed="true">等比缩放</button><button type="button" aria-pressed="false">独立调整</button></div></div>
               <div class="upca-size-fields"><div class="upca-size-field"><span class="upca-size-field-label">宽度 mm</span><span class="m-stepper m-stepper--value"><button type="button" aria-label="减少">−</button><input type="number" value="37.29" /><button type="button" aria-label="增加">+</button></span></div><div class="upca-size-field"><span class="upca-size-field-label">总高度 mm</span><span class="m-stepper m-stepper--value"><button type="button" aria-label="减少">−</button><input type="number" value="25.93" /><button type="button" aria-label="增加">+</button></span></div></div>
+              <label class="barcode-check"><input type="checkbox" checked /><span>显示白底</span></label>
               <small>含左右静区及下方数字</small>
               <div class="upca-preset-actions"><button class="m-btn" type="button">另存为预设</button><button class="m-btn" type="button" disabled>更新预设</button></div>
             </div>
@@ -558,11 +559,12 @@
           <div class="cat-stage" data-theme="dark">
             <span class="cat-label">深色 · UPC-A 参数卡</span>
             <div class="m-card control-card barcode-upca-size-card">
-              <div class="upca-size-card-header"><span class="label">尺寸与预设</span><button class="m-btn m-btn--quiet m-btn--sm" type="button">恢复默认</button></div>
-              <div class="upca-preset-row"><span class="upca-size-label">预设</span><div class="upca-preset-controls"><button class="m-select upca-preset-trigger" type="button">默认尺寸</button><button class="m-btn m-btn--quiet m-btn--icon" type="button" aria-label="预设操作"><svg class="ic" aria-hidden="true"><use href="#ic-more-horizontal"></use></svg></button></div></div>
-              <div class="upca-size-control"><span class="upca-size-label">快捷档位</span><div class="m-segmented m-segmented--sm upca-size-presets"><button type="button" aria-pressed="false">80%</button><button type="button" aria-pressed="true">100% 默认</button><button type="button" aria-pressed="false">150%</button><button type="button" aria-pressed="false">200%</button></div></div>
+              <div class="upca-size-card-header"><span class="label">尺寸与预设</span><button class="m-btn m-btn--quiet m-btn--sm" type="button">恢复 GS1 默认</button></div>
+              <div class="upca-preset-row"><span class="upca-size-label">预设</span><div class="upca-preset-controls"><button class="m-select upca-preset-trigger" type="button">GS1 标准</button><button class="m-btn m-btn--quiet m-btn--icon" type="button" aria-label="预设操作"><svg class="ic" aria-hidden="true"><use href="#ic-more-horizontal"></use></svg></button></div></div>
+              <div class="upca-size-control"><span class="upca-size-label">快捷档位</span><div class="m-segmented m-segmented--sm upca-size-presets"><button type="button" aria-pressed="false">A</button><button type="button" aria-pressed="false">B</button><button type="button" aria-pressed="false">C</button><button type="button" aria-pressed="false">D</button></div></div>
               <div class="upca-size-control"><span class="upca-size-label">调整方式</span><div class="m-segmented m-segmented--sm"><button type="button" aria-pressed="true">等比缩放</button><button type="button" aria-pressed="false">独立调整</button></div></div>
               <div class="upca-size-fields"><div class="upca-size-field"><span class="upca-size-field-label">宽度 mm</span><span class="m-stepper m-stepper--value"><button type="button" aria-label="减少">−</button><input type="number" value="37.29" /><button type="button" aria-label="增加">+</button></span></div><div class="upca-size-field"><span class="upca-size-field-label">总高度 mm</span><span class="m-stepper m-stepper--value"><button type="button" aria-label="减少">−</button><input type="number" value="25.93" /><button type="button" aria-label="增加">+</button></span></div></div>
+              <label class="barcode-check"><input type="checkbox" checked /><span>显示白底</span></label>
               <small>含左右静区及下方数字</small>
               <div class="upca-preset-actions"><button class="m-btn" type="button">另存为预设</button><button class="m-btn" type="button" disabled>更新预设</button></div>
             </div>

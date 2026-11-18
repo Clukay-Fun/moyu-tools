@@ -858,6 +858,18 @@
   display: none;
 }
 
+.barcode-upca-size-card .barcode-check {
+  display: flex;
+  align-items: center;
+  justify-self: start;
+  gap: var(--sp-2);
+}
+
+.barcode-upca-size-card .barcode-check input {
+  flex: none;
+  margin: 0;
+}
+
 .barcode-upca-size-card {
   gap: var(--sp-3);
   container-type: inline-size;
