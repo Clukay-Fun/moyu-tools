@@ -5,20 +5,21 @@ import { computeRetailGeometry } from '../retailBarcode.js'
 const UPC_A = 'UPC-A'
 const DEFAULT_ID = 'default'
 const CUSTOMER_SAMPLE_ID = 'customer-sample'
+const CUSTOMER_SHORT_ID = 'customer-short'
 const DEFAULT_NAME = 'GS1 标准'
 const CUSTOMER_SAMPLE_NAME = '客户样稿'
-const RESERVED_PRESET_NAMES = new Set([DEFAULT_NAME.toLocaleLowerCase(), CUSTOMER_SAMPLE_NAME.toLocaleLowerCase(), '默认尺寸'])
+const CUSTOMER_SHORT_NAME = '客户矮版'
+const RESERVED_PRESET_NAMES = new Set([DEFAULT_NAME.toLocaleLowerCase(), CUSTOMER_SAMPLE_NAME.toLocaleLowerCase(), CUSTOMER_SHORT_NAME, '默认尺寸'])
 const STORAGE_KEY = 'moyu.upca-size-presets.v1'
 const STORAGE_VERSION = 1
 const DEFAULT_GEOMETRY = computeRetailGeometry(UPC_A)
 const CUSTOMER_SAMPLE_GEOMETRY = computeRetailGeometry(UPC_A, { profile: CUSTOMER_SAMPLE_ID })
 const DEFAULT_WIDTH_MM = DEFAULT_GEOMETRY.widthMm
 const DEFAULT_HEIGHT_MM = DEFAULT_GEOMETRY.heightMm
-const CUSTOMER_SAMPLE_WIDTH_MM = CUSTOMER_SAMPLE_GEOMETRY.widthMm
-const CUSTOMER_SAMPLE_HEIGHT_MM = CUSTOMER_SAMPLE_GEOMETRY.heightMm
+const CUSTOMER_SHORT_GEOMETRY = computeRetailGeometry(UPC_A, { profile: CUSTOMER_SHORT_ID })
 
 /** @typedef {'proportional' | 'independent'} UpcaMode */
-/** @typedef {'gs1' | 'customer-sample'} UpcaProfile */
+/** @typedef {'gs1' | 'customer-sample' | 'customer-short'} UpcaProfile */
 /** @typedef {{ mode: UpcaMode, profile: UpcaProfile, widthMm: number, heightMm: number }} UpcaDimensions */
 /** @typedef {UpcaDimensions & { id: string, name: string, version: number }} UpcaPreset */
 /** @typedef {UpcaDimensions & { presetId: string, presetName: string }} UpcaConfig */
@@ -42,8 +43,8 @@ function normalizePreset(value) {
   const record = asRecord(value)
   if (!record) return null
   const mode = record.mode === 'independent' ? 'independent' : record.mode === 'proportional' ? 'proportional' : null
-  const profile = record.profile === CUSTOMER_SAMPLE_ID
-    ? CUSTOMER_SAMPLE_ID
+  const profile = record.profile === CUSTOMER_SAMPLE_ID || record.profile === CUSTOMER_SHORT_ID
+    ? record.profile
     : record.profile == null || record.profile === 'gs1' ? 'gs1' : null
   const widthMm = Number(record.widthMm)
   const heightMm = Number(record.heightMm)
@@ -153,6 +154,7 @@ export function initUpcaSizeControls({
 
   function selectedName() {
     if (selectedPresetId === CUSTOMER_SAMPLE_ID) return CUSTOMER_SAMPLE_NAME
+    if (selectedPresetId === CUSTOMER_SHORT_ID) return CUSTOMER_SHORT_NAME
     const preset = selectedPreset()
     if (!preset) return DEFAULT_NAME
     return RESERVED_PRESET_NAMES.has(preset.name.toLocaleLowerCase()) ? `${preset.name}（自建）` : preset.name
@@ -164,6 +166,7 @@ export function initUpcaSizeControls({
   }
 
   function baseGeometry(profile = current.profile) {
+    if (profile === CUSTOMER_SHORT_ID) return CUSTOMER_SHORT_GEOMETRY
     return profile === CUSTOMER_SAMPLE_ID ? CUSTOMER_SAMPLE_GEOMETRY : DEFAULT_GEOMETRY
   }
 
@@ -189,7 +192,7 @@ export function initUpcaSizeControls({
       const validPresets = /** @type {UpcaPreset[]} */ (loaded)
       const ids = new Set(validPresets.map((preset) => preset.id))
       const names = new Set(validPresets.map((preset) => preset.name.toLocaleLowerCase()))
-      if (ids.size !== validPresets.length || ids.has(DEFAULT_ID) || ids.has(CUSTOMER_SAMPLE_ID) ||
+      if (ids.size !== validPresets.length || ids.has(DEFAULT_ID) || ids.has(CUSTOMER_SAMPLE_ID) || ids.has(CUSTOMER_SHORT_ID) ||
           names.size !== validPresets.length || names.has('默认尺寸')) {
         throw new Error('预设名称或编号重复，未覆盖原数据')
       }
@@ -230,19 +233,10 @@ export function initUpcaSizeControls({
 
   function isDirty() {
     const saved = selectedPreset()
-    const baseline = saved || (selectedPresetId === CUSTOMER_SAMPLE_ID
-      ? {
-          mode: 'proportional',
-          profile: /** @type {UpcaProfile} */ (CUSTOMER_SAMPLE_ID),
-          widthMm: CUSTOMER_SAMPLE_WIDTH_MM,
-          heightMm: CUSTOMER_SAMPLE_HEIGHT_MM
-        }
-      : {
-          mode: 'proportional',
-          profile: /** @type {UpcaProfile} */ ('gs1'),
-          widthMm: DEFAULT_WIDTH_MM,
-          heightMm: DEFAULT_HEIGHT_MM
-        })
+    const profile = selectedPresetId === CUSTOMER_SHORT_ID || selectedPresetId === CUSTOMER_SAMPLE_ID
+      ? selectedPresetId : /** @type {const} */ ('gs1')
+    const { widthMm, heightMm } = baseGeometry(profile)
+    const baseline = saved || { mode: 'proportional', profile, widthMm, heightMm }
     return current.mode !== baseline.mode || !sameDimensions(current, baseline)
   }
 
@@ -252,7 +246,7 @@ export function initUpcaSizeControls({
 
   function needsScanWarning() {
     if (!draftValid) return false
-    if (current.profile === CUSTOMER_SAMPLE_ID) return true
+    if (current.profile !== 'gs1') return true
     const baseline = baseGeometry()
     const widthScale = current.widthMm / baseline.widthMm
     const heightScale = current.heightMm / baseline.heightMm
@@ -282,7 +276,9 @@ export function initUpcaSizeControls({
     sampleItem?.setAttribute('aria-selected', String(selectedPresetId === CUSTOMER_SAMPLE_ID))
     const rename = presetActionsMenu.querySelector('[data-upca-preset-action="rename"]')
     const remove = presetActionsMenu.querySelector('[data-upca-preset-action="delete"]')
-    const isBuiltIn = selectedPresetId === DEFAULT_ID || selectedPresetId === CUSTOMER_SAMPLE_ID
+    presetMenu.querySelector(`[data-upca-preset-id="${CUSTOMER_SHORT_ID}"]`)
+      ?.setAttribute('aria-selected', String(selectedPresetId === CUSTOMER_SHORT_ID))
+    const isBuiltIn = selectedPresetId === DEFAULT_ID || selectedPresetId === CUSTOMER_SAMPLE_ID || selectedPresetId === CUSTOMER_SHORT_ID
     if (rename instanceof HTMLButtonElement) rename.disabled = isBuiltIn
     if (remove instanceof HTMLButtonElement) remove.disabled = isBuiltIn
   }
@@ -297,6 +293,7 @@ export function initUpcaSizeControls({
         ? ''
         : selectedPresetId === CUSTOMER_SAMPLE_ID
           ? '客户样稿基准'
+          : selectedPresetId === CUSTOMER_SHORT_ID ? '客户矮版基准'
           : '已保存预设'
     sizeStatus.textContent = statusText
     sizeStatus.hidden = !statusText
@@ -318,8 +315,9 @@ export function initUpcaSizeControls({
       button.disabled = !draftValid
     }
 
-    warning.textContent = current.profile === CUSTOMER_SAMPLE_ID
-      ? '客户样稿版式不按 GS1 尺寸声明；用于对齐样稿，量产前请确认并打样验证。'
+    const customerLayoutName = current.profile === CUSTOMER_SHORT_ID ? CUSTOMER_SHORT_NAME : CUSTOMER_SAMPLE_NAME
+    warning.textContent = current.profile !== 'gs1'
+      ? `${customerLayoutName}版式不按 GS1 尺寸声明；用于对齐参考稿，量产前请确认并打样验证。`
       : '自定义尺寸，需打样验证扫描效果'
     warning.hidden = !needsScanWarning()
     saveAsButton.disabled = !draftValid
@@ -426,13 +424,10 @@ export function initUpcaSizeControls({
     applyConfiguration({ mode: 'proportional', profile: 'gs1', widthMm: DEFAULT_WIDTH_MM, heightMm: DEFAULT_HEIGHT_MM }, DEFAULT_ID)
   }
 
-  function applyCustomerSample() {
-    applyConfiguration({
-      mode: 'proportional',
-      profile: CUSTOMER_SAMPLE_ID,
-      widthMm: CUSTOMER_SAMPLE_WIDTH_MM,
-      heightMm: CUSTOMER_SAMPLE_HEIGHT_MM
-    }, CUSTOMER_SAMPLE_ID)
+  /** @param {'customer-sample' | 'customer-short'} profile */
+  function applyCustomerSample(profile) {
+    const { widthMm, heightMm } = baseGeometry(profile)
+    applyConfiguration({ mode: 'proportional', profile, widthMm, heightMm }, profile)
   }
 
   /** @param {string} message */
@@ -604,7 +599,7 @@ export function initUpcaSizeControls({
     if (!(item instanceof HTMLButtonElement)) return
     const id = item.dataset.upcaPresetId
     if (id === DEFAULT_ID) applyDefault()
-    else if (id === CUSTOMER_SAMPLE_ID) applyCustomerSample()
+    else if (id === CUSTOMER_SAMPLE_ID || id === CUSTOMER_SHORT_ID) applyCustomerSample(id)
     else {
       const preset = presets.find((entry) => entry.id === id)
       if (preset) applyConfiguration(preset, preset.id)

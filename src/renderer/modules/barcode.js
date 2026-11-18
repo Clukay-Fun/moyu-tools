@@ -463,15 +463,15 @@ export function initBarcode({
     // 版式未锁定的码制：**保留全部已锁定参数**，只把合规结论标为待定。
     // （早前的提前 return 会把条高/静区/尺寸一并藏掉，反而丢失有效信息。）
     const pending = geometry.spec.hri.placementPending === true
-    const customerSample = typeName === 'UPC-A' && upcaOptions?.profile === 'customer-sample'
+    const customerSample = typeName === 'UPC-A' && geometry.profile !== 'gs1'
     const customUpca = typeName === 'UPC-A' && Boolean(upcaOptions) && !customerSample
     const baseWidthMm = customerSample
-      ? computeRetailGeometry('UPC-A', { profile: 'customer-sample' }).widthMm
+      ? computeRetailGeometry('UPC-A', { profile: geometry.profile }).widthMm
       : UPC_A_DEFAULT_WIDTH_MM
 
     const rows = [
       customerSample
-        ? ['版式预设', '客户样稿 · 按参考稿排版，不按 GS1 尺寸声明']
+        ? ['版式预设', `${geometry.profile === 'customer-short' ? '客户矮版' : '客户样稿'} · 按参考稿排版，不按 GS1 尺寸声明`]
         : customUpca
           ? ['尺寸状态', 'GS1 标准基准上的自定义尺寸，需打样验证扫描效果']
           : pending

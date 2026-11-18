@@ -22,6 +22,11 @@ const UPC = UPCModule.default || UPCModule
 const EAN13 = EAN13Module.default || EAN13Module
 const EAN8 = EAN8Module.default || EAN8Module
 const UPC_A_CUSTOMER_SAMPLE = 'customer-sample'
+const UPC_A_CUSTOMER_SHORT = 'customer-short'
+const CUSTOMER_LAYOUTS = {
+  [UPC_A_CUSTOMER_SAMPLE]: { width: 98.14 * 25.4 / 72, height: 25.908, x: 0.30825, left: 2.428, top: 0.747, bottom: 22.272, cap: 2.56, digitInset: 0.69, outerDrop: 0.26, leftGap: 3.28, rightGap: 3.25 },
+  [UPC_A_CUSTOMER_SHORT]: { width: 88.556 * 25.4 / 72, height: 7.366, x: 0.280384, left: 2.0877, top: 0.4812, bottom: 4.0432, cap: 2.33, digitInset: 0.638, outerDrop: 0.239, leftGap: 3.28, rightGap: 3.25 }
+}
 // 首位数字决定 EAN-13 左侧 6 位用 L(Number Set A) 还是 G(Number Set B)，
 // 直接影响 Table 5-10 的补偿方向，必须按位取用。
 const EAN13_STRUCTURE = eanConstants.EAN13_STRUCTURE || eanConstants.default?.EAN13_STRUCTURE
@@ -193,36 +198,38 @@ export function encodeRetailModules(typeName, value) {
   return { modules: data, text }
 }
 
-/** 计算该码制的几何（毫米）；UPC-A 可选择 GS1 或客户样稿基准。 */
+/** 计算该码制的几何（毫米）；UPC-A 可选择 GS1 或客户参考稿预设。 */
 /** @param {string} typeName @param {{widthMm?: number, heightMm?: number, profile?: string} | null} [options] */
 export function computeRetailGeometry(typeName, options = null) {
   let spec = RETAIL_SPECS[typeName]
   if (!spec) throw new Error(`${typeName} 不是零售合规码制`)
 
-  let customerSample = false
+  let customerLayout = null
+  let customerScale = 1
+  let widthMm = 0
   let symbolStartMm = spec.quietLeftX * spec.xDimensionMm
   let barTopMm = 0
   let heightMm = 0
   if (typeName === 'UPC-A') {
-    customerSample = options?.profile === UPC_A_CUSTOMER_SAMPLE
-    const sampleWidth = 98.14 * 25.4 / 72
-    const sampleHeight = 73.44 * 25.4 / 72
+    customerLayout = Object.hasOwn(CUSTOMER_LAYOUTS, options?.profile ?? '') ? CUSTOMER_LAYOUTS[options.profile] : null
     const standardWidth = (spec.quietLeftX + spec.dataModules + spec.quietRightX) * spec.xDimensionMm
     const standardHeight = spec.barHeightMm + spec.hri.gapX * spec.xDimensionMm + spec.hri.capHeightMm
-    const defaultWidth = customerSample ? sampleWidth : standardWidth
-    const defaultHeight = customerSample ? sampleHeight : standardHeight
+    const defaultWidth = customerLayout?.width ?? standardWidth
+    const defaultHeight = customerLayout?.height ?? standardHeight
     const width = Number(options?.widthMm ?? defaultWidth)
     const height = Number(options?.heightMm ?? defaultHeight * width / defaultWidth)
     if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) throw new Error('尺寸必须为大于零的有效数字')
-    if (customerSample) {
-      // 以用户提供的「upc标准 (1).ai」第一页白底为基准，仅作为客户样稿版式。
-      const scale = width / sampleWidth
-      const x = 0.30825 * scale
-      const capHeightMm = 2.56 * scale
-      const barHeightMm = height - (sampleHeight - 22.272 + 0.747) * scale
-      if (barHeightMm <= 0) throw new Error('总高度不足以容纳客户样稿条形与数字')
-      symbolStartMm = 2.428 * scale
-      barTopMm = 0.747 * scale
+    widthMm = width
+    if (customerLayout) {
+      // 客户版式按参考稿白底左上角测量。独立调整时保留上下留白和数字比例。
+      const scale = width / customerLayout.width
+      customerScale = scale
+      const x = customerLayout.x * scale
+      const capHeightMm = customerLayout.cap * scale
+      const barHeightMm = height - (customerLayout.height - customerLayout.bottom + customerLayout.top) * scale
+      if (barHeightMm <= 0) throw new Error('总高度不足以容纳客户版式的条形与数字')
+      symbolStartMm = customerLayout.left * scale
+      barTopMm = customerLayout.top * scale
       const quietLeftX = symbolStartMm / x
       const quietRightX = (width - symbolStartMm - spec.dataModules * x) / x
       spec = {
@@ -251,24 +258,22 @@ export function computeRetailGeometry(typeName, options = null) {
   const barBottomMm = spec.barHeightMm
   const guardBottomMm = barBottomMm + spec.guardExtendX * x
   const hriTopMm = barBottomMm + spec.hri.gapX * x
-  const hriBaselineMm = customerSample
-    ? heightMm - 0.69 * (x / 0.30825)
+  const hriBaselineMm = customerLayout
+    ? heightMm - customerLayout.digitInset * customerScale
     : hriTopMm + spec.hri.capHeightMm
 
   return {
     spec,
     x,
     totalModules,
-    widthMm: typeName === 'UPC-A' ? Number(options?.widthMm ?? (customerSample
-      ? 98.14 * 25.4 / 72
-      : totalModules * 0.33)) : totalModules * x,
+    widthMm: typeName === 'UPC-A' ? widthMm : totalModules * x,
     heightMm: typeName === 'UPC-A' ? heightMm : hriBaselineMm,
     symbolStartMm,
     barTopMm,
     barBottomMm,
     guardBottomMm,
     hriBaselineMm,
-    profile: customerSample ? UPC_A_CUSTOMER_SAMPLE : 'gs1'
+    profile: customerLayout ? options.profile : 'gs1'
   }
 }
 
@@ -322,7 +327,7 @@ export function renderRetailBarcode(svgElement, typeName, value, options = null)
   const geometry = computeRetailGeometry(typeName, options)
   const { spec, x, widthMm, heightMm, symbolStartMm, barTopMm, barBottomMm, guardBottomMm, hriBaselineMm } =
     geometry
-  const customerSample = typeName === 'UPC-A' && geometry.profile === UPC_A_CUSTOMER_SAMPLE
+  const customerLayout = CUSTOMER_LAYOUTS[geometry.profile]
 
   const svgNs = 'http://www.w3.org/2000/svg'
   svgElement.replaceChildren()
@@ -356,13 +361,13 @@ export function renderRetailBarcode(svgElement, typeName, value, options = null)
     if (content == null) return
     const node = document.createElementNS(svgNs, 'text')
     node.setAttribute('x', String(xMm))
-    node.setAttribute('y', String(customerSample
-      ? hriBaselineMm + (edge ? 0.26 * x / 0.30825 : 0)
+    node.setAttribute('y', String(customerLayout
+      ? hriBaselineMm + (edge ? customerLayout.outerDrop * x / customerLayout.x : 0)
       : hriBaselineMm))
     node.setAttribute('text-anchor', 'middle')
     // 写入目标**字形高度**而非 em size（opentype 的 fontSize 是 em），
     // 由 outlineBarcodeText() 按字体 metrics 反算。
-    node.setAttribute('data-cap-height', String(spec.hri.capHeightMm * (customerSample && edge ? 0.78 : 1)))
+    node.setAttribute('data-cap-height', String(spec.hri.capHeightMm * (customerLayout && edge ? 0.78 : 1)))
     node.setAttribute('fill', '#000000')
     node.setAttribute('data-anchor-edge', edge || 'center')
     // 仅 UPC-A 定义了「符号外数字最大墨宽 4X、超出等比缩小」。
@@ -382,8 +387,8 @@ export function renderRetailBarcode(svgElement, typeName, value, options = null)
 
   // 符号外首位。UPC-A 用规范值 outsideEdgeGapX；
   // EAN-13 水平位置未锁定，用 provisional 值（**非规范值**，见 spec 注释）。
-  const outsideFirstOffsetX = customerSample
-    ? 3.28
+  const outsideFirstOffsetX = customerLayout
+    ? customerLayout.leftGap
     : (spec.hri.outsideEdgeGapX ?? spec.hri.outsideFirstProvisionalOffsetX ?? 0)
   addDigit(layout.outsideFirst, symbolStartMm - outsideFirstOffsetX * x, 'right')
 
@@ -393,7 +398,7 @@ export function renderRetailBarcode(svgElement, typeName, value, options = null)
   // 符号外末位：左边缘位于右护栏右侧 outsideEdgeGapX
   addDigit(
     layout.outsideLast,
-    symbolStartMm + spec.dataModules * x + (customerSample ? 3.25 : (spec.hri.outsideEdgeGapX ?? 0)) * x,
+    symbolStartMm + spec.dataModules * x + (customerLayout ? customerLayout.rightGap : (spec.hri.outsideEdgeGapX ?? 0)) * x,
     'left'
   )
 
