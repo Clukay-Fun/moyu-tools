@@ -87,10 +87,15 @@ jobs:
             exit 1
           fi
 
-          git fetch origin main --quiet
-          MAIN_SHA=$(git rev-parse FETCH_HEAD)
-          git fetch origin "refs/tags/$TAG:refs/tags/$TAG" --quiet
+          git fetch origin refs/heads/main:refs/remotes/origin/main --quiet
+          MAIN_SHA=$(git rev-parse refs/remotes/origin/main)
+          if ! git show-ref --verify --quiet "refs/tags/$TAG"; then
+            echo "::error::Release tag was not fetched by checkout: $TAG"
+            exit 1
+          fi
           TAG_SHA=$(git rev-parse "$TAG^{commit}")
+          echo "release tag commit: $TAG_SHA"
+          echo "main commit: $MAIN_SHA"
           if ! git merge-base --is-ancestor "$TAG_SHA" "$MAIN_SHA"; then
             echo "::error::Release tag must point to a commit already merged into main"
             exit 1
